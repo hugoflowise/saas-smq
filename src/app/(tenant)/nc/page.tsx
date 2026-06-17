@@ -12,6 +12,9 @@ import { NC_GRAVITE_LABELS, NC_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { NcDialog } from "./nc-dialog";
+import { NcFilterBar } from "./nc-filter-bar";
+import { NcKanban } from "./nc-kanban";
+import { NcViewToggle } from "./nc-view-toggle";
 
 const GRAVITE_CLASS: Record<string, string> = {
   mineure: "bg-status-pa/15 text-status-pa",
@@ -23,8 +26,13 @@ function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
 }
 
-export default async function NcPage() {
+export default async function NcPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ statut?: string; gravite?: string; vue?: string }>;
+}) {
   const ctx = await getTenantContext();
+  const { statut, gravite, vue } = await searchParams;
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -49,13 +57,21 @@ export default async function NcPage() {
     .eq("tenant_id", ctx.effectiveTenantId)
     .order("ordre_affichage", { ascending: true });
 
-  const { data: ncs } = await supabase
+  let query = supabase
     .from("non_conformites")
     .select(
       "id, reference, intitule, description, date_constat, origine, gravite, type, statut, processus_concerne",
     )
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("date_constat", { ascending: false });
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (statut)
+    query = query.eq(
+      "statut",
+      statut as "ouverte" | "analysee" | "action_definie" | "cloturee" | "efficace" | "inefficace",
+    );
+  if (gravite) query = query.eq("gravite", gravite as "mineure" | "majeure" | "critique");
+
+  const { data: ncs } = await query.order("date_constat", { ascending: false });
 
   const items = ncs ?? [];
   const options = processusOptions ?? [];
@@ -66,13 +82,26 @@ export default async function NcPage() {
         title="Non-conformités"
         description="Détection, analyse des causes et traitement des non-conformités."
       >
+        <NcViewToggle />
         <NcDialog processusOptions={options} />
       </PageHeader>
+
+      <NcFilterBar />
 
       {items.length === 0 ? (
         <EmptyState
           title="Aucune non-conformité"
           description="Enregistrez une non-conformité pour démarrer son traitement."
+        />
+      ) : vue === "kanban" ? (
+        <NcKanban
+          initial={items.map((nc) => ({
+            id: nc.id,
+            reference: nc.reference,
+            intitule: nc.intitule,
+            gravite: nc.gravite,
+            statut: nc.statut,
+          }))}
         />
       ) : (
         <div className="rounded-lg border bg-card">

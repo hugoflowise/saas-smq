@@ -71,6 +71,38 @@ export async function createNcAction(input: unknown): Promise<ActionResult> {
   return { ok: true };
 }
 
+const setStatutSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["ouverte", "analysee", "action_definie", "cloturee", "efficace", "inefficace"]),
+});
+
+/** Change uniquement le statut d'une NC (utilisé par le Kanban). */
+export async function setNcStatutAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = setStatutSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+
+  const isCloture = ["cloturee", "efficace", "inefficace"].includes(parsed.data.statut);
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("non_conformites")
+    .update({
+      statut: parsed.data.statut,
+      date_cloture: isCloture ? new Date().toISOString().slice(0, 10) : null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", parsed.data.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/nc");
+  return { ok: true };
+}
+
 export async function updateNcAction(input: unknown): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
