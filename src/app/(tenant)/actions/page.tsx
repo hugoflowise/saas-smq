@@ -13,6 +13,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
+import { ActionsKanban } from "./kanban";
+import { ViewToggle } from "./view-toggle";
 
 const STATUT_CLASS: Record<string, string> = {
   a_faire: "bg-muted text-foreground",
@@ -30,10 +32,10 @@ function formatDate(d: string | null) {
 export default async function ActionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string; priorite?: string; tri?: string }>;
+  searchParams: Promise<{ statut?: string; priorite?: string; tri?: string; vue?: string }>;
 }) {
   const ctx = await getTenantContext();
-  const { statut, priorite, tri } = await searchParams;
+  const { statut, priorite, tri, vue } = await searchParams;
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -94,6 +96,7 @@ export default async function ActionsPage({
         title="Plan d'actions"
         description="Suivi des actions d'amélioration, correctives et préventives."
       >
+        <ViewToggle />
         <ActionDialog processusOptions={options} />
       </PageHeader>
 
@@ -101,6 +104,16 @@ export default async function ActionsPage({
 
       {items.length === 0 ? (
         <EmptyState title="Aucune action" description="Créez une action ou ajustez les filtres." />
+      ) : vue === "kanban" ? (
+        <ActionsKanban
+          initial={items.map((a) => ({
+            id: a.id,
+            reference: a.reference,
+            description_courte: a.description_courte,
+            priorite: a.priorite,
+            statut: a.statut,
+          }))}
+        />
       ) : (
         <div className="rounded-lg border bg-card">
           <Table>
