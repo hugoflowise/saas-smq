@@ -2,7 +2,7 @@
 
 import type { JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
@@ -27,24 +27,56 @@ type Props = {
 
 export function PolitiqueClient({ initialContenu, statut }: Props) {
   const router = useRouter();
-  const [contenu, setContenu] = useState<JSONContent | null>(initialContenu);
+  const contenuRef = useRef<JSONContent | null>(initialContenu);
+  const dirtyRef = useRef(false);
   const [pending, setPending] = useState(false);
+  const [saved, setSaved] = useState(false);
   const editable = statut === "brouillon";
+
+  function handleChange(c: JSONContent) {
+    contenuRef.current = c;
+    dirtyRef.current = true;
+    setSaved(false);
+  }
+
+  async function persist(): Promise<boolean> {
+    const result = await savePolitiqueContenuAction((contenuRef.current ?? {}) as never);
+    if (result.ok) {
+      dirtyRef.current = false;
+      setSaved(true);
+      return true;
+    }
+    toast.error(result.error);
+    return false;
+  }
+
+  // Sauvegarde automatique tant qu'on est en brouillon
+  useEffect(() => {
+    if (!editable) return;
+    const interval = setInterval(async () => {
+      if (!dirtyRef.current) return;
+      const result = await savePolitiqueContenuAction((contenuRef.current ?? {}) as never);
+      if (result.ok) {
+        dirtyRef.current = false;
+        setSaved(true);
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [editable]);
 
   async function save() {
     setPending(true);
-    const result = await savePolitiqueContenuAction((contenu ?? {}) as never);
+    if (await persist()) toast.success("Politique enregistrée.");
     setPending(false);
-    if (result.ok) {
-      toast.success("Politique enregistrée.");
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   async function transition(target: string, message: string) {
     setPending(true);
+    // Toujours sauvegarder le contenu en cours avant de changer de statut
+    if (editable && dirtyRef.current && !(await persist())) {
+      setPending(false);
+      return;
+    }
     const result = await transitionPolitiqueStatutAction(target);
     setPending(false);
     if (result.ok) {
@@ -65,9 +97,14 @@ export function PolitiqueClient({ initialContenu, statut }: Props) {
 
         <div className="flex flex-wrap gap-2">
           {editable ? (
-            <Button onClick={save} disabled={pending} variant="outline">
-              Enregistrer
-            </Button>
+            <>
+              {saved ? (
+                <span className="self-center text-muted-foreground text-xs">Enregistré ✓</span>
+              ) : null}
+              <Button onClick={save} disabled={pending} variant="outline">
+                Enregistrer
+              </Button>
+            </>
           ) : null}
 
           {statut === "brouillon" ? (
@@ -116,7 +153,7 @@ export function PolitiqueClient({ initialContenu, statut }: Props) {
         key={statut}
         content={initialContenu}
         editable={editable}
-        onChange={setContenu}
+        onChange={handleChange}
       />
 
       {!editable ? (
