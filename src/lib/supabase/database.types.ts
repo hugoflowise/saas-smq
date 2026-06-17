@@ -375,6 +375,125 @@ export type Database = {
           },
         ]
       }
+      politique_qualite: {
+        Row: {
+          contenu: Json | null
+          created_at: string
+          created_by: string | null
+          id: string
+          statut: Database["public"]["Enums"]["document_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          version_actuelle_id: string | null
+        }
+        Insert: {
+          contenu?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          statut?: Database["public"]["Enums"]["document_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          version_actuelle_id?: string | null
+        }
+        Update: {
+          contenu?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          statut?: Database["public"]["Enums"]["document_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_actuelle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "politique_qualite_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      politique_qualite_versions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          contenu_snapshot: Json | null
+          created_at: string
+          id: string
+          pdf_url: string | null
+          politique_id: string
+          signature_data: Json | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu_snapshot?: Json | null
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          politique_id: string
+          signature_data?: Json | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu_snapshot?: Json | null
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          politique_id?: string
+          signature_data?: Json | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "politique_qualite_versions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_politique_id_fkey"
+            columns: ["politique_id"]
+            isOneToOne: false
+            referencedRelation: "politique_qualite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       processus: {
         Row: {
           created_at: string
@@ -581,6 +700,12 @@ export type Database = {
         | "bloquee"
         | "abandonnee"
       action_type: "preventive" | "corrective"
+      document_statut:
+        | "brouillon"
+        | "en_revue"
+        | "approuvee"
+        | "publiee"
+        | "archivee"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_origine:
@@ -762,6 +887,13 @@ export const Constants = {
         "abandonnee",
       ],
       action_type: ["preventive", "corrective"],
+      document_statut: [
+        "brouillon",
+        "en_revue",
+        "approuvee",
+        "publiee",
+        "archivee",
+      ],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_origine: [
