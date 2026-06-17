@@ -30,10 +30,10 @@ function formatDate(d: string | null) {
 export default async function ActionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string; priorite?: string; echeance?: string }>;
+  searchParams: Promise<{ statut?: string; priorite?: string; tri?: string }>;
 }) {
   const ctx = await getTenantContext();
-  const { statut, priorite, echeance } = await searchParams;
+  const { statut, priorite, tri } = await searchParams;
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -72,18 +72,18 @@ export default async function ActionsPage({
     );
   if (priorite) query = query.eq("priorite", priorite as "p1" | "p2" | "p3");
 
-  const today = new Date().toISOString().slice(0, 10);
-  if (echeance === "retard") {
-    query = query.lt("date_prevue", today).in("statut", ["a_faire", "en_cours", "bloquee"]);
-  } else if (echeance === "a_venir") {
-    query = query.gte("date_prevue", today);
-  } else if (echeance === "sans") {
-    query = query.is("date_prevue", null);
+  // Tri : par échéance (croissant/décroissant) ou par priorité (défaut)
+  if (tri === "echeance_asc") {
+    query = query.order("date_prevue", { ascending: true, nullsFirst: false });
+  } else if (tri === "echeance_desc") {
+    query = query.order("date_prevue", { ascending: false, nullsFirst: false });
+  } else {
+    query = query
+      .order("priorite", { ascending: true })
+      .order("date_prevue", { ascending: true, nullsFirst: false });
   }
 
-  const { data: actions } = await query
-    .order("priorite", { ascending: true })
-    .order("date_prevue", { ascending: true, nullsFirst: false });
+  const { data: actions } = await query;
 
   const items = actions ?? [];
   const options = processusOptions ?? [];

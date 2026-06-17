@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Building2, LogOut, Menu } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -58,9 +59,14 @@ export function TopBar({
             }
           />
           <SheetContent side="left" className="w-72 p-0">
-            <SheetTitle className="flex h-14 items-center gap-2 border-b px-5">
-              <span className="size-3 rounded-full bg-primary" aria-hidden />
-              <span className="font-semibold tracking-tight">Flowise SMQ</span>
+            <SheetTitle className="flex h-14 items-center border-b px-5">
+              <Image
+                src="/logo.png"
+                alt="Flowise"
+                width={480}
+                height={170}
+                className="h-7 w-auto"
+              />
             </SheetTitle>
             <div className="overflow-y-auto">
               <NavLinks isAdmin={isAdmin} onNavigate={() => setMobileOpen(false)} />

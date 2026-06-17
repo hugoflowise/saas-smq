@@ -46,13 +46,12 @@ export function FilterBar() {
       </select>
       <select
         className={SELECT_CLASS}
-        value={params.get("echeance") ?? ""}
-        onChange={(e) => update("echeance", e.target.value)}
+        value={params.get("tri") ?? ""}
+        onChange={(e) => update("tri", e.target.value)}
       >
-        <option value="">Toutes les échéances</option>
-        <option value="retard">En retard</option>
-        <option value="a_venir">À venir</option>
-        <option value="sans">Sans échéance</option>
+        <option value="">Tri : priorité</option>
+        <option value="echeance_asc">Échéance (proche → lointaine)</option>
+        <option value="echeance_desc">Échéance (lointaine → proche)</option>
       </select>
     </div>
   );
