@@ -1,0 +1,81 @@
+import { redirect } from "next/navigation";
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { CreateTenantDialog } from "./create-tenant-dialog";
+
+export default async function AdminClientsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Garde : rôle lu en base (fiable même si le JWT n'est pas encore rafraîchi)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user?.id ?? "")
+    .maybeSingle();
+
+  if (profile?.role !== "admin_flowise") {
+    redirect("/dashboard");
+  }
+
+  const admin = createAdminClient();
+  const { data: tenants } = await admin
+    .from("tenants")
+    .select("id, nom_societe, formule, statut, effectif_tranche, secteur, created_at")
+    .order("created_at", { ascending: false });
+
+  return (
+    <div className="mx-auto w-full max-w-5xl">
+      <PageHeader title="Clients" description="Gestion des sociétés clientes (tenants) Flowise.">
+        <CreateTenantDialog />
+      </PageHeader>
+
+      {tenants && tenants.length > 0 ? (
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Société</TableHead>
+                <TableHead>Formule</TableHead>
+                <TableHead>Effectif</TableHead>
+                <TableHead>Secteur</TableHead>
+                <TableHead>Statut</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tenants.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell className="font-medium">{t.nom_societe}</TableCell>
+                  <TableCell>{t.formule}</TableCell>
+                  <TableCell>{t.effectif_tranche ?? "—"}</TableCell>
+                  <TableCell>{t.secteur ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{t.statut}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <EmptyState
+          title="Aucun client"
+          description="Créez votre première société cliente pour commencer."
+        />
+      )}
+    </div>
+  );
+}

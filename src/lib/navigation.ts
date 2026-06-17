@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Building2,
   CalendarDays,
   ClipboardCheck,
   FileText,
@@ -83,3 +84,9 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [{ label: "Paramètres", href: "/parametres", icon: Settings }],
   },
 ];
+
+/** Section réservée à l'admin Flowise (affichée uniquement pour ce rôle). */
+export const ADMIN_NAV_SECTION: NavSection = {
+  title: "Admin Flowise",
+  items: [{ label: "Clients", href: "/admin/clients", icon: Building2 }],
+};
