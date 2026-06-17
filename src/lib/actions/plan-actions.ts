@@ -1,0 +1,121 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { getTenantContext } from "@/lib/tenant-context";
+
+type ActionResult = { ok: true } | { ok: false; error: string };
+
+const baseSchema = {
+  descriptionCourte: z.string().trim().min(2, "Description requise."),
+  descriptionDetail: z.string().trim().optional(),
+  origine: z.enum([
+    "manuelle",
+    "demarrage_smq",
+    "audit_interne",
+    "audit_externe",
+    "nc",
+    "rdd",
+    "r_o",
+    "reclamation",
+    "amelioration_continue",
+  ]),
+  type: z.enum(["preventive", "corrective"]),
+  priorite: z.enum(["p1", "p2", "p3"]),
+  statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
+  processusConcerne: z.string().uuid().optional(),
+  datePrevue: z.string().optional(),
+  commentaires: z.string().trim().optional(),
+};
+
+const createSchema = z.object(baseSchema);
+const updateSchema = z.object({ id: z.string().uuid(), ...baseSchema });
+
+/** Génère une référence ACT-AAAA-NNN par tenant et par année. */
+async function nextReference(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+): Promise<string> {
+  const year = new Date().getFullYear();
+  const prefix = `ACT-${year}-`;
+  const { count } = await supabase
+    .from("actions")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .ilike("reference", `${prefix}%`);
+  return `${prefix}${String((count ?? 0) + 1).padStart(3, "0")}`;
+}
+
+export async function createActionAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) {
+    return { ok: false, error: "Sélectionnez d'abord un client (tenant actif)." };
+  }
+
+  const parsed = createSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+
+  const supabase = await createClient();
+  const reference = await nextReference(supabase, ctx.effectiveTenantId);
+
+  const { error } = await supabase.from("actions").insert({
+    tenant_id: ctx.effectiveTenantId,
+    reference,
+    description_courte: d.descriptionCourte,
+    description_detail: d.descriptionDetail ?? null,
+    origine: d.origine,
+    type: d.type,
+    priorite: d.priorite,
+    statut: d.statut,
+    processus_concerne: d.processusConcerne ?? null,
+    date_prevue: d.datePrevue || null,
+    commentaires: d.commentaires ?? null,
+    created_by: ctx.userId,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/actions");
+  return { ok: true };
+}
+
+export async function updateActionAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = updateSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("actions")
+    .update({
+      description_courte: d.descriptionCourte,
+      description_detail: d.descriptionDetail ?? null,
+      origine: d.origine,
+      type: d.type,
+      priorite: d.priorite,
+      statut: d.statut,
+      processus_concerne: d.processusConcerne ?? null,
+      date_prevue: d.datePrevue || null,
+      date_effective: d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
+      commentaires: d.commentaires ?? null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/actions");
+  return { ok: true };
+}
