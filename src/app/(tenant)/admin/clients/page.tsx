@@ -13,6 +13,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { CreateTenantDialog } from "./create-tenant-dialog";
+import { EditTenantDialog } from "./edit-tenant-dialog";
 
 export default async function AdminClientsPage() {
   const supabase = await createClient();
@@ -37,6 +38,18 @@ export default async function AdminClientsPage() {
     .select("id, nom_societe, formule, statut, effectif_tranche, secteur, created_at")
     .order("created_at", { ascending: false });
 
+  // Dirigeant de chaque tenant
+  const tenantIds = (tenants ?? []).map((t) => t.id);
+  const { data: dirigeants } = await admin
+    .from("profiles")
+    .select("id, full_name, email, tenant_id")
+    .eq("role", "dirigeant")
+    .in("tenant_id", tenantIds.length > 0 ? tenantIds : ["00000000-0000-0000-0000-000000000000"]);
+
+  const dirigeantByTenant = new Map(
+    (dirigeants ?? []).filter((d) => d.tenant_id).map((d) => [d.tenant_id as string, d]),
+  );
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       <PageHeader title="Clients" description="Gestion des sociétés clientes (tenants) Flowise.">
@@ -49,24 +62,56 @@ export default async function AdminClientsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Société</TableHead>
-                <TableHead>Formule</TableHead>
+                <TableHead>Dirigeant</TableHead>
                 <TableHead>Effectif</TableHead>
                 <TableHead>Secteur</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tenants.map((t) => (
-                <TableRow key={t.id}>
-                  <TableCell className="font-medium">{t.nom_societe}</TableCell>
-                  <TableCell>{t.formule}</TableCell>
-                  <TableCell>{t.effectif_tranche ?? "—"}</TableCell>
-                  <TableCell>{t.secteur ?? "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{t.statut}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {tenants.map((t) => {
+                const dirigeant = dirigeantByTenant.get(t.id) ?? null;
+                return (
+                  <TableRow key={t.id}>
+                    <TableCell className="font-medium">{t.nom_societe}</TableCell>
+                    <TableCell>
+                      {dirigeant ? (
+                        <span className="flex flex-col">
+                          <span>{dirigeant.full_name ?? "—"}</span>
+                          <span className="text-muted-foreground text-xs">{dirigeant.email}</span>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell>{t.effectif_tranche ?? "—"}</TableCell>
+                    <TableCell>{t.secteur ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{t.statut}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <EditTenantDialog
+                        tenant={{
+                          id: t.id,
+                          nom_societe: t.nom_societe,
+                          effectif_tranche: t.effectif_tranche,
+                          secteur: t.secteur,
+                        }}
+                        dirigeant={
+                          dirigeant
+                            ? {
+                                id: dirigeant.id,
+                                full_name: dirigeant.full_name,
+                                email: dirigeant.email,
+                              }
+                            : null
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
