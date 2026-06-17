@@ -49,9 +49,9 @@ export function FilterBar() {
         value={params.get("tri") ?? ""}
         onChange={(e) => update("tri", e.target.value)}
       >
-        <option value="">Tri : priorité</option>
-        <option value="echeance_asc">Échéance (proche → lointaine)</option>
-        <option value="echeance_desc">Échéance (lointaine → proche)</option>
+        <option value="">Tri : par priorité</option>
+        <option value="echeance_asc">Tri : échéance, du plus tôt au plus tard</option>
+        <option value="echeance_desc">Tri : échéance, du plus tard au plus tôt</option>
       </select>
     </div>
   );

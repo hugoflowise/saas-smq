@@ -59,13 +59,13 @@ export function TopBar({
             }
           />
           <SheetContent side="left" className="w-72 p-0">
-            <SheetTitle className="flex h-14 items-center border-b px-5">
+            <SheetTitle className="flex h-14 items-center justify-center border-b px-4">
               <Image
                 src="/logo.png"
                 alt="Flowise"
-                width={480}
-                height={170}
-                className="h-7 w-auto"
+                width={500}
+                height={500}
+                className="h-12 w-auto"
               />
             </SheetTitle>
             <div className="overflow-y-auto">
