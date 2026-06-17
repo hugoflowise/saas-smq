@@ -13,23 +13,25 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { setActionStatutAction } from "@/lib/actions/plan-actions";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS, ACTION_STATUTS } from "@/lib/labels";
+import { ActionDialog, type ActionRow } from "./action-dialog";
 
 type Statut = (typeof ACTION_STATUTS)[number];
 
-export type KanbanAction = {
-  id: string;
-  reference: string;
-  description_courte: string;
-  priorite: keyof typeof ACTION_PRIORITE_LABELS;
-  statut: Statut;
-  date_prevue: string | null;
-};
+export type KanbanAction = ActionRow & { reference: string };
+
+type ProcessusOption = { id: string; nom: string };
 
 function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : null;
 }
 
-function Card({ action }: { action: KanbanAction }) {
+function Card({
+  action,
+  processusOptions,
+}: {
+  action: KanbanAction;
+  processusOptions: ProcessusOption[];
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: action.id,
   });
@@ -41,27 +43,42 @@ function Card({ action }: { action: KanbanAction }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
-      className={`cursor-grab touch-none rounded-md border bg-card px-3 py-2 text-sm shadow-sm active:cursor-grabbing ${
-        isDragging ? "opacity-50" : ""
-      }`}
+      className={`relative rounded-md border bg-card shadow-sm ${isDragging ? "opacity-50" : ""}`}
     >
-      <p className="font-mono text-muted-foreground text-xs">{action.reference}</p>
-      <p className="mt-0.5 font-medium">{action.description_courte}</p>
-      <div className="mt-1.5 flex items-center justify-between text-muted-foreground text-xs">
-        <span>{ACTION_PRIORITE_LABELS[action.priorite]}</span>
-        {formatDate(action.date_prevue) ? (
-          <span className="rounded bg-muted px-1.5 py-0.5">
-            échéance {formatDate(action.date_prevue)}
+      <div
+        {...listeners}
+        {...attributes}
+        className="cursor-grab touch-none px-3 py-2 pr-9 text-sm active:cursor-grabbing"
+      >
+        <p className="font-mono text-muted-foreground text-xs">{action.reference}</p>
+        <p className="mt-0.5 font-medium">{action.description_courte}</p>
+        <div className="mt-1.5 flex items-center justify-between text-muted-foreground text-xs">
+          <span>
+            {ACTION_PRIORITE_LABELS[action.priorite as keyof typeof ACTION_PRIORITE_LABELS]}
           </span>
-        ) : null}
+          {formatDate(action.date_prevue) ? (
+            <span className="rounded bg-muted px-1.5 py-0.5">
+              échéance {formatDate(action.date_prevue)}
+            </span>
+          ) : null}
+        </div>
+      </div>
+      <div className="absolute top-1 right-1" onPointerDown={(e) => e.stopPropagation()}>
+        <ActionDialog action={action} processusOptions={processusOptions} />
       </div>
     </div>
   );
 }
 
-function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }) {
+function Column({
+  statut,
+  actions,
+  processusOptions,
+}: {
+  statut: Statut;
+  actions: KanbanAction[];
+  processusOptions: ProcessusOption[];
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
     <div className="flex w-72 shrink-0 flex-col">
@@ -75,14 +92,20 @@ function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }
         }`}
       >
         {actions.map((a) => (
-          <Card key={a.id} action={a} />
+          <Card key={a.id} action={a} processusOptions={processusOptions} />
         ))}
       </div>
     </div>
   );
 }
 
-export function ActionsKanban({ initial }: { initial: KanbanAction[] }) {
+export function ActionsKanban({
+  initial,
+  processusOptions,
+}: {
+  initial: KanbanAction[];
+  processusOptions: ProcessusOption[];
+}) {
   const [items, setItems] = useState(initial);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -108,7 +131,12 @@ export function ActionsKanban({ initial }: { initial: KanbanAction[] }) {
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {ACTION_STATUTS.map((statut) => (
-          <Column key={statut} statut={statut} actions={items.filter((a) => a.statut === statut)} />
+          <Column
+            key={statut}
+            statut={statut}
+            actions={items.filter((a) => a.statut === statut)}
+            processusOptions={processusOptions}
+          />
         ))}
       </div>
     </DndContext>
