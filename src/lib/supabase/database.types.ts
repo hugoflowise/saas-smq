@@ -113,6 +113,89 @@ export type Database = {
           },
         ]
       }
+      processus: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          entrees: string | null
+          id: string
+          nom: string
+          ordre_affichage: number
+          pilote_id: string | null
+          ressources_associees: string | null
+          sorties: string | null
+          tenant_id: string
+          type: Database["public"]["Enums"]["processus_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          entrees?: string | null
+          id?: string
+          nom: string
+          ordre_affichage?: number
+          pilote_id?: string | null
+          ressources_associees?: string | null
+          sorties?: string | null
+          tenant_id: string
+          type: Database["public"]["Enums"]["processus_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          entrees?: string | null
+          id?: string
+          nom?: string
+          ordre_affichage?: number
+          pilote_id?: string | null
+          ressources_associees?: string | null
+          sorties?: string | null
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["processus_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processus_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_pilote_id_fkey"
+            columns: ["pilote_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -231,6 +314,7 @@ export type Database = {
         | "boond_sync_error"
         | "policy_review_due"
         | "mention"
+      processus_type: "pilotage" | "realisation" | "support"
       secteur_activite: "SI" | "ESN" | "AT" | "autre"
       tenant_formule: "Essentiel" | "Tandem" | "Premium"
       tenant_statut: "Actif" | "Suspendu" | "Résilié"
@@ -376,6 +460,7 @@ export const Constants = {
         "policy_review_due",
         "mention",
       ],
+      processus_type: ["pilotage", "realisation", "support"],
       secteur_activite: ["SI", "ESN", "AT", "autre"],
       tenant_formule: ["Essentiel", "Tandem", "Premium"],
       tenant_statut: ["Actif", "Suspendu", "Résilié"],

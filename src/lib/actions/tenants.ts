@@ -5,6 +5,7 @@ import { z } from "zod";
 import { setActiveTenantId } from "@/lib/active-tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { PROCESSUS_STANDARDS } from "@/lib/templates/processus";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -90,6 +91,19 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
 
   if (profileError) {
     return { ok: false, error: `Rattachement du dirigeant impossible : ${profileError.message}` };
+  }
+
+  // 4) Provisioning : cartographie processus standard SI/ESN (Annexe B)
+  const { error: seedError } = await admin.from("processus").insert(
+    PROCESSUS_STANDARDS.map((p, index) => ({
+      tenant_id: tenant.id,
+      nom: p.nom,
+      type: p.type,
+      ordre_affichage: index,
+    })),
+  );
+  if (seedError) {
+    return { ok: false, error: `Initialisation des processus impossible : ${seedError.message}` };
   }
 
   revalidatePath("/admin/clients");
