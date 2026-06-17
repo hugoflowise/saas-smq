@@ -26,6 +26,7 @@ export type Database = {
           description_courte: string
           description_detail: string | null
           id: string
+          indicateur_efficacite: string | null
           origine: Database["public"]["Enums"]["action_origine"]
           priorite: Database["public"]["Enums"]["action_priorite"]
           processus_concerne: string | null
@@ -49,6 +50,7 @@ export type Database = {
           description_courte: string
           description_detail?: string | null
           id?: string
+          indicateur_efficacite?: string | null
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           description_courte?: string
           description_detail?: string | null
           id?: string
+          indicateur_efficacite?: string | null
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null

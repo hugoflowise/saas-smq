@@ -5,6 +5,7 @@ import { z } from "zod";
 import { setActiveTenantId } from "@/lib/active-tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { ACTIONS_STANDARDS } from "@/lib/templates/actions-standards";
 import { PROCESSUS_STANDARDS } from "@/lib/templates/processus";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -104,6 +105,26 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
   );
   if (seedError) {
     return { ok: false, error: `Initialisation des processus impossible : ${seedError.message}` };
+  }
+
+  // 5) Provisioning : 80 actions standards ISO 9001 (démarrage SMQ)
+  const year = new Date().getFullYear();
+  const { error: actionsError } = await admin.from("actions").insert(
+    ACTIONS_STANDARDS.map((a) => ({
+      tenant_id: tenant.id,
+      reference: `ACT-${year}-${String(a.ordre).padStart(3, "0")}`,
+      description_courte: a.descriptionCourte,
+      description_detail: a.actionAMener || null,
+      origine: "demarrage_smq" as const,
+      type: a.type,
+      priorite: a.priorite,
+      reference_iso: a.referenceIso.length > 0 ? a.referenceIso : null,
+      indicateur_efficacite: a.indicateur,
+      statut: "a_faire" as const,
+    })),
+  );
+  if (actionsError) {
+    return { ok: false, error: `Initialisation des actions impossible : ${actionsError.message}` };
   }
 
   revalidatePath("/admin/clients");

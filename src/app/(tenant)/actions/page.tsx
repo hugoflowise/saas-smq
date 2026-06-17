@@ -30,10 +30,10 @@ function formatDate(d: string | null) {
 export default async function ActionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string; priorite?: string }>;
+  searchParams: Promise<{ statut?: string; priorite?: string; echeance?: string }>;
 }) {
   const ctx = await getTenantContext();
-  const { statut, priorite } = await searchParams;
+  const { statut, priorite, echeance } = await searchParams;
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -61,7 +61,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, commentaires",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires",
     )
     .eq("tenant_id", ctx.effectiveTenantId);
 
@@ -71,6 +71,15 @@ export default async function ActionsPage({
       statut as "a_faire" | "en_cours" | "termine" | "bloquee" | "abandonnee",
     );
   if (priorite) query = query.eq("priorite", priorite as "p1" | "p2" | "p3");
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (echeance === "retard") {
+    query = query.lt("date_prevue", today).in("statut", ["a_faire", "en_cours", "bloquee"]);
+  } else if (echeance === "a_venir") {
+    query = query.gte("date_prevue", today);
+  } else if (echeance === "sans") {
+    query = query.is("date_prevue", null);
+  }
 
   const { data: actions } = await query
     .order("priorite", { ascending: true })
