@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions: {
+        Row: {
+          commentaires: string | null
+          created_at: string
+          created_by: string | null
+          date_creation: string
+          date_effective: string | null
+          date_prevue: string | null
+          deleted_at: string | null
+          description_courte: string
+          description_detail: string | null
+          id: string
+          origine: Database["public"]["Enums"]["action_origine"]
+          priorite: Database["public"]["Enums"]["action_priorite"]
+          processus_concerne: string | null
+          reference: string
+          reference_iso: string[] | null
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["action_statut"]
+          tenant_id: string
+          type: Database["public"]["Enums"]["action_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commentaires?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_creation?: string
+          date_effective?: string | null
+          date_prevue?: string | null
+          deleted_at?: string | null
+          description_courte: string
+          description_detail?: string | null
+          id?: string
+          origine?: Database["public"]["Enums"]["action_origine"]
+          priorite?: Database["public"]["Enums"]["action_priorite"]
+          processus_concerne?: string | null
+          reference: string
+          reference_iso?: string[] | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["action_statut"]
+          tenant_id: string
+          type?: Database["public"]["Enums"]["action_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commentaires?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_creation?: string
+          date_effective?: string | null
+          date_prevue?: string | null
+          deleted_at?: string | null
+          description_courte?: string
+          description_detail?: string | null
+          id?: string
+          origine?: Database["public"]["Enums"]["action_origine"]
+          priorite?: Database["public"]["Enums"]["action_priorite"]
+          processus_concerne?: string | null
+          reference?: string
+          reference_iso?: string[] | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["action_statut"]
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["action_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_processus_concerne_fkey"
+            columns: ["processus_concerne"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -301,6 +409,24 @@ export type Database = {
       jwt_tenant_id: { Args: never; Returns: string }
     }
     Enums: {
+      action_origine:
+        | "manuelle"
+        | "demarrage_smq"
+        | "audit_interne"
+        | "audit_externe"
+        | "nc"
+        | "rdd"
+        | "r_o"
+        | "reclamation"
+        | "amelioration_continue"
+      action_priorite: "p1" | "p2" | "p3"
+      action_statut:
+        | "a_faire"
+        | "en_cours"
+        | "termine"
+        | "bloquee"
+        | "abandonnee"
+      action_type: "preventive" | "corrective"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
       notification_type:
         | "approval_request"
@@ -446,6 +572,26 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_origine: [
+        "manuelle",
+        "demarrage_smq",
+        "audit_interne",
+        "audit_externe",
+        "nc",
+        "rdd",
+        "r_o",
+        "reclamation",
+        "amelioration_continue",
+      ],
+      action_priorite: ["p1", "p2", "p3"],
+      action_statut: [
+        "a_faire",
+        "en_cours",
+        "termine",
+        "bloquee",
+        "abandonnee",
+      ],
+      action_type: ["preventive", "corrective"],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
       notification_type: [
         "approval_request",
