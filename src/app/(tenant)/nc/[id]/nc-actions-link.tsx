@@ -34,8 +34,14 @@ export function NcActionsLink({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [selected, setSelected] = useState("");
+  const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
+
+  const filtered = available
+    .filter((a) =>
+      `${a.reference} ${a.description_courte}`.toLowerCase().includes(search.trim().toLowerCase()),
+    )
+    .slice(0, 50);
 
   async function run(fn: () => Promise<{ ok: boolean; error?: string }>, success: string) {
     setPending(true);
@@ -97,29 +103,39 @@ export function NcActionsLink({
         </ul>
       )}
 
-      {/* Lier une action existante */}
+      {/* Lier une action existante (avec recherche) */}
       {available.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            className={SELECT_CLASS}
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
-            <option value="">Lier une action existante…</option>
-            {available.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.reference} — {a.description_courte}
-              </option>
-            ))}
-          </select>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!selected || pending}
-            onClick={() => run(() => linkActionToNcAction(ncId, selected), "Action liée.")}
-          >
-            Lier
-          </Button>
+        <div className="flex flex-col gap-2">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher une action à lier (référence ou intitulé)…"
+          />
+          {search.trim() ? (
+            <ul className="max-h-56 overflow-y-auto rounded-lg border">
+              {filtered.length === 0 ? (
+                <li className="px-3 py-2 text-muted-foreground text-sm">Aucun résultat.</li>
+              ) : (
+                filtered.map((a) => (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        run(() => linkActionToNcAction(ncId, a.id), "Action liée.").then(() =>
+                          setSearch(""),
+                        )
+                      }
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+                    >
+                      <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>
+                      <span className="truncate">{a.description_courte}</span>
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          ) : null}
         </div>
       ) : null}
 

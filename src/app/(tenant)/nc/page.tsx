@@ -96,6 +96,7 @@ export default async function NcPage({
         />
       ) : vue === "kanban" ? (
         <NcKanban
+          key={`${statut ?? ""}|${gravite ?? ""}`}
           initial={items.map((nc) => ({
             id: nc.id,
             reference: nc.reference,

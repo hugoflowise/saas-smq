@@ -106,14 +106,9 @@ export default async function ActionsPage({
         <EmptyState title="Aucune action" description="Créez une action ou ajustez les filtres." />
       ) : vue === "kanban" ? (
         <ActionsKanban
-          initial={items.map((a) => ({
-            id: a.id,
-            reference: a.reference,
-            description_courte: a.description_courte,
-            priorite: a.priorite,
-            statut: a.statut,
-            date_prevue: a.date_prevue,
-          }))}
+          key={`${statut ?? ""}|${priorite ?? ""}`}
+          initial={items}
+          processusOptions={options}
         />
       ) : (
         <div className="rounded-lg border bg-card">
