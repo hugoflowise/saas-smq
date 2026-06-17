@@ -71,6 +71,138 @@ export async function createNcAction(input: unknown): Promise<ActionResult> {
   return { ok: true };
 }
 
+const causesSchema = z.object({
+  id: z.string().uuid(),
+  probleme: z.string().trim().optional(),
+  pourquoi: z.array(z.string().trim()).max(7),
+  causeRacine: z.string().trim().optional(),
+});
+
+/** Enregistre l'analyse des causes (5 pourquoi) dans causes_identifiees. */
+export async function saveNcCausesAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = causesSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("non_conformites")
+    .update({
+      causes_identifiees: {
+        methode: "5_pourquoi",
+        probleme: d.probleme ?? null,
+        pourquoi: d.pourquoi.filter((p) => p.length > 0),
+        cause_racine: d.causeRacine ?? null,
+      },
+      updated_by: ctx.userId,
+    })
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/nc/${d.id}`);
+  return { ok: true };
+}
+
+export async function linkActionToNcAction(ncId: string, actionId: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("nc_actions").insert({
+    tenant_id: ctx.effectiveTenantId,
+    nc_id: ncId,
+    action_id: actionId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/nc/${ncId}`);
+  return { ok: true };
+}
+
+export async function unlinkActionFromNcAction(
+  ncId: string,
+  actionId: string,
+): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("nc_actions")
+    .delete()
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .eq("nc_id", ncId)
+    .eq("action_id", actionId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/nc/${ncId}`);
+  return { ok: true };
+}
+
+const createCorrectiveSchema = z.object({
+  ncId: z.string().uuid(),
+  descriptionCourte: z.string().trim().min(2, "Description requise."),
+  priorite: z.enum(["p1", "p2", "p3"]),
+  datePrevue: z.string().optional(),
+});
+
+/** Crée une action corrective (origine NC) et la lie à la NC. */
+export async function createCorrectiveActionForNcAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = createCorrectiveSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  const supabase = await createClient();
+
+  const year = new Date().getFullYear();
+  const prefix = `ACT-${year}-`;
+  const { count } = await supabase
+    .from("actions")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .ilike("reference", `${prefix}%`);
+  const reference = `${prefix}${String((count ?? 0) + 1).padStart(3, "0")}`;
+
+  const { data: action, error: actionError } = await supabase
+    .from("actions")
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      reference,
+      description_courte: d.descriptionCourte,
+      origine: "nc",
+      type: "corrective",
+      priorite: d.priorite,
+      date_prevue: d.datePrevue || null,
+      statut: "a_faire",
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
+
+  if (actionError || !action) {
+    return { ok: false, error: `Création de l'action impossible : ${actionError?.message}` };
+  }
+
+  const { error: linkError } = await supabase.from("nc_actions").insert({
+    tenant_id: ctx.effectiveTenantId,
+    nc_id: d.ncId,
+    action_id: action.id,
+  });
+  if (linkError) return { ok: false, error: linkError.message };
+
+  revalidatePath(`/nc/${d.ncId}`);
+  revalidatePath("/actions");
+  return { ok: true };
+}
+
 const setStatutSchema = z.object({
   id: z.string().uuid(),
   statut: z.enum(["ouverte", "analysee", "action_definie", "cloturee", "efficace", "inefficace"]),

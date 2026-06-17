@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -122,7 +123,11 @@ export default async function NcPage({
                   <TableCell className="font-mono text-muted-foreground text-xs">
                     {nc.reference}
                   </TableCell>
-                  <TableCell className="font-medium">{nc.intitule}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/nc/${nc.id}`} className="hover:text-primary hover:underline">
+                      {nc.intitule}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <span
                       className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${GRAVITE_CLASS[nc.gravite] ?? "bg-muted"}`}
