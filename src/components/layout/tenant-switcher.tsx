@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -47,7 +48,9 @@ export function TenantSwitcher({
         }
       />
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Tenant actif</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Tenant actif</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {tenants.length === 0 ? (
           <DropdownMenuItem disabled>Aucun client</DropdownMenuItem>
