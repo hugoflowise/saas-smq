@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_SECTIONS } from "@/lib/navigation";
+import { ADMIN_NAV_SECTION, NAV_SECTIONS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, href: string) {
@@ -10,12 +10,19 @@ function isActive(pathname: string, href: string) {
 }
 
 /** Liste des sections/items de navigation. Partagée sidebar desktop + menu mobile. */
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+export function NavLinks({
+  isAdmin = false,
+  onNavigate,
+}: {
+  isAdmin?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
+  const sections = isAdmin ? [...NAV_SECTIONS, ADMIN_NAV_SECTION] : NAV_SECTIONS;
 
   return (
     <nav className="px-3 py-4">
-      {NAV_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <div key={section.title} className="mb-5">
           <p className="px-2 pb-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">
             {section.title}

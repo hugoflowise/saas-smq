@@ -15,13 +15,25 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { NavLinks } from "./nav-links";
+import { TenantSwitcher } from "./tenant-switcher";
 
 type TopBarProps = {
   email: string;
   role: string;
+  isAdmin: boolean;
+  tenants: { id: string; nom: string }[];
+  activeTenantId: string | null;
+  activeTenantName: string | null;
 };
 
-export function TopBar({ email, role }: TopBarProps) {
+export function TopBar({
+  email,
+  role,
+  isAdmin,
+  tenants,
+  activeTenantId,
+  activeTenantName,
+}: TopBarProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -50,16 +62,20 @@ export function TopBar({ email, role }: TopBarProps) {
               <span className="font-semibold tracking-tight">Flowise SMQ</span>
             </SheetTitle>
             <div className="overflow-y-auto">
-              <NavLinks onNavigate={() => setMobileOpen(false)} />
+              <NavLinks isAdmin={isAdmin} onNavigate={() => setMobileOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>
 
-        {/* Sélecteur de tenant (placeholder — activé pour l'admin Flowise plus tard) */}
-        <Button variant="outline" size="sm" className="gap-2" disabled>
-          <Building2 className="size-4" />
-          <span className="max-w-[12rem] truncate">Aucun tenant actif</span>
-        </Button>
+        {/* Sélecteur de tenant (admin) ou tenant fixe (dirigeant) */}
+        {isAdmin ? (
+          <TenantSwitcher tenants={tenants} activeTenantId={activeTenantId} />
+        ) : (
+          <div className="flex items-center gap-2 text-sm">
+            <Building2 className="size-4 text-muted-foreground" />
+            <span className="max-w-[12rem] truncate font-medium">{activeTenantName ?? "—"}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-1">
