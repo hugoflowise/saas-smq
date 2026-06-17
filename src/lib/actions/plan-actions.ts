@@ -86,6 +86,38 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
   return { ok: true };
 }
 
+const setStatutSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
+});
+
+/** Change uniquement le statut d'une action (utilisé par le Kanban). */
+export async function setActionStatutAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = setStatutSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("actions")
+    .update({
+      statut: parsed.data.statut,
+      date_effective:
+        parsed.data.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", parsed.data.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/actions");
+  return { ok: true };
+}
+
 export async function updateActionAction(input: unknown): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
