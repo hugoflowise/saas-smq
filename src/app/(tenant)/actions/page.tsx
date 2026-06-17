@@ -112,6 +112,7 @@ export default async function ActionsPage({
             description_courte: a.description_courte,
             priorite: a.priorite,
             statut: a.statut,
+            date_prevue: a.date_prevue,
           }))}
         />
       ) : (

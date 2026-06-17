@@ -22,7 +22,12 @@ export type KanbanAction = {
   description_courte: string;
   priorite: keyof typeof ACTION_PRIORITE_LABELS;
   statut: Statut;
+  date_prevue: string | null;
 };
+
+function formatDate(d: string | null) {
+  return d ? new Date(d).toLocaleDateString("fr-FR") : null;
+}
 
 function Card({ action }: { action: KanbanAction }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -44,9 +49,14 @@ function Card({ action }: { action: KanbanAction }) {
     >
       <p className="font-mono text-muted-foreground text-xs">{action.reference}</p>
       <p className="mt-0.5 font-medium">{action.description_courte}</p>
-      <p className="mt-1 text-muted-foreground text-xs">
-        {ACTION_PRIORITE_LABELS[action.priorite]}
-      </p>
+      <div className="mt-1.5 flex items-center justify-between text-muted-foreground text-xs">
+        <span>{ACTION_PRIORITE_LABELS[action.priorite]}</span>
+        {formatDate(action.date_prevue) ? (
+          <span className="rounded bg-muted px-1.5 py-0.5">
+            échéance {formatDate(action.date_prevue)}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -54,7 +64,7 @@ function Card({ action }: { action: KanbanAction }) {
 function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
-    <div className="flex min-w-60 flex-1 flex-col">
+    <div className="flex w-72 shrink-0 flex-col">
       <p className="mb-2 px-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
         {ACTION_STATUT_LABELS[statut]} <span className="text-foreground">{actions.length}</span>
       </p>
