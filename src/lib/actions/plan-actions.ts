@@ -26,6 +26,7 @@ const baseSchema = {
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
   processusConcerne: z.string().uuid().optional(),
   datePrevue: z.string().optional(),
+  indicateurEfficacite: z.string().trim().optional(),
   commentaires: z.string().trim().optional(),
 };
 
@@ -74,6 +75,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
     statut: d.statut,
     processus_concerne: d.processusConcerne ?? null,
     date_prevue: d.datePrevue || null,
+    indicateur_efficacite: d.indicateurEfficacite ?? null,
     commentaires: d.commentaires ?? null,
     created_by: ctx.userId,
   });
@@ -108,6 +110,7 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       processus_concerne: d.processusConcerne ?? null,
       date_prevue: d.datePrevue || null,
       date_effective: d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
+      indicateur_efficacite: d.indicateurEfficacite ?? null,
       commentaires: d.commentaires ?? null,
       updated_by: ctx.userId,
     })

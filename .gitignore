@@ -45,3 +45,6 @@ supabase/.branches/
 # Misc
 .DS_Store
 *.pem
+
+# Données sources (export Airtable, non versionnées)
+*.csv

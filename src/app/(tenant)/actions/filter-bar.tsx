@@ -44,6 +44,16 @@ export function FilterBar() {
           </option>
         ))}
       </select>
+      <select
+        className={SELECT_CLASS}
+        value={params.get("echeance") ?? ""}
+        onChange={(e) => update("echeance", e.target.value)}
+      >
+        <option value="">Toutes les échéances</option>
+        <option value="retard">En retard</option>
+        <option value="a_venir">À venir</option>
+        <option value="sans">Sans échéance</option>
+      </select>
     </div>
   );
 }

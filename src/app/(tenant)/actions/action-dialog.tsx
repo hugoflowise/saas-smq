@@ -36,6 +36,7 @@ export type ActionRow = {
   statut: string;
   processus_concerne: string | null;
   date_prevue: string | null;
+  indicateur_efficacite: string | null;
   commentaires: string | null;
 };
 
@@ -76,6 +77,7 @@ export function ActionDialog({ processusOptions, action }: Props) {
       statut: form.get("statut"),
       processusConcerne: form.get("processusConcerne") || undefined,
       datePrevue: form.get("datePrevue") || undefined,
+      indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
       commentaires: form.get("commentaires") || undefined,
     };
 
@@ -197,12 +199,20 @@ export function ActionDialog({ processusOptions, action }: Props) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="descriptionDetail">Détail</Label>
+            <Label htmlFor="descriptionDetail">Détail / action à mener</Label>
             <Textarea
               id="descriptionDetail"
               name="descriptionDetail"
               rows={2}
               defaultValue={action?.description_detail ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="indicateurEfficacite">Indicateur d'efficacité</Label>
+            <Input
+              id="indicateurEfficacite"
+              name="indicateurEfficacite"
+              defaultValue={action?.indicateur_efficacite ?? ""}
             />
           </div>
           <div className="flex flex-col gap-2">
