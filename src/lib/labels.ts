@@ -37,3 +37,35 @@ export const ACTION_STATUTS = Object.keys(
 export const ACTION_PRIORITES = Object.keys(
   ACTION_PRIORITE_LABELS,
 ) as (keyof typeof ACTION_PRIORITE_LABELS)[];
+
+export const NC_ORIGINE_LABELS = {
+  audit_interne: "Audit interne",
+  audit_externe: "Audit externe",
+  client: "Client",
+  collaborateur: "Collaborateur",
+  rdd: "Revue de direction",
+  autre: "Autre",
+} as const;
+
+export const NC_GRAVITE_LABELS = {
+  mineure: "Mineure",
+  majeure: "Majeure",
+  critique: "Critique",
+} as const;
+
+export const NC_TYPE_LABELS = {
+  nc_produit: "NC produit/service",
+  nc_processus: "NC processus",
+  reclamation_client: "Réclamation client",
+} as const;
+
+export const NC_STATUT_LABELS = {
+  ouverte: "Ouverte",
+  analysee: "Analysée",
+  action_definie: "Action définie",
+  cloturee: "Clôturée",
+  efficace: "Clôturée — efficace",
+  inefficace: "Clôturée — inefficace",
+} as const;
+
+export const NC_STATUTS = Object.keys(NC_STATUT_LABELS) as (keyof typeof NC_STATUT_LABELS)[];

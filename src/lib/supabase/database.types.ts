@@ -173,6 +173,157 @@ export type Database = {
           },
         ]
       }
+      nc_actions: {
+        Row: {
+          action_id: string
+          created_at: string
+          id: string
+          nc_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          id?: string
+          nc_id: string
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          id?: string
+          nc_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nc_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nc_actions_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "non_conformites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nc_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      non_conformites: {
+        Row: {
+          causes_identifiees: Json | null
+          created_at: string
+          created_by: string | null
+          date_cloture: string | null
+          date_constat: string
+          deleted_at: string | null
+          description: string | null
+          gravite: Database["public"]["Enums"]["nc_gravite"]
+          id: string
+          intitule: string
+          origine: Database["public"]["Enums"]["nc_origine"]
+          origine_detail: string | null
+          processus_concerne: string | null
+          reference: string
+          responsable_traitement: string | null
+          statut: Database["public"]["Enums"]["nc_statut"]
+          tenant_id: string
+          type: Database["public"]["Enums"]["nc_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          causes_identifiees?: Json | null
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          date_constat?: string
+          deleted_at?: string | null
+          description?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          intitule: string
+          origine?: Database["public"]["Enums"]["nc_origine"]
+          origine_detail?: string | null
+          processus_concerne?: string | null
+          reference: string
+          responsable_traitement?: string | null
+          statut?: Database["public"]["Enums"]["nc_statut"]
+          tenant_id: string
+          type?: Database["public"]["Enums"]["nc_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          causes_identifiees?: Json | null
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          date_constat?: string
+          deleted_at?: string | null
+          description?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          intitule?: string
+          origine?: Database["public"]["Enums"]["nc_origine"]
+          origine_detail?: string | null
+          processus_concerne?: string | null
+          reference?: string
+          responsable_traitement?: string | null
+          statut?: Database["public"]["Enums"]["nc_statut"]
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["nc_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "non_conformites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "non_conformites_processus_concerne_fkey"
+            columns: ["processus_concerne"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "non_conformites_responsable_traitement_fkey"
+            columns: ["responsable_traitement"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "non_conformites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "non_conformites_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -431,6 +582,22 @@ export type Database = {
         | "abandonnee"
       action_type: "preventive" | "corrective"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
+      nc_gravite: "mineure" | "majeure" | "critique"
+      nc_origine:
+        | "audit_interne"
+        | "audit_externe"
+        | "client"
+        | "collaborateur"
+        | "rdd"
+        | "autre"
+      nc_statut:
+        | "ouverte"
+        | "analysee"
+        | "action_definie"
+        | "cloturee"
+        | "efficace"
+        | "inefficace"
+      nc_type: "nc_produit" | "nc_processus" | "reclamation_client"
       notification_type:
         | "approval_request"
         | "approval_granted"
@@ -596,6 +763,24 @@ export const Constants = {
       ],
       action_type: ["preventive", "corrective"],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
+      nc_gravite: ["mineure", "majeure", "critique"],
+      nc_origine: [
+        "audit_interne",
+        "audit_externe",
+        "client",
+        "collaborateur",
+        "rdd",
+        "autre",
+      ],
+      nc_statut: [
+        "ouverte",
+        "analysee",
+        "action_definie",
+        "cloturee",
+        "efficace",
+        "inefficace",
+      ],
+      nc_type: ["nc_produit", "nc_processus", "reclamation_client"],
       notification_type: [
         "approval_request",
         "approval_granted",
