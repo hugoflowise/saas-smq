@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,14 +70,18 @@ export default async function ProcessusPage() {
                     <p className="text-muted-foreground text-sm">—</p>
                   ) : (
                     colItems.map((p) => (
-                      <div key={p.id} className="rounded-md border bg-surface px-3 py-2 text-sm">
+                      <Link
+                        key={p.id}
+                        href={`/processus/${p.id}`}
+                        className="rounded-md border bg-surface px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                      >
                         <p className="font-medium">{p.nom}</p>
                         {p.description ? (
                           <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs">
                             {p.description}
                           </p>
                         ) : null}
-                      </div>
+                      </Link>
                     ))
                   )}
                 </CardContent>

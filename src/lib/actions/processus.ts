@@ -39,3 +39,46 @@ export async function createProcessusAction(input: unknown): Promise<ActionResul
   revalidatePath("/processus");
   return { ok: true };
 }
+
+const updateProcessusSchema = z.object({
+  id: z.string().uuid(),
+  nom: z.string().trim().min(2, "Nom requis."),
+  type: z.enum(["pilotage", "realisation", "support"]),
+  description: z.string().trim().optional(),
+  entrees: z.string().trim().optional(),
+  sorties: z.string().trim().optional(),
+  ressourcesAssociees: z.string().trim().optional(),
+});
+
+export async function updateProcessusAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = updateProcessusSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const data = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("processus")
+    .update({
+      nom: data.nom,
+      type: data.type,
+      description: data.description ?? null,
+      entrees: data.entrees ?? null,
+      sorties: data.sorties ?? null,
+      ressources_associees: data.ressourcesAssociees ?? null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", data.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/processus");
+  revalidatePath(`/processus/${data.id}`);
+  return { ok: true };
+}

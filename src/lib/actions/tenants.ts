@@ -110,6 +110,53 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
   return { ok: true };
 }
 
+const updateTenantSchema = z.object({
+  tenantId: z.string().uuid(),
+  nomSociete: z.string().trim().min(2, "Nom de société requis."),
+  effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
+  secteur: z.enum(["SI", "ESN", "AT", "autre"]).optional(),
+  dirigeantId: z.string().uuid().optional(),
+  dirigeantNom: z.string().trim().optional(),
+});
+
+export async function updateTenantAction(input: unknown): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const parsed = updateTenantSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const data = parsed.data;
+  const admin = createAdminClient();
+
+  const { error: tenantError } = await admin
+    .from("tenants")
+    .update({
+      nom_societe: data.nomSociete,
+      effectif_tranche: data.effectif ?? null,
+      secteur: data.secteur ?? null,
+    })
+    .eq("id", data.tenantId);
+
+  if (tenantError) {
+    return { ok: false, error: `Mise à jour du client impossible : ${tenantError.message}` };
+  }
+
+  if (data.dirigeantId) {
+    const { error: profileError } = await admin
+      .from("profiles")
+      .update({ full_name: data.dirigeantNom ?? null })
+      .eq("id", data.dirigeantId);
+    if (profileError) {
+      return { ok: false, error: `Mise à jour du dirigeant impossible : ${profileError.message}` };
+    }
+  }
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
 export async function switchTenantAction(tenantId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
