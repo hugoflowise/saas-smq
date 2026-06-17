@@ -48,3 +48,6 @@ supabase/.branches/
 
 # Données sources (export Airtable, non versionnées)
 *.csv
+
+# Images sources à la racine (le logo utilisé est public/logo.png)
+/*.png
