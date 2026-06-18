@@ -4,10 +4,12 @@ import type { JSONContent } from "@tiptap/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  publishPolitiqueAction,
   savePolitiqueContenuAction,
   transitionPolitiqueStatutAction,
 } from "@/lib/actions/politique";
@@ -70,6 +72,18 @@ export function PolitiqueClient({ initialContenu, statut }: Props) {
     setPending(false);
   }
 
+  async function publish() {
+    setPending(true);
+    const result = await publishPolitiqueAction();
+    setPending(false);
+    if (result.ok) {
+      toast.success("Politique publiée. Version figée créée.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
   async function transition(target: string, message: string) {
     setPending(true);
     // Toujours sauvegarder le contenu en cours avant de changer de statut
@@ -124,16 +138,16 @@ export function PolitiqueClient({ initialContenu, statut }: Props) {
               >
                 Demander des modifications
               </Button>
-              <Button
-                onClick={() => transition("approuvee", "Politique approuvée.")}
-                disabled={pending}
-              >
-                Approuver
-              </Button>
+              <SignatureCapture
+                triggerLabel="Approuver et signer"
+                title="Approuver la politique qualité"
+                description="Signez avec votre mot de passe pour approuver ce document."
+                onSigned={() => transition("approuvee", "Politique approuvée et signée.")}
+              />
             </>
           ) : null}
           {statut === "approuvee" ? (
-            <Button onClick={() => transition("publiee", "Politique publiée.")} disabled={pending}>
+            <Button onClick={publish} disabled={pending}>
               Publier
             </Button>
           ) : null}
