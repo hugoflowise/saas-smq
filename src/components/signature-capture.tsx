@@ -64,7 +64,7 @@ export function SignatureCapture({ triggerLabel, title, description, onSigned, d
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button disabled={disabled}>{triggerLabel}</Button>} />
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{title ?? "Signature électronique"}</DialogTitle>
           <DialogDescription>

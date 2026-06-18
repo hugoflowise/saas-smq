@@ -41,6 +41,8 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-surface: var(--surface);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
   /* Statuts SMQ Flowise (cf. CDC §12.3) */
   --color-status-conforme: var(--status-conforme);
   --color-status-pa: var(--status-pa);
@@ -67,8 +69,11 @@
   /* Coral Flowise #FF5A5F (cf. CDC §12.3) */
   --primary: #ff5a5f;
   --primary-foreground: #ffffff;
-  /* Surface slate-100 #F1F5F9 (cf. CDC §12.3) */
-  --surface: #f1f5f9;
+  /* Surface — fond doux légèrement bleuté (verre dépoli) */
+  --surface: #eef1f7;
+  /* Surfaces translucides (effet verre / Apple liquid glass) */
+  --glass: oklch(1 0 0 / 72%);
+  --glass-border: oklch(1 0 0 / 55%);
 
   /* Statuts SMQ */
   --status-conforme: #10b981;
@@ -91,7 +96,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.8rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -112,7 +117,9 @@
   /* Coral Flowise — conservé en mode sombre */
   --primary: #ff5a5f;
   --primary-foreground: #ffffff;
-  --surface: oklch(0.205 0 0);
+  --surface: oklch(0.165 0 0);
+  --glass: oklch(0.22 0 0 / 60%);
+  --glass-border: oklch(1 0 0 / 12%);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -143,9 +150,28 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-surface text-foreground;
+    /* Fond doux et profond (façon Apple) : dégradé subtil + halos coloraux discrets */
+    background-image:
+      radial-gradient(60rem 60rem at 110% -10%, color-mix(in oklch, var(--primary) 8%, transparent), transparent 60%),
+      radial-gradient(50rem 50rem at -10% 110%, color-mix(in oklch, var(--status-pf) 7%, transparent), transparent 55%);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Ombre douce et profonde, façon carte Apple. */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(11, 17, 32, 0.04),
+    0 14px 36px -18px rgba(11, 17, 32, 0.14);
+}
+
+/* Panneau en verre dépoli (sidebar, topbar, dialogs). */
+@utility glass {
+  background-color: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 }

@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Tableau de bord"
           description="Vue d'ensemble du Système de Management de la Qualité."
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Tableau de bord"
         description="Vue d'ensemble du Système de Management de la Qualité."

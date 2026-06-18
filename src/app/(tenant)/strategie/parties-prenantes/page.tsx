@@ -31,7 +31,7 @@ export default async function PartiesPrenantesPage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Parties prenantes"
           description="Registre des parties intéressées et de leurs attentes."
@@ -54,7 +54,7 @@ export default async function PartiesPrenantesPage() {
   const items = parties ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Parties prenantes"
         description="Registre des parties intéressées et de leurs attentes."

@@ -34,7 +34,7 @@ export default async function AuditsPage({
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader title="Audits" description="Planification et rapports d'audit." />
         <EmptyState
           title="Aucun client sélectionné"
@@ -62,7 +62,7 @@ export default async function AuditsPage({
   const items = audits ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Audits"
         description="Audits internes (ISO 9001 §9.2), externes (certification/client) et fournisseurs."

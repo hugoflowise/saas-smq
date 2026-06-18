@@ -23,7 +23,7 @@ export default async function RevuesDirectionPage() {
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader title="Revues de direction" description="Revues annuelles de direction." />
         <EmptyState
           title="Aucun client sélectionné"
@@ -43,7 +43,7 @@ export default async function RevuesDirectionPage() {
   const items = revues ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Revues de direction"
         description="Revues annuelles de direction."

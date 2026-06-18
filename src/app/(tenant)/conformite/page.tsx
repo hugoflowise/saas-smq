@@ -11,7 +11,7 @@ export default async function ConformitePage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Conformité ISO 9001"
           description="Auto-évaluation de la conformité par chapitre."
@@ -67,7 +67,7 @@ export default async function ConformitePage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Conformité ISO 9001:2015"
         description="Auto-évaluation de la conformité par chapitre."
