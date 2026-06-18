@@ -234,6 +234,57 @@ export type Database = {
           },
         ]
       }
+      contexte_organisme: {
+        Row: {
+          analyse_pestel: Json | null
+          analyse_swot: Json | null
+          created_at: string
+          date_revue: string | null
+          id: string
+          prochain_revue: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          analyse_pestel?: Json | null
+          analyse_swot?: Json | null
+          created_at?: string
+          date_revue?: string | null
+          id?: string
+          prochain_revue?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          analyse_pestel?: Json | null
+          analyse_swot?: Json | null
+          created_at?: string
+          date_revue?: string | null
+          id?: string
+          prochain_revue?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contexte_organisme_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contexte_organisme_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicateurs: {
         Row: {
           boond_endpoint: string | null
@@ -585,6 +636,73 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parties_interessees: {
+        Row: {
+          attentes: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          exigences: string | null
+          id: string
+          niveau_influence: Database["public"]["Enums"]["pi_influence"]
+          nom: string
+          tenant_id: string
+          type: Database["public"]["Enums"]["pi_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          attentes?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          exigences?: string | null
+          id?: string
+          niveau_influence?: Database["public"]["Enums"]["pi_influence"]
+          nom: string
+          tenant_id: string
+          type?: Database["public"]["Enums"]["pi_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          attentes?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          exigences?: string | null
+          id?: string
+          niveau_influence?: Database["public"]["Enums"]["pi_influence"]
+          nom?: string
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["pi_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parties_interessees_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parties_interessees_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parties_interessees_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1303,6 +1421,14 @@ export type Database = {
         | "boond_sync_error"
         | "policy_review_due"
         | "mention"
+      pi_influence: "faible" | "moyen" | "fort"
+      pi_type:
+        | "client"
+        | "fournisseur"
+        | "collaborateur"
+        | "autorite"
+        | "actionnaire"
+        | "autre"
       processus_type: "pilotage" | "realisation" | "support"
       ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
       ro_type: "risque" | "opportunite"
@@ -1522,6 +1648,15 @@ export const Constants = {
         "boond_sync_error",
         "policy_review_due",
         "mention",
+      ],
+      pi_influence: ["faible", "moyen", "fort"],
+      pi_type: [
+        "client",
+        "fournisseur",
+        "collaborateur",
+        "autorite",
+        "actionnaire",
+        "autre",
       ],
       processus_type: ["pilotage", "realisation", "support"],
       ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
