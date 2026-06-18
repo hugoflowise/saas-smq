@@ -26,8 +26,17 @@ function Field({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-export default async function NcDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NcDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
+}) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const backHref = from?.startsWith("/") ? from : "/nc";
+  const backLabel = from?.startsWith("/processus") ? "Retour au processus" : "Non-conformités";
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) redirect("/nc");
 
@@ -83,11 +92,11 @@ export default async function NcDetailPage({ params }: { params: Promise<{ id: s
   return (
     <div className="mx-auto w-full max-w-4xl">
       <Link
-        href="/nc"
+        href={backHref}
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Non-conformités
+        {backLabel}
       </Link>
 
       <PageHeader title={`${nc.reference} — ${nc.intitule}`}>

@@ -109,15 +109,16 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
     .order("ordre_affichage", { ascending: true });
   const processusOptions = allProcessus ?? [];
 
+  const from = `?from=/processus/${id}`;
   const procItems: RelatedItem[] = (procedures.data ?? []).map((p) => ({
     id: p.id,
-    href: `/documentation/procedures/${p.id}`,
+    href: `/documentation/procedures/${p.id}${from}`,
     primary: p.titre,
     secondary: p.statut,
   }));
   const indItems: RelatedItem[] = (indicateurs.data ?? []).map((i) => ({
     id: i.id,
-    href: `/indicateurs/${i.id}`,
+    href: `/indicateurs/${i.id}${from}`,
     primary: i.nom,
     secondary: i.unite ?? undefined,
   }));
@@ -129,7 +130,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   }));
   const ncItems: RelatedItem[] = (ncs.data ?? []).map((n) => ({
     id: n.id,
-    href: `/nc/${n.id}`,
+    href: `/nc/${n.id}${from}`,
     primary: `${n.reference} — ${n.intitule}`,
     secondary: n.statut,
   }));
@@ -151,11 +152,11 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         {TYPE_LABELS[processus.type] ?? processus.type}
       </Badge>
 
-      <Tabs defaultValue="fiche">
+      <Tabs defaultValue="indicateurs">
         <TabsList>
+          <TabsTrigger value="indicateurs">Indicateurs ({indItems.length})</TabsTrigger>
           <TabsTrigger value="fiche">Fiche d'identité</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
-          <TabsTrigger value="indicateurs">Indicateurs ({indItems.length})</TabsTrigger>
           <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>

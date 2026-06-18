@@ -67,7 +67,7 @@ export default async function CalendrierPage() {
       date: a.date_prevue as string,
       label: `${a.reference} — ${a.description_courte}`,
       type: "Action",
-      href: "/actions",
+      href: `/actions/${a.id}`,
     });
   }
   for (const r of ros.data ?? []) {

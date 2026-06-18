@@ -9,8 +9,17 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ProcedureClient } from "./procedure-client";
 
-export default async function ProcedureDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProcedureDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
+}) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const backHref = from?.startsWith("/") ? from : "/documentation/procedures";
+  const backLabel = from?.startsWith("/processus") ? "Retour au processus" : "Procédures";
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) redirect("/documentation/procedures");
 
@@ -61,11 +70,11 @@ export default async function ProcedureDetailPage({ params }: { params: Promise<
   return (
     <div className="mx-auto w-full max-w-6xl">
       <Link
-        href="/documentation/procedures"
+        href={backHref}
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Procédures
+        {backLabel}
       </Link>
 
       <PageHeader title={procedure.titre} />
