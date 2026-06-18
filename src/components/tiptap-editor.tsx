@@ -2,7 +2,17 @@
 
 import { EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Heading2, Heading3, Italic, List, ListOrdered, Redo2, Undo2 } from "lucide-react";
+import {
+  Bold,
+  Heading1,
+  Heading2,
+  Heading3,
+  Italic,
+  List,
+  ListOrdered,
+  Redo2,
+  Undo2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,12 +23,9 @@ type Props = {
 };
 
 const PROSE_CLASS = cn(
-  "min-h-72 rounded-lg border bg-card px-4 py-3 text-sm outline-none",
-  "[&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-64",
-  "[&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:font-semibold [&_h2]:text-xl",
-  "[&_h3]:mt-3 [&_h3]:mb-1.5 [&_h3]:font-semibold [&_h3]:text-base",
-  "[&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5",
-  "[&_a]:text-primary [&_a]:underline",
+  "prose prose-sm max-w-none rounded-lg border bg-card px-4 py-3",
+  "prose-headings:font-semibold prose-a:text-primary",
+  "[&_.ProseMirror]:min-h-64 [&_.ProseMirror]:outline-none",
 );
 
 function ToolbarButton({
@@ -77,6 +84,13 @@ export function TiptapEditor({ content, editable, onChange }: Props) {
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
             <Italic className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton
+            label="Titre 1"
+            active={editor.isActive("heading", { level: 1 })}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          >
+            <Heading1 className="size-4" />
           </ToolbarButton>
           <ToolbarButton
             label="Titre 2"
