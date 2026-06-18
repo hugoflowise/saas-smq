@@ -510,6 +510,173 @@ export type Database = {
           },
         ]
       }
+      procedures: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          contenu: Json | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description_courte: string | null
+          id: string
+          pilote_id: string | null
+          processus_id: string | null
+          reference_iso: string[] | null
+          signature_data: Json | null
+          statut: Database["public"]["Enums"]["document_statut"]
+          tenant_id: string
+          titre: string
+          updated_at: string
+          updated_by: string | null
+          version_actuelle_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu?: Json | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description_courte?: string | null
+          id?: string
+          pilote_id?: string | null
+          processus_id?: string | null
+          reference_iso?: string[] | null
+          signature_data?: Json | null
+          statut?: Database["public"]["Enums"]["document_statut"]
+          tenant_id: string
+          titre: string
+          updated_at?: string
+          updated_by?: string | null
+          version_actuelle_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu?: Json | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description_courte?: string | null
+          id?: string
+          pilote_id?: string | null
+          processus_id?: string | null
+          reference_iso?: string[] | null
+          signature_data?: Json | null
+          statut?: Database["public"]["Enums"]["document_statut"]
+          tenant_id?: string
+          titre?: string
+          updated_at?: string
+          updated_by?: string | null
+          version_actuelle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedures_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_pilote_id_fkey"
+            columns: ["pilote_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procedures_versions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          contenu_snapshot: Json | null
+          created_at: string
+          id: string
+          pdf_url: string | null
+          procedure_id: string
+          signature_data: Json | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu_snapshot?: Json | null
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          procedure_id: string
+          signature_data?: Json | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contenu_snapshot?: Json | null
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          procedure_id?: string
+          signature_data?: Json | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procedures_versions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_versions_procedure_id_fkey"
+            columns: ["procedure_id"]
+            isOneToOne: false
+            referencedRelation: "procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       processus: {
         Row: {
           created_at: string
