@@ -30,7 +30,7 @@ export default async function PolitiquePage() {
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("contenu, statut")
+    .select("contenu, statut, version_actuelle_id")
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -58,25 +58,36 @@ export default async function PolitiquePage() {
     snapshot: (v.contenu_snapshot ?? null) as JSONContent | null,
   }));
 
+  const current = versions.find((v) => v.id === politique?.version_actuelle_id) ?? null;
+
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="mx-auto w-full max-w-6xl">
       <PageHeader
         title="Politique qualité"
         description="Document maîtrisé définissant les engagements qualité de la direction."
       />
-      <PolitiqueClient
-        initialContenu={(politique?.contenu ?? null) as JSONContent | null}
-        statut={politique?.statut ?? "brouillon"}
-      />
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="text-base">Historique des versions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <VersionHistory versions={versions} />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="min-w-0">
+          <PolitiqueClient
+            initialContenu={(politique?.contenu ?? null) as JSONContent | null}
+            statut={politique?.statut ?? "brouillon"}
+            currentVersion={current?.version ?? null}
+            currentVersionDate={current?.approvedAt ?? null}
+          />
+        </div>
+
+        <aside className="lg:sticky lg:top-4 lg:self-start">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Historique des versions</CardTitle>
+            </CardHeader>
+            <CardContent className="max-h-[70vh] overflow-y-auto">
+              <VersionHistory versions={versions} />
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 }
