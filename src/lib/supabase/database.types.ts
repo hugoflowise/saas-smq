@@ -960,6 +960,108 @@ export type Database = {
           },
         ]
       }
+      risques_opportunites: {
+        Row: {
+          cause: string | null
+          consequence: string | null
+          created_at: string
+          created_by: string | null
+          criticite: number | null
+          date_revue: string | null
+          deleted_at: string | null
+          gravite: number
+          id: string
+          intitule: string
+          probabilite: number
+          processus_id: string | null
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["ro_statut"]
+          tenant_id: string
+          traitement_prevu: string | null
+          type: Database["public"]["Enums"]["ro_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cause?: string | null
+          consequence?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          date_revue?: string | null
+          deleted_at?: string | null
+          gravite?: number
+          id?: string
+          intitule: string
+          probabilite?: number
+          processus_id?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["ro_statut"]
+          tenant_id: string
+          traitement_prevu?: string | null
+          type?: Database["public"]["Enums"]["ro_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cause?: string | null
+          consequence?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          date_revue?: string | null
+          deleted_at?: string | null
+          gravite?: number
+          id?: string
+          intitule?: string
+          probabilite?: number
+          processus_id?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["ro_statut"]
+          tenant_id?: string
+          traitement_prevu?: string | null
+          type?: Database["public"]["Enums"]["ro_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risques_opportunites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risques_opportunites_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risques_opportunites_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risques_opportunites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risques_opportunites_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           boond_account_id: string | null
@@ -1083,6 +1185,8 @@ export type Database = {
         | "policy_review_due"
         | "mention"
       processus_type: "pilotage" | "realisation" | "support"
+      ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
+      ro_type: "risque" | "opportunite"
       secteur_activite: "SI" | "ESN" | "AT" | "autre"
       tenant_formule: "Essentiel" | "Tandem" | "Premium"
       tenant_statut: "Actif" | "Suspendu" | "Résilié"
@@ -1283,6 +1387,8 @@ export const Constants = {
         "mention",
       ],
       processus_type: ["pilotage", "realisation", "support"],
+      ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
+      ro_type: ["risque", "opportunite"],
       secteur_activite: ["SI", "ESN", "AT", "autre"],
       tenant_formule: ["Essentiel", "Tandem", "Premium"],
       tenant_statut: ["Actif", "Suspendu", "Résilié"],
