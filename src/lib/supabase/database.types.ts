@@ -640,6 +640,89 @@ export type Database = {
           },
         ]
       }
+      objectifs_qualite: {
+        Row: {
+          cible_chiffree: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          echeance: string | null
+          est_smart: boolean
+          fonction_concernee: string | null
+          id: string
+          intitule: string
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["objectif_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          cible_chiffree?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          echeance?: string | null
+          est_smart?: boolean
+          fonction_concernee?: string | null
+          id?: string
+          intitule: string
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["objectif_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          cible_chiffree?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          echeance?: string | null
+          est_smart?: boolean
+          fonction_concernee?: string | null
+          id?: string
+          intitule?: string
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["objectif_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objectifs_qualite_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parties_interessees: {
         Row: {
           attentes: string | null
@@ -1139,6 +1222,98 @@ export type Database = {
           },
         ]
       }
+      reclamations: {
+        Row: {
+          canal: Database["public"]["Enums"]["reclamation_canal"]
+          client: string | null
+          created_at: string
+          created_by: string | null
+          date_reception: string
+          date_reponse: string | null
+          deleted_at: string | null
+          description: string | null
+          gravite: Database["public"]["Enums"]["nc_gravite"]
+          id: string
+          nc_associee: string | null
+          objet: string
+          satisfait_client: boolean | null
+          statut: Database["public"]["Enums"]["reclamation_statut"]
+          tenant_id: string
+          traitement: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          canal?: Database["public"]["Enums"]["reclamation_canal"]
+          client?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_reception?: string
+          date_reponse?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          nc_associee?: string | null
+          objet: string
+          satisfait_client?: boolean | null
+          statut?: Database["public"]["Enums"]["reclamation_statut"]
+          tenant_id: string
+          traitement?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          canal?: Database["public"]["Enums"]["reclamation_canal"]
+          client?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_reception?: string
+          date_reponse?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          nc_associee?: string | null
+          objet?: string
+          satisfait_client?: boolean | null
+          statut?: Database["public"]["Enums"]["reclamation_statut"]
+          tenant_id?: string
+          traitement?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reclamations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reclamations_nc_associee_fkey"
+            columns: ["nc_associee"]
+            isOneToOne: false
+            referencedRelation: "non_conformites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reclamations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reclamations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referentiel_iso: {
         Row: {
           chapitre: string
@@ -1334,6 +1509,92 @@ export type Database = {
         }
         Relationships: []
       }
+      veille_reglementaire: {
+        Row: {
+          actions_a_prevoir: string | null
+          created_at: string
+          created_by: string | null
+          date_application: string | null
+          date_publication: string | null
+          deleted_at: string | null
+          domaine: Database["public"]["Enums"]["veille_domaine"]
+          id: string
+          impact_smq: string | null
+          intitule: string
+          reference: string | null
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["veille_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          actions_a_prevoir?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_application?: string | null
+          date_publication?: string | null
+          deleted_at?: string | null
+          domaine?: Database["public"]["Enums"]["veille_domaine"]
+          id?: string
+          impact_smq?: string | null
+          intitule: string
+          reference?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["veille_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          actions_a_prevoir?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_application?: string | null
+          date_publication?: string | null
+          deleted_at?: string | null
+          domaine?: Database["public"]["Enums"]["veille_domaine"]
+          id?: string
+          impact_smq?: string | null
+          intitule?: string
+          reference?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["veille_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veille_reglementaire_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veille_reglementaire_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veille_reglementaire_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veille_reglementaire_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1421,6 +1682,7 @@ export type Database = {
         | "boond_sync_error"
         | "policy_review_due"
         | "mention"
+      objectif_statut: "actif" | "atteint" | "abandonne"
       pi_influence: "faible" | "moyen" | "fort"
       pi_type:
         | "client"
@@ -1430,12 +1692,28 @@ export type Database = {
         | "actionnaire"
         | "autre"
       processus_type: "pilotage" | "realisation" | "support"
+      reclamation_canal:
+        | "mail"
+        | "tel"
+        | "visio"
+        | "audit"
+        | "enquete"
+        | "autre"
+      reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
       ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
       ro_type: "risque" | "opportunite"
       secteur_activite: "SI" | "ESN" | "AT" | "autre"
       tenant_formule: "Essentiel" | "Tandem" | "Premium"
       tenant_statut: "Actif" | "Suspendu" | "Résilié"
       user_role: "admin_flowise" | "dirigeant" | "manager" | "auditeur"
+      veille_domaine:
+        | "travail"
+        | "qualite"
+        | "environnement"
+        | "securite"
+        | "rgpd"
+        | "autre"
+      veille_statut: "a_analyser" | "analysee" | "integree" | "sans_objet"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1649,6 +1927,7 @@ export const Constants = {
         "policy_review_due",
         "mention",
       ],
+      objectif_statut: ["actif", "atteint", "abandonne"],
       pi_influence: ["faible", "moyen", "fort"],
       pi_type: [
         "client",
@@ -1659,12 +1938,23 @@ export const Constants = {
         "autre",
       ],
       processus_type: ["pilotage", "realisation", "support"],
+      reclamation_canal: ["mail", "tel", "visio", "audit", "enquete", "autre"],
+      reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
       ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
       ro_type: ["risque", "opportunite"],
       secteur_activite: ["SI", "ESN", "AT", "autre"],
       tenant_formule: ["Essentiel", "Tandem", "Premium"],
       tenant_statut: ["Actif", "Suspendu", "Résilié"],
       user_role: ["admin_flowise", "dirigeant", "manager", "auditeur"],
+      veille_domaine: [
+        "travail",
+        "qualite",
+        "environnement",
+        "securite",
+        "rgpd",
+        "autre",
+      ],
+      veille_statut: ["a_analyser", "analysee", "integree", "sans_objet"],
     },
   },
 } as const
