@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -105,11 +106,7 @@ export default async function ActionsPage({
       {items.length === 0 ? (
         <EmptyState title="Aucune action" description="Créez une action ou ajustez les filtres." />
       ) : vue === "kanban" ? (
-        <ActionsKanban
-          key={`${statut ?? ""}|${priorite ?? ""}`}
-          initial={items}
-          processusOptions={options}
-        />
+        <ActionsKanban key={`${statut ?? ""}|${priorite ?? ""}`} initial={items} />
       ) : (
         <div className="rounded-lg border bg-card">
           <Table>
@@ -127,9 +124,15 @@ export default async function ActionsPage({
               {items.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="font-mono text-muted-foreground text-xs">
-                    {a.reference}
+                    <Link href={`/actions/${a.id}`} className="hover:text-primary hover:underline">
+                      {a.reference}
+                    </Link>
                   </TableCell>
-                  <TableCell className="font-medium">{a.description_courte}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/actions/${a.id}`} className="hover:text-primary hover:underline">
+                      {a.description_courte}
+                    </Link>
+                  </TableCell>
                   <TableCell>{ACTION_PRIORITE_LABELS[a.priorite]}</TableCell>
                   <TableCell>
                     <span
@@ -140,7 +143,12 @@ export default async function ActionsPage({
                   </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
                   <TableCell>
-                    <ActionDialog processusOptions={options} action={a} />
+                    <Link
+                      href={`/actions/${a.id}`}
+                      className="text-primary text-sm hover:underline"
+                    >
+                      Ouvrir
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

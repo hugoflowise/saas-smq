@@ -1,6 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { CreateProcedureDialog } from "@/app/(tenant)/documentation/procedures/create-procedure-dialog";
+import { CreateIndicateurDialog } from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
+import { NcDialog } from "@/app/(tenant)/nc/nc-dialog";
+import { RoDialog } from "@/app/(tenant)/risques/ro-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +102,13 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("date_constat", { ascending: false }),
   ]);
 
+  const { data: allProcessus } = await supabase
+    .from("processus")
+    .select("id, nom")
+    .eq("tenant_id", tid)
+    .order("ordre_affichage", { ascending: true });
+  const processusOptions = allProcessus ?? [];
+
   const procItems: RelatedItem[] = (procedures.data ?? []).map((p) => ({
     id: p.id,
     href: `/documentation/procedures/${p.id}`,
@@ -163,25 +174,31 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           </Card>
         </TabsContent>
 
-        <TabsContent value="procedures">
-          <RelatedList
-            items={procItems}
-            empty="Aucune procédure rattachée à ce processus. Associez-en une depuis le module Procédures."
-          />
+        <TabsContent value="procedures" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <CreateProcedureDialog processusOptions={processusOptions} presetProcessusId={id} />
+          </div>
+          <RelatedList items={procItems} empty="Aucune procédure rattachée à ce processus." />
         </TabsContent>
-        <TabsContent value="indicateurs">
-          <RelatedList
-            items={indItems}
-            empty="Aucun indicateur rattaché. Associez un processus lors de la création d'un indicateur."
-          />
+        <TabsContent value="indicateurs" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <CreateIndicateurDialog processusOptions={processusOptions} presetProcessusId={id} />
+          </div>
+          <RelatedList items={indItems} empty="Aucun indicateur rattaché à ce processus." />
         </TabsContent>
-        <TabsContent value="risques">
+        <TabsContent value="risques" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <RoDialog processusOptions={processusOptions} presetProcessusId={id} />
+          </div>
           <RelatedList
             items={roItems}
             empty="Aucun risque ni opportunité rattaché à ce processus."
           />
         </TabsContent>
-        <TabsContent value="nc">
+        <TabsContent value="nc" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <NcDialog processusOptions={processusOptions} presetProcessusId={id} />
+          </div>
           <RelatedList items={ncItems} empty="Aucune non-conformité rattachée à ce processus." />
         </TabsContent>
       </Tabs>

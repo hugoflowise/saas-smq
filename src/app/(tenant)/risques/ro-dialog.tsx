@@ -37,9 +37,11 @@ export type RoRow = {
 export function RoDialog({
   processusOptions,
   ro,
+  presetProcessusId,
 }: {
   processusOptions: { id: string; nom: string }[];
   ro?: RoRow;
+  presetProcessusId?: string;
 }) {
   const router = useRouter();
   const isEdit = Boolean(ro);
@@ -161,7 +163,7 @@ export function RoDialog({
                 id="processusId"
                 name="processusId"
                 className={SELECT_CLASS}
-                defaultValue={ro?.processus_id ?? ""}
+                defaultValue={ro?.processus_id ?? presetProcessusId ?? ""}
               >
                 <option value="">—</option>
                 {processusOptions.map((p) => (

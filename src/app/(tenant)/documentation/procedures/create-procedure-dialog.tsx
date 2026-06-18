@@ -21,8 +21,10 @@ const SELECT_CLASS =
 
 export function CreateProcedureDialog({
   processusOptions,
+  presetProcessusId,
 }: {
   processusOptions: { id: string; nom: string }[];
+  presetProcessusId?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -62,7 +64,12 @@ export function CreateProcedureDialog({
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="processusId">Processus associé</Label>
-            <select id="processusId" name="processusId" className={SELECT_CLASS} defaultValue="">
+            <select
+              id="processusId"
+              name="processusId"
+              className={SELECT_CLASS}
+              defaultValue={presetProcessusId ?? ""}
+            >
               <option value="">—</option>
               {processusOptions.map((p) => (
                 <option key={p.id} value={p.id}>
