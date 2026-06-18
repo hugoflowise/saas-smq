@@ -32,7 +32,7 @@ export default async function VeillePage() {
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Veille réglementaire"
           description="Textes applicables et analyse d'impact."
@@ -57,7 +57,7 @@ export default async function VeillePage() {
   const items = textes ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Veille réglementaire"
         description="Textes applicables et analyse d'impact."

@@ -13,7 +13,7 @@ export default async function ContextePage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Contexte de l'organisme"
           description="Analyse SWOT et PESTEL de l'organisme."
@@ -37,7 +37,7 @@ export default async function ContextePage() {
   const pestelRaw = (contexte?.analyse_pestel ?? {}) as Record<string, unknown>;
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Contexte de l'organisme"
         description="Analyse SWOT et PESTEL de l'organisme."

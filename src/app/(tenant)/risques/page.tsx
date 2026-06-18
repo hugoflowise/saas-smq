@@ -38,7 +38,7 @@ export default async function RisquesPage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Risques & Opportunités"
           description="Registre R&O et matrice de criticité."
@@ -79,7 +79,7 @@ export default async function RisquesPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Risques & Opportunités"
         description="Registre R&O et matrice de criticité."

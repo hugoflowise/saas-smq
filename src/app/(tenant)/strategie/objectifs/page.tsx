@@ -26,7 +26,7 @@ export default async function ObjectifsPage() {
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Objectifs qualité"
           description="Objectifs SMART et leur déclinaison par fonction."
@@ -71,7 +71,7 @@ export default async function ObjectifsPage() {
   const tauxGlobal = total > 0 ? Math.round((atteints / total) * 100) : 0;
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Objectifs qualité"
         description="Objectifs SMART et leur déclinaison par fonction."

@@ -17,7 +17,7 @@ export default async function IndicateursPage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Indicateurs / KPI"
           description="Tableau de bord des indicateurs de performance."
@@ -61,7 +61,7 @@ export default async function IndicateursPage() {
   const items = indicateurs ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."

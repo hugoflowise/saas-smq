@@ -17,7 +17,7 @@ export default async function ProcessusPage() {
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Cartographie des processus"
           description="Processus de pilotage, de réalisation et de support."
@@ -51,7 +51,7 @@ export default async function ProcessusPage() {
   const aReviser = items.filter((p) => revueAlerte(p.date_prochaine_revue) !== null).length;
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="w-full">
       <PageHeader
         title="Cartographie des processus"
         description="Processus de pilotage, de réalisation et de support."

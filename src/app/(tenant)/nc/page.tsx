@@ -29,7 +29,7 @@ export default async function NcPage({
 
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader
           title="Non-conformités"
           description="Détection, analyse des causes et traitement des non-conformités."
@@ -70,7 +70,7 @@ export default async function NcPage({
   const options = processusOptions ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Non-conformités"
         description="Détection, analyse des causes et traitement des non-conformités."

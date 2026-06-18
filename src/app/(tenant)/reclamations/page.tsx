@@ -34,7 +34,7 @@ export default async function ReclamationsPage() {
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
-      <div className="mx-auto w-full max-w-5xl">
+      <div className="w-full">
         <PageHeader title="Réclamations" description="Plaintes et réclamations clients." />
         <EmptyState
           title="Aucun client sélectionné"
@@ -54,7 +54,7 @@ export default async function ReclamationsPage() {
   const items = reclamations ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Réclamations"
         description="Plaintes et réclamations clients."

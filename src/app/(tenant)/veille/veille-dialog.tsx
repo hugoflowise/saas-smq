@@ -78,7 +78,7 @@ export function VeilleDialog({ veille }: { veille?: VeilleRow }) {
           )
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Modifier le texte" : "Nouveau texte de veille"}</DialogTitle>
         </DialogHeader>
