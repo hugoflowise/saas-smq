@@ -44,6 +44,8 @@ export default async function ProcessusPage() {
       <PageHeader
         title="Cartographie des processus"
         description="Processus de pilotage, de réalisation et de support."
+        isoClause="ISO 9001 §4.4"
+        help="Déterminez les processus du SMQ et leurs interactions : pilote, entrées/sorties, ressources, critères et indicateurs de performance (approche processus)."
       >
         <CreateProcessusDialog />
       </PageHeader>

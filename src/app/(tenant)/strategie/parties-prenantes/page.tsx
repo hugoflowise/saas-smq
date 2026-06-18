@@ -58,6 +58,8 @@ export default async function PartiesPrenantesPage() {
       <PageHeader
         title="Parties prenantes"
         description="Registre des parties intéressées et de leurs attentes."
+        isoClause="ISO 9001 §4.2"
+        help="Identifiez les parties intéressées pertinentes (clients, salariés, fournisseurs, État, banques, partenaires…) et leurs exigences. Exigence obligatoire : son absence constitue une non-conformité majeure. Soyez exhaustif."
       >
         <PiDialog />
       </PageHeader>

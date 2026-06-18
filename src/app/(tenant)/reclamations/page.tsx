@@ -55,7 +55,12 @@ export default async function ReclamationsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <PageHeader title="Réclamations" description="Plaintes et réclamations clients.">
+      <PageHeader
+        title="Réclamations"
+        description="Plaintes et réclamations clients."
+        isoClause="ISO 9001 §9.1.2"
+        help="Les réclamations (y compris les arrêts prématurés de mission) reflètent la satisfaction client : tracez-les, analysez les causes et déclenchez des actions dans le plan d'actions."
+      >
         <ReclamationDialog />
       </PageHeader>
 

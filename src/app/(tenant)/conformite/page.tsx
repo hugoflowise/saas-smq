@@ -71,6 +71,8 @@ export default async function ConformitePage() {
       <PageHeader
         title="Conformité ISO 9001:2015"
         description="Auto-évaluation de la conformité par chapitre."
+        isoClause="ISO 9001:2015"
+        help="Auto-évaluez la conformité chapitre par chapitre pour mesurer votre taux de couverture et identifier les écarts à traiter avant l'audit de certification."
       />
 
       <Card className="mb-6">

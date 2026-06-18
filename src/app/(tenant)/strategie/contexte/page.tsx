@@ -40,7 +40,9 @@ export default async function ContextePage() {
     <div className="mx-auto w-full max-w-5xl">
       <PageHeader
         title="Contexte de l'organisme"
-        description="Analyse SWOT et PESTEL de l'organisme (ISO 9001 §4.1)."
+        description="Analyse SWOT et PESTEL de l'organisme."
+        isoClause="ISO 9001 §4.1"
+        help="Déterminez les enjeux internes et externes pertinents pour votre SMQ et leur incidence sur les résultats attendus. Le SWOT/PESTEL est revu en revue de direction."
       />
       <ContexteForm
         initialSwot={{
