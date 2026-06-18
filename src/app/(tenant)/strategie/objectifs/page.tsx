@@ -154,9 +154,14 @@ export default async function ObjectifsPage() {
                         </div>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground text-sm">
-                        {o.cible_chiffree ?? "—"}
-                      </span>
+                      <div className="flex flex-col gap-0.5 text-xs">
+                        {o.cible_chiffree ? (
+                          <span className="text-muted-foreground">Cible : {o.cible_chiffree}</span>
+                        ) : null}
+                        <span className="text-status-pa">
+                          À chiffrer — renseignez valeur actuelle &amp; cible
+                        </span>
+                      </div>
                     )}
                   </TableCell>
                   <TableCell>{formatDate(o.echeance)}</TableCell>
