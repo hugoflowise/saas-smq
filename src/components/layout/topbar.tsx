@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Building2, LogOut, Menu } from "lucide-react";
+import { Building2, LogOut, Menu } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { NavLinks } from "./nav-links";
+import { NotificationBell, type NotificationItem } from "./notification-bell";
 import { TenantSwitcher } from "./tenant-switcher";
 
 type TopBarProps = {
@@ -26,6 +27,8 @@ type TopBarProps = {
   tenants: { id: string; nom: string }[];
   activeTenantId: string | null;
   activeTenantName: string | null;
+  notifications: NotificationItem[];
+  unreadCount: number;
 };
 
 export function TopBar({
@@ -35,6 +38,8 @@ export function TopBar({
   tenants,
   activeTenantId,
   activeTenantName,
+  notifications,
+  unreadCount,
 }: TopBarProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -86,9 +91,7 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" aria-label="Notifications" disabled>
-          <Bell className="size-5" />
-        </Button>
+        <NotificationBell notifications={notifications} unreadCount={unreadCount} />
 
         <DropdownMenu>
           <DropdownMenuTrigger

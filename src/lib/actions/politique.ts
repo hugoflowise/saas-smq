@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { notifyTenant } from "@/lib/notifications";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -152,6 +153,14 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
     .eq("id", politique.id);
 
   if (error) return { ok: false, error: error.message };
+
+  await notifyTenant(ctx.effectiveTenantId, {
+    type: "approval_granted",
+    title: "Politique qualité publiée",
+    body: `La version ${version} de la politique qualité a été publiée.`,
+    link: "/strategie/politique",
+  });
+
   revalidatePath("/strategie/politique");
   return { ok: true };
 }

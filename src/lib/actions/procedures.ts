@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { notifyTenant } from "@/lib/notifications";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -174,6 +175,14 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
     .update({ statut: "publiee", version_actuelle_id: created.id, updated_by: ctx.userId })
     .eq("id", id);
   if (error) return { ok: false, error: error.message };
+
+  await notifyTenant(ctx.effectiveTenantId, {
+    type: "approval_granted",
+    title: "Procédure publiée",
+    body: `Une procédure a été publiée (version ${version}).`,
+    link: `/documentation/procedures/${id}`,
+  });
+
   revalidatePath(`/documentation/procedures/${id}`);
   return { ok: true };
 }
