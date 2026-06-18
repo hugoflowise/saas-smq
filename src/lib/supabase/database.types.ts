@@ -805,11 +805,16 @@ export type Database = {
           fonction_concernee: string | null
           id: string
           intitule: string
+          processus_id: string | null
           responsable_id: string | null
+          sens: Database["public"]["Enums"]["objectif_sens"]
           statut: Database["public"]["Enums"]["objectif_statut"]
           tenant_id: string
+          unite: string | null
           updated_at: string
           updated_by: string | null
+          valeur_actuelle: number | null
+          valeur_cible: number | null
         }
         Insert: {
           cible_chiffree?: string | null
@@ -822,11 +827,16 @@ export type Database = {
           fonction_concernee?: string | null
           id?: string
           intitule: string
+          processus_id?: string | null
           responsable_id?: string | null
+          sens?: Database["public"]["Enums"]["objectif_sens"]
           statut?: Database["public"]["Enums"]["objectif_statut"]
           tenant_id: string
+          unite?: string | null
           updated_at?: string
           updated_by?: string | null
+          valeur_actuelle?: number | null
+          valeur_cible?: number | null
         }
         Update: {
           cible_chiffree?: string | null
@@ -839,11 +849,16 @@ export type Database = {
           fonction_concernee?: string | null
           id?: string
           intitule?: string
+          processus_id?: string | null
           responsable_id?: string | null
+          sens?: Database["public"]["Enums"]["objectif_sens"]
           statut?: Database["public"]["Enums"]["objectif_statut"]
           tenant_id?: string
+          unite?: string | null
           updated_at?: string
           updated_by?: string | null
+          valeur_actuelle?: number | null
+          valeur_cible?: number | null
         }
         Relationships: [
           {
@@ -851,6 +866,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
             referencedColumns: ["id"]
           },
           {
@@ -1986,6 +2008,7 @@ export type Database = {
         | "boond_sync_error"
         | "policy_review_due"
         | "mention"
+      objectif_sens: "hausse" | "baisse"
       objectif_statut: "actif" | "atteint" | "abandonne"
       pi_influence: "faible" | "moyen" | "fort"
       pi_type:
@@ -2240,6 +2263,7 @@ export const Constants = {
         "policy_review_due",
         "mention",
       ],
+      objectif_sens: ["hausse", "baisse"],
       objectif_statut: ["actif", "atteint", "abandonne"],
       pi_influence: ["faible", "moyen", "fort"],
       pi_type: [

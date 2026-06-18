@@ -133,6 +133,11 @@ const objBase = {
   echeance: z.string().optional(),
   fonctionConcernee: z.string().trim().optional(),
   statut: z.enum(["actif", "atteint", "abandonne"]),
+  valeurCible: z.coerce.number().optional(),
+  valeurActuelle: z.coerce.number().optional(),
+  unite: z.string().trim().optional(),
+  sens: z.enum(["hausse", "baisse"]).optional(),
+  processusId: z.string().uuid().optional(),
 };
 const objCreate = z.object(objBase);
 const objUpdate = z.object({ id: z.string().uuid(), ...objBase });
@@ -146,6 +151,11 @@ function objPayload(d: z.infer<typeof objCreate>) {
     echeance: d.echeance || null,
     fonction_concernee: d.fonctionConcernee ?? null,
     statut: d.statut,
+    valeur_cible: d.valeurCible ?? null,
+    valeur_actuelle: d.valeurActuelle ?? null,
+    unite: d.unite ?? null,
+    sens: d.sens ?? "hausse",
+    processus_id: d.processusId ?? null,
   };
 }
 
