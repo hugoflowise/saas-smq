@@ -14,5 +14,16 @@ export const AUDIT_TYPE_BADGE_CLASS: Record<string, string> = {
   fournisseur: "bg-status-conforme/15 text-status-conforme",
 };
 
+/** Cotation d'écart (conformité, actions). */
+export const COTATION_BADGE_CLASS: Record<string, string> = {
+  conforme: "bg-status-conforme/15 text-status-conforme",
+  point_fort: "bg-status-pf/15 text-status-pf",
+  point_attention: "bg-status-pa/15 text-status-pa",
+  nc_mineure: "bg-status-nc-mineure/15 text-status-nc-mineure",
+  nc_majeure: "bg-status-nc-majeure/15 text-status-nc-majeure",
+  non_evalue: "bg-muted text-muted-foreground",
+  non_applicable: "bg-muted text-muted-foreground",
+};
+
 /** Style commun d'une pastille de badge. */
 export const BADGE_BASE = "inline-flex rounded-full px-2 py-0.5 font-medium text-xs";
