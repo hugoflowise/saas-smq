@@ -173,6 +173,95 @@ export type Database = {
           },
         ]
       }
+      audits_internes: {
+        Row: {
+          auditeur_id: string | null
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisee: string | null
+          deleted_at: string | null
+          duree_prevue: number | null
+          ecarts_constates: string | null
+          id: string
+          perimetre: string | null
+          processus_audites: string[] | null
+          rapport: string | null
+          reference: string
+          statut: Database["public"]["Enums"]["audit_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auditeur_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          duree_prevue?: number | null
+          ecarts_constates?: string | null
+          id?: string
+          perimetre?: string | null
+          processus_audites?: string[] | null
+          rapport?: string | null
+          reference: string
+          statut?: Database["public"]["Enums"]["audit_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auditeur_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          duree_prevue?: number | null
+          ecarts_constates?: string | null
+          id?: string
+          perimetre?: string | null
+          processus_audites?: string[] | null
+          rapport?: string | null
+          reference?: string
+          statut?: Database["public"]["Enums"]["audit_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audits_internes_auditeur_id_fkey"
+            columns: ["auditeur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audits_internes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audits_internes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audits_internes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conformite_evaluation: {
         Row: {
           commentaire: string | null
@@ -1356,6 +1445,86 @@ export type Database = {
         }
         Relationships: []
       }
+      revues_direction: {
+        Row: {
+          annee: number
+          approuve_par: string | null
+          conclusions: string | null
+          created_at: string
+          created_by: string | null
+          date_realisation: string | null
+          decisions: string | null
+          deleted_at: string | null
+          id: string
+          ordre_du_jour: string | null
+          statut: Database["public"]["Enums"]["revue_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          annee: number
+          approuve_par?: string | null
+          conclusions?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_realisation?: string | null
+          decisions?: string | null
+          deleted_at?: string | null
+          id?: string
+          ordre_du_jour?: string | null
+          statut?: Database["public"]["Enums"]["revue_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          annee?: number
+          approuve_par?: string | null
+          conclusions?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_realisation?: string | null
+          decisions?: string | null
+          deleted_at?: string | null
+          id?: string
+          ordre_du_jour?: string | null
+          statut?: Database["public"]["Enums"]["revue_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revues_direction_approuve_par_fkey"
+            columns: ["approuve_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revues_direction_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revues_direction_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revues_direction_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risques_opportunites: {
         Row: {
           cause: string | null
@@ -1623,6 +1792,12 @@ export type Database = {
         | "bloquee"
         | "abandonnee"
       action_type: "preventive" | "corrective"
+      audit_statut:
+        | "planifie"
+        | "en_cours"
+        | "realise"
+        | "rapport_redige"
+        | "cloture"
       cotation_conformite:
         | "non_evalue"
         | "conforme"
@@ -1700,6 +1875,7 @@ export type Database = {
         | "enquete"
         | "autre"
       reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
+      revue_statut: "planifiee" | "realisee" | "cloturee"
       ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
       ro_type: "risque" | "opportunite"
       secteur_activite: "SI" | "ESN" | "AT" | "autre"
@@ -1861,6 +2037,13 @@ export const Constants = {
         "abandonnee",
       ],
       action_type: ["preventive", "corrective"],
+      audit_statut: [
+        "planifie",
+        "en_cours",
+        "realise",
+        "rapport_redige",
+        "cloture",
+      ],
       cotation_conformite: [
         "non_evalue",
         "conforme",
@@ -1940,6 +2123,7 @@ export const Constants = {
       processus_type: ["pilotage", "realisation", "support"],
       reclamation_canal: ["mail", "tel", "visio", "audit", "enquete", "autre"],
       reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
+      revue_statut: ["planifiee", "realisee", "cloturee"],
       ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
       ro_type: ["risque", "opportunite"],
       secteur_activite: ["SI", "ESN", "AT", "autre"],
