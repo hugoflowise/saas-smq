@@ -74,6 +74,8 @@ export default async function NcPage({
       <PageHeader
         title="Non-conformités"
         description="Détection, analyse des causes et traitement des non-conformités."
+        isoClause="ISO 9001 §10.2"
+        help="Face à une non-conformité : réagir, analyser les causes profondes (5 Pourquoi, Ishikawa…), mettre en place une action corrective puis vérifier son efficacité. Une NC peut découler de vos propres exigences internes."
       >
         <NcViewToggle />
         <NcDialog processusOptions={options} />

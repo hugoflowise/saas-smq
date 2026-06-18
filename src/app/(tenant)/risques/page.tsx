@@ -83,6 +83,8 @@ export default async function RisquesPage() {
       <PageHeader
         title="Risques & Opportunités"
         description="Registre R&O et matrice de criticité."
+        isoClause="ISO 9001 §6.1"
+        help="Déterminez les risques et opportunités liés à vos enjeux et parties intéressées, planifiez des actions pour les traiter et évaluez leur efficacité."
       >
         <RoDialog processusOptions={processus ?? []} />
       </PageHeader>

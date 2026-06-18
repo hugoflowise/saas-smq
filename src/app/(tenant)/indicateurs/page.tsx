@@ -65,6 +65,8 @@ export default async function IndicateursPage() {
       <PageHeader
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."
+        isoClause="ISO 9001 §9.1.1"
+        help="Surveillance et mesure : déterminez quoi mesurer, par quelles méthodes et à quelle fréquence, puis analysez les résultats au regard des objectifs."
       >
         <CreateIndicateurDialog processusOptions={processus ?? []} />
       </PageHeader>

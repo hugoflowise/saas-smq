@@ -61,6 +61,8 @@ export default async function VeillePage() {
       <PageHeader
         title="Veille réglementaire"
         description="Textes applicables et analyse d'impact."
+        isoClause="Obligations légales & §4"
+        help="Suivez les textes applicables (qualité, réglementaires) pertinents pour votre activité, évaluez leur impact et tracez les actions de mise en conformité."
       >
         <VeilleDialog />
       </PageHeader>

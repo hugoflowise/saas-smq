@@ -77,6 +77,8 @@ export default async function PolitiquePage() {
       <PageHeader
         title="Politique qualité"
         description="Document maîtrisé définissant les engagements qualité de la direction."
+        isoClause="ISO 9001 §5.2"
+        help="La direction établit et tient à jour une politique qualité adaptée à la finalité de l'organisme. Elle sert de cadre aux objectifs qualité, est communiquée à tous et tenue à disposition des parties intéressées."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">

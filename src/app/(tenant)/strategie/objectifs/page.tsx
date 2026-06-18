@@ -50,6 +50,8 @@ export default async function ObjectifsPage() {
       <PageHeader
         title="Objectifs qualité"
         description="Objectifs SMART et leur déclinaison par fonction."
+        isoClause="ISO 9001 §6.2"
+        help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
       >
         <ObjectifDialog />
       </PageHeader>
