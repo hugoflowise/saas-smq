@@ -1,6 +1,5 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -43,9 +42,7 @@ export default async function ObjectifsPage() {
   const supabase = await createClient();
   const { data: objectifs } = await supabase
     .from("objectifs_qualite")
-    .select(
-      "id, intitule, description, est_smart, cible_chiffree, echeance, fonction_concernee, statut",
-    )
+    .select("id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut")
     .eq("tenant_id", ctx.effectiveTenantId)
     .order("created_at", { ascending: true });
 
@@ -81,14 +78,7 @@ export default async function ObjectifsPage() {
             <TableBody>
               {items.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell className="font-medium">
-                    {o.intitule}
-                    {o.est_smart ? (
-                      <Badge variant="secondary" className="ml-2">
-                        SMART
-                      </Badge>
-                    ) : null}
-                  </TableCell>
+                  <TableCell className="font-medium">{o.intitule}</TableCell>
                   <TableCell>{o.cible_chiffree ?? "—"}</TableCell>
                   <TableCell>{o.fonction_concernee ?? "—"}</TableCell>
                   <TableCell>{formatDate(o.echeance)}</TableCell>

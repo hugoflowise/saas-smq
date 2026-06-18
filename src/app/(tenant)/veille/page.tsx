@@ -68,6 +68,11 @@ export default async function VeillePage() {
         <VeilleDialog />
       </PageHeader>
 
+      <p className="mb-4 rounded-md border border-status-pf/30 bg-status-pf/10 px-3 py-2 text-sm">
+        ℹ️ Saisie manuelle pour l'instant. L'intégration automatique d'un flux réglementaire
+        (Legifrance, AFNOR…) est prévue pour rendre cette veille réellement utile.
+      </p>
+
       {items.length === 0 ? (
         <EmptyState
           title="Aucun texte"
