@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ProcedureClient } from "./procedure-client";
+import { ProcedureRevisionForm } from "./procedure-revision-form";
 
 export default async function ProcedureDetailPage({
   params,
@@ -28,7 +29,9 @@ export default async function ProcedureDetailPage({
 
   const { data: procedure } = await supabase
     .from("procedures")
-    .select("id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at")
+    .select(
+      "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, redacteur, verificateur, note_revision",
+    )
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -37,7 +40,9 @@ export default async function ProcedureDetailPage({
 
   const { data: rawVersions } = await supabase
     .from("procedures_versions")
-    .select("id, version, approved_at, approved_by, contenu_snapshot, created_at")
+    .select(
+      "id, version, approved_at, approved_by, contenu_snapshot, created_at, redacteur, verificateur, note_revision",
+    )
     .eq("procedure_id", id)
     .order("created_at", { ascending: false });
 
@@ -61,6 +66,9 @@ export default async function ProcedureDetailPage({
     approvedAt: v.approved_at,
     approverName: v.approved_by ? (nameById.get(v.approved_by) ?? null) : null,
     snapshot: (v.contenu_snapshot ?? null) as JSONContent | null,
+    redacteur: v.redacteur,
+    verificateur: v.verificateur,
+    noteRevision: v.note_revision,
   }));
 
   const current = versions.find((v) => v.id === procedure.version_actuelle_id) ?? null;
@@ -97,7 +105,26 @@ export default async function ProcedureDetailPage({
           />
         </div>
 
-        <aside className="lg:sticky lg:top-4 lg:self-start">
+        <aside className="flex flex-col gap-6 lg:sticky lg:top-4 lg:self-start">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Responsabilités &amp; révision</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProcedureRevisionForm
+                id={procedure.id}
+                redacteur={procedure.redacteur}
+                verificateur={procedure.verificateur}
+                noteRevision={procedure.note_revision}
+                approverName={
+                  procedure.approved_by ? (nameById.get(procedure.approved_by) ?? null) : null
+                }
+                canWrite={canWrite}
+                editable={procedure.statut === "brouillon"}
+              />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Historique des versions</CardTitle>

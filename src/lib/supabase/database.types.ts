@@ -1076,8 +1076,10 @@ export type Database = {
           deleted_at: string | null
           description_courte: string | null
           id: string
+          note_revision: string | null
           pilote_id: string | null
           processus_id: string | null
+          redacteur: string | null
           reference_iso: string[] | null
           signature_data: Json | null
           statut: Database["public"]["Enums"]["document_statut"]
@@ -1085,6 +1087,7 @@ export type Database = {
           titre: string
           updated_at: string
           updated_by: string | null
+          verificateur: string | null
           version_actuelle_id: string | null
         }
         Insert: {
@@ -1096,8 +1099,10 @@ export type Database = {
           deleted_at?: string | null
           description_courte?: string | null
           id?: string
+          note_revision?: string | null
           pilote_id?: string | null
           processus_id?: string | null
+          redacteur?: string | null
           reference_iso?: string[] | null
           signature_data?: Json | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -1105,6 +1110,7 @@ export type Database = {
           titre: string
           updated_at?: string
           updated_by?: string | null
+          verificateur?: string | null
           version_actuelle_id?: string | null
         }
         Update: {
@@ -1116,8 +1122,10 @@ export type Database = {
           deleted_at?: string | null
           description_courte?: string | null
           id?: string
+          note_revision?: string | null
           pilote_id?: string | null
           processus_id?: string | null
+          redacteur?: string | null
           reference_iso?: string[] | null
           signature_data?: Json | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -1125,6 +1133,7 @@ export type Database = {
           titre?: string
           updated_at?: string
           updated_by?: string | null
+          verificateur?: string | null
           version_actuelle_id?: string | null
         }
         Relationships: [
@@ -1179,10 +1188,13 @@ export type Database = {
           contenu_snapshot: Json | null
           created_at: string
           id: string
+          note_revision: string | null
           pdf_url: string | null
           procedure_id: string
+          redacteur: string | null
           signature_data: Json | null
           tenant_id: string
+          verificateur: string | null
           version: string
         }
         Insert: {
@@ -1191,10 +1203,13 @@ export type Database = {
           contenu_snapshot?: Json | null
           created_at?: string
           id?: string
+          note_revision?: string | null
           pdf_url?: string | null
           procedure_id: string
+          redacteur?: string | null
           signature_data?: Json | null
           tenant_id: string
+          verificateur?: string | null
           version: string
         }
         Update: {
@@ -1203,10 +1218,13 @@ export type Database = {
           contenu_snapshot?: Json | null
           created_at?: string
           id?: string
+          note_revision?: string | null
           pdf_url?: string | null
           procedure_id?: string
+          redacteur?: string | null
           signature_data?: Json | null
           tenant_id?: string
+          verificateur?: string | null
           version?: string
         }
         Relationships: [
