@@ -65,6 +65,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
+  const from = `?from=/processus/${id}`;
 
   const { data: processus } = await supabase
     .from("processus")
@@ -75,7 +76,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   if (!processus) notFound();
 
-  const [procedures, indicateurs, risques, ncs] = await Promise.all([
+  const [procedures, indicateurs, risques, ncs, allProcessus] = await Promise.all([
     supabase
       .from("procedures")
       .select("id, titre, statut")
@@ -84,7 +85,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("titre"),
     supabase
       .from("indicateurs")
-      .select("id, nom, unite")
+      .select("id, nom, unite, cible, seuil_alerte_min, seuil_alerte_max")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("nom"),
@@ -100,27 +101,30 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .eq("tenant_id", tid)
       .eq("processus_concerne", id)
       .order("date_constat", { ascending: false }),
+    supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
   ]);
 
-  const { data: allProcessus } = await supabase
-    .from("processus")
-    .select("id, nom")
-    .eq("tenant_id", tid)
-    .order("ordre_affichage", { ascending: true });
-  const processusOptions = allProcessus ?? [];
+  const indList = indicateurs.data ?? [];
+  const indIds = indList.map((i) => i.id);
+  const { data: valeurs } = indIds.length
+    ? await supabase
+        .from("indicateurs_valeurs")
+        .select("indicateur_id, valeur, date_mesure")
+        .in("indicateur_id", indIds)
+        .order("date_mesure", { ascending: false })
+    : { data: [] };
+  const lastVal = new Map<string, number>();
+  for (const v of valeurs ?? []) {
+    if (!lastVal.has(v.indicateur_id)) lastVal.set(v.indicateur_id, v.valeur);
+  }
 
-  const from = `?from=/processus/${id}`;
+  const processusOptions = allProcessus.data ?? [];
+
   const procItems: RelatedItem[] = (procedures.data ?? []).map((p) => ({
     id: p.id,
     href: `/documentation/procedures/${p.id}${from}`,
     primary: p.titre,
     secondary: p.statut,
-  }));
-  const indItems: RelatedItem[] = (indicateurs.data ?? []).map((i) => ({
-    id: i.id,
-    href: `/indicateurs/${i.id}${from}`,
-    primary: i.nom,
-    secondary: i.unite ?? undefined,
   }));
   const roItems: RelatedItem[] = (risques.data ?? []).map((r) => ({
     id: r.id,
@@ -136,7 +140,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   }));
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl">
       <Link
         href="/processus"
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
@@ -152,16 +156,15 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         {TYPE_LABELS[processus.type] ?? processus.type}
       </Badge>
 
-      <Tabs defaultValue="indicateurs">
+      <Tabs defaultValue="apercu">
         <TabsList>
-          <TabsTrigger value="indicateurs">Indicateurs ({indItems.length})</TabsTrigger>
-          <TabsTrigger value="fiche">Fiche d'identité</TabsTrigger>
+          <TabsTrigger value="apercu">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
           <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="fiche">
+        <TabsContent value="apercu" className="flex flex-col gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Fiche d'identité</CardTitle>
@@ -173,6 +176,54 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               <Field label="Ressources associées" value={processus.ressources_associees} />
             </CardContent>
           </Card>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-semibold text-sm">Indicateurs ({indList.length})</h2>
+              <CreateIndicateurDialog processusOptions={processusOptions} presetProcessusId={id} />
+            </div>
+            {indList.length === 0 ? (
+              <EmptyState
+                title="Aucun indicateur"
+                description="Ajoutez un indicateur pour suivre la performance de ce processus."
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {indList.map((ind) => {
+                  const v = lastVal.get(ind.id);
+                  const alert =
+                    v !== undefined &&
+                    ((ind.seuil_alerte_min !== null && v < ind.seuil_alerte_min) ||
+                      (ind.seuil_alerte_max !== null && v > ind.seuil_alerte_max));
+                  return (
+                    <Link key={ind.id} href={`/indicateurs/${ind.id}${from}`}>
+                      <Card className="h-full transition-colors hover:border-primary/40">
+                        <CardHeader>
+                          <CardTitle className="text-sm">{ind.nom}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-baseline gap-1">
+                            <span className="font-semibold text-2xl">{v ?? "—"}</span>
+                            {ind.unite ? (
+                              <span className="text-muted-foreground text-sm">{ind.unite}</span>
+                            ) : null}
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
+                            {ind.cible !== null ? <span>Cible : {ind.cible}</span> : null}
+                            {alert ? (
+                              <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">
+                                Hors seuil
+                              </span>
+                            ) : null}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="procedures" className="flex flex-col gap-3">
@@ -180,12 +231,6 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
             <CreateProcedureDialog processusOptions={processusOptions} presetProcessusId={id} />
           </div>
           <RelatedList items={procItems} empty="Aucune procédure rattachée à ce processus." />
-        </TabsContent>
-        <TabsContent value="indicateurs" className="flex flex-col gap-3">
-          <div className="flex justify-end">
-            <CreateIndicateurDialog processusOptions={processusOptions} presetProcessusId={id} />
-          </div>
-          <RelatedList items={indItems} empty="Aucun indicateur rattaché à ce processus." />
         </TabsContent>
         <TabsContent value="risques" className="flex flex-col gap-3">
           <div className="flex justify-end">
