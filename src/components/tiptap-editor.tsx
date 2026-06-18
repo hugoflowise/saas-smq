@@ -39,6 +39,8 @@ function ToolbarButton({
       size="icon"
       className="size-8"
       aria-label={label}
+      // Empêche l'éditeur de perdre la sélection au clic sur le bouton
+      onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
     >
       {children}
