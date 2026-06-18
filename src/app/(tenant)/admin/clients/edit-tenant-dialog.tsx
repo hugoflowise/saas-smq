@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateTenantAction } from "@/lib/actions/tenants";
+import { updateTenantAction, uploadTenantLogoAction } from "@/lib/actions/tenants";
 
 const SELECT_CLASS =
   "h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -25,6 +25,7 @@ type Tenant = {
   nom_societe: string;
   effectif_tranche: string | null;
   secteur: string | null;
+  logo_url: string | null;
 };
 
 type Dirigeant = { id: string; full_name: string | null; email: string } | null;
@@ -33,6 +34,24 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.set("tenantId", tenant.id);
+    fd.set("file", file);
+    const result = await uploadTenantLogoAction(fd);
+    setUploading(false);
+    if (result.ok) {
+      toast.success("Logo mis à jour.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,6 +92,30 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
           <DialogTitle>Modifier le client</DialogTitle>
           <DialogDescription>{tenant.nom_societe}</DialogDescription>
         </DialogHeader>
+
+        {/* Logo (upload séparé, immédiat) */}
+        <div className="mb-4 flex items-center gap-4">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-surface">
+            {tenant.logo_url ? (
+              // biome-ignore lint/performance/noImgElement: logo externe (Supabase Storage), taille fixe
+              <img src={tenant.logo_url} alt="Logo" className="size-full object-contain" />
+            ) : (
+              <span className="text-muted-foreground text-xs">Aucun</span>
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="logo">Logo de la société</Label>
+            <input
+              id="logo"
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={handleLogoChange}
+              className="text-sm file:mr-3 file:rounded-md file:border file:bg-card file:px-3 file:py-1 file:text-sm"
+            />
+            <span className="text-muted-foreground text-xs">PNG, JPG ou SVG · max 2 Mo</span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">

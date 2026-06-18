@@ -651,6 +651,7 @@ export type Database = {
             | null
           formule: Database["public"]["Enums"]["tenant_formule"]
           id: string
+          logo_url: string | null
           nom_societe: string
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
           statut: Database["public"]["Enums"]["tenant_statut"]
@@ -666,6 +667,7 @@ export type Database = {
             | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
+          logo_url?: string | null
           nom_societe: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
@@ -681,6 +683,7 @@ export type Database = {
             | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
+          logo_url?: string | null
           nom_societe?: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
