@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -167,6 +168,38 @@ export async function createObjectifAction(input: unknown): Promise<ActionResult
   const { error } = await c.supabase
     .from("objectifs_qualite")
     .insert({ tenant_id: c.tenantId, ...objPayload(parsed.data), created_by: c.userId });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/strategie/objectifs");
+  return { ok: true };
+}
+
+const objQuickSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["actif", "atteint", "abandonne"]).optional(),
+  echeance: z.string().optional(),
+  valeurActuelle: z.coerce.number().optional(),
+});
+
+/** Mise à jour rapide d'un objectif depuis le tableau (édition inline). */
+export async function quickUpdateObjectifAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = objQuickSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const patch: Database["public"]["Tables"]["objectifs_qualite"]["Update"] = {
+    updated_by: c.userId,
+  };
+  if (d.statut !== undefined) patch.statut = d.statut;
+  if (d.echeance !== undefined) patch.echeance = d.echeance || null;
+  if (d.valeurActuelle !== undefined) patch.valeur_actuelle = d.valeurActuelle;
+
+  const { error } = await c.supabase
+    .from("objectifs_qualite")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/strategie/objectifs");
   return { ok: true };
