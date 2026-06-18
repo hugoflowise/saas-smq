@@ -38,6 +38,18 @@ export type ActionRow = {
   date_prevue: string | null;
   indicateur_efficacite: string | null;
   commentaires: string | null;
+  constat?: string | null;
+  cause_fondamentale?: string | null;
+  recommandation?: string | null;
+  cotation?: string | null;
+};
+
+const COTATION_OPTIONS: Record<string, string> = {
+  non_evalue: "Non évalué",
+  conforme: "Conforme",
+  point_attention: "Point d'attention",
+  nc_mineure: "NC mineure",
+  nc_majeure: "NC majeure",
 };
 
 type Props = {
@@ -79,6 +91,10 @@ export function ActionDialog({ processusOptions, action }: Props) {
       datePrevue: form.get("datePrevue") || undefined,
       indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
       commentaires: form.get("commentaires") || undefined,
+      cotation: form.get("cotation") || undefined,
+      constat: form.get("constat") || undefined,
+      causeFondamentale: form.get("causeFondamentale") || undefined,
+      recommandation: form.get("recommandation") || undefined,
     };
 
     const result = isEdit
@@ -172,6 +188,17 @@ export function ActionDialog({ processusOptions, action }: Props) {
               </select>
             </div>
             <div className="flex flex-col gap-2">
+              <Label htmlFor="cotation">Cotation</Label>
+              <select
+                id="cotation"
+                name="cotation"
+                className={SELECT_CLASS}
+                defaultValue={action?.cotation ?? "non_evalue"}
+              >
+                <Options map={COTATION_OPTIONS} />
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="processusConcerne">Processus</Label>
               <select
                 id="processusConcerne"
@@ -199,12 +226,41 @@ export function ActionDialog({ processusOptions, action }: Props) {
           </div>
 
           <div className="flex flex-col gap-2">
+            <Label htmlFor="constat">Constat</Label>
+            <Textarea
+              id="constat"
+              name="constat"
+              rows={2}
+              defaultValue={action?.constat ?? ""}
+              placeholder="Ce qui a été observé (écart, situation)…"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="causeFondamentale">Cause fondamentale</Label>
+            <Textarea
+              id="causeFondamentale"
+              name="causeFondamentale"
+              rows={2}
+              defaultValue={action?.cause_fondamentale ?? ""}
+              placeholder="Cause racine identifiée (5 Pourquoi, Ishikawa…)"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
             <Label htmlFor="descriptionDetail">Détail / action à mener</Label>
             <Textarea
               id="descriptionDetail"
               name="descriptionDetail"
               rows={2}
               defaultValue={action?.description_detail ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="recommandation">Recommandation</Label>
+            <Textarea
+              id="recommandation"
+              name="recommandation"
+              rows={2}
+              defaultValue={action?.recommandation ?? ""}
             />
           </div>
           <div className="flex flex-col gap-2">

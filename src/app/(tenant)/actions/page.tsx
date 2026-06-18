@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -9,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
@@ -29,10 +31,17 @@ const STATUT_CLASS: Record<string, string> = {
 export default async function ActionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string; priorite?: string; tri?: string; vue?: string }>;
+  searchParams: Promise<{
+    statut?: string;
+    priorite?: string;
+    tri?: string;
+    vue?: string;
+    filtre?: string;
+  }>;
 }) {
   const ctx = await getTenantContext();
-  const { statut, priorite, tri, vue } = await searchParams;
+  const { statut, priorite, tri, vue, filtre } = await searchParams;
+  const today = new Date().toISOString().slice(0, 10);
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -60,7 +69,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires, cotation",
     )
     .eq("tenant_id", ctx.effectiveTenantId);
 
@@ -70,6 +79,19 @@ export default async function ActionsPage({
       statut as "a_faire" | "en_cours" | "termine" | "bloquee" | "abandonnee",
     );
   if (priorite) query = query.eq("priorite", priorite as "p1" | "p2" | "p3");
+
+  // Filtres pré-construits (vues rapides)
+  if (filtre === "retard") {
+    query = query
+      .in("statut", ["a_faire", "en_cours", "bloquee"] as ("a_faire" | "en_cours" | "bloquee")[])
+      .lt("date_prevue", today);
+  } else if (filtre === "nc_majeure") {
+    query = query.eq("cotation", "nc_majeure");
+  } else if (filtre === "p1") {
+    query = query.eq("priorite", "p1");
+  } else if (filtre === "solde") {
+    query = query.eq("statut", "termine");
+  }
 
   // Tri : par échéance (croissant/décroissant) ou par priorité (défaut)
   if (tri === "echeance_asc") {
@@ -99,6 +121,28 @@ export default async function ActionsPage({
         <ActionDialog processusOptions={options} />
       </PageHeader>
 
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {[
+          { value: "", label: "Toutes" },
+          { value: "retard", label: "En retard" },
+          { value: "nc_majeure", label: "NC majeures" },
+          { value: "p1", label: "Priorité P1" },
+          { value: "solde", label: "Soldées" },
+        ].map((c) => (
+          <Link
+            key={c.value || "tous"}
+            href={c.value ? `/actions?filtre=${c.value}` : "/actions"}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              (filtre ?? "") === c.value
+                ? "border-primary bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {c.label}
+          </Link>
+        ))}
+      </div>
+
       <FilterBar />
 
       {items.length === 0 ? (
@@ -112,6 +156,7 @@ export default async function ActionsPage({
               <TableRow>
                 <TableHead>Réf.</TableHead>
                 <TableHead>Intitulé</TableHead>
+                <TableHead>Cotation</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Échéance</TableHead>
@@ -129,6 +174,17 @@ export default async function ActionsPage({
                     <Link href={`/actions/${a.id}`} className="hover:text-primary hover:underline">
                       {a.description_courte}
                     </Link>
+                  </TableCell>
+                  <TableCell>
+                    {a.cotation && a.cotation !== "non_evalue" ? (
+                      <span
+                        className={`${BADGE_BASE} ${COTATION_BADGE_CLASS[a.cotation] ?? "bg-muted"}`}
+                      >
+                        {COTATION_LABELS[a.cotation as keyof typeof COTATION_LABELS]}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
                   </TableCell>
                   <TableCell>{ACTION_PRIORITE_LABELS[a.priorite]}</TableCell>
                   <TableCell>

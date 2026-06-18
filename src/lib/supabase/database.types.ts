@@ -16,7 +16,10 @@ export type Database = {
     Tables: {
       actions: {
         Row: {
+          cause_fondamentale: string | null
           commentaires: string | null
+          constat: string | null
+          cotation: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at: string
           created_by: string | null
           date_creation: string
@@ -30,6 +33,7 @@ export type Database = {
           origine: Database["public"]["Enums"]["action_origine"]
           priorite: Database["public"]["Enums"]["action_priorite"]
           processus_concerne: string | null
+          recommandation: string | null
           reference: string
           reference_iso: string[] | null
           responsable_id: string | null
@@ -40,7 +44,10 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          cause_fondamentale?: string | null
           commentaires?: string | null
+          constat?: string | null
+          cotation?: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at?: string
           created_by?: string | null
           date_creation?: string
@@ -54,6 +61,7 @@ export type Database = {
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
+          recommandation?: string | null
           reference: string
           reference_iso?: string[] | null
           responsable_id?: string | null
@@ -64,7 +72,10 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          cause_fondamentale?: string | null
           commentaires?: string | null
+          constat?: string | null
+          cotation?: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at?: string
           created_by?: string | null
           date_creation?: string
@@ -78,6 +89,7 @@ export type Database = {
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
+          recommandation?: string | null
           reference?: string
           reference_iso?: string[] | null
           responsable_id?: string | null

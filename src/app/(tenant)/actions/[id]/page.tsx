@@ -1,9 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import {
   ACTION_ORIGINE_LABELS,
@@ -35,7 +37,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, commentaires",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, commentaires, constat, cause_fondamentale, recommandation, cotation",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -72,6 +74,11 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         <Badge variant="secondary">{ACTION_STATUT_LABELS[action.statut]}</Badge>
         <Badge variant="secondary">{ACTION_PRIORITE_LABELS[action.priorite]}</Badge>
         <Badge variant="secondary">{ACTION_TYPE_LABELS[action.type]}</Badge>
+        {action.cotation && action.cotation !== "non_evalue" ? (
+          <span className={`${BADGE_BASE} ${COTATION_BADGE_CLASS[action.cotation] ?? "bg-muted"}`}>
+            {COTATION_LABELS[action.cotation as keyof typeof COTATION_LABELS]}
+          </span>
+        ) : null}
       </div>
 
       <Card>
@@ -85,7 +92,16 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           <Field label="Date effective" value={formatDate(action.date_effective)} />
           <Field label="Indicateur d'efficacité" value={action.indicateur_efficacite} />
           <div className="sm:col-span-2">
+            <Field label="Constat" value={action.constat} />
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Cause fondamentale" value={action.cause_fondamentale} />
+          </div>
+          <div className="sm:col-span-2">
             <Field label="Détail / action à mener" value={action.description_detail} />
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Recommandation" value={action.recommandation} />
           </div>
           <div className="sm:col-span-2">
             <Field label="Commentaires" value={action.commentaires} />

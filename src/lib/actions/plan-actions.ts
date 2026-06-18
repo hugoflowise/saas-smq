@@ -28,6 +28,20 @@ const baseSchema = {
   datePrevue: z.string().optional(),
   indicateurEfficacite: z.string().trim().optional(),
   commentaires: z.string().trim().optional(),
+  constat: z.string().trim().optional(),
+  causeFondamentale: z.string().trim().optional(),
+  recommandation: z.string().trim().optional(),
+  cotation: z
+    .enum([
+      "non_evalue",
+      "conforme",
+      "point_fort",
+      "point_attention",
+      "nc_mineure",
+      "nc_majeure",
+      "non_applicable",
+    ])
+    .optional(),
 };
 
 const createSchema = z.object(baseSchema);
@@ -77,6 +91,10 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
     date_prevue: d.datePrevue || null,
     indicateur_efficacite: d.indicateurEfficacite ?? null,
     commentaires: d.commentaires ?? null,
+    constat: d.constat ?? null,
+    cause_fondamentale: d.causeFondamentale ?? null,
+    recommandation: d.recommandation ?? null,
+    cotation: d.cotation ?? null,
     created_by: ctx.userId,
   });
 
@@ -144,6 +162,10 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       date_effective: d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
       indicateur_efficacite: d.indicateurEfficacite ?? null,
       commentaires: d.commentaires ?? null,
+      constat: d.constat ?? null,
+      cause_fondamentale: d.causeFondamentale ?? null,
+      recommandation: d.recommandation ?? null,
+      cotation: d.cotation ?? null,
       updated_by: ctx.userId,
     })
     .eq("id", d.id)
