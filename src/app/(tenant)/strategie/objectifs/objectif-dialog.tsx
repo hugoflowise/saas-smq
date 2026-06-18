@@ -24,7 +24,6 @@ export type ObjectifRow = {
   id: string;
   intitule: string;
   description: string | null;
-  est_smart: boolean;
   cible_chiffree: string | null;
   echeance: string | null;
   fonction_concernee: string | null;
@@ -44,7 +43,6 @@ export function ObjectifDialog({ objectif }: { objectif?: ObjectifRow }) {
     const data = {
       intitule: f.get("intitule"),
       description: f.get("description") || undefined,
-      estSmart: f.get("estSmart") === "on" || undefined,
       cibleChiffree: f.get("cibleChiffree") || undefined,
       echeance: f.get("echeance") || undefined,
       fonctionConcernee: f.get("fonctionConcernee") || undefined,
@@ -127,15 +125,6 @@ export function ObjectifDialog({ objectif }: { objectif?: ObjectifRow }) {
               </select>
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="estSmart"
-              defaultChecked={objectif?.est_smart ?? false}
-              className="size-4"
-            />
-            Objectif SMART
-          </label>
           <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
