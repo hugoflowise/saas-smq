@@ -12,13 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AddValeurForm } from "./add-valeur-form";
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("fr-FR");
-}
 
 export default async function IndicateurDetailPage({
   params,

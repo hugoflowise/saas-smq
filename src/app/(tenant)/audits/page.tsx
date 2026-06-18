@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AUDIT_TYPE_BADGE_CLASS, BADGE_BASE } from "@/lib/badges";
+import { formatDate } from "@/lib/format";
 import { AUDIT_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -21,10 +22,6 @@ const FILTERS = [
   { value: "externe", label: "Externes" },
   { value: "fournisseur", label: "Fournisseurs" },
 ] as const;
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function AuditsPage({
   searchParams,

@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ObjectifDialog } from "./objectif-dialog";
@@ -17,10 +18,6 @@ const STATUT_LABELS: Record<string, string> = {
   atteint: "Atteint",
   abandonne: "Abandonné",
 };
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function ObjectifsPage() {
   const ctx = await getTenantContext();

@@ -3,12 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { PrintButton } from "@/app/print/politique/print-button";
 import { TiptapEditor } from "@/components/tiptap-editor";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function ProcedurePrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

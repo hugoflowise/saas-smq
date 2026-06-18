@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -16,10 +17,6 @@ const ACTIONS_ACTIVES = ["a_faire", "en_cours", "bloquee"] as (
   | "en_cours"
   | "bloquee"
 )[];
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function DashboardPage() {
   const ctx = await getTenantContext();

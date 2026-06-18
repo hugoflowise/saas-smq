@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -24,11 +25,6 @@ const STATUT_CLASS: Record<string, string> = {
   bloquee: "bg-status-nc-mineure/15 text-status-nc-mineure",
   abandonnee: "bg-muted text-muted-foreground",
 };
-
-function formatDate(d: string | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("fr-FR");
-}
 
 export default async function ActionsPage({
   searchParams,

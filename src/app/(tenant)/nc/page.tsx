@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
+import { formatDate } from "@/lib/format";
 import { NC_GRAVITE_LABELS, NC_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -17,10 +18,6 @@ import { NcDialog } from "./nc-dialog";
 import { NcFilterBar } from "./nc-filter-bar";
 import { NcKanban } from "./nc-kanban";
 import { NcViewToggle } from "./nc-view-toggle";
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function NcPage({
   searchParams,
