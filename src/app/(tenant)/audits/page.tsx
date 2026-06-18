@@ -9,16 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AUDIT_TYPE_BADGE_CLASS, BADGE_BASE } from "@/lib/badges";
 import { AUDIT_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AuditDialog } from "./audit-dialog";
-
-const TYPE_BADGE: Record<string, string> = {
-  interne: "bg-sky-100 text-sky-700",
-  externe: "bg-amber-100 text-amber-700",
-  fournisseur: "bg-violet-100 text-violet-700",
-};
 
 const FILTERS = [
   { value: "tous", label: "Tous" },
@@ -121,8 +116,8 @@ export default async function AuditsPage({
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${
-                        TYPE_BADGE[a.type_audit] ?? "bg-muted text-muted-foreground"
+                      className={`${BADGE_BASE} ${
+                        AUDIT_TYPE_BADGE_CLASS[a.type_audit] ?? "bg-muted text-muted-foreground"
                       }`}
                     >
                       {AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS] ??

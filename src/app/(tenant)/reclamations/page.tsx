@@ -8,6 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
+import { NC_GRAVITE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ReclamationDialog } from "./reclamation-dialog";
@@ -25,11 +27,6 @@ const STATUT_LABELS: Record<string, string> = {
   analysee: "Analysée",
   traitee: "Traitée",
   cloturee: "Clôturée",
-};
-const GRAVITE_LABELS: Record<string, string> = {
-  mineure: "Mineure",
-  majeure: "Majeure",
-  critique: "Critique",
 };
 
 function formatDate(d: string | null) {
@@ -90,7 +87,13 @@ export default async function ReclamationsPage() {
                   <TableCell className="font-medium">{r.objet}</TableCell>
                   <TableCell>{r.client ?? "—"}</TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
-                  <TableCell>{GRAVITE_LABELS[r.gravite] ?? r.gravite}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`${BADGE_BASE} ${GRAVITE_BADGE_CLASS[r.gravite] ?? "bg-muted"}`}
+                    >
+                      {NC_GRAVITE_LABELS[r.gravite as keyof typeof NC_GRAVITE_LABELS] ?? r.gravite}
+                    </span>
+                  </TableCell>
                   <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>
                   <TableCell>{formatDate(r.date_reception)}</TableCell>
                   <TableCell>

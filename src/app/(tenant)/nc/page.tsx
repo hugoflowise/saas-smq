@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
 import { NC_GRAVITE_LABELS, NC_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -16,12 +17,6 @@ import { NcDialog } from "./nc-dialog";
 import { NcFilterBar } from "./nc-filter-bar";
 import { NcKanban } from "./nc-kanban";
 import { NcViewToggle } from "./nc-view-toggle";
-
-const GRAVITE_CLASS: Record<string, string> = {
-  mineure: "bg-status-pa/15 text-status-pa",
-  majeure: "bg-status-nc-mineure/15 text-status-nc-mineure",
-  critique: "bg-status-nc-majeure/15 text-status-nc-majeure",
-};
 
 function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
@@ -131,7 +126,7 @@ export default async function NcPage({
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${GRAVITE_CLASS[nc.gravite] ?? "bg-muted"}`}
+                      className={`${BADGE_BASE} ${GRAVITE_BADGE_CLASS[nc.gravite] ?? "bg-muted"}`}
                     >
                       {NC_GRAVITE_LABELS[nc.gravite]}
                     </span>
