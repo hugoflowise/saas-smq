@@ -9,6 +9,16 @@ import { getTenantContext } from "@/lib/tenant-context";
 type ActionResult = { ok: true } | { ok: false; error: string };
 type PolitiqueUpdate = Database["public"]["Tables"]["politique_qualite"]["Update"];
 
+/**
+ * Droits sur les documents maîtrisés (CDC §8) :
+ * - writer (rédige, enregistre, soumet, nouvelle version) : admin Flowise, manager, dirigeant
+ * - approver (approuve + signe, demande des modifs, publie) : admin Flowise, dirigeant
+ */
+function permissions(role: string) {
+  const approver = role === "admin_flowise" || role === "dirigeant";
+  return { approver, writer: approver || role === "manager" };
+}
+
 /** Transitions de statut autorisées (hors publication, gérée à part). */
 const TRANSITIONS: Record<string, string[]> = {
   brouillon: ["en_revue"],
@@ -32,6 +42,7 @@ export async function savePolitiqueContenuAction(contenu: Json): Promise<ActionR
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
 
   const { supabase, politique } = await loadPolitique(ctx.effectiveTenantId);
 
@@ -67,6 +78,12 @@ export async function transitionPolitiqueStatutAction(target: string): Promise<A
     return { ok: false, error: "Transition de statut non autorisée." };
   }
 
+  // Depuis "en revue" (approuver / demander des modifs) => approbateur ;
+  // sinon (soumettre, nouvelle version) => rédacteur
+  const perms = permissions(ctx.role);
+  const allowed = politique.statut === "en_revue" ? perms.approver : perms.writer;
+  if (!allowed) return { ok: false, error: "Droits insuffisants pour cette action." };
+
   const update: PolitiqueUpdate = {
     statut: target as PolitiqueUpdate["statut"],
     updated_by: ctx.userId,
@@ -97,6 +114,7 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!permissions(ctx.role).approver) return { ok: false, error: "Droits insuffisants." };
 
   const { supabase, politique } = await loadPolitique(ctx.effectiveTenantId);
   if (!politique) return { ok: false, error: "Politique introuvable." };

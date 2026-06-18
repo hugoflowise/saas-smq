@@ -30,7 +30,7 @@ export default async function PolitiquePage() {
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("contenu, statut, version_actuelle_id")
+    .select("contenu, statut, version_actuelle_id, created_by, approved_by, approved_at")
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -40,15 +40,20 @@ export default async function PolitiquePage() {
     .eq("tenant_id", tid)
     .order("created_at", { ascending: false });
 
-  // Noms des approbateurs
-  const approverIds = [...new Set((rawVersions ?? []).map((v) => v.approved_by).filter(Boolean))];
-  const { data: approvers } = approverIds.length
-    ? await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", approverIds as string[])
+  // Noms des intervenants (rédacteur + approbateurs)
+  const personIds = [
+    ...new Set(
+      [
+        politique?.created_by,
+        politique?.approved_by,
+        ...(rawVersions ?? []).map((v) => v.approved_by),
+      ].filter(Boolean),
+    ),
+  ] as string[];
+  const { data: persons } = personIds.length
+    ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
     : { data: [] };
-  const nameById = new Map((approvers ?? []).map((p) => [p.id, p.full_name ?? p.email]));
+  const nameById = new Map((persons ?? []).map((p) => [p.id, p.full_name ?? p.email]));
 
   const versions = (rawVersions ?? []).map((v) => ({
     id: v.id,
@@ -59,6 +64,13 @@ export default async function PolitiquePage() {
   }));
 
   const current = versions.find((v) => v.id === politique?.version_actuelle_id) ?? null;
+
+  const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
+  const canWrite = isApprover || ctx.role === "manager";
+  const drafterName = politique?.created_by ? (nameById.get(politique.created_by) ?? null) : null;
+  const approverName = politique?.approved_by
+    ? (nameById.get(politique.approved_by) ?? null)
+    : null;
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -74,6 +86,11 @@ export default async function PolitiquePage() {
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}
             currentVersionDate={current?.approvedAt ?? null}
+            canWrite={canWrite}
+            canApprove={isApprover}
+            drafterName={drafterName}
+            approverName={approverName}
+            approvedAt={politique?.approved_at ?? null}
           />
         </div>
 
