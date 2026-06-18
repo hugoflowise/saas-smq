@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -79,13 +80,21 @@ export default async function AuditsPage() {
               {items.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="font-mono text-muted-foreground text-xs">
-                    {a.reference}
+                    <Link href={`/audits/${a.id}`} className="hover:text-primary hover:underline">
+                      {a.reference}
+                    </Link>
                   </TableCell>
-                  <TableCell className="font-medium">{a.perimetre ?? "—"}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/audits/${a.id}`} className="hover:text-primary hover:underline">
+                      {a.perimetre ?? "À renseigner"}
+                    </Link>
+                  </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
                   <TableCell>{STATUT_LABELS[a.statut] ?? a.statut}</TableCell>
                   <TableCell>
-                    <AuditDialog audit={a} />
+                    <Link href={`/audits/${a.id}`} className="text-primary text-sm hover:underline">
+                      Ouvrir
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

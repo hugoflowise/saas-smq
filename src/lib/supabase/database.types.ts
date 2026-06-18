@@ -125,6 +125,52 @@ export type Database = {
           },
         ]
       }
+      audit_actions: {
+        Row: {
+          action_id: string
+          audit_id: string
+          created_at: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_id: string
+          audit_id: string
+          created_at?: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string
+          audit_id?: string
+          created_at?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_actions_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits_internes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string

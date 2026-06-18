@@ -16,6 +16,7 @@ async function tenantWrite() {
 // --------------------------------------------------------------- Audits
 const auditBase = {
   perimetre: z.string().trim().optional(),
+  processusAudites: z.array(z.string().uuid()).optional(),
   datePrevue: z.string().optional(),
   dateRealisee: z.string().optional(),
   dureePrevue: z.coerce.number().optional(),
@@ -29,6 +30,8 @@ const auditUpdate = z.object({ id: z.string().uuid(), ...auditBase });
 function auditPayload(d: z.infer<typeof auditCreate>) {
   return {
     perimetre: d.perimetre ?? null,
+    processus_audites:
+      d.processusAudites && d.processusAudites.length > 0 ? d.processusAudites : null,
     date_prevue: d.datePrevue || null,
     date_realisee: d.dateRealisee || null,
     duree_prevue: d.dureePrevue ?? null,
@@ -76,6 +79,76 @@ export async function updateAuditAction(input: unknown): Promise<ActionResult> {
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/audits");
+  return { ok: true };
+}
+
+// ---------------------------------------------- Écarts d'audit -> actions
+const createActionFromAudit = z.object({
+  auditId: z.string().uuid(),
+  descriptionCourte: z.string().trim().min(2, "Description requise."),
+  priorite: z.enum(["p1", "p2", "p3"]),
+  datePrevue: z.string().optional(),
+});
+
+export async function createActionFromAuditAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = createActionFromAudit.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+
+  const year = new Date().getFullYear();
+  const prefix = `ACT-${year}-`;
+  const { count } = await c.supabase
+    .from("actions")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", c.tenantId)
+    .ilike("reference", `${prefix}%`);
+  const reference = `${prefix}${String((count ?? 0) + 1).padStart(3, "0")}`;
+
+  const { data: action, error: actionError } = await c.supabase
+    .from("actions")
+    .insert({
+      tenant_id: c.tenantId,
+      reference,
+      description_courte: d.descriptionCourte,
+      origine: "audit_interne",
+      type: "corrective",
+      priorite: d.priorite,
+      date_prevue: d.datePrevue || null,
+      statut: "a_faire",
+      created_by: c.userId,
+    })
+    .select("id")
+    .single();
+  if (actionError || !action) {
+    return { ok: false, error: `Création de l'action impossible : ${actionError?.message}` };
+  }
+
+  const { error: linkError } = await c.supabase
+    .from("audit_actions")
+    .insert({ tenant_id: c.tenantId, audit_id: d.auditId, action_id: action.id });
+  if (linkError) return { ok: false, error: linkError.message };
+
+  revalidatePath(`/audits/${d.auditId}`);
+  revalidatePath("/actions");
+  return { ok: true };
+}
+
+export async function unlinkAuditActionAction(
+  auditId: string,
+  actionId: string,
+): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const { error } = await c.supabase
+    .from("audit_actions")
+    .delete()
+    .eq("tenant_id", c.tenantId)
+    .eq("audit_id", auditId)
+    .eq("action_id", actionId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/audits/${auditId}`);
   return { ok: true };
 }
 
