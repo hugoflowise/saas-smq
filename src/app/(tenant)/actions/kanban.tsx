@@ -25,6 +25,12 @@ function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : null;
 }
 
+const PRIORITE_BORDER: Record<string, string> = {
+  p1: "border-l-status-nc-mineure",
+  p2: "border-l-status-pa",
+  p3: "border-l-status-conforme",
+};
+
 function Card({
   action,
   processusOptions,
@@ -43,7 +49,7 @@ function Card({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative rounded-md border bg-card shadow-sm ${isDragging ? "opacity-50" : ""}`}
+      className={`relative rounded-md border border-l-4 bg-card shadow-sm ${PRIORITE_BORDER[action.priorite] ?? ""} ${isDragging ? "opacity-50" : ""}`}
     >
       <div
         {...listeners}
