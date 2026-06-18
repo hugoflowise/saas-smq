@@ -117,7 +117,6 @@ export default async function ActionsPage({
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Échéance</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -142,14 +141,6 @@ export default async function ActionsPage({
                     </span>
                   </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/actions/${a.id}`}
-                      className="text-primary text-sm hover:underline"
-                    >
-                      Ouvrir
-                    </Link>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

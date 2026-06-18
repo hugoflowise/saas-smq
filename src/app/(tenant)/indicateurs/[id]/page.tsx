@@ -22,10 +22,15 @@ function formatDate(d: string) {
 
 export default async function IndicateurDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const backHref = from?.startsWith("/") ? from : "/indicateurs";
+  const backLabel = from?.startsWith("/processus") ? "Retour au processus" : "Indicateurs";
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) redirect("/indicateurs");
 
@@ -57,11 +62,11 @@ export default async function IndicateurDetailPage({
   return (
     <div className="mx-auto w-full max-w-4xl">
       <Link
-        href="/indicateurs"
+        href={backHref}
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Indicateurs
+        {backLabel}
       </Link>
 
       <PageHeader title={ind.nom} description={ind.description ?? undefined} />
