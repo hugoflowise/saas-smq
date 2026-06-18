@@ -33,11 +33,22 @@ export default async function ProcessusPage() {
   const supabase = await createClient();
   const { data: processus } = await supabase
     .from("processus")
-    .select("id, nom, type, description")
+    .select("id, nom, type, description, date_prochaine_revue")
     .eq("tenant_id", ctx.effectiveTenantId)
     .order("ordre_affichage", { ascending: true });
 
   const items = processus ?? [];
+
+  const today = new Date().toISOString().slice(0, 10);
+  const horizon60 = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  /** "retard" | "bientot" | null selon la prochaine revue. */
+  function revueAlerte(date: string | null): "retard" | "bientot" | null {
+    if (!date) return null;
+    if (date < today) return "retard";
+    if (date <= horizon60) return "bientot";
+    return null;
+  }
+  const aReviser = items.filter((p) => revueAlerte(p.date_prochaine_revue) !== null).length;
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -49,6 +60,12 @@ export default async function ProcessusPage() {
       >
         <CreateProcessusDialog />
       </PageHeader>
+
+      {aReviser > 0 ? (
+        <div className="mb-4 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-2.5 text-sm text-status-pa">
+          {aReviser} processus à réviser (revue échue ou prévue sous 60 jours).
+        </div>
+      ) : null}
 
       {items.length === 0 ? (
         <EmptyState
@@ -77,7 +94,18 @@ export default async function ProcessusPage() {
                         href={`/processus/${p.id}`}
                         className="rounded-md border bg-surface px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
                       >
-                        <p className="font-medium">{p.nom}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-medium">{p.nom}</p>
+                          {revueAlerte(p.date_prochaine_revue) === "retard" ? (
+                            <span className="shrink-0 rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-[10px] text-status-nc-mineure">
+                              Revue en retard
+                            </span>
+                          ) : revueAlerte(p.date_prochaine_revue) === "bientot" ? (
+                            <span className="shrink-0 rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-[10px] text-status-pa">
+                              À réviser
+                            </span>
+                          ) : null}
+                        </div>
                         {p.description ? (
                           <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs">
                             {p.description}

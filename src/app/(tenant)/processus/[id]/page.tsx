@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { EditProcessusDialog } from "./edit-processus-dialog";
@@ -69,7 +70,9 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   const { data: processus } = await supabase
     .from("processus")
-    .select("id, nom, type, description, entrees, sorties, ressources_associees")
+    .select(
+      "id, nom, type, description, entrees, sorties, ressources_associees, date_derniere_revue, date_prochaine_revue",
+    )
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -174,6 +177,8 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               <Field label="Entrées" value={processus.entrees} />
               <Field label="Sorties" value={processus.sorties} />
               <Field label="Ressources associées" value={processus.ressources_associees} />
+              <Field label="Dernière revue" value={formatDate(processus.date_derniere_revue)} />
+              <Field label="Prochaine revue" value={formatDate(processus.date_prochaine_revue)} />
             </CardContent>
           </Card>
 
