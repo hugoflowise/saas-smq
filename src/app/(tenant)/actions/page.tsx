@@ -11,22 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
-import { formatDate } from "@/lib/format";
-import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
+import { EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
 import { ActionsKanban } from "./kanban";
 import { ViewToggle } from "./view-toggle";
-
-const STATUT_CLASS: Record<string, string> = {
-  a_faire: "bg-muted text-foreground",
-  en_cours: "bg-status-pf/15 text-status-pf",
-  termine: "bg-status-conforme/15 text-status-conforme",
-  bloquee: "bg-status-nc-mineure/15 text-status-nc-mineure",
-  abandonnee: "bg-muted text-muted-foreground",
-};
 
 export default async function ActionsPage({
   searchParams,
@@ -186,15 +177,15 @@ export default async function ActionsPage({
                       <span className="text-muted-foreground text-xs">—</span>
                     )}
                   </TableCell>
-                  <TableCell>{ACTION_PRIORITE_LABELS[a.priorite]}</TableCell>
                   <TableCell>
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${STATUT_CLASS[a.statut] ?? "bg-muted"}`}
-                    >
-                      {ACTION_STATUT_LABELS[a.statut]}
-                    </span>
+                    <PrioriteCell id={a.id} value={a.priorite} />
                   </TableCell>
-                  <TableCell>{formatDate(a.date_prevue)}</TableCell>
+                  <TableCell>
+                    <StatutCell id={a.id} value={a.statut} />
+                  </TableCell>
+                  <TableCell>
+                    <EcheanceCell id={a.id} value={a.date_prevue} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

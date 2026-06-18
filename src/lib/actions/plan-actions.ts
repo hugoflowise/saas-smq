@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+type ActionUpdate = Database["public"]["Tables"]["actions"]["Update"];
 
 const baseSchema = {
   descriptionCourte: z.string().trim().min(2, "Description requise."),
@@ -132,6 +134,43 @@ export async function setActionStatutAction(input: unknown): Promise<ActionResul
 
   if (error) return { ok: false, error: error.message };
 
+  revalidatePath("/actions");
+  return { ok: true };
+}
+
+const quickUpdateSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]).optional(),
+  priorite: z.enum(["p1", "p2", "p3"]).optional(),
+  datePrevue: z.string().optional(),
+});
+
+/** Mise à jour rapide d'un seul champ depuis le tableau (édition inline). */
+export async function quickUpdateActionAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = quickUpdateSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const patch: ActionUpdate = { updated_by: ctx.userId };
+  if (d.statut !== undefined) {
+    patch.statut = d.statut;
+    patch.date_effective = d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null;
+  }
+  if (d.priorite !== undefined) patch.priorite = d.priorite;
+  if (d.datePrevue !== undefined) patch.date_prevue = d.datePrevue || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("actions")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/actions");
   return { ok: true };
 }
