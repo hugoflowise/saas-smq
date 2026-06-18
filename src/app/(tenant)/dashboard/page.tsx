@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
   const today = new Date().toISOString().slice(0, 10);
+  const horizon = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   // Conformité ISO
   const { count: refTotal } = await supabase
@@ -105,6 +107,73 @@ export default async function DashboardPage() {
 
   const retard = actionsRetard ?? [];
 
+  // Échéances à venir (30 jours) : agrégation audits / revues / R&O / actions
+  const [auditsAvenir, revuesAvenir, roAvenir, actionsAvenir] = await Promise.all([
+    supabase
+      .from("audits_internes")
+      .select("id, reference, type_audit, perimetre, organisme, date_prevue")
+      .eq("tenant_id", tid)
+      .neq("statut", "cloture")
+      .gte("date_prevue", today)
+      .lte("date_prevue", horizon),
+    supabase
+      .from("revues_direction")
+      .select("id, annee, date_realisation")
+      .eq("tenant_id", tid)
+      .neq("statut", "cloturee")
+      .gte("date_realisation", today)
+      .lte("date_realisation", horizon),
+    supabase
+      .from("risques_opportunites")
+      .select("id, intitule, date_revue")
+      .eq("tenant_id", tid)
+      .neq("statut", "cloture")
+      .gte("date_revue", today)
+      .lte("date_revue", horizon),
+    supabase
+      .from("actions")
+      .select("id, reference, description_courte, date_prevue")
+      .eq("tenant_id", tid)
+      .in("statut", ACTIONS_ACTIVES)
+      .gte("date_prevue", today)
+      .lte("date_prevue", horizon),
+  ]);
+
+  type Echeance = { date: string; label: string; href: string };
+  const echeances: Echeance[] = [];
+  for (const a of auditsAvenir.data ?? []) {
+    const t =
+      AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? "";
+    echeances.push({
+      date: a.date_prevue as string,
+      label: `Audit ${t} — ${a.perimetre ?? a.organisme ?? a.reference}`,
+      href: `/audits/${a.id}`,
+    });
+  }
+  for (const r of revuesAvenir.data ?? []) {
+    echeances.push({
+      date: r.date_realisation as string,
+      label: `Revue de direction ${r.annee}`,
+      href: "/revues/direction",
+    });
+  }
+  for (const r of roAvenir.data ?? []) {
+    echeances.push({
+      date: r.date_revue as string,
+      label: `Revue R&O — ${r.intitule}`,
+      href: `/risques/${r.id}`,
+    });
+  }
+  for (const a of actionsAvenir.data ?? []) {
+    echeances.push({
+      date: a.date_prevue as string,
+      label: `Action — ${a.description_courte}`,
+      href: `/actions/${a.id}`,
+    });
+  }
+  echeances.sort((a, b) => a.date.localeCompare(b.date));
+  const echeancesAvenir = echeances.slice(0, 7);
+
   const stats: { label: string; value: string | number; href: string; cls?: string }[] = [
     {
       label: "Conformité ISO",
@@ -148,35 +217,75 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Actions en retard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {retard.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucune action en retard. 👍</p>
-          ) : (
-            <ul className="flex flex-col divide-y">
-              {retard.map((a) => (
-                <li key={a.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                  <span className="min-w-0 truncate">
-                    <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
-                    {a.description_courte}
-                  </span>
-                  <span className="shrink-0 text-status-nc-mineure text-xs">
-                    échéance {formatDate(a.date_prevue)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="mt-3">
-            <Link href="/actions" className="text-primary text-sm hover:underline">
-              Voir le plan d'actions →
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Actions en retard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {retard.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Aucune action en retard. 👍</p>
+            ) : (
+              <ul className="flex flex-col divide-y">
+                {retard.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                    <Link
+                      href={`/actions/${a.id}`}
+                      className="min-w-0 truncate hover:text-primary hover:underline"
+                    >
+                      <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
+                      {a.description_courte}
+                    </Link>
+                    <span className="shrink-0 text-status-nc-mineure text-xs">
+                      échéance {formatDate(a.date_prevue)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-3">
+              <Link href="/actions" className="text-primary text-sm hover:underline">
+                Voir le plan d'actions →
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Échéances à venir (30 jours)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {echeancesAvenir.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Aucune échéance dans les 30 jours.</p>
+            ) : (
+              <ul className="flex flex-col divide-y">
+                {echeancesAvenir.map((e) => (
+                  <li
+                    key={`${e.href}-${e.date}`}
+                    className="flex items-center justify-between gap-3 py-2 text-sm"
+                  >
+                    <Link
+                      href={e.href}
+                      className="min-w-0 truncate hover:text-primary hover:underline"
+                    >
+                      {e.label}
+                    </Link>
+                    <span className="shrink-0 text-muted-foreground text-xs">
+                      {formatDate(e.date)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-3">
+              <Link href="/calendrier" className="text-primary text-sm hover:underline">
+                Voir le calendrier qualité →
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
