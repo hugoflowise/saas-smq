@@ -62,7 +62,7 @@ export async function savePolitiqueContenuAction(contenu: Json): Promise<ActionR
       });
 
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/strategie/politique");
+  // Pas de revalidatePath ici : éviter de rafraîchir la page pendant la frappe.
   return { ok: true };
 }
 
