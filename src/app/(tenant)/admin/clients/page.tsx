@@ -35,7 +35,7 @@ export default async function AdminClientsPage() {
   const admin = createAdminClient();
   const { data: tenants } = await admin
     .from("tenants")
-    .select("id, nom_societe, formule, statut, effectif_tranche, secteur, created_at")
+    .select("id, nom_societe, formule, statut, effectif_tranche, secteur, logo_url, created_at")
     .order("created_at", { ascending: false });
 
   // Dirigeant de chaque tenant
@@ -97,6 +97,7 @@ export default async function AdminClientsPage() {
                           nom_societe: t.nom_societe,
                           effectif_tranche: t.effectif_tranche,
                           secteur: t.secteur,
+                          logo_url: t.logo_url,
                         }}
                         dirigeant={
                           dirigeant

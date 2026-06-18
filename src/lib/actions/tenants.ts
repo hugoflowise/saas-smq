@@ -178,6 +178,43 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
   return { ok: true };
 }
 
+export async function uploadTenantLogoAction(formData: FormData): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const tenantId = String(formData.get("tenantId") ?? "");
+  const file = formData.get("file");
+  if (!tenantId || !(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Fichier manquant." };
+  }
+  if (!file.type.startsWith("image/")) {
+    return { ok: false, error: "Le logo doit être une image (PNG, JPG, SVG…)." };
+  }
+  if (file.size > 2_000_000) {
+    return { ok: false, error: "Image trop lourde (max 2 Mo)." };
+  }
+
+  const admin = createAdminClient();
+  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+  const path = `${tenantId}/logo-${Date.now()}.${ext}`;
+  const bytes = await file.arrayBuffer();
+
+  const { error: uploadError } = await admin.storage
+    .from("tenant-assets")
+    .upload(path, bytes, { contentType: file.type, upsert: true });
+  if (uploadError) return { ok: false, error: `Upload impossible : ${uploadError.message}` };
+
+  const {
+    data: { publicUrl },
+  } = admin.storage.from("tenant-assets").getPublicUrl(path);
+
+  const { error } = await admin.from("tenants").update({ logo_url: publicUrl }).eq("id", tenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
 export async function switchTenantAction(tenantId: string): Promise<ActionResult> {
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
