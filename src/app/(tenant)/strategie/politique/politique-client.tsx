@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -135,6 +136,14 @@ export function PolitiqueClient({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            render={
+              <Link href="/print/politique" target="_blank">
+                Aperçu / PDF
+              </Link>
+            }
+          />
           {editable ? (
             <>
               {saved ? (

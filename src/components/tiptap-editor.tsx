@@ -20,12 +20,19 @@ type Props = {
   content: JSONContent | null;
   editable: boolean;
   onChange?: (content: JSONContent) => void;
+  /** Rendu document, sans cadre d'éditeur (pour l'aperçu/impression). */
+  bare?: boolean;
 };
 
 const PROSE_CLASS = cn(
   "prose prose-sm max-w-none rounded-lg border bg-card px-4 py-3",
   "prose-headings:font-semibold prose-a:text-primary",
   "[&_.ProseMirror]:min-h-64 [&_.ProseMirror]:outline-none",
+);
+
+const BARE_CLASS = cn(
+  "prose max-w-none prose-headings:font-semibold prose-a:text-primary",
+  "[&_.ProseMirror]:outline-none",
 );
 
 function ToolbarButton({
@@ -55,7 +62,7 @@ function ToolbarButton({
   );
 }
 
-export function TiptapEditor({ content, editable, onChange }: Props) {
+export function TiptapEditor({ content, editable, onChange, bare = false }: Props) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: content ?? "",
@@ -128,7 +135,7 @@ export function TiptapEditor({ content, editable, onChange }: Props) {
           </ToolbarButton>
         </div>
       ) : null}
-      <EditorContent editor={editor} className={PROSE_CLASS} />
+      <EditorContent editor={editor} className={bare ? BARE_CLASS : PROSE_CLASS} />
     </div>
   );
 }
