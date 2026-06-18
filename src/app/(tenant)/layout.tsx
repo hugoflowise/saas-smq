@@ -61,7 +61,7 @@ export default async function TenantLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="flex flex-1">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar isAdmin={isAdmin} />
       <div className="flex flex-1 flex-col">
         <TopBar

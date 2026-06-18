@@ -29,6 +29,8 @@ export function AuditDialog() {
     setPending(true);
     const f = new FormData(event.currentTarget);
     const result = await createAuditAction({
+      typeAudit: f.get("typeAudit"),
+      organisme: f.get("organisme") || undefined,
       datePrevue: f.get("datePrevue") || undefined,
       dureePrevue: f.get("dureePrevue") || undefined,
       statut: f.get("statut"),
@@ -48,12 +50,28 @@ export function AuditDialog() {
       <DialogTrigger render={<Button>Nouvel audit</Button>} />
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Planifier un audit interne</DialogTitle>
+          <DialogTitle>Planifier un audit</DialogTitle>
           <DialogDescription>
             Le périmètre, le rapport et les écarts se renseignent ensuite sur la fiche de l'audit.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="typeAudit">Type d'audit</Label>
+            <select id="typeAudit" name="typeAudit" className={SELECT_CLASS} defaultValue="interne">
+              <option value="interne">Interne</option>
+              <option value="externe">Externe (certification / client)</option>
+              <option value="fournisseur">Fournisseur</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="organisme">Organisme</Label>
+            <Input
+              id="organisme"
+              name="organisme"
+              placeholder="Certificateur, client ou fournisseur (optionnel)"
+            />
+          </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="datePrevue">Date prévue</Label>
             <Input id="datePrevue" name="datePrevue" type="date" />

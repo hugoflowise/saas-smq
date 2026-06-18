@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ACTION_STATUT_LABELS } from "@/lib/labels";
+import { type ACTION_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AuditActions } from "./audit-actions";
@@ -20,7 +20,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
   const { data: audit } = await supabase
     .from("audits_internes")
     .select(
-      "id, reference, perimetre, processus_audites, date_prevue, date_realisee, duree_prevue, statut, rapport, ecarts_constates",
+      "id, reference, type_audit, organisme, perimetre, processus_audites, date_prevue, date_realisee, duree_prevue, statut, rapport, ecarts_constates",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -55,10 +55,15 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Audits internes
+        Audits
       </Link>
 
-      <PageHeader title={`Audit ${audit.reference}`} description="Fiche d'audit interne." />
+      <PageHeader
+        title={`Audit ${audit.reference}`}
+        description={`Audit ${AUDIT_TYPE_LABELS[audit.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""}${
+          audit.organisme ? ` — ${audit.organisme}` : ""
+        }`}
+      />
 
       <Card className="mb-6">
         <CardContent className="pt-6">

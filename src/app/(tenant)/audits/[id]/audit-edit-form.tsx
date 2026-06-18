@@ -14,6 +14,8 @@ const SELECT_CLASS =
 
 export type AuditDetail = {
   id: string;
+  type_audit: string;
+  organisme: string | null;
   perimetre: string | null;
   processus_audites: string[] | null;
   date_prevue: string | null;
@@ -41,6 +43,8 @@ export function AuditEditForm({
     const f = new FormData(event.currentTarget);
     const result = await updateAuditAction({
       id: audit.id,
+      typeAudit: f.get("typeAudit"),
+      organisme: f.get("organisme") || undefined,
       perimetre: f.get("perimetre") || undefined,
       processusAudites: f.getAll("processusAudites").map(String),
       datePrevue: f.get("datePrevue") || undefined,
@@ -61,6 +65,31 @@ export function AuditEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="typeAudit">Type d'audit</Label>
+          <select
+            id="typeAudit"
+            name="typeAudit"
+            className={SELECT_CLASS}
+            defaultValue={audit.type_audit}
+          >
+            <option value="interne">Interne</option>
+            <option value="externe">Externe (certification / client)</option>
+            <option value="fournisseur">Fournisseur</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-2 sm:col-span-2">
+          <Label htmlFor="organisme">Organisme</Label>
+          <Input
+            id="organisme"
+            name="organisme"
+            defaultValue={audit.organisme ?? ""}
+            placeholder="Certificateur, client ou fournisseur (optionnel)"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="statut">Statut</Label>

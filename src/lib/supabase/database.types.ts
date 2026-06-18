@@ -230,12 +230,14 @@ export type Database = {
           duree_prevue: number | null
           ecarts_constates: string | null
           id: string
+          organisme: string | null
           perimetre: string | null
           processus_audites: string[] | null
           rapport: string | null
           reference: string
           statut: Database["public"]["Enums"]["audit_statut"]
           tenant_id: string
+          type_audit: Database["public"]["Enums"]["audit_type"]
           updated_at: string
           updated_by: string | null
         }
@@ -249,12 +251,14 @@ export type Database = {
           duree_prevue?: number | null
           ecarts_constates?: string | null
           id?: string
+          organisme?: string | null
           perimetre?: string | null
           processus_audites?: string[] | null
           rapport?: string | null
           reference: string
           statut?: Database["public"]["Enums"]["audit_statut"]
           tenant_id: string
+          type_audit?: Database["public"]["Enums"]["audit_type"]
           updated_at?: string
           updated_by?: string | null
         }
@@ -268,12 +272,14 @@ export type Database = {
           duree_prevue?: number | null
           ecarts_constates?: string | null
           id?: string
+          organisme?: string | null
           perimetre?: string | null
           processus_audites?: string[] | null
           rapport?: string | null
           reference?: string
           statut?: Database["public"]["Enums"]["audit_statut"]
           tenant_id?: string
+          type_audit?: Database["public"]["Enums"]["audit_type"]
           updated_at?: string
           updated_by?: string | null
         }
@@ -1844,6 +1850,7 @@ export type Database = {
         | "realise"
         | "rapport_redige"
         | "cloture"
+      audit_type: "interne" | "externe" | "fournisseur"
       cotation_conformite:
         | "non_evalue"
         | "conforme"
@@ -2090,6 +2097,7 @@ export const Constants = {
         "rapport_redige",
         "cloture",
       ],
+      audit_type: ["interne", "externe", "fournisseur"],
       cotation_conformite: [
         "non_evalue",
         "conforme",
