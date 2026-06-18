@@ -138,6 +138,7 @@ export function ProcedureClient({
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            nativeButton={false}
             render={
               <Link href={`/print/procedure/${id}`} target="_blank">
                 Aperçu / PDF
