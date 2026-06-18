@@ -48,6 +48,8 @@ const updateProcessusSchema = z.object({
   entrees: z.string().trim().optional(),
   sorties: z.string().trim().optional(),
   ressourcesAssociees: z.string().trim().optional(),
+  dateDerniereRevue: z.string().optional(),
+  dateProchaineRevue: z.string().optional(),
 });
 
 export async function updateProcessusAction(input: unknown): Promise<ActionResult> {
@@ -71,6 +73,8 @@ export async function updateProcessusAction(input: unknown): Promise<ActionResul
       entrees: data.entrees ?? null,
       sorties: data.sorties ?? null,
       ressources_associees: data.ressourcesAssociees ?? null,
+      date_derniere_revue: data.dateDerniereRevue || null,
+      date_prochaine_revue: data.dateProchaineRevue || null,
       updated_by: ctx.userId,
     })
     .eq("id", data.id)
