@@ -69,3 +69,17 @@ export const NC_STATUT_LABELS = {
 } as const;
 
 export const NC_STATUTS = Object.keys(NC_STATUT_LABELS) as (keyof typeof NC_STATUT_LABELS)[];
+
+export const AUDIT_TYPE_LABELS = {
+  interne: "Interne",
+  externe: "Externe",
+  fournisseur: "Fournisseur",
+} as const;
+
+export const AUDIT_STATUT_LABELS = {
+  planifie: "Planifié",
+  en_cours: "En cours",
+  realise: "Réalisé",
+  rapport_redige: "Rapport rédigé",
+  cloture: "Clôturé",
+} as const;

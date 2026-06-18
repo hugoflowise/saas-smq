@@ -9,28 +9,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AUDIT_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AuditDialog } from "./audit-dialog";
 
-const STATUT_LABELS: Record<string, string> = {
-  planifie: "Planifié",
-  en_cours: "En cours",
-  realise: "Réalisé",
-  rapport_redige: "Rapport rédigé",
-  cloture: "Clôturé",
+const TYPE_BADGE: Record<string, string> = {
+  interne: "bg-sky-100 text-sky-700",
+  externe: "bg-amber-100 text-amber-700",
+  fournisseur: "bg-violet-100 text-violet-700",
 };
+
+const FILTERS = [
+  { value: "tous", label: "Tous" },
+  { value: "interne", label: "Internes" },
+  { value: "externe", label: "Externes" },
+  { value: "fournisseur", label: "Fournisseurs" },
+] as const;
 
 function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
 }
 
-export default async function AuditsPage() {
+export default async function AuditsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type } = await searchParams;
+  const activeType = FILTERS.some((f) => f.value === type) ? type : "tous";
+
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) {
     return (
       <div className="mx-auto w-full max-w-5xl">
-        <PageHeader title="Audits internes" description="Planification et rapports d'audit." />
+        <PageHeader title="Audits" description="Planification et rapports d'audit." />
         <EmptyState
           title="Aucun client sélectionné"
           description="Choisissez un client dans le sélecteur en haut."
@@ -40,29 +53,51 @@ export default async function AuditsPage() {
   }
 
   const supabase = await createClient();
-  const { data: audits } = await supabase
+  let query = supabase
     .from("audits_internes")
     .select(
-      "id, reference, perimetre, date_prevue, date_realisee, duree_prevue, statut, rapport, ecarts_constates",
+      "id, reference, type_audit, organisme, perimetre, date_prevue, date_realisee, duree_prevue, statut",
     )
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("date_prevue", { ascending: false, nullsFirst: false });
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (activeType !== "tous") {
+    query = query.eq("type_audit", activeType as "interne" | "externe" | "fournisseur");
+  }
+  const { data: audits } = await query.order("date_prevue", {
+    ascending: false,
+    nullsFirst: false,
+  });
 
   const items = audits ?? [];
 
   return (
     <div className="mx-auto w-full max-w-5xl">
       <PageHeader
-        title="Audits internes"
-        description="Planification et rapports d'audit (ISO 9001 §9.2)."
+        title="Audits"
+        description="Audits internes (ISO 9001 §9.2), externes (certification/client) et fournisseurs."
       >
         <AuditDialog />
       </PageHeader>
 
+      <div className="mb-4 flex gap-1 rounded-lg border bg-card p-1">
+        {FILTERS.map((f) => (
+          <Link
+            key={f.value}
+            href={f.value === "tous" ? "/audits" : `/audits?type=${f.value}`}
+            className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
+              activeType === f.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {f.label}
+          </Link>
+        ))}
+      </div>
+
       {items.length === 0 ? (
         <EmptyState
           title="Aucun audit"
-          description="Planifiez un audit interne : tous les processus doivent être audités sur 3 ans."
+          description="Planifiez un audit : tous les processus doivent être audités en interne sur 3 ans."
         />
       ) : (
         <div className="rounded-lg border bg-card">
@@ -70,10 +105,10 @@ export default async function AuditsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Réf.</TableHead>
-                <TableHead>Périmètre</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Périmètre / Organisme</TableHead>
                 <TableHead>Date prévue</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -84,17 +119,24 @@ export default async function AuditsPage() {
                       {a.reference}
                     </Link>
                   </TableCell>
+                  <TableCell>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${
+                        TYPE_BADGE[a.type_audit] ?? "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS] ??
+                        a.type_audit}
+                    </span>
+                  </TableCell>
                   <TableCell className="font-medium">
                     <Link href={`/audits/${a.id}`} className="hover:text-primary hover:underline">
-                      {a.perimetre ?? "À renseigner"}
+                      {a.perimetre ?? a.organisme ?? "À renseigner"}
                     </Link>
                   </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
-                  <TableCell>{STATUT_LABELS[a.statut] ?? a.statut}</TableCell>
                   <TableCell>
-                    <Link href={`/audits/${a.id}`} className="text-primary text-sm hover:underline">
-                      Ouvrir
-                    </Link>
+                    {AUDIT_STATUT_LABELS[a.statut as keyof typeof AUDIT_STATUT_LABELS] ?? a.statut}
                   </TableCell>
                 </TableRow>
               ))}

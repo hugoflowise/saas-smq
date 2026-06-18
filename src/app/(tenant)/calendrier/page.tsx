@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { type CalEvent, CalendrierClient } from "./calendrier-client";
@@ -24,7 +25,7 @@ export default async function CalendrierPage() {
   const [audits, revues, actions, ros] = await Promise.all([
     supabase
       .from("audits_internes")
-      .select("id, reference, perimetre, date_prevue")
+      .select("id, reference, type_audit, perimetre, organisme, date_prevue")
       .eq("tenant_id", tid)
       .not("date_prevue", "is", null),
     supabase
@@ -49,7 +50,7 @@ export default async function CalendrierPage() {
   for (const a of audits.data ?? []) {
     events.push({
       date: a.date_prevue as string,
-      label: `Audit interne — ${a.perimetre ?? a.reference}`,
+      label: `Audit ${AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""} — ${a.perimetre ?? a.organisme ?? a.reference}`,
       type: "Audit",
       href: `/audits/${a.id}`,
     });

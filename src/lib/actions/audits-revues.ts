@@ -15,6 +15,8 @@ async function tenantWrite() {
 
 // --------------------------------------------------------------- Audits
 const auditBase = {
+  typeAudit: z.enum(["interne", "externe", "fournisseur"]).default("interne"),
+  organisme: z.string().trim().optional(),
   perimetre: z.string().trim().optional(),
   processusAudites: z.array(z.string().uuid()).optional(),
   datePrevue: z.string().optional(),
@@ -27,8 +29,17 @@ const auditBase = {
 const auditCreate = z.object(auditBase);
 const auditUpdate = z.object({ id: z.string().uuid(), ...auditBase });
 
+/** Préfixe de référence selon le type d'audit. */
+const AUDIT_PREFIX: Record<string, string> = {
+  interne: "AI",
+  externe: "AE",
+  fournisseur: "AF",
+};
+
 function auditPayload(d: z.infer<typeof auditCreate>) {
   return {
+    type_audit: d.typeAudit,
+    organisme: d.organisme ?? null,
     perimetre: d.perimetre ?? null,
     processus_audites:
       d.processusAudites && d.processusAudites.length > 0 ? d.processusAudites : null,
@@ -48,7 +59,7 @@ export async function createAuditAction(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
 
   const year = new Date().getFullYear();
-  const prefix = `AI-${year}-`;
+  const prefix = `${AUDIT_PREFIX[parsed.data.typeAudit]}-${year}-`;
   const { count } = await c.supabase
     .from("audits_internes")
     .select("id", { count: "exact", head: true })
