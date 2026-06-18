@@ -9,17 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDate } from "@/lib/format";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ObjEcheanceCell, ObjStatutCell, ObjValeurActuelleCell } from "./inline-cells";
 import { ObjectifDialog } from "./objectif-dialog";
-
-const STATUT_LABELS: Record<string, string> = {
-  actif: "Actif",
-  atteint: "Atteint",
-  abandonne: "Abandonné",
-};
 
 function progressClass(pct: number) {
   if (pct >= 100) return "bg-status-conforme";
@@ -138,20 +132,29 @@ export default async function ObjectifsPage() {
                     {o.processus_id ? (processusNom.get(o.processus_id) ?? "—") : "—"}
                   </TableCell>
                   <TableCell>
-                    {o.pct !== null ? (
+                    {o.valeur_cible !== null ? (
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">
-                            {o.valeur_actuelle} / {o.valeur_cible} {o.unite ?? ""}
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="flex items-center gap-1">
+                            <ObjValeurActuelleCell
+                              id={o.id}
+                              value={o.valeur_actuelle}
+                              unite={o.unite}
+                            />
+                            <span className="text-muted-foreground">
+                              / {o.valeur_cible} {o.unite ?? ""}
+                            </span>
                           </span>
-                          <span className="font-medium">{o.pct}%</span>
+                          {o.pct !== null ? <span className="font-medium">{o.pct}%</span> : null}
                         </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className={`h-full rounded-full ${progressClass(o.pct)}`}
-                            style={{ width: `${o.pct}%` }}
-                          />
-                        </div>
+                        {o.pct !== null ? (
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                            <div
+                              className={`h-full rounded-full ${progressClass(o.pct)}`}
+                              style={{ width: `${o.pct}%` }}
+                            />
+                          </div>
+                        ) : null}
                       </div>
                     ) : (
                       <div className="flex flex-col gap-0.5 text-xs">
@@ -159,13 +162,17 @@ export default async function ObjectifsPage() {
                           <span className="text-muted-foreground">Cible : {o.cible_chiffree}</span>
                         ) : null}
                         <span className="text-status-pa">
-                          À chiffrer — renseignez valeur actuelle &amp; cible
+                          À chiffrer — ouvrez l'objectif pour définir la cible
                         </span>
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{formatDate(o.echeance)}</TableCell>
-                  <TableCell>{STATUT_LABELS[o.statut] ?? o.statut}</TableCell>
+                  <TableCell>
+                    <ObjEcheanceCell id={o.id} value={o.echeance} />
+                  </TableCell>
+                  <TableCell>
+                    <ObjStatutCell id={o.id} value={o.statut} />
+                  </TableCell>
                   <TableCell>
                     <ObjectifDialog objectif={o} processusOptions={processusOptions} />
                   </TableCell>

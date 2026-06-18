@@ -143,6 +143,17 @@ const quickUpdateSchema = z.object({
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]).optional(),
   priorite: z.enum(["p1", "p2", "p3"]).optional(),
   datePrevue: z.string().optional(),
+  cotation: z
+    .enum([
+      "non_evalue",
+      "conforme",
+      "point_fort",
+      "point_attention",
+      "nc_mineure",
+      "nc_majeure",
+      "non_applicable",
+    ])
+    .optional(),
 });
 
 /** Mise à jour rapide d'un seul champ depuis le tableau (édition inline). */
@@ -162,6 +173,7 @@ export async function quickUpdateActionAction(input: unknown): Promise<ActionRes
   }
   if (d.priorite !== undefined) patch.priorite = d.priorite;
   if (d.datePrevue !== undefined) patch.date_prevue = d.datePrevue || null;
+  if (d.cotation !== undefined) patch.cotation = d.cotation;
 
   const supabase = await createClient();
   const { error } = await supabase

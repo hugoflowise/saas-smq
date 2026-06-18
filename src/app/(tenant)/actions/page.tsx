@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -10,12 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
-import { EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
+import { CotationCell, EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
 import { ActionsKanban } from "./kanban";
 import { ViewToggle } from "./view-toggle";
 
@@ -101,7 +99,7 @@ export default async function ActionsPage({
   const options = processusOptions ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="w-full">
       <PageHeader
         title="Plan d'actions"
         description="Suivi des actions d'amélioration, correctives et préventives."
@@ -167,15 +165,7 @@ export default async function ActionsPage({
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {a.cotation && a.cotation !== "non_evalue" ? (
-                      <span
-                        className={`${BADGE_BASE} ${COTATION_BADGE_CLASS[a.cotation] ?? "bg-muted"}`}
-                      >
-                        {COTATION_LABELS[a.cotation as keyof typeof COTATION_LABELS]}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
+                    <CotationCell id={a.id} value={a.cotation} />
                   </TableCell>
                   <TableCell>
                     <PrioriteCell id={a.id} value={a.priorite} />
