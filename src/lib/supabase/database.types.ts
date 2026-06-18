@@ -377,10 +377,13 @@ export type Database = {
       }
       politique_qualite: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           contenu: Json | null
           created_at: string
           created_by: string | null
           id: string
+          signature_data: Json | null
           statut: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           updated_at: string
@@ -388,10 +391,13 @@ export type Database = {
           version_actuelle_id: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
           id?: string
+          signature_data?: Json | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           updated_at?: string
@@ -399,10 +405,13 @@ export type Database = {
           version_actuelle_id?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
           id?: string
+          signature_data?: Json | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id?: string
           updated_at?: string
@@ -410,6 +419,13 @@ export type Database = {
           version_actuelle_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "politique_qualite_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "politique_qualite_created_by_fkey"
             columns: ["created_by"]
