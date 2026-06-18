@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,7 +144,11 @@ export default async function RisquesPage() {
             <TableBody>
               {items.map((r) => (
                 <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.intitule}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/risques/${r.id}`} className="hover:text-primary hover:underline">
+                      {r.intitule}
+                    </Link>
+                  </TableCell>
                   <TableCell>{TYPE_LABELS[r.type] ?? r.type}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {r.gravite} × {r.probabilite}

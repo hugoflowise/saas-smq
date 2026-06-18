@@ -1679,6 +1679,52 @@ export type Database = {
           },
         ]
       }
+      ro_actions: {
+        Row: {
+          action_id: string
+          created_at: string
+          id: string
+          ro_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          id?: string
+          ro_id: string
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          id?: string
+          ro_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ro_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ro_actions_ro_id_fkey"
+            columns: ["ro_id"]
+            isOneToOne: false
+            referencedRelation: "risques_opportunites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ro_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           boond_account_id: string | null
