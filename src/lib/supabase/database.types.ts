@@ -173,6 +173,159 @@ export type Database = {
           },
         ]
       }
+      indicateurs: {
+        Row: {
+          boond_endpoint: string | null
+          cible: number | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          formule_calcul: string | null
+          frequence_mesure: Database["public"]["Enums"]["indicateur_frequence"]
+          id: string
+          nom: string
+          processus_id: string | null
+          seuil_alerte_max: number | null
+          seuil_alerte_min: number | null
+          source: Database["public"]["Enums"]["indicateur_source"]
+          tenant_id: string
+          type: Database["public"]["Enums"]["indicateur_type"]
+          unite: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          boond_endpoint?: string | null
+          cible?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          formule_calcul?: string | null
+          frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
+          id?: string
+          nom: string
+          processus_id?: string | null
+          seuil_alerte_max?: number | null
+          seuil_alerte_min?: number | null
+          source?: Database["public"]["Enums"]["indicateur_source"]
+          tenant_id: string
+          type?: Database["public"]["Enums"]["indicateur_type"]
+          unite?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          boond_endpoint?: string | null
+          cible?: number | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          formule_calcul?: string | null
+          frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
+          id?: string
+          nom?: string
+          processus_id?: string | null
+          seuil_alerte_max?: number | null
+          seuil_alerte_min?: number | null
+          source?: Database["public"]["Enums"]["indicateur_source"]
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["indicateur_type"]
+          unite?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicateurs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicateurs_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicateurs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicateurs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicateurs_valeurs: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_mesure: string
+          id: string
+          indicateur_id: string
+          source_donnees: Json | null
+          tenant_id: string
+          valeur: number
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_mesure?: string
+          id?: string
+          indicateur_id: string
+          source_donnees?: Json | null
+          tenant_id: string
+          valeur: number
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_mesure?: string
+          id?: string
+          indicateur_id?: string
+          source_donnees?: Json | null
+          tenant_id?: string
+          valeur?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicateurs_valeurs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicateurs_valeurs_indicateur_id_fkey"
+            columns: ["indicateur_id"]
+            isOneToOne: false
+            referencedRelation: "indicateurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicateurs_valeurs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nc_actions: {
         Row: {
           action_id: string
@@ -893,6 +1046,14 @@ export type Database = {
         | "publiee"
         | "archivee"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
+      indicateur_frequence:
+        | "quotidien"
+        | "hebdo"
+        | "mensuel"
+        | "trimestriel"
+        | "annuel"
+      indicateur_source: "manuel" | "boondmanager" | "calcul"
+      indicateur_type: "numeric" | "percentage" | "count" | "duration"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_origine:
         | "audit_interne"
@@ -1081,6 +1242,15 @@ export const Constants = {
         "archivee",
       ],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
+      indicateur_frequence: [
+        "quotidien",
+        "hebdo",
+        "mensuel",
+        "trimestriel",
+        "annuel",
+      ],
+      indicateur_source: ["manuel", "boondmanager", "calcul"],
+      indicateur_type: ["numeric", "percentage", "count", "duration"],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_origine: [
         "audit_interne",
