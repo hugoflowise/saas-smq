@@ -9,17 +9,17 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { setActionStatutAction } from "@/lib/actions/plan-actions";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS, ACTION_STATUTS } from "@/lib/labels";
-import { ActionDialog, type ActionRow } from "./action-dialog";
+import type { ActionRow } from "./action-dialog";
 
 type Statut = (typeof ACTION_STATUTS)[number];
 
 export type KanbanAction = ActionRow & { reference: string };
-
-type ProcessusOption = { id: string; nom: string };
 
 function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : null;
@@ -31,13 +31,7 @@ const PRIORITE_BORDER: Record<string, string> = {
   p3: "border-l-status-conforme",
 };
 
-function Card({
-  action,
-  processusOptions,
-}: {
-  action: KanbanAction;
-  processusOptions: ProcessusOption[];
-}) {
+function Card({ action }: { action: KanbanAction }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: action.id,
   });
@@ -69,22 +63,19 @@ function Card({
           ) : null}
         </div>
       </div>
-      <div className="absolute top-1 right-1" onPointerDown={(e) => e.stopPropagation()}>
-        <ActionDialog action={action} processusOptions={processusOptions} />
-      </div>
+      <Link
+        href={`/actions/${action.id}`}
+        aria-label="Ouvrir la fiche"
+        onPointerDown={(e) => e.stopPropagation()}
+        className="absolute top-1.5 right-1.5 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+      >
+        <ArrowUpRight className="size-4" />
+      </Link>
     </div>
   );
 }
 
-function Column({
-  statut,
-  actions,
-  processusOptions,
-}: {
-  statut: Statut;
-  actions: KanbanAction[];
-  processusOptions: ProcessusOption[];
-}) {
+function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
     <div className="flex w-72 shrink-0 flex-col">
@@ -98,20 +89,14 @@ function Column({
         }`}
       >
         {actions.map((a) => (
-          <Card key={a.id} action={a} processusOptions={processusOptions} />
+          <Card key={a.id} action={a} />
         ))}
       </div>
     </div>
   );
 }
 
-export function ActionsKanban({
-  initial,
-  processusOptions,
-}: {
-  initial: KanbanAction[];
-  processusOptions: ProcessusOption[];
-}) {
+export function ActionsKanban({ initial }: { initial: KanbanAction[] }) {
   const [items, setItems] = useState(initial);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -137,12 +122,7 @@ export function ActionsKanban({
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {ACTION_STATUTS.map((statut) => (
-          <Column
-            key={statut}
-            statut={statut}
-            actions={items.filter((a) => a.statut === statut)}
-            processusOptions={processusOptions}
-          />
+          <Column key={statut} statut={statut} actions={items.filter((a) => a.statut === statut)} />
         ))}
       </div>
     </DndContext>

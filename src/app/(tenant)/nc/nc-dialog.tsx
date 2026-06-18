@@ -53,9 +53,11 @@ function Opts({ map }: { map: Record<string, string> }) {
 export function NcDialog({
   processusOptions,
   nc,
+  presetProcessusId,
 }: {
   processusOptions: { id: string; nom: string }[];
   nc?: NcRow;
+  presetProcessusId?: string;
 }) {
   const router = useRouter();
   const isEdit = Boolean(nc);
@@ -170,7 +172,7 @@ export function NcDialog({
                 id="processusConcerne"
                 name="processusConcerne"
                 className={SELECT_CLASS}
-                defaultValue={nc?.processus_concerne ?? ""}
+                defaultValue={nc?.processus_concerne ?? presetProcessusId ?? ""}
               >
                 <option value="">—</option>
                 {processusOptions.map((p) => (

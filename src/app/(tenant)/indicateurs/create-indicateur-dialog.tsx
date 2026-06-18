@@ -20,8 +20,10 @@ const SELECT_CLASS =
 
 export function CreateIndicateurDialog({
   processusOptions,
+  presetProcessusId,
 }: {
   processusOptions: { id: string; nom: string }[];
+  presetProcessusId?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -96,7 +98,12 @@ export function CreateIndicateurDialog({
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="processusId">Processus</Label>
-              <select id="processusId" name="processusId" className={SELECT_CLASS} defaultValue="">
+              <select
+                id="processusId"
+                name="processusId"
+                className={SELECT_CLASS}
+                defaultValue={presetProcessusId ?? ""}
+              >
                 <option value="">— (global)</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
