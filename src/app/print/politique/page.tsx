@@ -2,13 +2,10 @@ import type { JSONContent } from "@tiptap/react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { TiptapEditor } from "@/components/tiptap-editor";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { PrintButton } from "./print-button";
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function PolitiquePrintPage() {
   const ctx = await getTenantContext();

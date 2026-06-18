@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { VeilleDialog } from "./veille-dialog";
@@ -26,10 +27,6 @@ const STATUT_LABELS: Record<string, string> = {
   integree: "Intégrée",
   sans_objet: "Sans objet",
 };
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function VeillePage() {
   const ctx = await getTenantContext();

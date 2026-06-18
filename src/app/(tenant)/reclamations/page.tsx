@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
+import { formatDate } from "@/lib/format";
 import { NC_GRAVITE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -28,10 +29,6 @@ const STATUT_LABELS: Record<string, string> = {
   traitee: "Traitée",
   cloturee: "Clôturée",
 };
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function ReclamationsPage() {
   const ctx = await getTenantContext();

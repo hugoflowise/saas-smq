@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { formatDate } from "@/lib/format";
 
 export type VersionItem = {
   id: string;
@@ -19,10 +20,6 @@ export type VersionItem = {
   approverName: string | null;
   snapshot: JSONContent | null;
 };
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export function VersionHistory({ versions }: { versions: VersionItem[] }) {
   const [openId, setOpenId] = useState<string | null>(null);

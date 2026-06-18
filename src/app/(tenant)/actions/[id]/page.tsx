@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
 import {
   ACTION_ORIGINE_LABELS,
   ACTION_PRIORITE_LABELS,
@@ -13,10 +14,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ActionDialog } from "../action-dialog";
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 function Field({ label, value }: { label: string; value: string | null }) {
   return (

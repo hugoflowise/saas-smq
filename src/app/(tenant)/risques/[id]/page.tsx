@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BADGE_BASE } from "@/lib/badges";
+import { formatDate } from "@/lib/format";
 import type { ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -22,10 +23,6 @@ function criticiteClass(c: number) {
   if (c > 15) return "bg-status-nc-majeure/15 text-status-nc-majeure";
   if (c >= 9) return "bg-status-pa/15 text-status-pa";
   return "bg-status-conforme/15 text-status-conforme";
-}
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
 }
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {

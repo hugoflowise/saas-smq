@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RevueDialog } from "./revue-dialog";
@@ -17,10 +18,6 @@ const STATUT_LABELS: Record<string, string> = {
   realisee: "Réalisée",
   cloturee: "Clôturée",
 };
-
-function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : "—";
-}
 
 export default async function RevuesDirectionPage() {
   const ctx = await getTenantContext();
