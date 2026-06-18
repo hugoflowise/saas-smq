@@ -88,6 +88,14 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Origine" value={ACTION_ORIGINE_LABELS[action.origine]} />
           <Field label="Processus concerné" value={processusNom} />
+          <Field
+            label="Cotation"
+            value={
+              action.cotation
+                ? COTATION_LABELS[action.cotation as keyof typeof COTATION_LABELS]
+                : null
+            }
+          />
           <Field label="Échéance" value={formatDate(action.date_prevue)} />
           <Field label="Date effective" value={formatDate(action.date_effective)} />
           <Field label="Indicateur d'efficacité" value={action.indicateur_efficacite} />

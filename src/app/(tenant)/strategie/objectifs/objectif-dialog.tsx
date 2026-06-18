@@ -28,9 +28,20 @@ export type ObjectifRow = {
   echeance: string | null;
   fonction_concernee: string | null;
   statut: string;
+  valeur_cible: number | null;
+  valeur_actuelle: number | null;
+  unite: string | null;
+  sens: string | null;
+  processus_id: string | null;
 };
 
-export function ObjectifDialog({ objectif }: { objectif?: ObjectifRow }) {
+export function ObjectifDialog({
+  objectif,
+  processusOptions = [],
+}: {
+  objectif?: ObjectifRow;
+  processusOptions?: { id: string; nom: string }[];
+}) {
   const router = useRouter();
   const isEdit = Boolean(objectif);
   const [open, setOpen] = useState(false);
@@ -43,10 +54,14 @@ export function ObjectifDialog({ objectif }: { objectif?: ObjectifRow }) {
     const data = {
       intitule: f.get("intitule"),
       description: f.get("description") || undefined,
-      cibleChiffree: f.get("cibleChiffree") || undefined,
       echeance: f.get("echeance") || undefined,
       fonctionConcernee: f.get("fonctionConcernee") || undefined,
       statut: f.get("statut"),
+      valeurCible: f.get("valeurCible") || undefined,
+      valeurActuelle: f.get("valeurActuelle") || undefined,
+      unite: f.get("unite") || undefined,
+      sens: f.get("sens") || undefined,
+      processusId: f.get("processusId") || undefined,
     };
     const result = isEdit
       ? await updateObjectifAction({ id: objectif?.id, ...data })
@@ -85,13 +100,63 @@ export function ObjectifDialog({ objectif }: { objectif?: ObjectifRow }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="cibleChiffree">Cible chiffrée</Label>
+              <Label htmlFor="valeurActuelle">Valeur actuelle</Label>
               <Input
-                id="cibleChiffree"
-                name="cibleChiffree"
-                defaultValue={objectif?.cible_chiffree ?? ""}
-                placeholder="90% de satisfaction"
+                id="valeurActuelle"
+                name="valeurActuelle"
+                type="number"
+                step="any"
+                defaultValue={objectif?.valeur_actuelle ?? ""}
+                placeholder="65"
               />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="valeurCible">Valeur cible</Label>
+              <Input
+                id="valeurCible"
+                name="valeurCible"
+                type="number"
+                step="any"
+                defaultValue={objectif?.valeur_cible ?? ""}
+                placeholder="90"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="unite">Unité</Label>
+              <Input
+                id="unite"
+                name="unite"
+                defaultValue={objectif?.unite ?? ""}
+                placeholder="%, NPS, €…"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sens">Sens</Label>
+              <select
+                id="sens"
+                name="sens"
+                className={SELECT_CLASS}
+                defaultValue={objectif?.sens ?? "hausse"}
+              >
+                <option value="hausse">Hausse (atteindre la cible)</option>
+                <option value="baisse">Baisse (ne pas dépasser)</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="processusId">Processus pilote</Label>
+              <select
+                id="processusId"
+                name="processusId"
+                className={SELECT_CLASS}
+                defaultValue={objectif?.processus_id ?? ""}
+              >
+                <option value="">—</option>
+                {processusOptions.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nom}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="echeance">Échéance</Label>
