@@ -25,9 +25,16 @@ const STATUT_LABELS: Record<string, string> = {
 type Props = {
   initialContenu: JSONContent | null;
   statut: string;
+  currentVersion: string | null;
+  currentVersionDate: string | null;
 };
 
-export function PolitiqueClient({ initialContenu, statut }: Props) {
+export function PolitiqueClient({
+  initialContenu,
+  statut,
+  currentVersion,
+  currentVersionDate,
+}: Props) {
   const router = useRouter();
   const contenuRef = useRef<JSONContent | null>(initialContenu);
   const dirtyRef = useRef(false);
@@ -104,9 +111,17 @@ export function PolitiqueClient({ initialContenu, statut }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">Statut</span>
           <Badge variant="secondary">{STATUT_LABELS[statut] ?? statut}</Badge>
+          {currentVersion ? (
+            <span className="text-muted-foreground text-sm">
+              · {currentVersion}
+              {currentVersionDate
+                ? ` · publiée le ${new Date(currentVersionDate).toLocaleDateString("fr-FR")}`
+                : ""}
+            </span>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2">
