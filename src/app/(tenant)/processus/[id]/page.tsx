@@ -146,7 +146,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Cartographie
+        Processus
       </Link>
 
       <PageHeader title={processus.nom}>
