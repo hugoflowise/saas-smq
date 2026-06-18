@@ -173,6 +173,67 @@ export type Database = {
           },
         ]
       }
+      conformite_evaluation: {
+        Row: {
+          commentaire: string | null
+          cotation: Database["public"]["Enums"]["cotation_conformite"]
+          created_at: string
+          date_evaluation: string | null
+          evaluateur_id: string | null
+          id: string
+          preuves_liees: Json | null
+          referentiel_iso_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          cotation?: Database["public"]["Enums"]["cotation_conformite"]
+          created_at?: string
+          date_evaluation?: string | null
+          evaluateur_id?: string | null
+          id?: string
+          preuves_liees?: Json | null
+          referentiel_iso_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          cotation?: Database["public"]["Enums"]["cotation_conformite"]
+          created_at?: string
+          date_evaluation?: string | null
+          evaluateur_id?: string | null
+          id?: string
+          preuves_liees?: Json | null
+          referentiel_iso_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conformite_evaluation_evaluateur_id_fkey"
+            columns: ["evaluateur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conformite_evaluation_referentiel_iso_id_fkey"
+            columns: ["referentiel_iso_id"]
+            isOneToOne: false
+            referencedRelation: "referentiel_iso"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conformite_evaluation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicateurs: {
         Row: {
           boond_endpoint: string | null
@@ -960,6 +1021,48 @@ export type Database = {
           },
         ]
       }
+      referentiel_iso: {
+        Row: {
+          chapitre: string
+          description: string | null
+          domaine: Database["public"]["Enums"]["domaine_iso"]
+          est_obligatoire: boolean
+          exigences: Json | null
+          id: string
+          intitule: string
+          norme: string
+          ordre_affichage: number
+          preuves_attendues: string | null
+          version: string
+        }
+        Insert: {
+          chapitre: string
+          description?: string | null
+          domaine: Database["public"]["Enums"]["domaine_iso"]
+          est_obligatoire?: boolean
+          exigences?: Json | null
+          id?: string
+          intitule: string
+          norme?: string
+          ordre_affichage?: number
+          preuves_attendues?: string | null
+          version?: string
+        }
+        Update: {
+          chapitre?: string
+          description?: string | null
+          domaine?: Database["public"]["Enums"]["domaine_iso"]
+          est_obligatoire?: boolean
+          exigences?: Json | null
+          id?: string
+          intitule?: string
+          norme?: string
+          ordre_affichage?: number
+          preuves_attendues?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       risques_opportunites: {
         Row: {
           cause: string | null
@@ -1141,12 +1244,28 @@ export type Database = {
         | "bloquee"
         | "abandonnee"
       action_type: "preventive" | "corrective"
+      cotation_conformite:
+        | "non_evalue"
+        | "conforme"
+        | "point_fort"
+        | "point_attention"
+        | "nc_mineure"
+        | "nc_majeure"
+        | "non_applicable"
       document_statut:
         | "brouillon"
         | "en_revue"
         | "approuvee"
         | "publiee"
         | "archivee"
+      domaine_iso:
+        | "contexte"
+        | "leadership"
+        | "planification"
+        | "support"
+        | "realisation"
+        | "evaluation"
+        | "amelioration"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
       indicateur_frequence:
         | "quotidien"
@@ -1338,12 +1457,30 @@ export const Constants = {
         "abandonnee",
       ],
       action_type: ["preventive", "corrective"],
+      cotation_conformite: [
+        "non_evalue",
+        "conforme",
+        "point_fort",
+        "point_attention",
+        "nc_mineure",
+        "nc_majeure",
+        "non_applicable",
+      ],
       document_statut: [
         "brouillon",
         "en_revue",
         "approuvee",
         "publiee",
         "archivee",
+      ],
+      domaine_iso: [
+        "contexte",
+        "leadership",
+        "planification",
+        "support",
+        "realisation",
+        "evaluation",
+        "amelioration",
       ],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
       indicateur_frequence: [
