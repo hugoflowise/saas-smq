@@ -27,6 +27,11 @@ type Props = {
   statut: string;
   currentVersion: string | null;
   currentVersionDate: string | null;
+  canWrite: boolean;
+  canApprove: boolean;
+  drafterName: string | null;
+  approverName: string | null;
+  approvedAt: string | null;
 };
 
 export function PolitiqueClient({
@@ -34,13 +39,18 @@ export function PolitiqueClient({
   statut,
   currentVersion,
   currentVersionDate,
+  canWrite,
+  canApprove,
+  drafterName,
+  approverName,
+  approvedAt,
 }: Props) {
   const router = useRouter();
   const contenuRef = useRef<JSONContent | null>(initialContenu);
   const dirtyRef = useRef(false);
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
-  const editable = statut === "brouillon";
+  const editable = statut === "brouillon" && canWrite;
 
   function handleChange(c: JSONContent) {
     contenuRef.current = c;
@@ -136,7 +146,7 @@ export function PolitiqueClient({
             </>
           ) : null}
 
-          {statut === "brouillon" ? (
+          {statut === "brouillon" && canWrite ? (
             <Button
               onClick={() => transition("en_revue", "Soumise à approbation.")}
               disabled={pending}
@@ -144,7 +154,7 @@ export function PolitiqueClient({
               Soumettre à approbation
             </Button>
           ) : null}
-          {statut === "en_revue" ? (
+          {statut === "en_revue" && canApprove ? (
             <>
               <Button
                 variant="outline"
@@ -161,12 +171,12 @@ export function PolitiqueClient({
               />
             </>
           ) : null}
-          {statut === "approuvee" ? (
+          {statut === "approuvee" && canApprove ? (
             <Button onClick={publish} disabled={pending}>
               Publier
             </Button>
           ) : null}
-          {statut === "publiee" ? (
+          {statut === "publiee" && canWrite ? (
             <Button
               variant="outline"
               onClick={() => transition("brouillon", "Nouvelle version en brouillon.")}
@@ -177,6 +187,18 @@ export function PolitiqueClient({
           ) : null}
         </div>
       </div>
+
+      {drafterName || approverName ? (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
+          {drafterName ? <span>Rédigé par {drafterName}</span> : null}
+          {approverName ? (
+            <span>
+              Validé et signé par {approverName}
+              {approvedAt ? ` le ${new Date(approvedAt).toLocaleDateString("fr-FR")}` : ""}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <TiptapEditor
         key={statut}
