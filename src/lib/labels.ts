@@ -29,6 +29,7 @@ export const ACTION_ORIGINE_LABELS = {
   r_o: "Risques & Opportunités",
   reclamation: "Réclamation",
   amelioration_continue: "Amélioration continue",
+  reunion: "Réunion QHSE",
 } as const;
 
 export const ACTION_STATUTS = Object.keys(

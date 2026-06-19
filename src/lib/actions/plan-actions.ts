@@ -22,6 +22,7 @@ const baseSchema = {
     "r_o",
     "reclamation",
     "amelioration_continue",
+    "reunion",
   ]),
   type: z.enum(["preventive", "corrective"]),
   priorite: z.enum(["p1", "p2", "p3"]),
