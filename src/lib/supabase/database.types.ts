@@ -650,6 +650,101 @@ export type Database = {
           },
         ]
       }
+      documents_maitrise: {
+        Row: {
+          approbateur: string | null
+          code: string | null
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_approbation: string | null
+          date_revision_prevue: string | null
+          deleted_at: string | null
+          emplacement: string | null
+          id: string
+          processus_id: string | null
+          redacteur: string | null
+          statut: Database["public"]["Enums"]["doc_maitrise_statut"]
+          tenant_id: string
+          titre: string
+          type: Database["public"]["Enums"]["doc_maitrise_type"]
+          updated_at: string
+          updated_by: string | null
+          version: string | null
+        }
+        Insert: {
+          approbateur?: string | null
+          code?: string | null
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_approbation?: string | null
+          date_revision_prevue?: string | null
+          deleted_at?: string | null
+          emplacement?: string | null
+          id?: string
+          processus_id?: string | null
+          redacteur?: string | null
+          statut?: Database["public"]["Enums"]["doc_maitrise_statut"]
+          tenant_id: string
+          titre: string
+          type?: Database["public"]["Enums"]["doc_maitrise_type"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          approbateur?: string | null
+          code?: string | null
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_approbation?: string | null
+          date_revision_prevue?: string | null
+          deleted_at?: string | null
+          emplacement?: string | null
+          id?: string
+          processus_id?: string | null
+          redacteur?: string | null
+          statut?: Database["public"]["Enums"]["doc_maitrise_statut"]
+          tenant_id?: string
+          titre?: string
+          type?: Database["public"]["Enums"]["doc_maitrise_type"]
+          updated_at?: string
+          updated_by?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_maitrise_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_maitrise_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_maitrise_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_maitrise_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enquetes_satisfaction: {
         Row: {
           client: string | null
@@ -2691,6 +2786,15 @@ export type Database = {
         | "nc_mineure"
         | "nc_majeure"
         | "non_applicable"
+      doc_maitrise_statut: "brouillon" | "en_vigueur" | "archive"
+      doc_maitrise_type:
+        | "manuel"
+        | "procedure"
+        | "instruction"
+        | "enregistrement"
+        | "formulaire"
+        | "document_externe"
+        | "autre"
       document_statut:
         | "brouillon"
         | "en_revue"
@@ -2968,6 +3072,16 @@ export const Constants = {
         "nc_mineure",
         "nc_majeure",
         "non_applicable",
+      ],
+      doc_maitrise_statut: ["brouillon", "en_vigueur", "archive"],
+      doc_maitrise_type: [
+        "manuel",
+        "procedure",
+        "instruction",
+        "enregistrement",
+        "formulaire",
+        "document_externe",
+        "autre",
       ],
       document_statut: [
         "brouillon",

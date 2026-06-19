@@ -7,6 +7,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  FileStack,
   FileText,
   FolderTree,
   Gauge,
@@ -63,6 +64,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Organisation",
     items: [
       { label: "Processus", href: "/processus", icon: FolderTree },
+      { label: "Documents", href: "/documents", icon: FileStack },
       { label: "Procédures", href: "/documentation/procedures", icon: FileText },
       { label: "Communications", href: "/communications", icon: Megaphone },
     ],
