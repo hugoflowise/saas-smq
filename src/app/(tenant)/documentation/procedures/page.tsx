@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CreateProcedureDialog } from "./create-procedure-dialog";
@@ -57,6 +59,7 @@ export default async function ProceduresPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl">
+      <ModuleTabs tabs={DOCUMENTATION_TABS} />
       <PageHeader
         title="Procédures"
         description="Documents maîtrisés et modes opératoires."

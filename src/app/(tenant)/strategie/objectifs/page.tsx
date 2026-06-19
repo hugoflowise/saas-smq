@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
-import { PerformanceTabs } from "@/components/performance-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -102,7 +103,7 @@ export default async function ObjectifsPage() {
 
   return (
     <div className="w-full">
-      <PerformanceTabs />
+      <ModuleTabs tabs={PERFORMANCE_TABS} />
       <PageHeader
         title="Objectifs qualité"
         description="Objectifs SMART et leur déclinaison par fonction."

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -18,6 +19,7 @@ import {
   statutDocumentNatif,
 } from "@/lib/documents";
 import { formatDate } from "@/lib/format";
+import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
@@ -206,6 +208,7 @@ export default async function DocumentsPage({
 
   return (
     <div className="w-full">
+      <ModuleTabs tabs={DOCUMENTATION_TABS} />
       <PageHeader
         title="Documents"
         description="Matrice documentaire : liste maîtrisée de tous les documents du système qualité."
