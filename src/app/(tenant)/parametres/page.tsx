@@ -50,7 +50,7 @@ export default async function ParametresPage() {
         <CardContent className="flex flex-col gap-3">
           <p className="text-muted-foreground text-sm">
             Partagez ce lien à vos clients (e-mail, signature, QR code…). Chaque réponse alimente
-            automatiquement le module Satisfaction, en temps réel — sans aucune licence.
+            automatiquement le module Satisfaction, en temps réel · sans aucune licence.
           </p>
           <CopyField label="Lien public du questionnaire" value={surveyUrl} />
         </CardContent>
@@ -75,7 +75,7 @@ export default async function ParametresPage() {
           <div className="rounded-lg border bg-surface p-3 text-muted-foreground text-sm">
             <p className="mb-2 font-medium text-foreground">Étapes dans Power Automate :</p>
             <ol className="list-decimal space-y-1 pl-5">
-              <li>Déclencheur « Microsoft Forms — Quand une nouvelle réponse est envoyée ».</li>
+              <li>Déclencheur « Microsoft Forms · Quand une nouvelle réponse est envoyée ».</li>
               <li>Action « Obtenir les détails de la réponse ».</li>
               <li>
                 Action « HTTP » : méthode <code>POST</code>, URI = l'URL ci-dessus, en-tête{" "}

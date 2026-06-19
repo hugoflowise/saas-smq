@@ -78,7 +78,7 @@ export default async function PolitiquePrintPage() {
 
         {!isPublished ? (
           <p className="mb-6 rounded-md bg-status-pa/15 px-3 py-2 text-status-pa text-sm">
-            Document non publié — aperçu du brouillon en cours.
+            Document non publié · aperçu du brouillon en cours.
           </p>
         ) : null}
 

@@ -69,7 +69,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
       <PageHeader
         title={`Audit ${audit.reference}`}
         description={`Audit ${AUDIT_TYPE_LABELS[audit.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""}${
-          audit.organisme ? ` — ${audit.organisme}` : ""
+          audit.organisme ? ` · ${audit.organisme}` : ""
         }`}
       />
 

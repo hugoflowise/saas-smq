@@ -3,7 +3,7 @@ import type { Database } from "./database.types";
 
 /**
  * Client Supabase pour les Client Components (navigateur).
- * Utilise la clé publique (anon/publishable) — l'isolation des données
+ * Utilise la clé publique (anon/publishable) · l'isolation des données
  * repose sur les RLS policies, jamais sur le secret de cette clé.
  */
 export function createClient() {

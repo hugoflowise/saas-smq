@@ -45,7 +45,7 @@ export default async function CertificationPage() {
       <PageHeader
         title="Cycle de certification"
         description="Jalons de la démarche : audit blanc, certification, surveillances."
-        isoClause="ISO 9001 — cycle de 3 ans"
+        isoClause="ISO 9001 · cycle de 3 ans"
         help="Planifiez les grandes étapes du cycle de certification (audit blanc, audit de certification, audits de surveillance annuels). Chaque jalon peut renvoyer au plan d'actions pour le suivi des écarts."
       >
         <JalonDialog />

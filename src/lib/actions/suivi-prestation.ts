@@ -57,7 +57,7 @@ export async function submitSuiviPrestationAction(input: unknown): Promise<Actio
   });
   if (error) return { ok: false, error: error.message };
 
-  // Alimente aussi le module Satisfaction (NPS global) — note /5 ramenée sur /10.
+  // Alimente aussi le module Satisfaction (NPS global) · note /5 ramenée sur /10.
   await admin.from("enquetes_satisfaction").insert({
     tenant_id: tenant.id,
     client: d.client,

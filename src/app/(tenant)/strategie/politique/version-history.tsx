@@ -19,7 +19,7 @@ export type VersionItem = {
   approvedAt: string | null;
   approverName: string | null;
   snapshot: JSONContent | null;
-  /** Circuit de révision (procédures) — optionnel. */
+  /** Circuit de révision (procédures) · optionnel. */
   redacteur?: string | null;
   verificateur?: string | null;
   noteRevision?: string | null;
@@ -77,7 +77,7 @@ export function VersionHistory({ versions }: { versions: VersionItem[] }) {
             <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-4xl">
               <DialogHeader>
                 <DialogTitle>
-                  Politique qualité — {v.version} ({formatDate(v.approvedAt)})
+                  Politique qualité · {v.version} ({formatDate(v.approvedAt)})
                 </DialogTitle>
               </DialogHeader>
               <TiptapEditor content={v.snapshot} editable={false} />

@@ -75,7 +75,7 @@ export function EnqueteForm({ token, nomSociete }: { token: string; nomSociete: 
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="noteSatisfaction">Note de satisfaction globale (sur 10) — optionnel</Label>
+        <Label htmlFor="noteSatisfaction">Note de satisfaction globale (sur 10) · optionnel</Label>
         <Input
           id="noteSatisfaction"
           name="noteSatisfaction"

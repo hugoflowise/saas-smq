@@ -144,7 +144,7 @@ export function AuditGrille({
 
       {adding ? (
         <form onSubmit={handleAdd} className="flex flex-col gap-2 rounded-lg border p-3">
-          <Input name="referenceIso" placeholder="Réf. ISO (ex. 8.4) — optionnel" className="h-8" />
+          <Input name="referenceIso" placeholder="Réf. ISO (ex. 8.4) · optionnel" className="h-8" />
           <Input name="question" required placeholder="Point de contrôle / question d'audit" />
           <div className="flex gap-2">
             <Button type="submit" size="sm" disabled={pending}>

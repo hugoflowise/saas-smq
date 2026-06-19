@@ -138,7 +138,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   const ncItems: RelatedItem[] = (ncs.data ?? []).map((n) => ({
     id: n.id,
     href: `/nc/${n.id}${from}`,
-    primary: `${n.reference} — ${n.intitule}`,
+    primary: `${n.reference} · ${n.intitule}`,
     secondary: n.statut,
   }));
 

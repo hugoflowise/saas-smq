@@ -10,7 +10,7 @@ const PUBLIC_PATHS = ["/login", "/auth", "/api/ingest", "/enquete"];
  * privées. À appeler depuis le middleware racine.
  *
  * NB : ne pas insérer de logique entre la création du client et `getUser()`
- * (risque de déconnexions aléatoires — cf. doc @supabase/ssr).
+ * (risque de déconnexions aléatoires · cf. doc @supabase/ssr).
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
