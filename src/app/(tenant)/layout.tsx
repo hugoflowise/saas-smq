@@ -74,7 +74,7 @@ export default async function TenantLayout({ children }: { children: React.React
           notifications={notifications}
           unreadCount={unreadCount ?? 0}
         />
-        <main className="flex-1 overflow-y-auto bg-surface px-6 py-8">{children}</main>
+        <main className="app-bg flex-1 overflow-y-auto px-6 py-8">{children}</main>
       </div>
     </div>
   );

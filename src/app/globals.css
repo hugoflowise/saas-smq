@@ -151,11 +151,6 @@
   }
   body {
     @apply bg-surface text-foreground;
-    /* Fond doux et profond (façon Apple) : dégradé subtil + halos coloraux discrets */
-    background-image:
-      radial-gradient(60rem 60rem at 110% -10%, color-mix(in oklch, var(--primary) 8%, transparent), transparent 60%),
-      radial-gradient(50rem 50rem at -10% 110%, color-mix(in oklch, var(--status-pf) 7%, transparent), transparent 55%);
-    background-attachment: fixed;
   }
   html {
     @apply font-sans;
@@ -169,7 +164,15 @@
     0 14px 36px -18px rgba(11, 17, 32, 0.14);
 }
 
-/* Panneau en verre dépoli (sidebar, topbar, dialogs). */
+/* Fond de l'espace de travail : dégradé doux + halos coloraux discrets (façon Apple). */
+@utility app-bg {
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(55rem 55rem at 100% 0%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 60%),
+    radial-gradient(50rem 50rem at 0% 100%, color-mix(in oklch, var(--status-pf) 12%, transparent), transparent 55%);
+}
+
+/* Panneau en verre dépoli (si besoin d'un overlay translucide sur du contenu défilant). */
 @utility glass {
   background-color: var(--glass);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
