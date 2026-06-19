@@ -189,6 +189,7 @@ export type Database = {
           created_at: string
           diff: Json | null
           entity_id: string | null
+          entity_label: string | null
           entity_type: string
           id: string
           tenant_id: string | null
@@ -199,6 +200,7 @@ export type Database = {
           created_at?: string
           diff?: Json | null
           entity_id?: string | null
+          entity_label?: string | null
           entity_type: string
           id?: string
           tenant_id?: string | null
@@ -209,6 +211,7 @@ export type Database = {
           created_at?: string
           diff?: Json | null
           entity_id?: string | null
+          entity_label?: string | null
           entity_type?: string
           id?: string
           tenant_id?: string | null
@@ -2633,6 +2636,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      audit_entity_label: { Args: { r: Json }; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       is_admin_flowise: { Args: never; Returns: boolean }
       jwt_tenant_id: { Args: never; Returns: string }
