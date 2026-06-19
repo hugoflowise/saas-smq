@@ -17,7 +17,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createDocumentMaitriseAction,
+  removeDocumentFichierAction,
   updateDocumentMaitriseAction,
+  uploadDocumentFichierAction,
 } from "@/lib/actions/documents-maitrise";
 import { DOC_MAITRISE_TYPE_LABELS } from "@/lib/documents";
 
@@ -38,6 +40,7 @@ export type DocumentRow = {
   processus_id: string | null;
   emplacement: string | null;
   commentaire: string | null;
+  fichier_nom: string | null;
 };
 
 export function DocumentDialog({
@@ -51,6 +54,8 @@ export function DocumentDialog({
   const isEdit = Boolean(document);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [fichierNom, setFichierNom] = useState(document?.fichier_nom ?? null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,16 +75,55 @@ export function DocumentDialog({
       emplacement: f.get("emplacement") || undefined,
       commentaire: f.get("commentaire") || undefined,
     };
-    const result = isEdit
-      ? await updateDocumentMaitriseAction({ id: document?.id, ...data })
-      : await createDocumentMaitriseAction(data);
+    let docId: string | undefined;
+    if (isEdit && document) {
+      const result = await updateDocumentMaitriseAction({ id: document.id, ...data });
+      if (!result.ok) {
+        setPending(false);
+        toast.error(result.error);
+        return;
+      }
+      docId = document.id;
+    } else {
+      const result = await createDocumentMaitriseAction(data);
+      if (!result.ok) {
+        setPending(false);
+        toast.error(result.error);
+        return;
+      }
+      docId = result.id;
+    }
+
+    // Téléversement éventuel du fichier.
+    if (file && docId) {
+      const fd = new FormData();
+      fd.set("id", docId);
+      fd.set("file", file as Blob);
+      const up = await uploadDocumentFichierAction(fd);
+      if (!up.ok) {
+        setPending(false);
+        toast.error(`Document enregistré, mais fichier non envoyé : ${up.error}`);
+        setOpen(false);
+        router.refresh();
+        return;
+      }
+    }
+
     setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Document mis à jour." : "Document ajouté.");
-      setOpen(false);
+    toast.success(isEdit ? "Document mis à jour." : "Document ajouté.");
+    setOpen(false);
+    router.refresh();
+  }
+
+  async function handleRemoveFile() {
+    if (!document?.id) return;
+    const r = await removeDocumentFichierAction(document.id);
+    if (r.ok) {
+      setFichierNom(null);
+      toast.success("Fichier supprimé.");
       router.refresh();
     } else {
-      toast.error(result.error);
+      toast.error(r.error);
     }
   }
 
@@ -221,6 +265,34 @@ export function DocumentDialog({
               defaultValue={document?.commentaire ?? ""}
             />
           </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="file">Fichier (PDF, Word… max 10 Mo)</Label>
+            {fichierNom && !file ? (
+              <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+                <span className="min-w-0 truncate">{fichierNom}</span>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="shrink-0 text-status-nc-mineure text-xs hover:underline"
+                >
+                  Supprimer
+                </button>
+              </div>
+            ) : null}
+            <Input
+              id="file"
+              name="file"
+              type="file"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            {fichierNom && !file ? (
+              <p className="text-muted-foreground text-xs">
+                Choisir un fichier remplacera le fichier actuel.
+              </p>
+            ) : null}
+          </div>
+
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Ajouter"}
           </Button>

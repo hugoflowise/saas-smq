@@ -24,6 +24,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
 import { DocumentsFilters } from "./documents-filters";
+import { FichierLink } from "./fichier-link";
 
 const REVISION_ALERTE_JOURS = 60;
 
@@ -85,7 +86,7 @@ export default async function DocumentsPage({
       supabase
         .from("documents_maitrise")
         .select(
-          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, processus_id, emplacement, commentaire",
+          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, processus_id, emplacement, commentaire, fichier_nom",
         )
         .eq("tenant_id", tid)
         .order("code", { nullsFirst: false }),
@@ -257,13 +258,14 @@ export default async function DocumentsPage({
                 <TableHead className="w-28">Statut</TableHead>
                 <TableHead className="w-40">Approbateur</TableHead>
                 <TableHead className="w-32">Révision prévue</TableHead>
+                <TableHead className="w-40">Fichier</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
                     Aucun document ne correspond aux filtres.
                   </TableCell>
                 </TableRow>
@@ -319,6 +321,13 @@ export default async function DocumentsPage({
                         </span>
                       ) : (
                         <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {r.registre?.fichier_nom ? (
+                        <FichierLink id={r.registre.id} nom={r.registre.fichier_nom} />
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
                       )}
                     </TableCell>
                     <TableCell>
