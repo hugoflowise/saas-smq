@@ -2059,6 +2059,68 @@ export type Database = {
           },
         ]
       }
+      suivis_prestation: {
+        Row: {
+          client: string | null
+          consultant: string | null
+          created_at: string
+          date_suivi: string | null
+          deleted_at: string | null
+          est_reclamation: boolean
+          id: string
+          manager: string | null
+          mission: string | null
+          nouvelle_date_suivi: string | null
+          nps: number | null
+          reponses: Json
+          satisfaction_globale: number | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client?: string | null
+          consultant?: string | null
+          created_at?: string
+          date_suivi?: string | null
+          deleted_at?: string | null
+          est_reclamation?: boolean
+          id?: string
+          manager?: string | null
+          mission?: string | null
+          nouvelle_date_suivi?: string | null
+          nps?: number | null
+          reponses?: Json
+          satisfaction_globale?: number | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client?: string | null
+          consultant?: string | null
+          created_at?: string
+          date_suivi?: string | null
+          deleted_at?: string | null
+          est_reclamation?: boolean
+          id?: string
+          manager?: string | null
+          mission?: string | null
+          nouvelle_date_suivi?: string | null
+          nps?: number | null
+          reponses?: Json
+          satisfaction_globale?: number | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suivis_prestation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           boond_account_id: string | null

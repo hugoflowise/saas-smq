@@ -6,6 +6,7 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
   FileText,
   FolderTree,
   Gauge,
@@ -83,6 +84,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Suivi",
     items: [
       { label: "Satisfaction", href: "/satisfaction", icon: Smile },
+      { label: "Suivi de prestation", href: "/suivi-prestation", icon: ClipboardList },
       { label: "Calendrier qualité", href: "/calendrier", icon: CalendarDays },
       { label: "Veille réglementaire", href: "/veille", icon: ScrollText },
     ],
