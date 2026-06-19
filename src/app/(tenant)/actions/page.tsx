@@ -120,7 +120,11 @@ export default async function ActionsPage({
         ].map((c) => (
           <Link
             key={c.value || "tous"}
-            href={c.value ? `/actions?filtre=${c.value}` : "/actions"}
+            href={
+              c.value
+                ? `/actions?filtre=${c.value}${vue === "kanban" ? "&vue=kanban" : ""}`
+                : `/actions${vue === "kanban" ? "?vue=kanban" : ""}`
+            }
             className={`rounded-full border px-3 py-1 text-xs transition-colors ${
               (filtre ?? "") === c.value
                 ? "border-primary bg-primary text-primary-foreground"
