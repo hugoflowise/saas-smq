@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   ListChecks,
   MessageSquareWarning,
+  Presentation,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -35,7 +36,10 @@ export type NavSection = {
 export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Pilotage",
-    items: [{ label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard }],
+    items: [
+      { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Mode audit", href: "/mode-audit", icon: Presentation },
+    ],
   },
   {
     title: "Stratégie",
