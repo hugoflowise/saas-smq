@@ -2,18 +2,26 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type CalEvent = { date: string; label: string; type: string; href: string };
 
-const TYPE_DOT: Record<string, string> = {
-  Audit: "bg-status-pf",
-  Revue: "bg-primary",
-  Action: "bg-status-pa",
-  "R&O": "bg-status-nc-majeure",
+// Couleurs par type d'événement (classes littérales pour Tailwind).
+const TYPE_META: Record<string, { dot: string; chip: string }> = {
+  Audit: { dot: "bg-status-pf", chip: "bg-status-pf/15 text-status-pf" },
+  Revue: { dot: "bg-primary", chip: "bg-primary/15 text-primary" },
+  Action: { dot: "bg-status-pa", chip: "bg-status-pa/15 text-status-pa" },
+  "R&O": { dot: "bg-status-nc-majeure", chip: "bg-status-nc-majeure/15 text-status-nc-majeure" },
+  Communication: { dot: "bg-status-conforme", chip: "bg-status-conforme/15 text-status-conforme" },
+  Certification: {
+    dot: "bg-status-nc-mineure",
+    chip: "bg-status-nc-mineure/15 text-status-nc-mineure",
+  },
 };
+const META_DEFAUT = { dot: "bg-muted-foreground", chip: "bg-muted text-muted-foreground" };
+const meta = (type: string) => TYPE_META[type] ?? META_DEFAUT;
 
 const MOIS = [
   "janvier",
@@ -47,8 +55,10 @@ function EventRow({ e }: { e: CalEvent }) {
     <li className="flex items-center justify-between gap-3 py-2.5">
       <Link href={e.href} className="flex min-w-0 items-center gap-2.5 text-sm hover:text-primary">
         <span
-          className={`size-2.5 shrink-0 rounded-full ${TYPE_DOT[e.type] ?? "bg-muted-foreground"}`}
-        />
+          className={`inline-flex shrink-0 rounded-full px-2 py-0.5 font-medium text-xs ${meta(e.type).chip}`}
+        >
+          {e.type}
+        </span>
         <span className="truncate">{e.label}</span>
       </Link>
       <span className="shrink-0 text-muted-foreground text-xs">{formatDate(e.date)}</span>
@@ -70,7 +80,7 @@ function MonthView({ events }: { events: CalEvent[] }) {
     byDate.set(e.date, list);
   }
 
-  const startWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // lundi = 0
+  const startWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells: (number | null)[] = [];
   for (let i = 0; i < startWeekday; i++) cells.push(null);
@@ -79,7 +89,7 @@ function MonthView({ events }: { events: CalEvent[] }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-semibold capitalize">
+        <p className="font-semibold text-lg capitalize">
           {MOIS[month]} {year}
         </p>
         <div className="flex gap-1">
@@ -109,7 +119,7 @@ function MonthView({ events }: { events: CalEvent[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1.5">
         {JOURS.map((j) => (
           <div key={j} className="pb-1 text-center font-medium text-muted-foreground text-xs">
             {j}
@@ -118,7 +128,7 @@ function MonthView({ events }: { events: CalEvent[] }) {
         {cells.map((day, i) => {
           if (day === null) {
             // biome-ignore lint/suspicious/noArrayIndexKey: cellules vides de remplissage
-            return <div key={`empty-${i}`} className="min-h-20 rounded-md" />;
+            return <div key={`empty-${i}`} className="min-h-28 rounded-xl" />;
           }
           const dateStr = `${year}-${pad(month + 1)}-${pad(day)}`;
           const dayEvents = byDate.get(dateStr) ?? [];
@@ -126,30 +136,35 @@ function MonthView({ events }: { events: CalEvent[] }) {
           return (
             <div
               key={dateStr}
-              className={`min-h-20 rounded-md border p-1 ${isToday ? "border-primary bg-primary/5" : "bg-card"}`}
+              className={`flex min-h-28 flex-col rounded-xl border p-1.5 ${
+                isToday ? "border-primary ring-1 ring-primary/30" : "bg-card"
+              }`}
             >
-              <p
-                className={`text-right text-xs ${isToday ? "font-semibold text-primary" : "text-muted-foreground"}`}
+              <span
+                className={`mb-1 flex size-6 items-center justify-center self-end rounded-full text-xs ${
+                  isToday
+                    ? "bg-primary font-semibold text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
               >
                 {day}
-              </p>
-              <div className="mt-0.5 flex flex-col gap-0.5">
-                {dayEvents.slice(0, 3).map((e, j) => (
+              </span>
+              <div className="flex flex-col gap-1">
+                {dayEvents.slice(0, 4).map((e, j) => (
                   <Link
                     // biome-ignore lint/suspicious/noArrayIndexKey: events d'un même jour
                     key={`${dateStr}-${j}`}
                     href={e.href}
-                    title={e.label}
-                    className="flex items-center gap-1 truncate rounded bg-surface px-1 py-0.5 text-[10px] hover:bg-muted"
+                    title={`${e.type} · ${e.label}`}
+                    className={`truncate rounded-md px-1.5 py-0.5 font-medium text-[11px] transition-opacity hover:opacity-80 ${meta(e.type).chip}`}
                   >
-                    <span
-                      className={`size-1.5 shrink-0 rounded-full ${TYPE_DOT[e.type] ?? "bg-muted-foreground"}`}
-                    />
-                    <span className="truncate">{e.label}</span>
+                    {e.label}
                   </Link>
                 ))}
-                {dayEvents.length > 3 ? (
-                  <span className="text-[10px] text-muted-foreground">+{dayEvents.length - 3}</span>
+                {dayEvents.length > 4 ? (
+                  <span className="px-1 text-[10px] text-muted-foreground">
+                    +{dayEvents.length - 4} autre(s)
+                  </span>
                 ) : null}
               </div>
             </div>
@@ -161,34 +176,70 @@ function MonthView({ events }: { events: CalEvent[] }) {
 }
 
 export function CalendrierClient({ events }: { events: CalEvent[] }) {
-  const [view, setView] = useState<"liste" | "mois">("liste");
+  const [view, setView] = useState<"mois" | "liste">("mois");
   const today = new Date().toISOString().slice(0, 10);
-  const passe = events.filter((e) => e.date < today).sort((a, b) => a.date.localeCompare(b.date));
-  const aVenir = events.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+
+  const types = useMemo(() => [...new Set(events.map((e) => e.type))].sort(), [events]);
+  const [actifs, setActifs] = useState<Set<string>>(() => new Set(types));
+
+  const filtres = events.filter((e) => actifs.has(e.type));
+  const passe = filtres.filter((e) => e.date < today).sort((a, b) => a.date.localeCompare(b.date));
+  const aVenir = filtres
+    .filter((e) => e.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  function toggle(type: string) {
+    setActifs((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-1 self-start rounded-lg border bg-card p-0.5">
-        <Button
-          variant={view === "liste" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setView("liste")}
-        >
-          Liste
-        </Button>
-        <Button
-          variant={view === "mois" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setView("mois")}
-        >
-          Mois
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {types.map((type) => {
+            const on = actifs.has(type);
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => toggle(type)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  on ? "bg-card" : "bg-transparent text-muted-foreground opacity-60"
+                }`}
+              >
+                <span className={`size-2 rounded-full ${meta(type).dot}`} />
+                {type}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex gap-1 rounded-lg border bg-card p-0.5">
+          <Button
+            variant={view === "mois" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setView("mois")}
+          >
+            Mois
+          </Button>
+          <Button
+            variant={view === "liste" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setView("liste")}
+          >
+            Liste
+          </Button>
+        </div>
       </div>
 
       {view === "mois" ? (
         <Card>
           <CardContent className="pt-6">
-            <MonthView events={events} />
+            <MonthView events={filtres} />
           </CardContent>
         </Card>
       ) : (
