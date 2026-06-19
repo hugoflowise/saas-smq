@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "./database.types";
 
 /** Préfixes de routes accessibles sans authentification. */
-const PUBLIC_PATHS = ["/login", "/auth"];
+const PUBLIC_PATHS = ["/login", "/auth", "/api/ingest"];
 
 /**
  * Rafraîchit la session Supabase à chaque requête et protège les routes
