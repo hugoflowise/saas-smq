@@ -57,7 +57,7 @@ export default async function AdminClientsPage() {
       </PageHeader>
 
       {tenants && tenants.length > 0 ? (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

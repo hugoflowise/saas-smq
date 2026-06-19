@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BADGE_BASE } from "@/lib/badges";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RoStatutCell } from "./inline-cells";
@@ -126,7 +127,7 @@ export default async function RisquesPage() {
           description="Créez un risque ou une opportunité pour démarrer le registre."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -152,17 +153,13 @@ export default async function RisquesPage() {
                     {r.gravite} × {r.probabilite}
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${criticiteClass(r.criticite ?? 0)}`}
-                    >
+                    <span className={`${BADGE_BASE} ${criticiteClass(r.criticite ?? 0)}`}>
                       {r.criticite}
                     </span>
                   </TableCell>
                   <TableCell>
                     {r.criticite_residuelle != null ? (
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${criticiteClass(r.criticite_residuelle)}`}
-                      >
+                      <span className={`${BADGE_BASE} ${criticiteClass(r.criticite_residuelle)}`}>
                         {r.criticite_residuelle}
                       </span>
                     ) : (

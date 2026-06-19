@@ -99,7 +99,7 @@ export default async function ConformitePage() {
           return (
             <div key={dom}>
               <h2 className="mb-2 font-semibold text-sm">{DOMAINE_LABELS[dom] ?? dom}</h2>
-              <div className="rounded-lg border bg-card">
+              <div className="rounded-2xl border bg-card">
                 {domChapters.map((c) => (
                   <ChapterRow
                     key={c.id}

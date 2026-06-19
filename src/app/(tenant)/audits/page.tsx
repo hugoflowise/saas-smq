@@ -66,7 +66,9 @@ export default async function AuditsPage({
     <div className="w-full">
       <PageHeader
         title="Audits"
-        description="Audits internes (ISO 9001 §9.2), externes (certification/client) et fournisseurs."
+        description="Audits internes, externes (certification/client) et fournisseurs."
+        isoClause="ISO 9001 §9.2"
+        help="Programmez des audits internes à intervalles planifiés (chaque processus audité sur le cycle) pour vérifier la conformité et l'efficacité du SMQ ; les écarts alimentent le plan d'actions."
       >
         <ProgrammeButton annee={new Date().getFullYear()} />
         <AuditDialog />
@@ -94,7 +96,7 @@ export default async function AuditsPage({
           description="Planifiez un audit : tous les processus doivent être audités en interne sur 3 ans."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

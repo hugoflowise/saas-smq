@@ -339,6 +339,8 @@ export default async function ModeAuditPage() {
       <PageHeader
         title="Mode audit"
         description="Dossier de préparation à l'audit, organisé par chapitre de la norme ISO 9001:2015."
+        isoClause="ISO 9001:2015"
+        help="Vue de synthèse présentable à un auditeur : pour chaque chapitre de la norme, l'état des éléments de preuve (vert = en place, ambre = à compléter). Cliquez un point pour ouvrir le module concerné. Bouton Imprimer pour un dossier PDF."
       >
         <PrintButton />
       </PageHeader>

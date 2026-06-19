@@ -70,7 +70,7 @@ export default async function PartiesPrenantesPage() {
           description="Recensez vos parties intéressées (clients, fournisseurs, autorités…)."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

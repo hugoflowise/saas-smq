@@ -78,7 +78,7 @@ export default async function VeillePage() {
           description="Ajoutez les textes réglementaires applicables et leur impact sur le SMQ."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

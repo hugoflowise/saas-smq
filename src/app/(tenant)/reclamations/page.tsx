@@ -63,7 +63,7 @@ export default async function ReclamationsPage() {
           description="Enregistrez une réclamation client pour la suivre jusqu'à sa clôture."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

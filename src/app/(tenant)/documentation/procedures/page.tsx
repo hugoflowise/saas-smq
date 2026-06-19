@@ -72,7 +72,7 @@ export default async function ProceduresPage() {
           description="Créez votre première procédure pour démarrer la documentation."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

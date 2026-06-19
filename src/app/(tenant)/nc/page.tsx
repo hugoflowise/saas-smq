@@ -99,7 +99,7 @@ export default async function NcPage({
           }))}
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

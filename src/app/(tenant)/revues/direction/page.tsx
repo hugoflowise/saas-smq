@@ -59,7 +59,7 @@ export default async function RevuesDirectionPage() {
           description="Planifiez la revue de direction annuelle."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
