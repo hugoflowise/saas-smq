@@ -82,7 +82,22 @@ export default async function SatisfactionPage() {
         title="Satisfaction client"
         description="Mesure de la perception client (NPS, notes, réclamations)."
         isoClause="ISO 9001 §9.1.2"
-        help="Surveillez la perception des clients (enquêtes, suivis de projet, NPS). L'enjeu n'est pas le % de satisfaits mais d'agir sur les insatisfactions. Les réponses peuvent provenir des suivis de projet ou d'un export Microsoft Forms."
+        help={
+          <span className="flex flex-col gap-1.5">
+            <span>
+              Surveillez la perception des clients. L'enjeu n'est pas le % de satisfaits, mais
+              d'agir sur les insatisfactions.
+            </span>
+            <span>
+              <strong>Calcul du NPS (Net Promoter Score)</strong> : sur la question «
+              recommanderiez-vous ? » (0 à 10), on classe chaque réponse en{" "}
+              <strong>promoteur</strong> (9-10), <strong>neutre</strong> (7-8) ou{" "}
+              <strong>détracteur</strong> (0-6). NPS = % de promoteurs − % de détracteurs. Il va de
+              −100 à +100 (les neutres ne comptent pas). Repères : ≥ 0 correct, ≥ 30 bon, ≥ 70
+              excellent. Ce n'est donc pas une moyenne : une seule note de 8 donne un NPS de 0.
+            </span>
+          </span>
+        }
       >
         <ExportButton rows={items} />
         <EnqueteDialog />

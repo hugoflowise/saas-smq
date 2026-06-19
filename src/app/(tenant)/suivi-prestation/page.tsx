@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { CopyField } from "@/app/(tenant)/parametres/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
@@ -96,9 +97,14 @@ export default async function SuiviPrestationPage() {
         title="Suivi de prestation client"
         description="Comptes rendus de visite client, remplis par les Business Managers."
         isoClause="ISO 9001 §9.1.2 / §8"
-        help="Lien à partager aux BM (mail, signature, QR code). Ils remplissent le compte rendu sur le terrain, sans connexion. Les réponses alimentent automatiquement la satisfaction et les réclamations."
+        help="Lien à partager aux BM (mail, signature, QR code) : ils remplissent le compte rendu sur le terrain, sans connexion. Les réponses alimentent la satisfaction et les réclamations. NPS = % promoteurs (9-10) − % détracteurs (0-6), les notes 7-8 étant neutres (une note de 8 donne donc un NPS de 0)."
       >
-        <ExportButton rows={items} />
+        <ExportButton
+          rows={items.map((s) => ({
+            est_reclamation: s.est_reclamation,
+            reponses: (s.reponses ?? null) as Record<string, unknown> | null,
+          }))}
+        />
       </PageHeader>
 
       <Card className="mb-6">
@@ -161,8 +167,22 @@ export default async function SuiviPrestationPage() {
             <TableBody>
               {items.map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell>{formatDate(s.date_suivi)}</TableCell>
-                  <TableCell className="font-medium">{s.client ?? "—"}</TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/suivi-prestation/${s.id}`}
+                      className="hover:text-primary hover:underline"
+                    >
+                      {formatDate(s.date_suivi)}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/suivi-prestation/${s.id}`}
+                      className="hover:text-primary hover:underline"
+                    >
+                      {s.client ?? "—"}
+                    </Link>
+                  </TableCell>
                   <TableCell>{s.consultant ?? "—"}</TableCell>
                   <TableCell>{s.satisfaction_globale ?? "—"}</TableCell>
                   <TableCell>{s.nps ?? "—"}</TableCell>
