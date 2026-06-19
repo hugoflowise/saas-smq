@@ -162,7 +162,7 @@ export default async function ObjectifsPage() {
                           <span className="text-muted-foreground">Cible : {o.cible_chiffree}</span>
                         ) : null}
                         <span className="text-status-pa">
-                          À chiffrer — ouvrez l'objectif pour définir la cible
+                          À chiffrer · ouvrez l'objectif pour définir la cible
                         </span>
                       </div>
                     )}

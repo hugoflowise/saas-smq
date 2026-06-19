@@ -143,7 +143,7 @@ export default async function DashboardPage() {
       AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? "";
     echeances.push({
       date: a.date_prevue as string,
-      label: `Audit ${t} — ${a.perimetre ?? a.organisme ?? a.reference}`,
+      label: `Audit ${t} · ${a.perimetre ?? a.organisme ?? a.reference}`,
       href: `/audits/${a.id}`,
     });
   }
@@ -157,14 +157,14 @@ export default async function DashboardPage() {
   for (const r of roAvenir.data ?? []) {
     echeances.push({
       date: r.date_revue as string,
-      label: `Revue R&O — ${r.intitule}`,
+      label: `Revue R&O · ${r.intitule}`,
       href: `/risques/${r.id}`,
     });
   }
   for (const a of actionsAvenir.data ?? []) {
     echeances.push({
       date: a.date_prevue as string,
-      label: `Action — ${a.description_courte}`,
+      label: `Action · ${a.description_courte}`,
       href: `/actions/${a.id}`,
     });
   }

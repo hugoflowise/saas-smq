@@ -99,7 +99,7 @@ export default async function NcDetailPage({
         {backLabel}
       </Link>
 
-      <PageHeader title={`${nc.reference} — ${nc.intitule}`}>
+      <PageHeader title={`${nc.reference} · ${nc.intitule}`}>
         <NcDialog
           processusOptions={processusOptions ?? []}
           nc={{
@@ -141,7 +141,7 @@ export default async function NcDetailPage({
         <TabsContent value="causes">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Analyse des causes — 5 pourquoi</CardTitle>
+              <CardTitle className="text-base">Analyse des causes · 5 pourquoi</CardTitle>
             </CardHeader>
             <CardContent>
               <NcCauses ncId={nc.id} initial={causesInitial} />

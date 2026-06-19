@@ -92,7 +92,7 @@ export function JalonDialog({ jalon }: { jalon?: JalonRow }) {
               name="libelle"
               required
               defaultValue={jalon?.libelle ?? ""}
-              placeholder="Audit de certification — Stage 2"
+              placeholder="Audit de certification · Stage 2"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -140,7 +140,7 @@ export function JalonDialog({ jalon }: { jalon?: JalonRow }) {
               name="description"
               rows={3}
               defaultValue={jalon?.description ?? ""}
-              placeholder="Ex. 11 NC majeures identifiées — plan d'action lancé"
+              placeholder="Ex. 11 NC majeures identifiées · plan d'action lancé"
             />
           </div>
           <Button type="submit" disabled={pending} className="mt-1">

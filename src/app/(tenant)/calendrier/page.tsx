@@ -50,7 +50,7 @@ export default async function CalendrierPage() {
   for (const a of audits.data ?? []) {
     events.push({
       date: a.date_prevue as string,
-      label: `Audit ${AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""} — ${a.perimetre ?? a.organisme ?? a.reference}`,
+      label: `Audit ${AUDIT_TYPE_LABELS[a.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""} · ${a.perimetre ?? a.organisme ?? a.reference}`,
       type: "Audit",
       href: `/audits/${a.id}`,
     });
@@ -66,7 +66,7 @@ export default async function CalendrierPage() {
   for (const a of actions.data ?? []) {
     events.push({
       date: a.date_prevue as string,
-      label: `${a.reference} — ${a.description_courte}`,
+      label: `${a.reference} · ${a.description_courte}`,
       type: "Action",
       href: `/actions/${a.id}`,
     });
@@ -74,7 +74,7 @@ export default async function CalendrierPage() {
   for (const r of ros.data ?? []) {
     events.push({
       date: r.date_revue as string,
-      label: `Revue R&O — ${r.intitule}`,
+      label: `Revue R&O · ${r.intitule}`,
       type: "R&O",
       href: "/risques",
     });

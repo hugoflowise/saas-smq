@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
 import { CopyField } from "@/app/(tenant)/parametres/copy-field";
 import { EmptyState } from "@/components/empty-state";
@@ -108,6 +109,15 @@ export default async function SuiviPrestationPage() {
           <QrCode value={lien} />
           <div className="min-w-0 flex-1">
             <CopyField label="Lien à partager aux BM" value={lien} />
+            <a
+              href={lien}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex h-9 items-center gap-2 rounded-lg border px-3 font-medium text-sm transition-colors hover:bg-muted"
+            >
+              <ExternalLink className="size-4" />
+              Ouvrir le formulaire
+            </a>
             <p className="mt-2 text-muted-foreground text-xs">
               Aucune connexion requise : le BM ouvre le lien (ou scanne le QR) sur son téléphone et
               remplit le compte rendu.

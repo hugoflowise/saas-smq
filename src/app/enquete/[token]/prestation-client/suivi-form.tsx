@@ -364,7 +364,7 @@ export function SuiviForm({ token, nomSociete }: { token: string; nomSociete: st
         {pending ? "Envoi…" : "Envoyer le compte rendu"}
       </Button>
       <p className="text-center text-muted-foreground text-xs">
-        Compte rendu de suivi de prestation — {nomSociete}
+        Compte rendu de suivi de prestation · {nomSociete}
       </p>
     </form>
   );

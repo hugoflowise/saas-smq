@@ -9,9 +9,9 @@ export const ACTION_STATUT_LABELS = {
 } as const;
 
 export const ACTION_PRIORITE_LABELS = {
-  p1: "P1 — Haute",
-  p2: "P2 — Moyenne",
-  p3: "P3 — Basse",
+  p1: "P1 · Haute",
+  p2: "P2 · Moyenne",
+  p3: "P3 · Basse",
 } as const;
 
 export const ACTION_TYPE_LABELS = {
@@ -64,8 +64,8 @@ export const NC_STATUT_LABELS = {
   analysee: "Analysée",
   action_definie: "Action définie",
   cloturee: "Clôturée",
-  efficace: "Clôturée — efficace",
-  inefficace: "Clôturée — inefficace",
+  efficace: "Clôturée · efficace",
+  inefficace: "Clôturée · inefficace",
 } as const;
 
 export const NC_STATUTS = Object.keys(NC_STATUT_LABELS) as (keyof typeof NC_STATUT_LABELS)[];
