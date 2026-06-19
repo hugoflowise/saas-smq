@@ -53,7 +53,7 @@ export function CreateProcedureDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button>Nouvelle procédure</Button>} />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Nouvelle procédure</DialogTitle>
         </DialogHeader>

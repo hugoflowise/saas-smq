@@ -48,7 +48,7 @@ export function AuditDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button>Nouvel audit</Button>} />
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Planifier un audit</DialogTitle>
           <DialogDescription>

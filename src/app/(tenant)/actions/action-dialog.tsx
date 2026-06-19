@@ -125,7 +125,7 @@ export function ActionDialog({ processusOptions, action }: Props) {
           )
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Modifier l'action" : "Nouvelle action"}</DialogTitle>
         </DialogHeader>

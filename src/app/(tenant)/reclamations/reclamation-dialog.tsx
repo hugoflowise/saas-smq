@@ -78,7 +78,7 @@ export function ReclamationDialog({ reclamation }: { reclamation?: ReclamationRo
           )
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Modifier la réclamation" : "Nouvelle réclamation"}</DialogTitle>
         </DialogHeader>

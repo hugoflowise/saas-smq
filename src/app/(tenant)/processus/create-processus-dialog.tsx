@@ -50,7 +50,7 @@ export function CreateProcessusDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button>Nouveau processus</Button>} />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Nouveau processus</DialogTitle>
           <DialogDescription>Ajoutez un processus à la cartographie.</DialogDescription>

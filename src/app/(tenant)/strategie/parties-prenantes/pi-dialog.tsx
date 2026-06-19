@@ -72,7 +72,7 @@ export function PiDialog({ pi }: { pi?: PiRow }) {
           )
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Modifier" : "Nouvelle partie prenante"}</DialogTitle>
         </DialogHeader>

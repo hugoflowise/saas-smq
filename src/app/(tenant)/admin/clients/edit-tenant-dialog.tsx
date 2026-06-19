@@ -87,7 +87,7 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Modifier le client</DialogTitle>
           <DialogDescription>{tenant.nom_societe}</DialogDescription>
