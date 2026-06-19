@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
+import { DocumentsFilters } from "./documents-filters";
 
 const REVISION_ALERTE_JOURS = 60;
 
@@ -28,6 +29,7 @@ type MatriceRow = {
   key: string;
   code: string | null;
   titre: string;
+  typeToken: string;
   typeLabel: string;
   version: string | null;
   statut: string;
@@ -39,8 +41,13 @@ type MatriceRow = {
   registre: DocumentRow | null;
 };
 
-export default async function DocumentsPage() {
+export default async function DocumentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; statut?: string }>;
+}) {
   const ctx = await getTenantContext();
+  const { type: typeFiltre, statut: statutFiltre } = await searchParams;
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
@@ -121,6 +128,7 @@ export default async function DocumentsPage() {
       key: "politique",
       code: "POL",
       titre: "Politique qualité",
+      typeToken: "politique",
       typeLabel: "Politique",
       version: politique.version_actuelle_id
         ? (versionById.get(politique.version_actuelle_id) ?? null)
@@ -140,6 +148,7 @@ export default async function DocumentsPage() {
       key: `proc-${p.id}`,
       code: null,
       titre: p.titre,
+      typeToken: "procedure",
       typeLabel: "Procédure",
       version: p.version_actuelle_id ? (versionById.get(p.version_actuelle_id) ?? null) : null,
       statut: statutDocumentNatif(p.statut),
@@ -157,6 +166,7 @@ export default async function DocumentsPage() {
       key: `reg-${d.id}`,
       code: d.code,
       titre: d.titre,
+      typeToken: d.type,
       typeLabel: DOC_MAITRISE_TYPE_LABELS[d.type] ?? d.type,
       version: d.version,
       statut: d.statut,
@@ -181,6 +191,19 @@ export default async function DocumentsPage() {
     { label: "À réviser (≤ 60 j)", value: aReviser, cls: "text-status-pa" },
   ];
 
+  // Types présents (pour le filtre), dans l'ordre d'apparition.
+  const typeOptions: { value: string; label: string }[] = [];
+  for (const r of rows) {
+    if (!typeOptions.some((t) => t.value === r.typeToken)) {
+      typeOptions.push({ value: r.typeToken, label: r.typeLabel });
+    }
+  }
+
+  const visibleRows = rows.filter(
+    (r) =>
+      (!typeFiltre || r.typeToken === typeFiltre) && (!statutFiltre || r.statut === statutFiltre),
+  );
+
   return (
     <div className="w-full">
       <PageHeader
@@ -189,7 +212,16 @@ export default async function DocumentsPage() {
         isoClause="ISO 9001 §7.5"
         help="Tenez à jour la liste de vos informations documentées : codification, version en vigueur, statut, qui approuve, et date de révision prévue. La politique et les procédures rédigées dans l'application y figurent automatiquement ; ajoutez ici vos autres documents (manuel, instructions, enregistrements, documents externes)."
       >
-        <DocumentDialog processus={processusList} />
+        <div className="flex flex-wrap items-center gap-2">
+          {rows.length > 0 ? (
+            <DocumentsFilters
+              types={typeOptions}
+              type={typeFiltre ?? null}
+              statut={statutFiltre ?? null}
+            />
+          ) : null}
+          <DocumentDialog processus={processusList} />
+        </div>
       </PageHeader>
 
       {rows.length > 0 ? (
@@ -226,7 +258,14 @@ export default async function DocumentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((r) => {
+              {visibleRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
+                    Aucun document ne correspond aux filtres.
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {visibleRows.map((r) => {
                 const enRetard = r.revisionPrevue && r.revisionPrevue < today;
                 const bientot = r.revisionPrevue && !enRetard && r.revisionPrevue <= alerteDate;
                 return (
