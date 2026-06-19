@@ -5,12 +5,14 @@ import { CreateProcedureDialog } from "@/app/(tenant)/documentation/procedures/c
 import { CreateIndicateurDialog } from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
 import { NcDialog } from "@/app/(tenant)/nc/nc-dialog";
 import { RoDialog } from "@/app/(tenant)/risques/ro-dialog";
+import { ObjectifDialog } from "@/app/(tenant)/strategie/objectifs/objectif-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/format";
+import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { EditProcessusDialog } from "./edit-processus-dialog";
@@ -79,7 +81,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   if (!processus) notFound();
 
-  const [procedures, indicateurs, risques, ncs, allProcessus] = await Promise.all([
+  const [procedures, indicateurs, risques, ncs, objectifs, allProcessus] = await Promise.all([
     supabase
       .from("procedures")
       .select("id, titre, statut")
@@ -104,6 +106,15 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .eq("tenant_id", tid)
       .eq("processus_concerne", id)
       .order("date_constat", { ascending: false }),
+    supabase
+      .from("objectifs_qualite")
+      .select(
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id",
+      )
+      .eq("tenant_id", tid)
+      .eq("processus_id", id)
+      .is("deleted_at", null)
+      .order("created_at"),
     supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
   ]);
 
@@ -122,6 +133,19 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   }
 
   const processusOptions = allProcessus.data ?? [];
+  const indicateurOptions = indList.map((i) => ({ id: i.id, nom: i.nom }));
+
+  const objList = (objectifs.data ?? []).map((o) => {
+    const valeurEffective =
+      o.indicateur_id && lastVal.has(o.indicateur_id)
+        ? (lastVal.get(o.indicateur_id) ?? null)
+        : o.valeur_actuelle;
+    return {
+      ...o,
+      valeurEffective,
+      pct: objectifProgress(valeurEffective, o.valeur_cible, o.sens),
+    };
+  });
 
   const procItems: RelatedItem[] = (procedures.data ?? []).map((p) => ({
     id: p.id,
@@ -162,6 +186,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       <Tabs defaultValue="apercu">
         <TabsList>
           <TabsTrigger value="apercu">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="objectifs">Objectifs ({objList.length})</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
           <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
@@ -229,6 +254,86 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               </div>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="objectifs" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <ObjectifDialog
+              processusOptions={processusOptions}
+              indicateurOptions={indicateurOptions}
+              presetProcessusId={id}
+            />
+          </div>
+          {objList.length === 0 ? (
+            <EmptyState
+              title="Aucun objectif"
+              description="Rattachez un objectif qualité à ce processus pour suivre sa performance."
+            />
+          ) : (
+            <Card>
+              <CardContent className="py-2">
+                <ul className="flex flex-col divide-y">
+                  {objList.map((o) => (
+                    <li key={o.id} className="flex items-center justify-between gap-4 py-3">
+                      <div className="min-w-0">
+                        <Link
+                          href="/strategie/objectifs"
+                          className="font-medium text-sm hover:text-primary"
+                        >
+                          {o.intitule}
+                        </Link>
+                        {o.indicateur_id ? (
+                          <Link
+                            href={`/indicateurs/${o.indicateur_id}${from}`}
+                            className="block text-primary text-xs hover:underline"
+                          >
+                            ↳ Indicateur de mesure
+                          </Link>
+                        ) : null}
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        {o.valeur_cible !== null ? (
+                          <div className="flex w-40 flex-col gap-1">
+                            <div className="flex items-center justify-between gap-2 text-xs">
+                              <span className="text-muted-foreground">
+                                {o.valeurEffective ?? "—"} / {o.valeur_cible} {o.unite ?? ""}
+                              </span>
+                              {o.pct !== null ? (
+                                <span className="font-medium">{o.pct}%</span>
+                              ) : null}
+                            </div>
+                            {o.pct !== null ? (
+                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    o.pct >= 100
+                                      ? "bg-status-conforme"
+                                      : o.pct >= 60
+                                        ? "bg-status-pf"
+                                        : o.pct >= 30
+                                          ? "bg-status-pa"
+                                          : "bg-status-nc-mineure"
+                                  }`}
+                                  style={{ width: `${o.pct}%` }}
+                                />
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span className="text-status-pa text-xs">À chiffrer</span>
+                        )}
+                        <ObjectifDialog
+                          objectif={o}
+                          processusOptions={processusOptions}
+                          indicateurOptions={indicateurOptions}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="procedures" className="flex flex-col gap-3">

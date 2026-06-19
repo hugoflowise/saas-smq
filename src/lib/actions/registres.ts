@@ -167,6 +167,7 @@ const objBase = {
   unite: z.string().trim().optional(),
   sens: z.enum(["hausse", "baisse"]).optional(),
   processusId: z.string().uuid().optional(),
+  indicateurId: z.string().uuid().optional(),
 };
 const objCreate = z.object(objBase);
 const objUpdate = z.object({ id: z.string().uuid(), ...objBase });
@@ -185,6 +186,7 @@ function objPayload(d: z.infer<typeof objCreate>) {
     unite: d.unite ?? null,
     sens: d.sens ?? "hausse",
     processus_id: d.processusId ?? null,
+    indicateur_id: d.indicateurId ?? null,
   };
 }
 
