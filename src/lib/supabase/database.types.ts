@@ -565,6 +565,79 @@ export type Database = {
           },
         ]
       }
+      enquetes_satisfaction: {
+        Row: {
+          client: string | null
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_reponse: string
+          deleted_at: string | null
+          est_reclamation: boolean
+          id: string
+          note_recommandation: number | null
+          note_satisfaction: number | null
+          source: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          client?: string | null
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_reponse?: string
+          deleted_at?: string | null
+          est_reclamation?: boolean
+          id?: string
+          note_recommandation?: number | null
+          note_satisfaction?: number | null
+          source?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          client?: string | null
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_reponse?: string
+          deleted_at?: string | null
+          est_reclamation?: boolean
+          id?: string
+          note_recommandation?: number | null
+          note_satisfaction?: number | null
+          source?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enquetes_satisfaction_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enquetes_satisfaction_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enquetes_satisfaction_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicateurs: {
         Row: {
           boond_endpoint: string | null
