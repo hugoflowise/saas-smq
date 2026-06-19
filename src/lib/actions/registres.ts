@@ -70,6 +70,34 @@ export async function updateReclamationAction(input: unknown): Promise<ActionRes
   return { ok: true };
 }
 
+const recQuickSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["recue", "analysee", "traitee", "cloturee"]).optional(),
+  gravite: z.enum(["mineure", "majeure", "critique"]).optional(),
+});
+
+/** Mise à jour rapide d'une réclamation depuis le tableau (édition inline). */
+export async function quickUpdateReclamationAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = recQuickSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const patch: Database["public"]["Tables"]["reclamations"]["Update"] = { updated_by: c.userId };
+  if (d.statut !== undefined) patch.statut = d.statut;
+  if (d.gravite !== undefined) patch.gravite = d.gravite;
+
+  const { error } = await c.supabase
+    .from("reclamations")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/reclamations");
+  return { ok: true };
+}
+
 // ------------------------------------------------------------------- Veille
 const veilleBase = {
   intitule: z.string().trim().min(2, "Intitulé requis."),
