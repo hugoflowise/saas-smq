@@ -159,6 +159,10 @@ export default async function ModeAuditPage() {
     .from("enquetes_satisfaction")
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tid);
+  const fournisseurs = await supabase
+    .from("fournisseurs")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tid);
 
   const chapitres: { num: string; titre: string; checks: Check[] }[] = [
     {
@@ -248,6 +252,12 @@ export default async function ModeAuditPage() {
           value: `${count(reclamationsOuvertes)} ouverte(s) / ${count(reclamationsTotal)}`,
           ok: true,
           href: "/reclamations",
+        },
+        {
+          label: "Fournisseurs évalués (§8.4)",
+          value: `${count(fournisseurs)}`,
+          ok: count(fournisseurs) > 0,
+          href: "/fournisseurs",
         },
       ],
     },
