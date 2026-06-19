@@ -326,6 +326,82 @@ export type Database = {
           },
         ]
       }
+      communications: {
+        Row: {
+          audience: string | null
+          canal: Database["public"]["Enums"]["communication_canal"]
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisee: string | null
+          deleted_at: string | null
+          id: string
+          message: string | null
+          statut: Database["public"]["Enums"]["communication_statut"]
+          sujet: string
+          tenant_id: string
+          type: Database["public"]["Enums"]["communication_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audience?: string | null
+          canal?: Database["public"]["Enums"]["communication_canal"]
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          id?: string
+          message?: string | null
+          statut?: Database["public"]["Enums"]["communication_statut"]
+          sujet: string
+          tenant_id: string
+          type?: Database["public"]["Enums"]["communication_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audience?: string | null
+          canal?: Database["public"]["Enums"]["communication_canal"]
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          id?: string
+          message?: string | null
+          statut?: Database["public"]["Enums"]["communication_statut"]
+          sujet?: string
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["communication_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conformite_evaluation: {
         Row: {
           commentaire: string | null
@@ -1964,6 +2040,21 @@ export type Database = {
         | "rapport_redige"
         | "cloture"
       audit_type: "interne" | "externe" | "fournisseur"
+      communication_canal:
+        | "email"
+        | "intranet"
+        | "affichage"
+        | "reunion"
+        | "courrier"
+        | "autre"
+      communication_statut: "planifiee" | "realisee"
+      communication_type:
+        | "note_interne"
+        | "communique"
+        | "affichage"
+        | "reunion"
+        | "newsletter"
+        | "autre"
       cotation_conformite:
         | "non_evalue"
         | "conforme"
@@ -2212,6 +2303,23 @@ export const Constants = {
         "cloture",
       ],
       audit_type: ["interne", "externe", "fournisseur"],
+      communication_canal: [
+        "email",
+        "intranet",
+        "affichage",
+        "reunion",
+        "courrier",
+        "autre",
+      ],
+      communication_statut: ["planifiee", "realisee"],
+      communication_type: [
+        "note_interne",
+        "communique",
+        "affichage",
+        "reunion",
+        "newsletter",
+        "autre",
+      ],
       cotation_conformite: [
         "non_evalue",
         "conforme",
