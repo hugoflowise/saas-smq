@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AuditActions } from "./audit-actions";
 import { AuditEditForm } from "./audit-edit-form";
+import { AuditGrille } from "./audit-grille";
 
 export default async function AuditDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,6 +34,13 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
     .select("id, nom")
     .eq("tenant_id", tid)
     .order("ordre_affichage", { ascending: true });
+
+  const { data: questions } = await supabase
+    .from("audit_questions")
+    .select("id, reference_iso, question, reponse, constat")
+    .eq("audit_id", id)
+    .eq("tenant_id", tid)
+    .order("ordre", { ascending: true });
 
   const { data: links } = await supabase
     .from("audit_actions")
@@ -68,6 +76,15 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
       <Card className="mb-6">
         <CardContent className="pt-6">
           <AuditEditForm audit={audit} processusOptions={processus ?? []} />
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Grille d'audit</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AuditGrille auditId={audit.id} questions={questions ?? []} />
         </CardContent>
       </Card>
 

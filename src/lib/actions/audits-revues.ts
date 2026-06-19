@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -88,6 +89,128 @@ export async function updateAuditAction(input: unknown): Promise<ActionResult> {
     .update({ ...auditPayload(parsed.data), updated_by: c.userId })
     .eq("id", parsed.data.id)
     .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/audits");
+  return { ok: true };
+}
+
+// ---------------------------------------------- Grille d'audit (questions)
+const COTATIONS = [
+  "non_evalue",
+  "conforme",
+  "point_fort",
+  "point_attention",
+  "nc_mineure",
+  "nc_majeure",
+  "non_applicable",
+] as const;
+
+const addQuestionSchema = z.object({
+  auditId: z.string().uuid(),
+  question: z.string().trim().min(2, "Question requise."),
+  referenceIso: z.string().trim().optional(),
+});
+
+export async function addAuditQuestionAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = addQuestionSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+
+  const { count } = await c.supabase
+    .from("audit_questions")
+    .select("id", { count: "exact", head: true })
+    .eq("audit_id", d.auditId);
+
+  const { error } = await c.supabase.from("audit_questions").insert({
+    tenant_id: c.tenantId,
+    audit_id: d.auditId,
+    question: d.question,
+    reference_iso: d.referenceIso ?? null,
+    ordre: count ?? 0,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/audits/${d.auditId}`);
+  return { ok: true };
+}
+
+const updateQuestionSchema = z.object({
+  id: z.string().uuid(),
+  auditId: z.string().uuid(),
+  reponse: z.enum(COTATIONS).optional(),
+  constat: z.string().trim().optional(),
+});
+
+export async function updateAuditQuestionAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = updateQuestionSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const patch: Database["public"]["Tables"]["audit_questions"]["Update"] = {};
+  if (d.reponse !== undefined) patch.reponse = d.reponse;
+  if (d.constat !== undefined) patch.constat = d.constat || null;
+
+  const { error } = await c.supabase
+    .from("audit_questions")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  // Pas de revalidatePath : édition inline, on garde la ligne en place.
+  return { ok: true };
+}
+
+export async function deleteAuditQuestionAction(
+  id: string,
+  auditId: string,
+): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const { error } = await c.supabase
+    .from("audit_questions")
+    .delete()
+    .eq("id", id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/audits/${auditId}`);
+  return { ok: true };
+}
+
+/** Initialise le programme annuel : 1 audit interne planifié par processus. */
+export async function generateAuditProgrammeAction(annee: number): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+
+  const { data: processus } = await c.supabase
+    .from("processus")
+    .select("id, nom")
+    .eq("tenant_id", c.tenantId)
+    .order("ordre_affichage", { ascending: true });
+  if (!processus || processus.length === 0) {
+    return { ok: false, error: "Aucun processus à auditer. Créez d'abord la cartographie." };
+  }
+
+  const prefix = `AI-${annee}-`;
+  const { count } = await c.supabase
+    .from("audits_internes")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", c.tenantId)
+    .ilike("reference", `${prefix}%`);
+
+  const rows = processus.map((p, i) => ({
+    tenant_id: c.tenantId,
+    reference: `${prefix}${String((count ?? 0) + i + 1).padStart(3, "0")}`,
+    type_audit: "interne" as const,
+    perimetre: p.nom,
+    processus_audites: [p.id],
+    statut: "planifie" as const,
+    created_by: c.userId,
+  }));
+
+  const { error } = await c.supabase.from("audits_internes").insert(rows);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/audits");
   return { ok: true };
