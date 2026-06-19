@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { PerformanceTabs } from "@/components/performance-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -62,6 +63,7 @@ export default async function IndicateursPage() {
 
   return (
     <div className="w-full">
+      <PerformanceTabs />
       <PageHeader
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."
