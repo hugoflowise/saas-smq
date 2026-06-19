@@ -22,7 +22,7 @@ export default async function CalendrierPage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
-  const [audits, revues, actions, ros] = await Promise.all([
+  const [audits, revues, actions, ros, communications, jalons] = await Promise.all([
     supabase
       .from("audits_internes")
       .select("id, reference, type_audit, perimetre, organisme, date_prevue")
@@ -44,6 +44,16 @@ export default async function CalendrierPage() {
       .select("id, intitule, date_revue")
       .eq("tenant_id", tid)
       .not("date_revue", "is", null),
+    supabase
+      .from("communications")
+      .select("id, sujet, date_prevue")
+      .eq("tenant_id", tid)
+      .not("date_prevue", "is", null),
+    supabase
+      .from("jalons_certification")
+      .select("id, libelle, date_jalon")
+      .eq("tenant_id", tid)
+      .not("date_jalon", "is", null),
   ]);
 
   const events: CalEvent[] = [];
@@ -79,12 +89,29 @@ export default async function CalendrierPage() {
       href: "/risques",
     });
   }
+  for (const c of communications.data ?? []) {
+    events.push({
+      date: c.date_prevue as string,
+      label: c.sujet,
+      type: "Communication",
+      href: "/communications",
+    });
+  }
+  for (const j of jalons.data ?? []) {
+    events.push({
+      date: j.date_jalon as string,
+      label: j.libelle,
+      type: "Certification",
+      href: "/certification",
+    });
+  }
 
   return (
     <div className="w-full">
       <PageHeader
         title="Calendrier qualité"
-        description="Échéances et événements agrégés (audits, revues, actions, R&O)."
+        description="Échéances et événements agrégés : audits, revues, actions, R&O, communications, certification."
+        help="Vue consolidée des échéances de tous les modules. Filtrez par type d'événement (couleurs) et basculez entre vue mois et liste. D'autres types (formations, EPI, habilitations, visites médicales…) viendront avec les données Boond."
       />
 
       {events.length === 0 ? (
