@@ -16,12 +16,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  confirmDocumentUploadAction,
   createDocumentMaitriseAction,
+  createDocumentUploadUrlAction,
   removeDocumentFichierAction,
   updateDocumentMaitriseAction,
-  uploadDocumentFichierAction,
 } from "@/lib/actions/documents-maitrise";
 import { DOC_MAITRISE_TYPE_LABELS } from "@/lib/documents";
+import { createClient } from "@/lib/supabase/client";
+
+const MAX_TAILLE = 10 * 1024 * 1024; // 10 Mo
 
 const SELECT_CLASS =
   "h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
@@ -59,8 +63,22 @@ export function DocumentDialog({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (file && file.size > MAX_TAILLE) {
+      toast.error("Fichier trop volumineux (max 10 Mo).");
+      return;
+    }
     setPending(true);
-    const f = new FormData(event.currentTarget);
+    try {
+      await doSubmit(event.currentTarget);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function doSubmit(formEl: HTMLFormElement) {
+    const f = new FormData(formEl);
     const data = {
       code: f.get("code") || undefined,
       titre: f.get("titre"),
@@ -79,7 +97,6 @@ export function DocumentDialog({
     if (isEdit && document) {
       const result = await updateDocumentMaitriseAction({ id: document.id, ...data });
       if (!result.ok) {
-        setPending(false);
         toast.error(result.error);
         return;
       }
@@ -87,29 +104,40 @@ export function DocumentDialog({
     } else {
       const result = await createDocumentMaitriseAction(data);
       if (!result.ok) {
-        setPending(false);
         toast.error(result.error);
         return;
       }
       docId = result.id;
     }
 
-    // Téléversement éventuel du fichier.
+    // Téléversement éventuel du fichier, directement vers Storage (URL signée).
     if (file && docId) {
-      const fd = new FormData();
-      fd.set("id", docId);
-      fd.set("file", file as Blob);
-      const up = await uploadDocumentFichierAction(fd);
-      if (!up.ok) {
-        setPending(false);
-        toast.error(`Document enregistré, mais fichier non envoyé : ${up.error}`);
+      const prep = await createDocumentUploadUrlAction(docId, file.name, file.size);
+      if (!prep.ok) {
+        toast.error(`Document enregistré, mais fichier non envoyé : ${prep.error}`);
+        setOpen(false);
+        router.refresh();
+        return;
+      }
+      const supabase = createClient();
+      const { error: upErr } = await supabase.storage
+        .from("documents")
+        .uploadToSignedUrl(prep.path, prep.token, file, { contentType: file.type || undefined });
+      if (upErr) {
+        toast.error(`Document enregistré, mais fichier non envoyé : ${upErr.message}`);
+        setOpen(false);
+        router.refresh();
+        return;
+      }
+      const conf = await confirmDocumentUploadAction(docId, prep.path, file.name, file.size);
+      if (!conf.ok) {
+        toast.error(`Fichier envoyé, mais non rattaché : ${conf.error}`);
         setOpen(false);
         router.refresh();
         return;
       }
     }
 
-    setPending(false);
     toast.success(isEdit ? "Document mis à jour." : "Document ajouté.");
     setOpen(false);
     router.refresh();

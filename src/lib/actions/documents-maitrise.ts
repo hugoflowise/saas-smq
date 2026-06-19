@@ -71,33 +71,50 @@ export async function createDocumentMaitriseAction(input: unknown): Promise<Crea
   return { ok: true, id: data.id };
 }
 
-/** Téléverse (ou remplace) le fichier rattaché à un document. */
-export async function uploadDocumentFichierAction(formData: FormData): Promise<ActionResult> {
+type UploadUrl = { ok: true; path: string; token: string } | { ok: false; error: string };
+
+/**
+ * Prépare une URL d'upload signée : le fichier est ensuite envoyé directement
+ * du navigateur vers Supabase Storage (évite la limite de taille des server
+ * actions / du corps de requête Vercel).
+ */
+export async function createDocumentUploadUrlAction(
+  id: string,
+  filename: string,
+  taille: number,
+): Promise<UploadUrl> {
   const ctx = await getTenantContext();
   if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  const id = String(formData.get("id") ?? "");
-  const file = formData.get("file");
   if (!id) return { ok: false, error: "Document introuvable." };
-  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Aucun fichier." };
-  if (file.size > MAX_TAILLE) return { ok: false, error: "Fichier trop volumineux (max 10 Mo)." };
+  if (taille > MAX_TAILLE) return { ok: false, error: "Fichier trop volumineux (max 10 Mo)." };
 
   const supabase = await createClient();
+  const safeName = (filename || "fichier").replace(/[^\w.\- ]/g, "_");
+  const path = `${ctx.effectiveTenantId}/${id}/${safeName}`;
+  const { data, error } = await supabase.storage.from("documents").createSignedUploadUrl(path, {
+    upsert: true,
+  });
+  if (error || !data) return { ok: false, error: error?.message ?? "Préparation impossible." };
+  return { ok: true, path: data.path, token: data.token };
+}
 
-  // Supprime un éventuel fichier précédent de chemin différent (évite les orphelins).
+/** Enregistre le fichier téléversé sur le document (et purge l'ancien si besoin). */
+export async function confirmDocumentUploadAction(
+  id: string,
+  path: string,
+  nom: string,
+  taille: number,
+): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const supabase = await createClient();
+
   const { data: existing } = await supabase
     .from("documents_maitrise")
     .select("fichier_path")
     .eq("id", id)
     .eq("tenant_id", ctx.effectiveTenantId)
     .maybeSingle();
-
-  const safeName = file.name.replace(/[^\w.\- ]/g, "_");
-  const path = `${ctx.effectiveTenantId}/${id}/${safeName}`;
-  const { error: upErr } = await supabase.storage
-    .from("documents")
-    .upload(path, file, { upsert: true, contentType: file.type || undefined });
-  if (upErr) return { ok: false, error: upErr.message };
-
   if (existing?.fichier_path && existing.fichier_path !== path) {
     await supabase.storage.from("documents").remove([existing.fichier_path]);
   }
@@ -106,8 +123,8 @@ export async function uploadDocumentFichierAction(formData: FormData): Promise<A
     .from("documents_maitrise")
     .update({
       fichier_path: path,
-      fichier_nom: file.name,
-      fichier_taille: file.size,
+      fichier_nom: nom,
+      fichier_taille: taille,
       updated_by: ctx.userId,
     })
     .eq("id", id)
