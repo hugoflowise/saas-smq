@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateRoStatutAction } from "@/lib/actions/risques";
@@ -16,7 +15,6 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 export function RoStatutCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -28,8 +26,6 @@ export function RoStatutCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }

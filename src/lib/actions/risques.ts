@@ -33,7 +33,7 @@ export async function quickUpdateRoStatutAction(input: unknown): Promise<ActionR
     .eq("id", parsed.data.id)
     .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/risques");
+  // Pas de revalidatePath : on garde la ligne en place (pas de re-tri immédiat).
   return { ok: true };
 }
 

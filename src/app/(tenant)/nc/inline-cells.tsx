@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateNcAction } from "@/lib/actions/nc";
@@ -11,7 +10,6 @@ const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
 
 export function NcStatutCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -23,8 +21,6 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }
@@ -47,7 +43,6 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
 }
 
 export function NcGraviteCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -59,8 +54,6 @@ export function NcGraviteCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }

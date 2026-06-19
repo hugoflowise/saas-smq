@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateActionAction } from "@/lib/actions/plan-actions";
@@ -34,7 +33,6 @@ const PRIORITE_CLASS: Record<string, string> = {
 
 /** Sélecteur de statut éditable directement dans le tableau. */
 export function StatutCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -46,8 +44,6 @@ export function StatutCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }
@@ -71,7 +67,6 @@ export function StatutCell({ id, value }: { id: string; value: string }) {
 
 /** Sélecteur de priorité éditable directement dans le tableau. */
 export function PrioriteCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -83,8 +78,6 @@ export function PrioriteCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }
@@ -108,7 +101,6 @@ export function PrioriteCell({ id, value }: { id: string; value: string }) {
 
 /** Sélecteur de cotation éditable directement dans le tableau. */
 export function CotationCell({ id, value }: { id: string; value: string | null }) {
-  const router = useRouter();
   const [val, setVal] = useState(value ?? "non_evalue");
   const [pending, startTransition] = useTransition();
 
@@ -120,8 +112,6 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
       if (!r.ok) {
         toast.error(r.error);
         setVal(value ?? "non_evalue");
-      } else {
-        router.refresh();
       }
     });
   }
@@ -145,7 +135,6 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
 
 /** Champ d'échéance éditable directement dans le tableau. */
 export function EcheanceCell({ id, value }: { id: string; value: string | null }) {
-  const router = useRouter();
   const [val, setVal] = useState(value ?? "");
   const [pending, startTransition] = useTransition();
 
@@ -157,8 +146,6 @@ export function EcheanceCell({ id, value }: { id: string; value: string | null }
       if (!r.ok) {
         toast.error(r.error);
         setVal(value ?? "");
-      } else {
-        router.refresh();
       }
     });
   }
