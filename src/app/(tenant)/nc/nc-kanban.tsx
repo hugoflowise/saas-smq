@@ -36,13 +36,13 @@ function Card({ nc }: { nc: KanbanNc }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`cursor-grab touch-none rounded-md border bg-card px-3 py-2 text-sm shadow-sm active:cursor-grabbing ${
-        isDragging ? "opacity-50" : ""
+      className={`cursor-grab touch-none rounded-xl bg-card px-3.5 py-3 text-sm shadow-soft ring-1 ring-foreground/5 transition-shadow hover:ring-foreground/10 active:cursor-grabbing ${
+        isDragging ? "opacity-60" : ""
       }`}
     >
-      <p className="font-mono text-muted-foreground text-xs">{nc.reference}</p>
-      <p className="mt-0.5 font-medium">{nc.intitule}</p>
-      <p className="mt-1 text-muted-foreground text-xs">{NC_GRAVITE_LABELS[nc.gravite]}</p>
+      <p className="font-mono text-[11px] text-muted-foreground">{nc.reference}</p>
+      <p className="mt-1.5 font-medium leading-snug">{nc.intitule}</p>
+      <p className="mt-2 text-muted-foreground text-xs">{NC_GRAVITE_LABELS[nc.gravite]}</p>
     </div>
   );
 }
@@ -51,13 +51,18 @@ function Column({ statut, ncs }: { statut: Statut; ncs: KanbanNc[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
     <div className="flex w-72 shrink-0 flex-col">
-      <p className="mb-2 px-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {NC_STATUT_LABELS[statut]} <span className="text-foreground">{ncs.length}</span>
-      </p>
+      <div className="mb-2 flex items-center justify-between px-1.5">
+        <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          {NC_STATUT_LABELS[statut]}
+        </span>
+        <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-muted-foreground text-xs">
+          {ncs.length}
+        </span>
+      </div>
       <div
         ref={setNodeRef}
-        className={`flex min-h-32 flex-1 flex-col gap-2 rounded-lg border border-dashed p-2 transition-colors ${
-          isOver ? "border-primary bg-primary/5" : "bg-surface"
+        className={`flex min-h-32 flex-1 flex-col gap-2.5 rounded-2xl p-2.5 transition-colors ${
+          isOver ? "bg-primary/5 ring-1 ring-primary/30" : "bg-foreground/[0.025]"
         }`}
       >
         {ncs.map((nc) => (

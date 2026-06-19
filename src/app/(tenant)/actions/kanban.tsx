@@ -25,10 +25,10 @@ function formatDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString("fr-FR") : null;
 }
 
-const PRIORITE_BORDER: Record<string, string> = {
-  p1: "border-l-status-nc-mineure",
-  p2: "border-l-status-pa",
-  p3: "border-l-status-conforme",
+const PRIORITE_DOT: Record<string, string> = {
+  p1: "bg-status-nc-mineure",
+  p2: "bg-status-pa",
+  p3: "bg-status-conforme",
 };
 
 function Card({ action }: { action: KanbanAction }) {
@@ -43,31 +43,32 @@ function Card({ action }: { action: KanbanAction }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative rounded-md border border-l-4 bg-card shadow-sm ${PRIORITE_BORDER[action.priorite] ?? ""} ${isDragging ? "opacity-50" : ""}`}
+      className={`group relative rounded-xl bg-card shadow-soft ring-1 ring-foreground/5 transition-shadow hover:ring-foreground/10 ${isDragging ? "opacity-60" : ""}`}
     >
       <div
         {...listeners}
         {...attributes}
-        className="cursor-grab touch-none px-3 py-2 pr-9 text-sm active:cursor-grabbing"
+        className="cursor-grab touch-none px-3.5 py-3 pr-9 text-sm active:cursor-grabbing"
       >
-        <p className="font-mono text-muted-foreground text-xs">{action.reference}</p>
-        <p className="mt-0.5 font-medium">{action.description_courte}</p>
-        <div className="mt-1.5 flex items-center justify-between text-muted-foreground text-xs">
-          <span>
-            {ACTION_PRIORITE_LABELS[action.priorite as keyof typeof ACTION_PRIORITE_LABELS]}
-          </span>
-          {formatDate(action.date_prevue) ? (
-            <span className="rounded bg-muted px-1.5 py-0.5">
-              échéance {formatDate(action.date_prevue)}
-            </span>
-          ) : null}
+        <div className="flex items-center gap-2">
+          <span
+            className={`size-1.5 shrink-0 rounded-full ${PRIORITE_DOT[action.priorite] ?? "bg-muted-foreground"}`}
+            title={ACTION_PRIORITE_LABELS[action.priorite as keyof typeof ACTION_PRIORITE_LABELS]}
+          />
+          <p className="font-mono text-[11px] text-muted-foreground">{action.reference}</p>
         </div>
+        <p className="mt-1.5 font-medium leading-snug">{action.description_courte}</p>
+        {formatDate(action.date_prevue) ? (
+          <p className="mt-2 text-muted-foreground text-xs">
+            Échéance {formatDate(action.date_prevue)}
+          </p>
+        ) : null}
       </div>
       <Link
         href={`/actions/${action.id}`}
         aria-label="Ouvrir la fiche"
         onPointerDown={(e) => e.stopPropagation()}
-        className="absolute top-1.5 right-1.5 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="absolute top-2 right-2 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
       >
         <ArrowUpRight className="size-4" />
       </Link>
@@ -79,13 +80,18 @@ function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
     <div className="flex w-72 shrink-0 flex-col">
-      <p className="mb-2 px-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {ACTION_STATUT_LABELS[statut]} <span className="text-foreground">{actions.length}</span>
-      </p>
+      <div className="mb-2 flex items-center justify-between px-1.5">
+        <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+          {ACTION_STATUT_LABELS[statut]}
+        </span>
+        <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-muted-foreground text-xs">
+          {actions.length}
+        </span>
+      </div>
       <div
         ref={setNodeRef}
-        className={`flex min-h-32 flex-1 flex-col gap-2 rounded-lg border border-dashed p-2 transition-colors ${
-          isOver ? "border-primary bg-primary/5" : "bg-surface"
+        className={`flex min-h-32 flex-1 flex-col gap-2.5 rounded-2xl p-2.5 transition-colors ${
+          isOver ? "bg-primary/5 ring-1 ring-primary/30" : "bg-foreground/[0.025]"
         }`}
       >
         {actions.map((a) => (

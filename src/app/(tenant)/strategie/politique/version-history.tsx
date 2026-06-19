@@ -74,7 +74,7 @@ export function VersionHistory({ versions }: { versions: VersionItem[] }) {
                 </Button>
               }
             />
-            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+            <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-4xl">
               <DialogHeader>
                 <DialogTitle>
                   Politique qualité — {v.version} ({formatDate(v.approvedAt)})

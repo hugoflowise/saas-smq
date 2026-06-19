@@ -75,7 +75,7 @@ export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Modifier le processus</DialogTitle>
         </DialogHeader>

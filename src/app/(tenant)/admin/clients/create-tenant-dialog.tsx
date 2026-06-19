@@ -52,7 +52,7 @@ export function CreateTenantDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button>Nouveau client</Button>} />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Nouveau client</DialogTitle>
           <DialogDescription>Crée la société et le compte de son dirigeant.</DialogDescription>
