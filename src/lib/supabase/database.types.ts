@@ -2034,6 +2034,140 @@ export type Database = {
         }
         Relationships: []
       }
+      reunion_actions: {
+        Row: {
+          action_id: string
+          created_at: string
+          id: string
+          reunion_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          id?: string
+          reunion_id: string
+          tenant_id: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          id?: string
+          reunion_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunion_actions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunion_actions_reunion_id_fkey"
+            columns: ["reunion_id"]
+            isOneToOne: false
+            referencedRelation: "reunions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunion_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunions: {
+        Row: {
+          animateur: string | null
+          convoques: string | null
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisation: string | null
+          deleted_at: string | null
+          id: string
+          lieu: string | null
+          objectifs: string | null
+          points: Json
+          presents: string | null
+          statut: Database["public"]["Enums"]["reunion_statut"]
+          synthese: string | null
+          tenant_id: string
+          titre: string
+          type: Database["public"]["Enums"]["reunion_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          animateur?: string | null
+          convoques?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisation?: string | null
+          deleted_at?: string | null
+          id?: string
+          lieu?: string | null
+          objectifs?: string | null
+          points?: Json
+          presents?: string | null
+          statut?: Database["public"]["Enums"]["reunion_statut"]
+          synthese?: string | null
+          tenant_id: string
+          titre: string
+          type?: Database["public"]["Enums"]["reunion_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          animateur?: string | null
+          convoques?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisation?: string | null
+          deleted_at?: string | null
+          id?: string
+          lieu?: string | null
+          objectifs?: string | null
+          points?: Json
+          presents?: string | null
+          statut?: Database["public"]["Enums"]["reunion_statut"]
+          synthese?: string | null
+          tenant_id?: string
+          titre?: string
+          type?: Database["public"]["Enums"]["reunion_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revues_direction: {
         Row: {
           annee: number
@@ -2514,6 +2648,7 @@ export type Database = {
         | "r_o"
         | "reclamation"
         | "amelioration_continue"
+        | "reunion"
       action_priorite: "p1" | "p2" | "p3"
       action_statut:
         | "a_faire"
@@ -2631,6 +2766,8 @@ export type Database = {
         | "enquete"
         | "autre"
       reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
+      reunion_statut: "planifiee" | "terminee"
+      reunion_type: "comite_qhse" | "reunion_echange" | "revue" | "autre"
       revue_statut: "planifiee" | "realisee" | "cloturee"
       ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
       ro_type: "risque" | "opportunite"
@@ -2783,6 +2920,7 @@ export const Constants = {
         "r_o",
         "reclamation",
         "amelioration_continue",
+        "reunion",
       ],
       action_priorite: ["p1", "p2", "p3"],
       action_statut: [
@@ -2908,6 +3046,8 @@ export const Constants = {
       processus_type: ["pilotage", "realisation", "support"],
       reclamation_canal: ["mail", "tel", "visio", "audit", "enquete", "autre"],
       reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
+      reunion_statut: ["planifiee", "terminee"],
+      reunion_type: ["comite_qhse", "reunion_echange", "revue", "autre"],
       revue_statut: ["planifiee", "realisee", "cloturee"],
       ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
       ro_type: ["risque", "opportunite"],

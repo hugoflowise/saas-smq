@@ -14,6 +14,7 @@ import {
   ListChecks,
   Megaphone,
   MessageSquareWarning,
+  MessagesSquare,
   Milestone,
   Presentation,
   ScrollText,
@@ -44,6 +45,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
       { label: "Effectif & couverture", href: "/effectif", icon: UsersRound },
+      { label: "Réunions QHSE", href: "/reunions", icon: MessagesSquare },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
     ],
   },
