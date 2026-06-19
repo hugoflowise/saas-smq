@@ -53,9 +53,11 @@ function Card({ action }: { action: KanbanAction }) {
         <div className="flex items-center gap-2">
           <span
             className={`size-1.5 shrink-0 rounded-full ${PRIORITE_DOT[action.priorite] ?? "bg-muted-foreground"}`}
-            title={ACTION_PRIORITE_LABELS[action.priorite as keyof typeof ACTION_PRIORITE_LABELS]}
           />
-          <p className="font-mono text-[11px] text-muted-foreground">{action.reference}</p>
+          <span className="font-medium text-[11px] text-muted-foreground">
+            {ACTION_PRIORITE_LABELS[action.priorite as keyof typeof ACTION_PRIORITE_LABELS]}
+          </span>
+          <span className="font-mono text-[11px] text-muted-foreground/70">{action.reference}</span>
         </div>
         <p className="mt-1.5 font-medium leading-snug">{action.description_courte}</p>
         {formatDate(action.date_prevue) ? (
