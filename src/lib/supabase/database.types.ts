@@ -2513,6 +2513,80 @@ export type Database = {
           },
         ]
       }
+      suivis_consultant: {
+        Row: {
+          alerte: boolean
+          besoin_accompagnement: boolean | null
+          client: string | null
+          coherence_odm: boolean | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          habilitations: boolean | null
+          id: string
+          nom: string | null
+          note_qualite_suivi_manager: number | null
+          nps: number | null
+          poste: string | null
+          reponses: Json
+          satisfaction_globale: number | null
+          secteur_nucleaire: boolean | null
+          site_intervention: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          alerte?: boolean
+          besoin_accompagnement?: boolean | null
+          client?: string | null
+          coherence_odm?: boolean | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          habilitations?: boolean | null
+          id?: string
+          nom?: string | null
+          note_qualite_suivi_manager?: number | null
+          nps?: number | null
+          poste?: string | null
+          reponses?: Json
+          satisfaction_globale?: number | null
+          secteur_nucleaire?: boolean | null
+          site_intervention?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          alerte?: boolean
+          besoin_accompagnement?: boolean | null
+          client?: string | null
+          coherence_odm?: boolean | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          habilitations?: boolean | null
+          id?: string
+          nom?: string | null
+          note_qualite_suivi_manager?: number | null
+          nps?: number | null
+          poste?: string | null
+          reponses?: Json
+          satisfaction_globale?: number | null
+          secteur_nucleaire?: boolean | null
+          site_intervention?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suivis_consultant_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suivis_prestation: {
         Row: {
           client: string | null
