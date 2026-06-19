@@ -11,6 +11,7 @@ import {
   Gauge,
   LayoutDashboard,
   ListChecks,
+  Megaphone,
   MessageSquareWarning,
   Presentation,
   ScrollText,
@@ -55,6 +56,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Processus", href: "/processus", icon: FolderTree },
       { label: "Procédures", href: "/documentation/procedures", icon: FileText },
+      { label: "Communications", href: "/communications", icon: Megaphone },
     ],
   },
   {

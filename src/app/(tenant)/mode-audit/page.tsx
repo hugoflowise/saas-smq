@@ -151,6 +151,11 @@ export default async function ModeAuditPage() {
   const pctConforme = refCount > 0 ? Math.round((conformes / refCount) * 100) : 0;
   const politiePubliee = politique.data?.statut === "publiee";
 
+  const communications = await supabase
+    .from("communications")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tid);
+
   const chapitres: { num: string; titre: string; checks: Check[] }[] = [
     {
       num: "4",
@@ -221,6 +226,12 @@ export default async function ModeAuditPage() {
           value: `${count(indicateurs)}`,
           ok: count(indicateurs) > 0,
           href: "/indicateurs",
+        },
+        {
+          label: "Communications planifiées (§7.4)",
+          value: `${count(communications)}`,
+          ok: count(communications) > 0,
+          href: "/communications",
         },
       ],
     },
