@@ -143,7 +143,7 @@ export default async function ActionsPage({
       ) : vue === "kanban" ? (
         <ActionsKanban key={`${statut ?? ""}|${priorite ?? ""}|${filtre ?? ""}`} initial={items} />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

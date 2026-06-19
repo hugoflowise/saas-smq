@@ -112,7 +112,7 @@ export default async function ObjectifsPage() {
           description="Définissez les objectifs qualité (SMART) alignés sur la politique."
         />
       ) : (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>

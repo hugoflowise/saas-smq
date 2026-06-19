@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -75,13 +76,11 @@ export default async function CertificationPage() {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${TYPE_BADGE[j.type] ?? ""}`}
-                        >
+                        <span className={`${BADGE_BASE} ${TYPE_BADGE[j.type] ?? ""}`}>
                           {JALON_TYPE_LABELS[j.type] ?? j.type}
                         </span>
                         <span
-                          className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${
+                          className={`${BADGE_BASE} ${
                             done
                               ? "bg-status-conforme/15 text-status-conforme"
                               : "bg-muted text-muted-foreground"
