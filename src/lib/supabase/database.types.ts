@@ -231,6 +231,57 @@ export type Database = {
           },
         ]
       }
+      audit_questions: {
+        Row: {
+          audit_id: string
+          constat: string | null
+          created_at: string
+          id: string
+          ordre: number
+          question: string
+          reference_iso: string | null
+          reponse: Database["public"]["Enums"]["cotation_conformite"]
+          tenant_id: string
+        }
+        Insert: {
+          audit_id: string
+          constat?: string | null
+          created_at?: string
+          id?: string
+          ordre?: number
+          question: string
+          reference_iso?: string | null
+          reponse?: Database["public"]["Enums"]["cotation_conformite"]
+          tenant_id: string
+        }
+        Update: {
+          audit_id?: string
+          constat?: string | null
+          created_at?: string
+          id?: string
+          ordre?: number
+          question?: string
+          reference_iso?: string | null
+          reponse?: Database["public"]["Enums"]["cotation_conformite"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_questions_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits_internes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_questions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audits_internes: {
         Row: {
           auditeur_id: string | null

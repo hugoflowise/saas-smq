@@ -15,6 +15,7 @@ import { AUDIT_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { AuditDialog } from "./audit-dialog";
+import { ProgrammeButton } from "./programme-button";
 
 const FILTERS = [
   { value: "tous", label: "Tous" },
@@ -67,6 +68,7 @@ export default async function AuditsPage({
         title="Audits"
         description="Audits internes (ISO 9001 §9.2), externes (certification/client) et fournisseurs."
       >
+        <ProgrammeButton annee={new Date().getFullYear()} />
         <AuditDialog />
       </PageHeader>
 
