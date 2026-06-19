@@ -1493,12 +1493,17 @@ export type Database = {
           deleted_at: string | null
           exigences: string | null
           id: string
+          legitimite: number
           niveau_influence: Database["public"]["Enums"]["pi_influence"]
+          niveau_interaction: Database["public"]["Enums"]["pi_interaction"]
           nom: string
+          pouvoir: number
+          sphere: Database["public"]["Enums"]["pi_sphere"]
           tenant_id: string
           type: Database["public"]["Enums"]["pi_type"]
           updated_at: string
           updated_by: string | null
+          urgence: number
         }
         Insert: {
           attentes?: string | null
@@ -1507,12 +1512,17 @@ export type Database = {
           deleted_at?: string | null
           exigences?: string | null
           id?: string
+          legitimite?: number
           niveau_influence?: Database["public"]["Enums"]["pi_influence"]
+          niveau_interaction?: Database["public"]["Enums"]["pi_interaction"]
           nom: string
+          pouvoir?: number
+          sphere?: Database["public"]["Enums"]["pi_sphere"]
           tenant_id: string
           type?: Database["public"]["Enums"]["pi_type"]
           updated_at?: string
           updated_by?: string | null
+          urgence?: number
         }
         Update: {
           attentes?: string | null
@@ -1521,12 +1531,17 @@ export type Database = {
           deleted_at?: string | null
           exigences?: string | null
           id?: string
+          legitimite?: number
           niveau_influence?: Database["public"]["Enums"]["pi_influence"]
+          niveau_interaction?: Database["public"]["Enums"]["pi_interaction"]
           nom?: string
+          pouvoir?: number
+          sphere?: Database["public"]["Enums"]["pi_sphere"]
           tenant_id?: string
           type?: Database["public"]["Enums"]["pi_type"]
           updated_at?: string
           updated_by?: string | null
+          urgence?: number
         }
         Relationships: [
           {
@@ -1545,6 +1560,105 @@ export type Database = {
           },
           {
             foreignKeyName: "parties_interessees_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pi_attentes: {
+        Row: {
+          action: string | null
+          attente: string
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          integration_pa: boolean
+          maitrise: Database["public"]["Enums"]["pi_maitrise"]
+          moyens_maitrise: string | null
+          opportunite: string | null
+          ordre: number
+          partie_id: string
+          processus_id: string | null
+          risque: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          action?: string | null
+          attente: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          integration_pa?: boolean
+          maitrise?: Database["public"]["Enums"]["pi_maitrise"]
+          moyens_maitrise?: string | null
+          opportunite?: string | null
+          ordre?: number
+          partie_id: string
+          processus_id?: string | null
+          risque?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          action?: string | null
+          attente?: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          integration_pa?: boolean
+          maitrise?: Database["public"]["Enums"]["pi_maitrise"]
+          moyens_maitrise?: string | null
+          opportunite?: string | null
+          ordre?: number
+          partie_id?: string
+          processus_id?: string | null
+          risque?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pi_attentes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pi_attentes_partie_id_fkey"
+            columns: ["partie_id"]
+            isOneToOne: false
+            referencedRelation: "parties_interessees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pi_attentes_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pi_attentes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pi_attentes_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -2819,6 +2933,7 @@ export type Database = {
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       is_admin_flowise: { Args: never; Returns: boolean }
       jwt_tenant_id: { Args: never; Returns: string }
+      jwt_user_role: { Args: never; Returns: string }
     }
     Enums: {
       action_origine:
@@ -2942,6 +3057,9 @@ export type Database = {
       objectif_sens: "hausse" | "baisse"
       objectif_statut: "actif" | "atteint" | "abandonne"
       pi_influence: "faible" | "moyen" | "fort"
+      pi_interaction: "faible" | "moyenne" | "forte" | "elevee"
+      pi_maitrise: "maitrise" | "partiel" | "non_maitrise"
+      pi_sphere: "interne" | "externe"
       pi_type:
         | "client"
         | "fournisseur"
@@ -3237,6 +3355,9 @@ export const Constants = {
       objectif_sens: ["hausse", "baisse"],
       objectif_statut: ["actif", "atteint", "abandonne"],
       pi_influence: ["faible", "moyen", "fort"],
+      pi_interaction: ["faible", "moyenne", "forte", "elevee"],
+      pi_maitrise: ["maitrise", "partiel", "non_maitrise"],
+      pi_sphere: ["interne", "externe"],
       pi_type: [
         "client",
         "fournisseur",
