@@ -8,11 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
-import { NC_GRAVITE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { RecGraviteCell, RecStatutCell } from "./inline-cells";
 import { ReclamationDialog } from "./reclamation-dialog";
 
 const CANAL_LABELS: Record<string, string> = {
@@ -22,12 +21,6 @@ const CANAL_LABELS: Record<string, string> = {
   audit: "Audit",
   enquete: "Enquête",
   autre: "Autre",
-};
-const STATUT_LABELS: Record<string, string> = {
-  recue: "Reçue",
-  analysee: "Analysée",
-  traitee: "Traitée",
-  cloturee: "Clôturée",
 };
 
 export default async function ReclamationsPage() {
@@ -90,13 +83,11 @@ export default async function ReclamationsPage() {
                   <TableCell>{r.client ?? "—"}</TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
                   <TableCell>
-                    <span
-                      className={`${BADGE_BASE} ${GRAVITE_BADGE_CLASS[r.gravite] ?? "bg-muted"}`}
-                    >
-                      {NC_GRAVITE_LABELS[r.gravite as keyof typeof NC_GRAVITE_LABELS] ?? r.gravite}
-                    </span>
+                    <RecGraviteCell id={r.id} value={r.gravite} />
                   </TableCell>
-                  <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>
+                  <TableCell>
+                    <RecStatutCell id={r.id} value={r.statut} />
+                  </TableCell>
                   <TableCell>{formatDate(r.date_reception)}</TableCell>
                   <TableCell>
                     <ReclamationDialog reclamation={r} />

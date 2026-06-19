@@ -2,10 +2,40 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+
+const roQuickSchema = z.object({
+  id: z.string().uuid(),
+  statut: z.enum(["identifie", "en_traitement", "maitrise", "cloture"]),
+});
+
+/** Mise à jour rapide du statut d'un risque/opportunité (édition inline). */
+export async function quickUpdateRoStatutAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = roQuickSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+
+  const patch: Database["public"]["Tables"]["risques_opportunites"]["Update"] = {
+    statut: parsed.data.statut,
+    updated_by: ctx.userId,
+  };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("risques_opportunites")
+    .update(patch)
+    .eq("id", parsed.data.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/risques");
+  return { ok: true };
+}
 
 const base = {
   intitule: z.string().trim().min(2, "Intitulé requis."),

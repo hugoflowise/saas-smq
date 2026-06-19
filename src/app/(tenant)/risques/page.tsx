@@ -12,15 +12,10 @@ import {
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { RoStatutCell } from "./inline-cells";
 import { RoDialog } from "./ro-dialog";
 
 const TYPE_LABELS: Record<string, string> = { risque: "Risque", opportunite: "Opportunité" };
-const STATUT_LABELS: Record<string, string> = {
-  identifie: "Identifié",
-  en_traitement: "En traitement",
-  maitrise: "Maîtrisé",
-  cloture: "Clôturé",
-};
 
 function criticiteClass(c: number) {
   if (c > 15) return "bg-status-nc-majeure/15 text-status-nc-majeure";
@@ -162,7 +157,9 @@ export default async function RisquesPage() {
                       {r.criticite}
                     </span>
                   </TableCell>
-                  <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>
+                  <TableCell>
+                    <RoStatutCell id={r.id} value={r.statut} />
+                  </TableCell>
                   <TableCell>
                     <RoDialog processusOptions={processus ?? []} ro={r} />
                   </TableCell>
