@@ -155,6 +155,10 @@ export default async function ModeAuditPage() {
     .from("communications")
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tid);
+  const satisfaction = await supabase
+    .from("enquetes_satisfaction")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tid);
 
   const chapitres: { num: string; titre: string; checks: Check[] }[] = [
     {
@@ -268,6 +272,12 @@ export default async function ModeAuditPage() {
           value: `${count(revues)}`,
           ok: count(revues) > 0,
           href: "/revues/direction",
+        },
+        {
+          label: "Satisfaction client mesurée (NPS)",
+          value: `${count(satisfaction)} réponse(s)`,
+          ok: count(satisfaction) > 0,
+          href: "/satisfaction",
         },
         {
           label: "Processus à réviser (≤ 60 j ou échus)",
