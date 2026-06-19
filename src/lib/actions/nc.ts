@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
+type NcUpdate = Database["public"]["Tables"]["non_conformites"]["Update"];
 
 const base = {
   intitule: z.string().trim().min(2, "Intitulé requis."),
@@ -231,6 +233,44 @@ export async function setNcStatutAction(input: unknown): Promise<ActionResult> {
 
   if (error) return { ok: false, error: error.message };
 
+  revalidatePath("/nc");
+  return { ok: true };
+}
+
+const quickUpdateNcSchema = z.object({
+  id: z.string().uuid(),
+  statut: z
+    .enum(["ouverte", "analysee", "action_definie", "cloturee", "efficace", "inefficace"])
+    .optional(),
+  gravite: z.enum(["mineure", "majeure", "critique"]).optional(),
+});
+
+/** Mise à jour rapide d'une NC depuis le tableau (édition inline). */
+export async function quickUpdateNcAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = quickUpdateNcSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const d = parsed.data;
+
+  const patch: NcUpdate = { updated_by: ctx.userId };
+  if (d.statut !== undefined) {
+    patch.statut = d.statut;
+    patch.date_cloture = ["cloturee", "efficace", "inefficace"].includes(d.statut)
+      ? new Date().toISOString().slice(0, 10)
+      : null;
+  }
+  if (d.gravite !== undefined) patch.gravite = d.gravite;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("non_conformites")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/nc");
   return { ok: true };
 }
