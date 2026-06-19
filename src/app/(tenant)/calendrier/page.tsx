@@ -1,9 +1,13 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { type CalEvent, CalendrierClient } from "./calendrier-client";
+import { EvenementDelete } from "./evenement-delete";
+import { EvenementDialog } from "./evenement-dialog";
 
 export default async function CalendrierPage() {
   const ctx = await getTenantContext();
@@ -22,7 +26,7 @@ export default async function CalendrierPage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
-  const [audits, revues, actions, ros, communications, jalons] = await Promise.all([
+  const [audits, revues, actions, ros, communications, jalons, evenements] = await Promise.all([
     supabase
       .from("audits_internes")
       .select("id, reference, type_audit, perimetre, organisme, date_prevue")
@@ -54,6 +58,11 @@ export default async function CalendrierPage() {
       .select("id, libelle, date_jalon")
       .eq("tenant_id", tid)
       .not("date_jalon", "is", null),
+    supabase
+      .from("evenements_qualite")
+      .select("id, titre, date_evenement")
+      .eq("tenant_id", tid)
+      .order("date_evenement", { ascending: false }),
   ]);
 
   const events: CalEvent[] = [];
@@ -105,6 +114,15 @@ export default async function CalendrierPage() {
       href: "/certification",
     });
   }
+  const manuels = evenements.data ?? [];
+  for (const e of manuels) {
+    events.push({
+      date: e.date_evenement,
+      label: e.titre,
+      type: "Événement",
+      href: "/calendrier",
+    });
+  }
 
   return (
     <div className="w-full">
@@ -112,16 +130,41 @@ export default async function CalendrierPage() {
         title="Calendrier qualité"
         description="Échéances et événements agrégés : audits, revues, actions, R&O, communications, certification."
         help="Vue consolidée des échéances de tous les modules. Filtrez par type d'événement (couleurs) et basculez entre vue mois et liste. D'autres types (formations, EPI, habilitations, visites médicales…) viendront avec les données Boond."
-      />
+      >
+        <EvenementDialog />
+      </PageHeader>
 
       {events.length === 0 ? (
         <EmptyState
           title="Aucune échéance"
-          description="Les dates planifiées dans les audits, revues, actions et R&O apparaîtront ici."
+          description="Ajoutez un événement, ou planifiez des dates dans les audits, revues, actions, etc."
         />
       ) : (
         <CalendrierClient events={events} />
       )}
+
+      {manuels.length > 0 ? (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-base">Événements ajoutés manuellement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col divide-y">
+              {manuels.map((e) => (
+                <li key={e.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">{e.titre}</span>{" "}
+                    <span className="text-muted-foreground text-xs">
+                      {formatDate(e.date_evenement)}
+                    </span>
+                  </span>
+                  <EvenementDelete id={e.id} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

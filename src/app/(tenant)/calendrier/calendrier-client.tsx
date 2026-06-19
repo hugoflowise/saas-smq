@@ -19,6 +19,7 @@ const TYPE_META: Record<string, { dot: string; chip: string }> = {
     dot: "bg-status-nc-mineure",
     chip: "bg-status-nc-mineure/15 text-status-nc-mineure",
   },
+  Événement: { dot: "bg-foreground/50", chip: "bg-foreground/10 text-foreground" },
 };
 const META_DEFAUT = { dot: "bg-muted-foreground", chip: "bg-muted text-muted-foreground" };
 const meta = (type: string) => TYPE_META[type] ?? META_DEFAUT;
