@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { DocumentPaper, type Societe } from "@/components/document-paper";
 import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ type Props = {
   drafterName: string | null;
   approverName: string | null;
   approvedAt: string | null;
+  societe: Societe;
 };
 
 export function PolitiqueClient({
@@ -45,6 +47,7 @@ export function PolitiqueClient({
   drafterName,
   approverName,
   approvedAt,
+  societe,
 }: Props) {
   const router = useRouter();
   const contenuRef = useRef<JSONContent | null>(initialContenu);
@@ -52,6 +55,19 @@ export function PolitiqueClient({
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const editable = statut === "brouillon" && canWrite;
+
+  const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
+  const documentMeta = [
+    { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
+    ...(currentVersion ? [{ label: "Version", value: currentVersion }] : []),
+    ...(approverName
+      ? [
+          { label: "Approuvée le", value: fmt(approvedAt ?? currentVersionDate) },
+          { label: "Signataire", value: approverName },
+        ]
+      : []),
+    ...(drafterName ? [{ label: "Rédacteur", value: drafterName }] : []),
+  ];
 
   function handleChange(c: JSONContent) {
     contenuRef.current = c;
@@ -210,18 +226,25 @@ export function PolitiqueClient({
         </div>
       ) : null}
 
-      <TiptapEditor
-        key={statut}
-        content={initialContenu}
-        editable={editable}
-        onChange={handleChange}
-      />
-
-      {!editable ? (
-        <p className="text-muted-foreground text-xs">
-          La politique n'est modifiable qu'en statut « Brouillon ».
-        </p>
-      ) : null}
+      {editable ? (
+        <TiptapEditor key={statut} content={initialContenu} editable onChange={handleChange} />
+      ) : (
+        <>
+          <DocumentPaper
+            surtitre="Document maîtrisé"
+            titre="Politique qualité"
+            societe={societe}
+            meta={documentMeta}
+            className="border"
+          >
+            <TiptapEditor content={initialContenu} editable={false} bare />
+          </DocumentPaper>
+          <p className="text-muted-foreground text-xs">
+            La politique n'est modifiable qu'en statut « Brouillon ». Utilisez « Aperçu / PDF » pour
+            l'imprimer.
+          </p>
+        </>
+      )}
     </div>
   );
 }
