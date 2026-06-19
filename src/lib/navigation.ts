@@ -23,6 +23,7 @@ import {
   Target,
   Truck,
   Users,
+  UsersRound,
 } from "lucide-react";
 
 export type NavItem = {
@@ -42,6 +43,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Pilotage",
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Effectif & couverture", href: "/effectif", icon: UsersRound },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
     ],
   },

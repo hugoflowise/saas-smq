@@ -514,6 +514,88 @@ export type Database = {
           },
         ]
       }
+      consultants: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_demarrage: string | null
+          date_fin: string | null
+          deleted_at: string | null
+          entite: string | null
+          id: string
+          nom: string
+          odm: boolean
+          pdp: boolean
+          poste: string | null
+          prenom: string | null
+          reference: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          visite_medicale: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_demarrage?: string | null
+          date_fin?: string | null
+          deleted_at?: string | null
+          entite?: string | null
+          id?: string
+          nom: string
+          odm?: boolean
+          pdp?: boolean
+          poste?: string | null
+          prenom?: string | null
+          reference?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          visite_medicale?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_demarrage?: string | null
+          date_fin?: string | null
+          deleted_at?: string | null
+          entite?: string | null
+          id?: string
+          nom?: string
+          odm?: boolean
+          pdp?: boolean
+          poste?: string | null
+          prenom?: string | null
+          reference?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          visite_medicale?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contexte_organisme: {
         Row: {
           analyse_pestel: Json | null
