@@ -108,10 +108,10 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
       },
       {
         key: "note_environnement",
-        label: "Environnement de travail (T°, éclairage, hygrométrie, ergonomie)",
+        label:
+          "Comment jugez-vous votre environnement de travail ? (T°, éclairage, hygrométrie, ergonomie, hygiène)",
         type: "note5",
       },
-      { key: "note_hygiene", label: "Conditions d'hygiène", type: "note5" },
       {
         key: "insatisfaction_details",
         label: "Si vous êtes insatisfait, précisez",
@@ -233,6 +233,12 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+      },
+      {
+        key: "habilitations_details",
+        label: "Si oui, lesquelles ?",
+        type: "textarea",
+        showIf: { key: "habilitations", equals: "Oui" },
       },
       {
         key: "besoin_accompagnement",
