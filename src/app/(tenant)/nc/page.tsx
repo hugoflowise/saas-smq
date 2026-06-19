@@ -9,11 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BADGE_BASE, GRAVITE_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
-import { NC_GRAVITE_LABELS, NC_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { NcGraviteCell, NcStatutCell } from "./inline-cells";
 import { NcDialog } from "./nc-dialog";
 import { NcFilterBar } from "./nc-filter-bar";
 import { NcKanban } from "./nc-kanban";
@@ -124,13 +123,11 @@ export default async function NcPage({
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`${BADGE_BASE} ${GRAVITE_BADGE_CLASS[nc.gravite] ?? "bg-muted"}`}
-                    >
-                      {NC_GRAVITE_LABELS[nc.gravite]}
-                    </span>
+                    <NcGraviteCell id={nc.id} value={nc.gravite} />
                   </TableCell>
-                  <TableCell>{NC_STATUT_LABELS[nc.statut]}</TableCell>
+                  <TableCell>
+                    <NcStatutCell id={nc.id} value={nc.statut} />
+                  </TableCell>
                   <TableCell>{formatDate(nc.date_constat)}</TableCell>
                   <TableCell>
                     <NcDialog processusOptions={options} nc={nc} />
