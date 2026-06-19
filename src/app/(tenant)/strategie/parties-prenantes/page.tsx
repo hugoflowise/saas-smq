@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,23 +10,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  INTERACTION_LABELS,
+  PRIORITE_CLASS,
+  PRIORITE_LABELS,
+  prioriteFromTotal,
+  SPHERE_LABELS,
+  scoreTotal,
+} from "@/lib/parties-prenantes";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { PiDialog } from "./pi-dialog";
-
-const TYPE_LABELS: Record<string, string> = {
-  client: "Client",
-  fournisseur: "Fournisseur",
-  collaborateur: "Collaborateur",
-  autorite: "Autorité",
-  actionnaire: "Actionnaire",
-  autre: "Autre",
-};
-const INFLUENCE_LABELS: Record<string, string> = {
-  faible: "Faible",
-  moyen: "Moyen",
-  fort: "Fort",
-};
+import { Cartographie } from "./cartographie";
+import { PartieDialog } from "./partie-dialog";
 
 export default async function PartiesPrenantesPage() {
   const ctx = await getTenantContext();
@@ -45,60 +42,140 @@ export default async function PartiesPrenantesPage() {
   }
 
   const supabase = await createClient();
-  const { data: parties } = await supabase
-    .from("parties_interessees")
-    .select("id, nom, type, attentes, exigences, niveau_influence")
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("nom", { ascending: true });
+  const tid = ctx.effectiveTenantId;
 
-  const items = parties ?? [];
+  const [{ data: parties }, { data: attentes }] = await Promise.all([
+    supabase
+      .from("parties_interessees")
+      .select("id, nom, sphere, type, niveau_interaction, pouvoir, legitimite, urgence")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("nom", { ascending: true }),
+    supabase.from("pi_attentes").select("partie_id").eq("tenant_id", tid).is("deleted_at", null),
+  ]);
+
+  const attentesCount = new Map<string, number>();
+  for (const a of attentes ?? []) {
+    attentesCount.set(a.partie_id, (attentesCount.get(a.partie_id) ?? 0) + 1);
+  }
+
+  const items = (parties ?? []).map((p) => {
+    const total = scoreTotal(p.pouvoir, p.legitimite, p.urgence);
+    return {
+      ...p,
+      total,
+      priorite: prioriteFromTotal(total),
+      nbAttentes: attentesCount.get(p.id) ?? 0,
+    };
+  });
+  const tri = [...items].sort((a, b) => b.total - a.total);
+
+  const hautes = items.filter((p) => p.priorite === 3).length;
+  const internes = items.filter((p) => p.sphere === "interne").length;
+
+  const tiles = [
+    { label: "Parties prenantes", value: items.length, cls: "text-foreground" },
+    { label: "Priorité haute", value: hautes, cls: "text-status-nc-mineure" },
+    { label: "Sphère interne", value: internes, cls: "text-primary" },
+    { label: "Sphère externe", value: items.length - internes, cls: "text-foreground" },
+  ];
 
   return (
     <div className="w-full">
       <PageHeader
         title="Parties prenantes"
-        description="Registre des parties intéressées et de leurs attentes."
+        description="Cartographie, cotation de saillance et registre des attentes."
         isoClause="ISO 9001 §4.2"
-        help="Identifiez les parties intéressées pertinentes (clients, salariés, fournisseurs, État, banques, partenaires…) et leurs exigences. Exigence obligatoire : son absence constitue une non-conformité majeure. Soyez exhaustif."
+        help="Identifiez les parties intéressées pertinentes et leurs attentes. Cotez leur saillance (Pouvoir, Légitimité, Urgence, chacun de 1 à 3) : la priorité et la criticité résiduelle de chaque attente sont calculées automatiquement. Ouvrez une partie prenante pour gérer ses attentes (risque, opportunité, maîtrise, action)."
       >
-        <PiDialog />
+        <PartieDialog />
       </PageHeader>
 
       {items.length === 0 ? (
         <EmptyState
           title="Aucune partie prenante"
-          description="Recensez vos parties intéressées (clients, fournisseurs, autorités…)."
+          description="Recensez vos parties intéressées (dirigeants, collaborateurs, clients, autorités…) et cotez leur saillance."
         />
       ) : (
-        <div className="rounded-2xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Partie prenante</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Attentes</TableHead>
-                <TableHead>Influence</TableHead>
-                <TableHead className="w-12" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.nom}</TableCell>
-                  <TableCell>{TYPE_LABELS[p.type] ?? p.type}</TableCell>
-                  <TableCell className="max-w-xs truncate text-muted-foreground">
-                    {p.attentes ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    {INFLUENCE_LABELS[p.niveau_influence] ?? p.niveau_influence}
-                  </TableCell>
-                  <TableCell>
-                    <PiDialog pi={p} />
-                  </TableCell>
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {tiles.map((t) => (
+              <Card key={t.label}>
+                <CardContent className="py-5">
+                  <p className={`font-semibold text-3xl ${t.cls}`}>{t.value}</p>
+                  <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Cartographie des parties prenantes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Cartographie
+                parties={items.map((p) => ({
+                  id: p.id,
+                  nom: p.nom,
+                  sphere: p.sphere,
+                  priorite: p.priorite,
+                }))}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="rounded-2xl border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Partie prenante</TableHead>
+                  <TableHead>Sphère</TableHead>
+                  <TableHead>Interaction</TableHead>
+                  <TableHead className="text-center">P / L / U</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Priorité</TableHead>
+                  <TableHead>Attentes</TableHead>
+                  <TableHead className="w-12" />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {tri.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/strategie/parties-prenantes/${p.id}`}
+                        className="hover:text-primary hover:underline"
+                      >
+                        {p.nom}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {SPHERE_LABELS[p.sphere] ?? p.sphere}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {INTERACTION_LABELS[p.niveau_interaction] ?? p.niveau_interaction}
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground text-sm">
+                      {p.pouvoir} / {p.legitimite} / {p.urgence}
+                    </TableCell>
+                    <TableCell className="font-medium">{p.total}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${PRIORITE_CLASS[p.priorite]}`}
+                      >
+                        {PRIORITE_LABELS[p.priorite]}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{p.nbAttentes}</TableCell>
+                    <TableCell>
+                      <PartieDialog partie={p} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </div>
