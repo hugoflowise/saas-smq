@@ -1,7 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { PrintButton } from "@/app/print/politique/print-button";
+import { PrintShell, type Societe } from "@/components/print-shell";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -19,7 +17,9 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
 
   const { data: tenant } = await supabase
     .from("tenants")
-    .select("nom_societe, logo_url")
+    .select(
+      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales",
+    )
     .eq("id", tid)
     .maybeSingle();
 
@@ -37,7 +37,7 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
   const { data: version } = procedure.version_actuelle_id
     ? await supabase
         .from("procedures_versions")
-        .select("version, approved_at, approved_by, contenu_snapshot")
+        .select("version, approved_at, approved_by, contenu_snapshot, redacteur, verificateur")
         .eq("id", procedure.version_actuelle_id)
         .maybeSingle()
     : { data: null };
@@ -55,66 +55,29 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? procedure.contenu ?? null) as JSONContent | null;
 
+  const meta = isPublished
+    ? [
+        procedure.reference_iso?.length
+          ? { label: "Réf. ISO", value: procedure.reference_iso.join(", ") }
+          : null,
+        { label: "Version", value: version?.version ?? "—" },
+        { label: "Rédacteur", value: version?.redacteur ?? "—" },
+        { label: "Vérificateur", value: version?.verificateur ?? "—" },
+        { label: "Approbateur", value: approverName ?? "—" },
+        { label: "Approuvée le", value: formatDate(version?.approved_at ?? null) },
+      ].filter((m): m is { label: string; value: string } => m !== null)
+    : [{ label: "Statut", value: "Brouillon (non publié)" }];
+
   return (
-    <div className="min-h-full bg-surface">
-      <div className="flex items-center justify-between gap-2 border-b bg-card px-6 py-3 print:hidden">
-        <Link
-          href={`/documentation/procedures/${id}`}
-          className="inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Retour
-        </Link>
-        <PrintButton />
-      </div>
-
-      <div className="mx-auto my-8 max-w-3xl bg-white p-10 shadow-sm print:my-0 print:max-w-none print:p-0 print:shadow-none">
-        <header className="mb-8 flex items-start justify-between gap-6 border-b pb-6">
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-wide">Procédure</p>
-            <p className="mt-1 font-semibold text-2xl tracking-tight">{procedure.titre}</p>
-            <p className="mt-1 text-muted-foreground">{tenant?.nom_societe}</p>
-            {procedure.reference_iso?.length ? (
-              <p className="mt-1 text-muted-foreground text-xs">
-                ISO {procedure.reference_iso.join(", ")}
-              </p>
-            ) : null}
-          </div>
-          {tenant?.logo_url ? (
-            // biome-ignore lint/performance/noImgElement: logo externe, document imprimable
-            <img src={tenant.logo_url} alt="Logo" className="h-16 w-auto object-contain" />
-          ) : null}
-        </header>
-
-        {!isPublished ? (
-          <p className="mb-6 rounded-md bg-status-pa/15 px-3 py-2 text-status-pa text-sm">
-            Document non publié · aperçu du brouillon en cours.
-          </p>
-        ) : null}
-
-        <TiptapEditor content={contenu} editable={false} bare />
-
-        <footer className="mt-10 border-t pt-6 text-sm">
-          {isPublished ? (
-            <div className="flex flex-wrap justify-between gap-4">
-              <span>
-                <span className="text-muted-foreground">Version </span>
-                <strong>{version?.version}</strong>
-              </span>
-              <span>
-                <span className="text-muted-foreground">Approuvée le </span>
-                {formatDate(version?.approved_at ?? null)}
-              </span>
-              <span>
-                <span className="text-muted-foreground">Signataire : </span>
-                {approverName ?? "—"}
-              </span>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Version de travail, non approuvée.</p>
-          )}
-        </footer>
-      </div>
-    </div>
+    <PrintShell
+      backHref={`/documentation/procedures/${id}`}
+      surtitre="Procédure"
+      titre={procedure.titre}
+      societe={tenant as Societe}
+      meta={meta}
+      genereLe={formatDate(new Date().toISOString().slice(0, 10))}
+    >
+      <TiptapEditor content={contenu} editable={false} bare />
+    </PrintShell>
   );
 }
