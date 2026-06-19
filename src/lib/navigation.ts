@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Smile,
   Target,
+  Truck,
   Users,
 } from "lucide-react";
 
@@ -85,6 +86,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Satisfaction", href: "/satisfaction", icon: Smile },
       { label: "Suivi de prestation", href: "/suivi-prestation", icon: ClipboardList },
+      { label: "Fournisseurs", href: "/fournisseurs", icon: Truck },
       { label: "Calendrier qualité", href: "/calendrier", icon: CalendarDays },
       { label: "Veille réglementaire", href: "/veille", icon: ScrollText },
     ],

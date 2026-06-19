@@ -638,6 +638,85 @@ export type Database = {
           },
         ]
       }
+      fournisseurs: {
+        Row: {
+          categorie: string | null
+          commentaire: string | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          criticite: Database["public"]["Enums"]["fournisseur_criticite"]
+          date_evaluation: string | null
+          deleted_at: string | null
+          id: string
+          nom: string
+          note_evaluation: number | null
+          prochaine_evaluation: string | null
+          statut: Database["public"]["Enums"]["fournisseur_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          commentaire?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticite?: Database["public"]["Enums"]["fournisseur_criticite"]
+          date_evaluation?: string | null
+          deleted_at?: string | null
+          id?: string
+          nom: string
+          note_evaluation?: number | null
+          prochaine_evaluation?: string | null
+          statut?: Database["public"]["Enums"]["fournisseur_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          commentaire?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          criticite?: Database["public"]["Enums"]["fournisseur_criticite"]
+          date_evaluation?: string | null
+          deleted_at?: string | null
+          id?: string
+          nom?: string
+          note_evaluation?: number | null
+          prochaine_evaluation?: string | null
+          statut?: Database["public"]["Enums"]["fournisseur_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fournisseurs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseurs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseurs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indicateurs: {
         Row: {
           boond_endpoint: string | null
@@ -2337,6 +2416,8 @@ export type Database = {
         | "evaluation"
         | "amelioration"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
+      fournisseur_criticite: "faible" | "moyenne" | "critique"
+      fournisseur_statut: "actif" | "inactif"
       indicateur_frequence:
         | "quotidien"
         | "hebdo"
@@ -2612,6 +2693,8 @@ export const Constants = {
         "amelioration",
       ],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
+      fournisseur_criticite: ["faible", "moyenne", "critique"],
+      fournisseur_statut: ["actif", "inactif"],
       indicateur_frequence: [
         "quotidien",
         "hebdo",
