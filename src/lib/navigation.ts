@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
   FileStack,
   FolderTree,
   Gauge,
@@ -47,6 +48,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Réunions QHSE", href: "/reunions", icon: MessagesSquare },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
       { label: "Effectif & couverture", href: "/effectif", icon: UsersRound },
+      { label: "Suivi consultant", href: "/suivi-consultant", icon: ClipboardList },
     ],
   },
   {
