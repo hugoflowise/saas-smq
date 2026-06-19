@@ -2070,6 +2070,7 @@ export type Database = {
             | null
           formule: Database["public"]["Enums"]["tenant_formule"]
           id: string
+          ingest_token: string
           logo_url: string | null
           nom_societe: string
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
@@ -2086,6 +2087,7 @@ export type Database = {
             | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
+          ingest_token?: string
           logo_url?: string | null
           nom_societe: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
@@ -2102,6 +2104,7 @@ export type Database = {
             | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
+          ingest_token?: string
           logo_url?: string | null
           nom_societe?: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
