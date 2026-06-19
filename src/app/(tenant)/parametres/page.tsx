@@ -29,7 +29,7 @@ export default async function ParametresPage() {
   const admin = createAdminClient();
   const { data: tenant } = await admin
     .from("tenants")
-    .select("ingest_token")
+    .select("ingest_token, survey_token")
     .eq("id", ctx.effectiveTenantId)
     .maybeSingle();
 
@@ -37,10 +37,24 @@ export default async function ParametresPage() {
   const host = h.get("host") ?? "app.flowise.fr";
   const proto = host.includes("localhost") ? "http" : "https";
   const endpoint = `${proto}://${host}/api/ingest/satisfaction`;
+  const surveyUrl = `${proto}://${host}/enquete/${tenant?.survey_token ?? ""}`;
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="flex w-full max-w-3xl flex-col gap-6">
       <PageHeader title="Paramètres" description="Configuration du client." />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Questionnaire de satisfaction</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <p className="text-muted-foreground text-sm">
+            Partagez ce lien à vos clients (e-mail, signature, QR code…). Chaque réponse alimente
+            automatiquement le module Satisfaction, en temps réel — sans aucune licence.
+          </p>
+          <CopyField label="Lien public du questionnaire" value={surveyUrl} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

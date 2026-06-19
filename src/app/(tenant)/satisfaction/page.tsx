@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { EnqueteDelete } from "./enquete-delete";
 import { EnqueteDialog } from "./enquete-dialog";
+import { ExportButton } from "./export-button";
 
 function npsClass(nps: number | null) {
   if (nps == null) return "text-muted-foreground";
@@ -83,6 +84,7 @@ export default async function SatisfactionPage() {
         isoClause="ISO 9001 §9.1.2"
         help="Surveillez la perception des clients (enquêtes, suivis de projet, NPS). L'enjeu n'est pas le % de satisfaits mais d'agir sur les insatisfactions. Les réponses peuvent provenir des suivis de projet ou d'un export Microsoft Forms."
       >
+        <ExportButton rows={items} />
         <EnqueteDialog />
       </PageHeader>
 
