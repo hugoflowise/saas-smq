@@ -718,6 +718,73 @@ export type Database = {
           },
         ]
       }
+      jalons_certification: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_jalon: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          libelle: string
+          statut: Database["public"]["Enums"]["jalon_statut"]
+          tenant_id: string
+          type: Database["public"]["Enums"]["jalon_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_jalon?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle: string
+          statut?: Database["public"]["Enums"]["jalon_statut"]
+          tenant_id: string
+          type?: Database["public"]["Enums"]["jalon_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_jalon?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle?: string
+          statut?: Database["public"]["Enums"]["jalon_statut"]
+          tenant_id?: string
+          type?: Database["public"]["Enums"]["jalon_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jalons_certification_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jalons_certification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jalons_certification_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nc_actions: {
         Row: {
           action_id: string
@@ -2137,6 +2204,13 @@ export type Database = {
         | "annuel"
       indicateur_source: "manuel" | "boondmanager" | "calcul"
       indicateur_type: "numeric" | "percentage" | "count" | "duration"
+      jalon_statut: "planifie" | "realise"
+      jalon_type:
+        | "audit_blanc"
+        | "audit_certification"
+        | "audit_surveillance"
+        | "revue"
+        | "autre"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_origine:
         | "audit_interne"
@@ -2406,6 +2480,14 @@ export const Constants = {
       ],
       indicateur_source: ["manuel", "boondmanager", "calcul"],
       indicateur_type: ["numeric", "percentage", "count", "duration"],
+      jalon_statut: ["planifie", "realise"],
+      jalon_type: [
+        "audit_blanc",
+        "audit_certification",
+        "audit_surveillance",
+        "revue",
+        "autre",
+      ],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_origine: [
         "audit_interne",

@@ -13,6 +13,7 @@ import {
   ListChecks,
   Megaphone,
   MessageSquareWarning,
+  Milestone,
   Presentation,
   ScrollText,
   Settings,
@@ -75,6 +76,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Indicateurs", href: "/indicateurs", icon: BarChart3 },
       { label: "Audits", href: "/audits", icon: Gauge },
       { label: "Revues de direction", href: "/revues/direction", icon: ClipboardCheck },
+      { label: "Cycle de certification", href: "/certification", icon: Milestone },
     ],
   },
   {
