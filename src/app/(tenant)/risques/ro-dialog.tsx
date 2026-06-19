@@ -29,6 +29,8 @@ export type RoRow = {
   consequence: string | null;
   gravite: number;
   probabilite: number;
+  gravite_residuelle: number | null;
+  probabilite_residuelle: number | null;
   traitement_prevu: string | null;
   statut: string;
   date_revue: string | null;
@@ -60,6 +62,8 @@ export function RoDialog({
       consequence: form.get("consequence") || undefined,
       gravite: form.get("gravite"),
       probabilite: form.get("probabilite"),
+      graviteResiduelle: form.get("graviteResiduelle") || undefined,
+      probabiliteResiduelle: form.get("probabiliteResiduelle") || undefined,
       traitementPrevu: form.get("traitementPrevu") || undefined,
       statut: form.get("statut"),
       dateRevue: form.get("dateRevue") || undefined,
@@ -150,6 +154,38 @@ export function RoDialog({
                 className={SELECT_CLASS}
                 defaultValue={String(ro?.probabilite ?? 1)}
               >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="graviteResiduelle">Gravité résiduelle (après traitement)</Label>
+              <select
+                id="graviteResiduelle"
+                name="graviteResiduelle"
+                className={SELECT_CLASS}
+                defaultValue={ro?.gravite_residuelle ? String(ro.gravite_residuelle) : ""}
+              >
+                <option value="">—</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="probabiliteResiduelle">Probabilité résiduelle</Label>
+              <select
+                id="probabiliteResiduelle"
+                name="probabiliteResiduelle"
+                className={SELECT_CLASS}
+                defaultValue={ro?.probabilite_residuelle ? String(ro.probabilite_residuelle) : ""}
+              >
+                <option value="">—</option>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
                     {n}

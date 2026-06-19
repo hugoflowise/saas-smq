@@ -58,7 +58,7 @@ export default async function RisquesPage() {
   const { data: ros } = await supabase
     .from("risques_opportunites")
     .select(
-      "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, traitement_prevu, statut, date_revue",
+      "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, gravite_residuelle, probabilite_residuelle, criticite_residuelle, traitement_prevu, statut, date_revue",
     )
     .eq("tenant_id", tid)
     .order("criticite", { ascending: false });
@@ -133,7 +133,8 @@ export default async function RisquesPage() {
                 <TableHead>Intitulé</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>G × P</TableHead>
-                <TableHead>Criticité</TableHead>
+                <TableHead>Criticité brute</TableHead>
+                <TableHead>Résiduelle</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
@@ -156,6 +157,17 @@ export default async function RisquesPage() {
                     >
                       {r.criticite}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    {r.criticite_residuelle != null ? (
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 font-medium text-xs ${criticiteClass(r.criticite_residuelle)}`}
+                      >
+                        {r.criticite_residuelle}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <RoStatutCell id={r.id} value={r.statut} />

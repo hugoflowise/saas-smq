@@ -45,7 +45,7 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
   const { data: ro } = await supabase
     .from("risques_opportunites")
     .select(
-      "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, traitement_prevu, statut, date_revue",
+      "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, gravite_residuelle, probabilite_residuelle, criticite_residuelle, traitement_prevu, statut, date_revue",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -97,9 +97,21 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
           <Field label="Processus" value={processusNom} />
           <Field label="Gravité × Probabilité" value={`${ro.gravite} × ${ro.probabilite}`} />
           <Field
-            label="Criticité"
+            label="Criticité brute"
             value={
               <span className={`${BADGE_BASE} ${criticiteClass(criticite)}`}>{criticite}</span>
+            }
+          />
+          <Field
+            label="Criticité résiduelle (après traitement)"
+            value={
+              ro.criticite_residuelle != null ? (
+                <span className={`${BADGE_BASE} ${criticiteClass(ro.criticite_residuelle)}`}>
+                  {ro.gravite_residuelle} × {ro.probabilite_residuelle} = {ro.criticite_residuelle}
+                </span>
+              ) : (
+                "Non évaluée"
+              )
             }
           />
           <Field label="Date de revue" value={formatDate(ro.date_revue)} />
