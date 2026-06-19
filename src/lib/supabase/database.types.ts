@@ -1642,12 +1642,15 @@ export type Database = {
           created_at: string
           created_by: string | null
           criticite: number | null
+          criticite_residuelle: number | null
           date_revue: string | null
           deleted_at: string | null
           gravite: number
+          gravite_residuelle: number | null
           id: string
           intitule: string
           probabilite: number
+          probabilite_residuelle: number | null
           processus_id: string | null
           responsable_id: string | null
           statut: Database["public"]["Enums"]["ro_statut"]
@@ -1663,12 +1666,15 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           criticite?: number | null
+          criticite_residuelle?: number | null
           date_revue?: string | null
           deleted_at?: string | null
           gravite?: number
+          gravite_residuelle?: number | null
           id?: string
           intitule: string
           probabilite?: number
+          probabilite_residuelle?: number | null
           processus_id?: string | null
           responsable_id?: string | null
           statut?: Database["public"]["Enums"]["ro_statut"]
@@ -1684,12 +1690,15 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           criticite?: number | null
+          criticite_residuelle?: number | null
           date_revue?: string | null
           deleted_at?: string | null
           gravite?: number
+          gravite_residuelle?: number | null
           id?: string
           intitule?: string
           probabilite?: number
+          probabilite_residuelle?: number | null
           processus_id?: string | null
           responsable_id?: string | null
           statut?: Database["public"]["Enums"]["ro_statut"]
