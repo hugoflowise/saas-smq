@@ -141,7 +141,7 @@ export default async function ActionsPage({
       {items.length === 0 ? (
         <EmptyState title="Aucune action" description="Créez une action ou ajustez les filtres." />
       ) : vue === "kanban" ? (
-        <ActionsKanban key={`${statut ?? ""}|${priorite ?? ""}`} initial={items} />
+        <ActionsKanban key={`${statut ?? ""}|${priorite ?? ""}|${filtre ?? ""}`} initial={items} />
       ) : (
         <div className="rounded-lg border bg-card">
           <Table>
