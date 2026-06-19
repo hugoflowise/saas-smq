@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
+import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,14 @@ export default async function PolitiquePage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
+
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select(
+      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales",
+    )
+    .eq("id", tid)
+    .maybeSingle();
 
   const { data: politique } = await supabase
     .from("politique_qualite")
@@ -93,6 +102,7 @@ export default async function PolitiquePage() {
             drafterName={drafterName}
             approverName={approverName}
             approvedAt={politique?.approved_at ?? null}
+            societe={tenant as Societe}
           />
         </div>
 
