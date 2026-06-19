@@ -8,7 +8,7 @@ on:
 
 jobs:
   quality:
-    name: Lint · Typecheck · Build
+    name: Lint · Typecheck · Test · Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,6 +33,9 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Test (Vitest)
+        run: pnpm test
 
       - name: Build
         run: pnpm build
