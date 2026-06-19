@@ -248,15 +248,6 @@ export function DocumentDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="emplacement">Emplacement</Label>
-            <Input
-              id="emplacement"
-              name="emplacement"
-              defaultValue={document?.emplacement ?? ""}
-              placeholder="Lien SharePoint, chemin réseau…"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
             <Label htmlFor="commentaire">Commentaire</Label>
             <Textarea
               id="commentaire"
@@ -291,6 +282,20 @@ export function DocumentDialog({
                 Choisir un fichier remplacera le fichier actuel.
               </p>
             ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="emplacement">Lien externe / référence (optionnel)</Label>
+            <Input
+              id="emplacement"
+              name="emplacement"
+              defaultValue={document?.emplacement ?? ""}
+              placeholder="Lien SharePoint, chemin réseau… (si le document n'est pas hébergé ici)"
+            />
+            <p className="text-muted-foreground text-xs">
+              À renseigner uniquement pour les documents conservés ailleurs (non téléversés
+              ci-dessus).
+            </p>
           </div>
 
           <Button type="submit" disabled={pending} className="mt-1">
