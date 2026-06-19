@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { PerformanceTabs } from "@/components/performance-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -101,6 +102,7 @@ export default async function ObjectifsPage() {
 
   return (
     <div className="w-full">
+      <PerformanceTabs />
       <PageHeader
         title="Objectifs qualité"
         description="Objectifs SMART et leur déclinaison par fonction."

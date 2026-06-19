@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   AlertTriangle,
-  BarChart3,
   Building2,
   CalendarDays,
   ClipboardCheck,
@@ -55,7 +54,6 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Stratégie",
     items: [
       { label: "Politique qualité", href: "/strategie/politique", icon: ScrollText },
-      { label: "Objectifs", href: "/strategie/objectifs", icon: Target },
       { label: "Contexte", href: "/strategie/contexte", icon: Activity },
       { label: "Parties prenantes", href: "/strategie/parties-prenantes", icon: Users },
     ],
@@ -82,7 +80,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Évaluation",
     items: [
       { label: "Conformité ISO", href: "/conformite", icon: ClipboardCheck },
-      { label: "Indicateurs", href: "/indicateurs", icon: BarChart3 },
+      { label: "Objectifs & indicateurs", href: "/strategie/objectifs", icon: Target },
       { label: "Audits", href: "/audits", icon: Gauge },
       { label: "Revues de direction", href: "/revues/direction", icon: ClipboardCheck },
       { label: "Cycle de certification", href: "/certification", icon: Milestone },
