@@ -2075,6 +2075,7 @@ export type Database = {
           nom_societe: string
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
           statut: Database["public"]["Enums"]["tenant_statut"]
+          survey_token: string
           updated_at: string
         }
         Insert: {
@@ -2092,6 +2093,7 @@ export type Database = {
           nom_societe: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
+          survey_token?: string
           updated_at?: string
         }
         Update: {
@@ -2109,6 +2111,7 @@ export type Database = {
           nom_societe?: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
+          survey_token?: string
           updated_at?: string
         }
         Relationships: []
