@@ -10,6 +10,7 @@ import {
   FileText,
   FolderTree,
   Gauge,
+  History,
   LayoutDashboard,
   ListChecks,
   Megaphone,
@@ -97,7 +98,10 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     title: "Configuration",
-    items: [{ label: "Paramètres", href: "/parametres", icon: Settings }],
+    items: [
+      { label: "Main courante", href: "/journal", icon: History },
+      { label: "Paramètres", href: "/parametres", icon: Settings },
+    ],
   },
 ];
 
