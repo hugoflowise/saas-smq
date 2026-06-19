@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CopyField } from "./copy-field";
+import { InfosSocieteForm } from "./infos-societe-form";
 
 export default async function ParametresPage() {
   const ctx = await getTenantContext();
@@ -29,7 +30,9 @@ export default async function ParametresPage() {
   const admin = createAdminClient();
   const { data: tenant } = await admin
     .from("tenants")
-    .select("ingest_token, survey_token")
+    .select(
+      "ingest_token, survey_token, forme_juridique, siret, adresse, code_postal, ville, mentions_legales",
+    )
     .eq("id", ctx.effectiveTenantId)
     .maybeSingle();
 
@@ -42,6 +45,28 @@ export default async function ParametresPage() {
   return (
     <div className="flex w-full max-w-3xl flex-col gap-6">
       <PageHeader title="Paramètres" description="Configuration du client." />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Informations société</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <p className="text-muted-foreground text-sm">
+            Ces informations apparaissent en pied de page des documents PDF officiels (politique,
+            procédures, comptes rendus…).
+          </p>
+          <InfosSocieteForm
+            infos={{
+              forme_juridique: tenant?.forme_juridique ?? null,
+              siret: tenant?.siret ?? null,
+              adresse: tenant?.adresse ?? null,
+              code_postal: tenant?.code_postal ?? null,
+              ville: tenant?.ville ?? null,
+              mentions_legales: tenant?.mentions_legales ?? null,
+            }}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

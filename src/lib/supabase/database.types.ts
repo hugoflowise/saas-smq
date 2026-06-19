@@ -2335,58 +2335,76 @@ export type Database = {
       }
       tenants: {
         Row: {
+          adresse: string | null
           boond_account_id: string | null
           boond_oauth_token: string | null
+          code_postal: string | null
           created_at: string
           date_souscription: string | null
           effectif_tranche:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
+          forme_juridique: string | null
           formule: Database["public"]["Enums"]["tenant_formule"]
           id: string
           ingest_token: string
           logo_url: string | null
+          mentions_legales: string | null
           nom_societe: string
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
+          siret: string | null
           statut: Database["public"]["Enums"]["tenant_statut"]
           survey_token: string
           updated_at: string
+          ville: string | null
         }
         Insert: {
+          adresse?: string | null
           boond_account_id?: string | null
           boond_oauth_token?: string | null
+          code_postal?: string | null
           created_at?: string
           date_souscription?: string | null
           effectif_tranche?:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
+          forme_juridique?: string | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
           ingest_token?: string
           logo_url?: string | null
+          mentions_legales?: string | null
           nom_societe: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
+          siret?: string | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
           survey_token?: string
           updated_at?: string
+          ville?: string | null
         }
         Update: {
+          adresse?: string | null
           boond_account_id?: string | null
           boond_oauth_token?: string | null
+          code_postal?: string | null
           created_at?: string
           date_souscription?: string | null
           effectif_tranche?:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
+          forme_juridique?: string | null
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
           ingest_token?: string
           logo_url?: string | null
+          mentions_legales?: string | null
           nom_societe?: string
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
+          siret?: string | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
           survey_token?: string
           updated_at?: string
+          ville?: string | null
         }
         Relationships: []
       }
