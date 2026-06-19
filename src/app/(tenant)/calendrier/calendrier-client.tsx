@@ -19,6 +19,8 @@ const TYPE_META: Record<string, { dot: string; chip: string }> = {
     dot: "bg-status-nc-mineure",
     chip: "bg-status-nc-mineure/15 text-status-nc-mineure",
   },
+  Réunion: { dot: "bg-violet-500", chip: "bg-violet-500/15 text-violet-600" },
+  Document: { dot: "bg-sky-500", chip: "bg-sky-500/15 text-sky-700" },
   Événement: { dot: "bg-foreground/50", chip: "bg-foreground/10 text-foreground" },
 };
 const META_DEFAUT = { dot: "bg-muted-foreground", chip: "bg-muted text-muted-foreground" };
