@@ -26,6 +26,12 @@ const STATUT_CLASS: Record<string, string> = {
   abandonnee: "bg-muted text-muted-foreground",
 };
 
+const PRIORITE_CLASS: Record<string, string> = {
+  p1: "bg-status-nc-mineure/15 text-status-nc-mineure",
+  p2: "bg-status-pa/15 text-status-pa",
+  p3: "bg-status-conforme/15 text-status-conforme",
+};
+
 /** Sélecteur de statut éditable directement dans le tableau. */
 export function StatutCell({ id, value }: { id: string; value: string }) {
   const router = useRouter();
@@ -88,7 +94,7 @@ export function PrioriteCell({ id, value }: { id: string; value: string }) {
       value={val}
       onChange={onChange}
       disabled={pending}
-      className={CONTROL}
+      className={`${CONTROL} font-medium ${PRIORITE_CLASS[val] ?? ""}`}
       aria-label="Priorité"
     >
       {Object.entries(ACTION_PRIORITE_LABELS).map(([v, label]) => (
