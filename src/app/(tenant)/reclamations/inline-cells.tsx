@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateReclamationAction } from "@/lib/actions/registres";
@@ -18,7 +17,6 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 export function RecStatutCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -30,8 +28,6 @@ export function RecStatutCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }
@@ -54,7 +50,6 @@ export function RecStatutCell({ id, value }: { id: string; value: string }) {
 }
 
 export function RecGraviteCell({ id, value }: { id: string; value: string }) {
-  const router = useRouter();
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
 
@@ -66,8 +61,6 @@ export function RecGraviteCell({ id, value }: { id: string; value: string }) {
       if (!r.ok) {
         toast.error(r.error);
         setVal(value);
-      } else {
-        router.refresh();
       }
     });
   }

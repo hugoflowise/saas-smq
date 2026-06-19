@@ -183,7 +183,7 @@ export async function quickUpdateActionAction(input: unknown): Promise<ActionRes
     .eq("tenant_id", ctx.effectiveTenantId);
 
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/actions");
+  // Pas de revalidatePath : on garde la ligne en place (pas de re-tri immédiat).
   return { ok: true };
 }
 

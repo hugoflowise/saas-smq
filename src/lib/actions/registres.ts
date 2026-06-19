@@ -94,7 +94,7 @@ export async function quickUpdateReclamationAction(input: unknown): Promise<Acti
     .eq("id", d.id)
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/reclamations");
+  // Pas de revalidatePath : on garde la ligne en place (pas de re-tri immédiat).
   return { ok: true };
 }
 
@@ -229,7 +229,7 @@ export async function quickUpdateObjectifAction(input: unknown): Promise<ActionR
     .eq("id", d.id)
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/strategie/objectifs");
+  // Pas de revalidatePath : on garde la ligne en place (pas de re-tri immédiat).
   return { ok: true };
 }
 
