@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
-import { PerformanceTabs } from "@/components/performance-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CreateIndicateurDialog } from "./create-indicateur-dialog";
@@ -63,7 +64,7 @@ export default async function IndicateursPage() {
 
   return (
     <div className="w-full">
-      <PerformanceTabs />
+      <ModuleTabs tabs={PERFORMANCE_TABS} />
       <PageHeader
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."

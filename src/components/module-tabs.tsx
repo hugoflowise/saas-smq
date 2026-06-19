@@ -4,17 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const TABS = [
-  { href: "/strategie/objectifs", label: "Objectifs" },
-  { href: "/indicateurs", label: "Indicateurs" },
-];
+export type ModuleTab = { href: string; label: string };
 
-/** Onglets du module « Objectifs & indicateurs » (navigation entre les deux vues). */
-export function PerformanceTabs() {
+/** Barre d'onglets d'un module regroupé (navigation par route entre les vues). */
+export function ModuleTabs({ tabs }: { tabs: ModuleTab[] }) {
   const pathname = usePathname();
   return (
     <div className="mb-6 flex gap-1 border-b">
-      {TABS.map((t) => {
+      {tabs.map((t) => {
         const active = pathname === t.href || pathname.startsWith(`${t.href}/`);
         return (
           <Link

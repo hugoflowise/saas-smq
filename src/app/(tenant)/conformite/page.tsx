@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { CONFORMITE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ChapterRow } from "./chapter-row";
@@ -68,6 +70,7 @@ export default async function ConformitePage() {
 
   return (
     <div className="w-full">
+      <ModuleTabs tabs={CONFORMITE_TABS} />
       <PageHeader
         title="Conformité ISO 9001:2015"
         description="Auto-évaluation de la conformité par chapitre."
