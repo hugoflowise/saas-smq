@@ -661,6 +661,9 @@ export type Database = {
           date_revision_prevue: string | null
           deleted_at: string | null
           emplacement: string | null
+          fichier_nom: string | null
+          fichier_path: string | null
+          fichier_taille: number | null
           id: string
           processus_id: string | null
           redacteur: string | null
@@ -682,6 +685,9 @@ export type Database = {
           date_revision_prevue?: string | null
           deleted_at?: string | null
           emplacement?: string | null
+          fichier_nom?: string | null
+          fichier_path?: string | null
+          fichier_taille?: number | null
           id?: string
           processus_id?: string | null
           redacteur?: string | null
@@ -703,6 +709,9 @@ export type Database = {
           date_revision_prevue?: string | null
           deleted_at?: string | null
           emplacement?: string | null
+          fichier_nom?: string | null
+          fichier_path?: string | null
+          fichier_taille?: number | null
           id?: string
           processus_id?: string | null
           redacteur?: string | null
