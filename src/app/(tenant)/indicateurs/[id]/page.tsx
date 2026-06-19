@@ -45,11 +45,20 @@ export default async function IndicateurDetailPage({
 
   if (!ind) notFound();
 
-  const { data: valeurs } = await supabase
-    .from("indicateurs_valeurs")
-    .select("id, valeur, date_mesure, commentaire")
-    .eq("indicateur_id", id)
-    .order("date_mesure", { ascending: true });
+  const [{ data: valeurs }, { data: objectifs }] = await Promise.all([
+    supabase
+      .from("indicateurs_valeurs")
+      .select("id, valeur, date_mesure, commentaire")
+      .eq("indicateur_id", id)
+      .order("date_mesure", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule, statut")
+      .eq("tenant_id", tid)
+      .eq("indicateur_id", id)
+      .is("deleted_at", null)
+      .order("created_at"),
+  ]);
 
   const points = (valeurs ?? []).map((v) => ({
     date: formatDate(v.date_mesure),
@@ -76,6 +85,29 @@ export default async function IndicateurDetailPage({
           <KpiChart data={points} cible={ind.cible} unite={ind.unite} />
         </CardContent>
       </Card>
+
+      {(objectifs ?? []).length > 0 ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Objectifs pilotés par cet indicateur</CardTitle>
+          </CardHeader>
+          <CardContent className="py-2">
+            <ul className="flex flex-col divide-y">
+              {(objectifs ?? []).map((o) => (
+                <li key={o.id} className="py-2.5">
+                  <Link
+                    href="/strategie/objectifs"
+                    className="flex items-center justify-between gap-3 text-sm hover:text-primary"
+                  >
+                    <span className="min-w-0 truncate font-medium">{o.intitule}</span>
+                    <span className="shrink-0 text-muted-foreground text-xs">{o.statut}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="mb-6">
         <CardHeader>

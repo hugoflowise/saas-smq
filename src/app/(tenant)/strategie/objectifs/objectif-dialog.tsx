@@ -33,14 +33,19 @@ export type ObjectifRow = {
   unite: string | null;
   sens: string | null;
   processus_id: string | null;
+  indicateur_id: string | null;
 };
 
 export function ObjectifDialog({
   objectif,
   processusOptions = [],
+  indicateurOptions = [],
+  presetProcessusId,
 }: {
   objectif?: ObjectifRow;
   processusOptions?: { id: string; nom: string }[];
+  indicateurOptions?: { id: string; nom: string }[];
+  presetProcessusId?: string;
 }) {
   const router = useRouter();
   const isEdit = Boolean(objectif);
@@ -62,6 +67,7 @@ export function ObjectifDialog({
       unite: f.get("unite") || undefined,
       sens: f.get("sens") || undefined,
       processusId: f.get("processusId") || undefined,
+      indicateurId: f.get("indicateurId") || undefined,
     };
     const result = isEdit
       ? await updateObjectifAction({ id: objectif?.id, ...data })
@@ -148,12 +154,28 @@ export function ObjectifDialog({
                 id="processusId"
                 name="processusId"
                 className={SELECT_CLASS}
-                defaultValue={objectif?.processus_id ?? ""}
+                defaultValue={objectif?.processus_id ?? presetProcessusId ?? ""}
               >
                 <option value="">—</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="indicateurId">Indicateur de mesure</Label>
+              <select
+                id="indicateurId"
+                name="indicateurId"
+                className={SELECT_CLASS}
+                defaultValue={objectif?.indicateur_id ?? ""}
+              >
+                <option value="">Aucun (saisie manuelle)</option>
+                {indicateurOptions.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.nom}
                   </option>
                 ))}
               </select>
@@ -190,6 +212,10 @@ export function ObjectifDialog({
               </select>
             </div>
           </div>
+          <p className="text-muted-foreground text-xs">
+            Si un indicateur de mesure est associé, la progression de l'objectif suit
+            automatiquement sa dernière valeur mesurée (la saisie manuelle est ignorée).
+          </p>
           <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea

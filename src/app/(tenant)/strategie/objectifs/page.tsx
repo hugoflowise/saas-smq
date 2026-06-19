@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,11 +43,11 @@ export default async function ObjectifsPage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
-  const [{ data: objectifs }, { data: processus }] = await Promise.all([
+  const [{ data: objectifs }, { data: processus }, { data: indicateurs }] = await Promise.all([
     supabase
       .from("objectifs_qualite")
       .select(
-        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id",
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id",
       )
       .eq("tenant_id", tid)
       .order("created_at", { ascending: true }),
@@ -55,16 +56,44 @@ export default async function ObjectifsPage() {
       .select("id, nom")
       .eq("tenant_id", tid)
       .order("ordre_affichage", { ascending: true }),
+    supabase
+      .from("indicateurs")
+      .select("id, nom, unite")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("nom", { ascending: true }),
   ]);
 
   const items = objectifs ?? [];
   const processusOptions = processus ?? [];
+  const indicateurOptions = indicateurs ?? [];
   const processusNom = new Map(processusOptions.map((p) => [p.id, p.nom]));
+  const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
+
+  // Dernière valeur mesurée de chaque indicateur piloté par un objectif.
+  const linkedIndIds = [...new Set(items.map((o) => o.indicateur_id).filter(Boolean))] as string[];
+  const lastVal = new Map<string, number>();
+  if (linkedIndIds.length) {
+    const { data: valeurs } = await supabase
+      .from("indicateurs_valeurs")
+      .select("indicateur_id, valeur, date_mesure")
+      .in("indicateur_id", linkedIndIds)
+      .order("date_mesure", { ascending: false });
+    for (const v of valeurs ?? []) {
+      if (!lastVal.has(v.indicateur_id)) lastVal.set(v.indicateur_id, Number(v.valeur));
+    }
+  }
 
   const withProgress = items.map((o) => {
-    const pct = objectifProgress(o.valeur_actuelle, o.valeur_cible, o.sens);
+    const ind = o.indicateur_id ? indicateurById.get(o.indicateur_id) : null;
+    // Si un indicateur pilote l'objectif, sa dernière valeur prime sur la saisie manuelle.
+    const valeurEffective =
+      o.indicateur_id && lastVal.has(o.indicateur_id)
+        ? (lastVal.get(o.indicateur_id) ?? null)
+        : o.valeur_actuelle;
+    const pct = objectifProgress(valeurEffective, o.valeur_cible, o.sens);
     const atteint = o.statut === "atteint" || (pct !== null && pct >= 100);
-    return { ...o, pct, atteint };
+    return { ...o, pct, atteint, valeurEffective, indicateurNom: ind?.nom ?? null };
   });
   const total = withProgress.length;
   const atteints = withProgress.filter((o) => o.atteint).length;
@@ -78,7 +107,7 @@ export default async function ObjectifsPage() {
         isoClause="ISO 9001 §6.2"
         help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
       >
-        <ObjectifDialog processusOptions={processusOptions} />
+        <ObjectifDialog processusOptions={processusOptions} indicateurOptions={indicateurOptions} />
       </PageHeader>
 
       {total > 0 ? (
@@ -127,7 +156,17 @@ export default async function ObjectifsPage() {
             <TableBody>
               {withProgress.map((o) => (
                 <TableRow key={o.id}>
-                  <TableCell className="font-medium">{o.intitule}</TableCell>
+                  <TableCell className="font-medium">
+                    {o.intitule}
+                    {o.indicateur_id && o.indicateurNom ? (
+                      <Link
+                        href={`/indicateurs/${o.indicateur_id}?from=/strategie/objectifs`}
+                        className="mt-0.5 block text-primary text-xs hover:underline"
+                      >
+                        ↳ Indicateur : {o.indicateurNom}
+                      </Link>
+                    ) : null}
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {o.processus_id ? (processusNom.get(o.processus_id) ?? "—") : "—"}
                   </TableCell>
@@ -136,11 +175,15 @@ export default async function ObjectifsPage() {
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between gap-2 text-xs">
                           <span className="flex items-center gap-1">
-                            <ObjValeurActuelleCell
-                              id={o.id}
-                              value={o.valeur_actuelle}
-                              unite={o.unite}
-                            />
+                            {o.indicateur_id ? (
+                              <span className="font-medium">{o.valeurEffective ?? "—"}</span>
+                            ) : (
+                              <ObjValeurActuelleCell
+                                id={o.id}
+                                value={o.valeur_actuelle}
+                                unite={o.unite}
+                              />
+                            )}
                             <span className="text-muted-foreground">
                               / {o.valeur_cible} {o.unite ?? ""}
                             </span>
@@ -174,7 +217,11 @@ export default async function ObjectifsPage() {
                     <ObjStatutCell id={o.id} value={o.statut} />
                   </TableCell>
                   <TableCell>
-                    <ObjectifDialog objectif={o} processusOptions={processusOptions} />
+                    <ObjectifDialog
+                      objectif={o}
+                      processusOptions={processusOptions}
+                      indicateurOptions={indicateurOptions}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

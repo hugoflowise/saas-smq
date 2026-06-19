@@ -1381,6 +1381,7 @@ export type Database = {
           est_smart: boolean
           fonction_concernee: string | null
           id: string
+          indicateur_id: string | null
           intitule: string
           processus_id: string | null
           responsable_id: string | null
@@ -1403,6 +1404,7 @@ export type Database = {
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
+          indicateur_id?: string | null
           intitule: string
           processus_id?: string | null
           responsable_id?: string | null
@@ -1425,6 +1427,7 @@ export type Database = {
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
+          indicateur_id?: string | null
           intitule?: string
           processus_id?: string | null
           responsable_id?: string | null
@@ -1443,6 +1446,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_indicateur_id_fkey"
+            columns: ["indicateur_id"]
+            isOneToOne: false
+            referencedRelation: "indicateurs"
             referencedColumns: ["id"]
           },
           {
