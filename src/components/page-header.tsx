@@ -14,8 +14,8 @@ type PageHeaderProps = {
 export function PageHeader({ title, description, isoClause, help, children }: PageHeaderProps) {
   return (
     <div className="mb-6 flex flex-col gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-semibold text-2xl tracking-tight">{title}</h1>
             {isoClause ? (
@@ -26,7 +26,9 @@ export function PageHeader({ title, description, isoClause, help, children }: Pa
           </div>
           {description ? <p className="mt-1 text-muted-foreground text-sm">{description}</p> : null}
         </div>
-        {children ? <div className="flex items-center gap-2">{children}</div> : null}
+        {children ? (
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{children}</div>
+        ) : null}
       </div>
       {help ? (
         <details className="group rounded-lg border bg-surface text-sm">
