@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createIndicateurAction } from "@/lib/actions/indicateurs";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateIndicateurDialog({
@@ -23,33 +21,24 @@ export function CreateIndicateurDialog({
   processusOptions: { id: string; nom: string }[];
   presetProcessusId?: string;
 }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const form = new FormData(event.currentTarget);
-    const result = await createIndicateurAction({
-      nom: form.get("nom"),
-      description: form.get("description") || undefined,
-      processusId: form.get("processusId") || undefined,
-      type: form.get("type"),
-      unite: form.get("unite") || undefined,
-      cible: form.get("cible") || undefined,
-      seuilMin: form.get("seuilMin") || undefined,
-      seuilMax: form.get("seuilMax") || undefined,
-      frequence: form.get("frequence"),
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) =>
+        createIndicateurAction({
+          nom: form.get("nom"),
+          description: form.get("description") || undefined,
+          processusId: form.get("processusId") || undefined,
+          type: form.get("type"),
+          unite: form.get("unite") || undefined,
+          cible: form.get("cible") || undefined,
+          seuilMin: form.get("seuilMin") || undefined,
+          seuilMax: form.get("seuilMax") || undefined,
+          frequence: form.get("frequence"),
+        }),
+      success: "Indicateur créé.",
     });
-    setPending(false);
-    if (result.ok) {
-      toast.success("Indicateur créé.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

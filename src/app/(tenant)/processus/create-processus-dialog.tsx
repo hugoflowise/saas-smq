@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,33 +13,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProcessusAction } from "@/lib/actions/processus";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateProcessusDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const result = await createProcessusAction({
-      nom: form.get("nom"),
-      type: form.get("type"),
-      description: form.get("description") || undefined,
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) =>
+        createProcessusAction({
+          nom: form.get("nom"),
+          type: form.get("type"),
+          description: form.get("description") || undefined,
+        }),
+      success: "Processus créé.",
     });
-
-    setPending(false);
-
-    if (result.ok) {
-      toast.success("Processus créé.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

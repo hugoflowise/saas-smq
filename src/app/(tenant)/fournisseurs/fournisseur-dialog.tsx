@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createFournisseurAction, updateFournisseurAction } from "@/lib/actions/fournisseurs";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type FournisseurRow = {
@@ -32,37 +30,29 @@ export type FournisseurRow = {
 };
 
 export function FournisseurDialog({ fournisseur }: { fournisseur?: FournisseurRow }) {
-  const router = useRouter();
   const isEdit = Boolean(fournisseur);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      nom: f.get("nom"),
-      categorie: f.get("categorie") || undefined,
-      contact: f.get("contact") || undefined,
-      criticite: f.get("criticite"),
-      noteEvaluation: f.get("noteEvaluation") || undefined,
-      dateEvaluation: f.get("dateEvaluation") || undefined,
-      prochaineEvaluation: f.get("prochaineEvaluation") || undefined,
-      statut: f.get("statut"),
-      commentaire: f.get("commentaire") || undefined,
-    };
-    const result = isEdit
-      ? await updateFournisseurAction({ id: fournisseur?.id, ...data })
-      : await createFournisseurAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Fournisseur mis à jour." : "Fournisseur ajouté.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          nom: f.get("nom"),
+          categorie: f.get("categorie") || undefined,
+          contact: f.get("contact") || undefined,
+          criticite: f.get("criticite"),
+          noteEvaluation: f.get("noteEvaluation") || undefined,
+          dateEvaluation: f.get("dateEvaluation") || undefined,
+          prochaineEvaluation: f.get("prochaineEvaluation") || undefined,
+          statut: f.get("statut"),
+          commentaire: f.get("commentaire") || undefined,
+        };
+        return isEdit
+          ? updateFournisseurAction({ id: fournisseur?.id, ...data })
+          : createFournisseurAction(data);
+      },
+      success: isEdit ? "Fournisseur mis à jour." : "Fournisseur ajouté.",
+    });
   }
 
   return (

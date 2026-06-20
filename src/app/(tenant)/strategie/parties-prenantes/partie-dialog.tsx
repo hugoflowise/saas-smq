@@ -1,9 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPartieAction, updatePartieAction } from "@/lib/actions/parties-prenantes";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   PRIORITE_CLASS,
   PRIORITE_LABELS,
@@ -41,10 +40,8 @@ export type PartieRow = {
 };
 
 export function PartieDialog({ partie }: { partie?: PartieRow }) {
-  const router = useRouter();
   const isEdit = Boolean(partie);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
   const [pouvoir, setPouvoir] = useState(partie?.pouvoir ?? 2);
   const [legitimite, setLegitimite] = useState(partie?.legitimite ?? 2);
   const [urgence, setUrgence] = useState(partie?.urgence ?? 2);
@@ -52,30 +49,22 @@ export function PartieDialog({ partie }: { partie?: PartieRow }) {
   const total = scoreTotal(pouvoir, legitimite, urgence);
   const priorite = prioriteFromTotal(total);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      nom: f.get("nom"),
-      sphere: f.get("sphere"),
-      type: f.get("type"),
-      niveauInteraction: f.get("niveauInteraction"),
-      pouvoir,
-      legitimite,
-      urgence,
-    };
-    const result = isEdit
-      ? await updatePartieAction({ id: partie?.id, ...data })
-      : await createPartieAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Partie prenante mise à jour." : "Partie prenante créée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          nom: f.get("nom"),
+          sphere: f.get("sphere"),
+          type: f.get("type"),
+          niveauInteraction: f.get("niveauInteraction"),
+          pouvoir,
+          legitimite,
+          urgence,
+        };
+        return isEdit ? updatePartieAction({ id: partie?.id, ...data }) : createPartieAction(data);
+      },
+      success: isEdit ? "Partie prenante mise à jour." : "Partie prenante créée.",
+    });
   }
 
   return (

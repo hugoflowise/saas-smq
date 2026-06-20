@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createEnqueteAction, updateEnqueteAction } from "@/lib/actions/satisfaction";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 
 export type EnqueteRow = {
   id: string;
@@ -29,35 +27,27 @@ export type EnqueteRow = {
 };
 
 export function EnqueteDialog({ enquete }: { enquete?: EnqueteRow }) {
-  const router = useRouter();
   const isEdit = Boolean(enquete);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      client: f.get("client") || undefined,
-      dateReponse: f.get("dateReponse") || undefined,
-      noteRecommandation: f.get("noteRecommandation") || undefined,
-      noteSatisfaction: f.get("noteSatisfaction") || undefined,
-      commentaire: f.get("commentaire") || undefined,
-      estReclamation: f.get("estReclamation") === "on",
-      source: f.get("source") || undefined,
-    };
-    const result = isEdit
-      ? await updateEnqueteAction({ id: enquete?.id, ...data })
-      : await createEnqueteAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Réponse mise à jour." : "Réponse ajoutée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          client: f.get("client") || undefined,
+          dateReponse: f.get("dateReponse") || undefined,
+          noteRecommandation: f.get("noteRecommandation") || undefined,
+          noteSatisfaction: f.get("noteSatisfaction") || undefined,
+          commentaire: f.get("commentaire") || undefined,
+          estReclamation: f.get("estReclamation") === "on",
+          source: f.get("source") || undefined,
+        };
+        return isEdit
+          ? updateEnqueteAction({ id: enquete?.id, ...data })
+          : createEnqueteAction(data);
+      },
+      success: isEdit ? "Réponse mise à jour." : "Réponse ajoutée.",
+    });
   }
 
   return (

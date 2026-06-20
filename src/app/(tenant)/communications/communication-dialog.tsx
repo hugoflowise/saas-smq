@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createCommunicationAction, updateCommunicationAction } from "@/lib/actions/communications";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export const TYPE_LABELS: Record<string, string> = {
@@ -60,36 +58,28 @@ function Options({ map }: { map: Record<string, string> }) {
 }
 
 export function CommunicationDialog({ communication }: { communication?: CommunicationRow }) {
-  const router = useRouter();
   const isEdit = Boolean(communication);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      sujet: f.get("sujet"),
-      type: f.get("type"),
-      canal: f.get("canal"),
-      audience: f.get("audience") || undefined,
-      message: f.get("message") || undefined,
-      datePrevue: f.get("datePrevue") || undefined,
-      dateRealisee: f.get("dateRealisee") || undefined,
-      statut: f.get("statut"),
-    };
-    const result = isEdit
-      ? await updateCommunicationAction({ id: communication?.id, ...data })
-      : await createCommunicationAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Communication mise à jour." : "Communication créée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          sujet: f.get("sujet"),
+          type: f.get("type"),
+          canal: f.get("canal"),
+          audience: f.get("audience") || undefined,
+          message: f.get("message") || undefined,
+          datePrevue: f.get("datePrevue") || undefined,
+          dateRealisee: f.get("dateRealisee") || undefined,
+          statut: f.get("statut"),
+        };
+        return isEdit
+          ? updateCommunicationAction({ id: communication?.id, ...data })
+          : createCommunicationAction(data);
+      },
+      success: isEdit ? "Communication mise à jour." : "Communication créée.",
+    });
   }
 
   return (

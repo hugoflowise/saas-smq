@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createConsultantAction, updateConsultantAction } from "@/lib/actions/consultants";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 
 export type ConsultantRow = {
   id: string;
@@ -31,38 +29,30 @@ export type ConsultantRow = {
 };
 
 export function ConsultantDialog({ consultant }: { consultant?: ConsultantRow }) {
-  const router = useRouter();
   const isEdit = Boolean(consultant);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      reference: f.get("reference") || undefined,
-      nom: f.get("nom"),
-      prenom: f.get("prenom") || undefined,
-      entite: f.get("entite") || undefined,
-      poste: f.get("poste") || undefined,
-      dateDemarrage: f.get("dateDemarrage") || undefined,
-      dateFin: f.get("dateFin") || undefined,
-      odm: f.get("odm") === "on",
-      pdp: f.get("pdp") === "on",
-      visiteMedicale: f.get("visiteMedicale") === "on",
-    };
-    const result = isEdit
-      ? await updateConsultantAction({ id: consultant?.id, ...data })
-      : await createConsultantAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Consultant mis à jour." : "Consultant ajouté.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          reference: f.get("reference") || undefined,
+          nom: f.get("nom"),
+          prenom: f.get("prenom") || undefined,
+          entite: f.get("entite") || undefined,
+          poste: f.get("poste") || undefined,
+          dateDemarrage: f.get("dateDemarrage") || undefined,
+          dateFin: f.get("dateFin") || undefined,
+          odm: f.get("odm") === "on",
+          pdp: f.get("pdp") === "on",
+          visiteMedicale: f.get("visiteMedicale") === "on",
+        };
+        return isEdit
+          ? updateConsultantAction({ id: consultant?.id, ...data })
+          : createConsultantAction(data);
+      },
+      success: isEdit ? "Consultant mis à jour." : "Consultant ajouté.",
+    });
   }
 
   return (

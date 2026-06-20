@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateTenantAction, uploadTenantLogoAction } from "@/lib/actions/tenants";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Tenant = {
@@ -30,8 +31,7 @@ type Dirigeant = { id: string; full_name: string | null; email: string } | null;
 
 export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirigeant: Dirigeant }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
   const [uploading, setUploading] = useState(false);
 
   async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -51,29 +51,19 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
     }
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const result = await updateTenantAction({
-      tenantId: tenant.id,
-      nomSociete: form.get("nomSociete"),
-      effectif: form.get("effectif") || undefined,
-      secteur: form.get("secteur") || undefined,
-      dirigeantId: dirigeant?.id,
-      dirigeantNom: form.get("dirigeantNom") || undefined,
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) =>
+        updateTenantAction({
+          tenantId: tenant.id,
+          nomSociete: form.get("nomSociete"),
+          effectif: form.get("effectif") || undefined,
+          secteur: form.get("secteur") || undefined,
+          dirigeantId: dirigeant?.id,
+          dirigeantNom: form.get("dirigeantNom") || undefined,
+        }),
+      success: "Client mis à jour.",
     });
-
-    setPending(false);
-
-    if (result.ok) {
-      toast.success("Client mis à jour.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

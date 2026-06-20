@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,36 +12,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createTenantAction } from "@/lib/actions/tenants";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateTenantDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const result = await createTenantAction({
-      nomSociete: form.get("nomSociete"),
-      dirigeantEmail: form.get("dirigeantEmail"),
-      dirigeantNom: form.get("dirigeantNom") || undefined,
-      formule: form.get("formule"),
-      effectif: form.get("effectif") || undefined,
-      secteur: form.get("secteur") || undefined,
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) =>
+        createTenantAction({
+          nomSociete: form.get("nomSociete"),
+          dirigeantEmail: form.get("dirigeantEmail"),
+          dirigeantNom: form.get("dirigeantNom") || undefined,
+          formule: form.get("formule"),
+          effectif: form.get("effectif") || undefined,
+          secteur: form.get("secteur") || undefined,
+        }),
+      success: "Client créé. Le dirigeant peut se connecter via son e-mail.",
     });
-
-    setPending(false);
-
-    if (result.ok) {
-      toast.success("Client créé. Le dirigeant peut se connecter via son e-mail.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

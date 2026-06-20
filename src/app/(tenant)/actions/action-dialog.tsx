@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createActionAction, updateActionAction } from "@/lib/actions/plan-actions";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   ACTION_ORIGINE_LABELS,
   ACTION_PRIORITE_LABELS,
@@ -68,46 +66,34 @@ function Options({ map }: { map: Record<string, string> }) {
 }
 
 export function ActionDialog({ processusOptions, action }: Props) {
-  const router = useRouter();
   const isEdit = Boolean(action);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const payload = {
-      descriptionCourte: form.get("descriptionCourte"),
-      descriptionDetail: form.get("descriptionDetail") || undefined,
-      origine: form.get("origine"),
-      type: form.get("type"),
-      priorite: form.get("priorite"),
-      statut: form.get("statut"),
-      processusConcerne: form.get("processusConcerne") || undefined,
-      datePrevue: form.get("datePrevue") || undefined,
-      indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
-      commentaires: form.get("commentaires") || undefined,
-      cotation: form.get("cotation") || undefined,
-      constat: form.get("constat") || undefined,
-      causeFondamentale: form.get("causeFondamentale") || undefined,
-      recommandation: form.get("recommandation") || undefined,
-    };
-
-    const result = isEdit
-      ? await updateActionAction({ id: action?.id, ...payload })
-      : await createActionAction(payload);
-
-    setPending(false);
-
-    if (result.ok) {
-      toast.success(isEdit ? "Action mise à jour." : "Action créée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) => {
+        const payload = {
+          descriptionCourte: form.get("descriptionCourte"),
+          descriptionDetail: form.get("descriptionDetail") || undefined,
+          origine: form.get("origine"),
+          type: form.get("type"),
+          priorite: form.get("priorite"),
+          statut: form.get("statut"),
+          processusConcerne: form.get("processusConcerne") || undefined,
+          datePrevue: form.get("datePrevue") || undefined,
+          indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
+          commentaires: form.get("commentaires") || undefined,
+          cotation: form.get("cotation") || undefined,
+          constat: form.get("constat") || undefined,
+          causeFondamentale: form.get("causeFondamentale") || undefined,
+          recommandation: form.get("recommandation") || undefined,
+        };
+        return isEdit
+          ? updateActionAction({ id: action?.id, ...payload })
+          : createActionAction(payload);
+      },
+      success: isEdit ? "Action mise à jour." : "Action créée.",
+    });
   }
 
   return (

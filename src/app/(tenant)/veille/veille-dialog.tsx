@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createVeilleAction, updateVeilleAction } from "@/lib/actions/registres";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type VeilleRow = {
@@ -31,36 +29,26 @@ export type VeilleRow = {
 };
 
 export function VeilleDialog({ veille }: { veille?: VeilleRow }) {
-  const router = useRouter();
   const isEdit = Boolean(veille);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      intitule: f.get("intitule"),
-      reference: f.get("reference") || undefined,
-      domaine: f.get("domaine"),
-      datePublication: f.get("datePublication") || undefined,
-      dateApplication: f.get("dateApplication") || undefined,
-      impactSmq: f.get("impactSmq") || undefined,
-      actionsAPrevoir: f.get("actionsAPrevoir") || undefined,
-      statut: f.get("statut"),
-    };
-    const result = isEdit
-      ? await updateVeilleAction({ id: veille?.id, ...data })
-      : await createVeilleAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Texte mis à jour." : "Texte ajouté à la veille.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          intitule: f.get("intitule"),
+          reference: f.get("reference") || undefined,
+          domaine: f.get("domaine"),
+          datePublication: f.get("datePublication") || undefined,
+          dateApplication: f.get("dateApplication") || undefined,
+          impactSmq: f.get("impactSmq") || undefined,
+          actionsAPrevoir: f.get("actionsAPrevoir") || undefined,
+          statut: f.get("statut"),
+        };
+        return isEdit ? updateVeilleAction({ id: veille?.id, ...data }) : createVeilleAction(data);
+      },
+      success: isEdit ? "Texte mis à jour." : "Texte ajouté à la veille.",
+    });
   }
 
   return (

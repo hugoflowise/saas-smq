@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createRevueAction, updateRevueAction } from "@/lib/actions/audits-revues";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type RevueRow = {
@@ -29,35 +27,25 @@ export type RevueRow = {
 };
 
 export function RevueDialog({ revue }: { revue?: RevueRow }) {
-  const router = useRouter();
   const isEdit = Boolean(revue);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
   const currentYear = new Date().getFullYear();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      annee: f.get("annee"),
-      dateRealisation: f.get("dateRealisation") || undefined,
-      statut: f.get("statut"),
-      ordreDuJour: f.get("ordreDuJour") || undefined,
-      conclusions: f.get("conclusions") || undefined,
-      decisions: f.get("decisions") || undefined,
-    };
-    const result = isEdit
-      ? await updateRevueAction({ id: revue?.id, ...data })
-      : await createRevueAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Revue mise à jour." : "Revue de direction créée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          annee: f.get("annee"),
+          dateRealisation: f.get("dateRealisation") || undefined,
+          statut: f.get("statut"),
+          ordreDuJour: f.get("ordreDuJour") || undefined,
+          conclusions: f.get("conclusions") || undefined,
+          decisions: f.get("decisions") || undefined,
+        };
+        return isEdit ? updateRevueAction({ id: revue?.id, ...data }) : createRevueAction(data);
+      },
+      success: isEdit ? "Revue mise à jour." : "Revue de direction créée.",
+    });
   }
 
   return (

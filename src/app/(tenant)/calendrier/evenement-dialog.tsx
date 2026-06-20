@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,29 +12,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createEvenementAction } from "@/lib/actions/evenements";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 
 export function EvenementDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const result = await createEvenementAction({
-      titre: f.get("titre"),
-      dateEvenement: f.get("dateEvenement"),
-      description: f.get("description") || undefined,
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) =>
+        createEvenementAction({
+          titre: f.get("titre"),
+          dateEvenement: f.get("dateEvenement"),
+          description: f.get("description") || undefined,
+        }),
+      success: "Événement ajouté.",
     });
-    setPending(false);
-    if (result.ok) {
-      toast.success("Événement ajouté.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (
