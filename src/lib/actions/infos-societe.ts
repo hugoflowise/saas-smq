@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant-context";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 const schema = z.object({
   formeJuridique: z.string().trim().optional(),

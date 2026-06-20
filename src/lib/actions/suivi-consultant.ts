@@ -1,11 +1,10 @@
 "use server";
 
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import { ALERTE_KEYS } from "@/lib/suivi-consultant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 const schema = z.object({
   token: z.string().uuid(),

@@ -2,11 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
-type CreateResult = { ok: true; id: string } | { ok: false; error: string };
 
 const MAX_TAILLE = 10 * 1024 * 1024; // 10 Mo
 

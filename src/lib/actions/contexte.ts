@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 const contexteSchema = z.object({
   swot: z.object({

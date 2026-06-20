@@ -2,13 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import { setActiveTenantId } from "@/lib/active-tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIONS_STANDARDS } from "@/lib/templates/actions-standards";
 import { PROCESSUS_STANDARDS } from "@/lib/templates/processus";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 /** Vérifie que l'utilisateur courant est admin Flowise. */
 async function requireAdmin(): Promise<{ ok: true } | { ok: false; error: string }> {
