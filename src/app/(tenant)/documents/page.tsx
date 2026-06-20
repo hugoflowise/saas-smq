@@ -18,7 +18,7 @@ import {
   DOC_STATUT_LABELS,
   statutDocumentNatif,
 } from "@/lib/documents";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -68,7 +68,7 @@ export default async function DocumentsPage({
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const [{ data: politique }, { data: procedures }, { data: registre }, { data: processus }] =
     await Promise.all([

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { setActiveTenantId } from "@/lib/active-tenant";
+import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIONS_STANDARDS } from "@/lib/templates/actions-standards";
@@ -57,7 +58,7 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
       formule: data.formule,
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
-      date_souscription: new Date().toISOString().slice(0, 10),
+      date_souscription: todayISO(),
     })
     .select("id")
     .single();

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -126,8 +127,7 @@ export async function setActionStatutAction(input: unknown): Promise<ActionResul
     .from("actions")
     .update({
       statut: parsed.data.statut,
-      date_effective:
-        parsed.data.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
+      date_effective: parsed.data.statut === "termine" ? todayISO() : null,
       updated_by: ctx.userId,
     })
     .eq("id", parsed.data.id)
@@ -170,7 +170,7 @@ export async function quickUpdateActionAction(input: unknown): Promise<ActionRes
   const patch: ActionUpdate = { updated_by: ctx.userId };
   if (d.statut !== undefined) {
     patch.statut = d.statut;
-    patch.date_effective = d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null;
+    patch.date_effective = d.statut === "termine" ? todayISO() : null;
   }
   if (d.priorite !== undefined) patch.priorite = d.priorite;
   if (d.datePrevue !== undefined) patch.date_prevue = d.datePrevue || null;
@@ -211,7 +211,7 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
       date_prevue: d.datePrevue || null,
-      date_effective: d.statut === "termine" ? new Date().toISOString().slice(0, 10) : null,
+      date_effective: d.statut === "termine" ? todayISO() : null,
       indicateur_efficacite: d.indicateurEfficacite ?? null,
       commentaires: d.commentaires ?? null,
       constat: d.constat ?? null,

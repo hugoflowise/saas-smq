@@ -9,13 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ViewToggle } from "@/components/view-toggle";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
 import { CotationCell, EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
 import { ActionsKanban } from "./kanban";
-import { ViewToggle } from "./view-toggle";
 
 export default async function ActionsPage({
   searchParams,
@@ -30,7 +31,7 @@ export default async function ActionsPage({
 }) {
   const ctx = await getTenantContext();
   const { statut, priorite, tri, vue, filtre } = await searchParams;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   if (!ctx.effectiveTenantId) {
     return (

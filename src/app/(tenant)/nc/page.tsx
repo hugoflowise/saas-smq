@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ViewToggle } from "@/components/view-toggle";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -16,7 +17,6 @@ import { NcGraviteCell, NcStatutCell } from "./inline-cells";
 import { NcDialog } from "./nc-dialog";
 import { NcFilterBar } from "./nc-filter-bar";
 import { NcKanban } from "./nc-kanban";
-import { NcViewToggle } from "./nc-view-toggle";
 
 export default async function NcPage({
   searchParams,
@@ -76,7 +76,7 @@ export default async function NcPage({
         isoClause="ISO 9001 §10.2"
         help="Face à une non-conformité : réagir, analyser les causes profondes (5 Pourquoi, Ishikawa…), mettre en place une action corrective puis vérifier son efficacité. Une NC peut découler de vos propres exigences internes."
       >
-        <NcViewToggle />
+        <ViewToggle />
         <NcDialog processusOptions={options} />
       </PageHeader>
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate } from "@/lib/format";
+import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { objectifProgress } from "@/lib/objectifs";
@@ -54,8 +54,8 @@ export default async function DashboardPage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const today = new Date().toISOString().slice(0, 10);
-  const horizon = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const today = todayISO();
+  const horizon = dateOffsetISO(30);
 
   // Conformité ISO
   const { count: refTotal } = await supabase

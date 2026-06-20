@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/react";
 import { PrintShell, type Societe } from "@/components/print-shell";
 import { TiptapEditor } from "@/components/tiptap-editor";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -75,7 +75,7 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
       titre={procedure.titre}
       societe={tenant as Societe}
       meta={meta}
-      genereLe={formatDate(new Date().toISOString().slice(0, 10))}
+      genereLe={formatDate(todayISO())}
     >
       <TiptapEditor content={contenu} editable={false} bare />
     </PrintShell>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -32,7 +33,7 @@ function recPayload(d: z.infer<typeof recCreate>) {
   return {
     objet: d.objet,
     client: d.client ?? null,
-    date_reception: d.dateReception || new Date().toISOString().slice(0, 10),
+    date_reception: d.dateReception || todayISO(),
     canal: d.canal,
     gravite: d.gravite,
     description: d.description ?? null,

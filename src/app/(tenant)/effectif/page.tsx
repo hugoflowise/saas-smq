@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { type Consultant, computeEffectif, nomComplet } from "@/lib/effectif";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ConsultantDelete } from "./consultant-delete";
@@ -82,7 +82,7 @@ export default async function EffectifPage() {
     .order("nom", { ascending: true });
 
   const consultants = (data ?? []) as Consultant[];
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { effectifActuel, couverture, trend, mouvements } = computeEffectif(consultants, today);
 
   const fmtPct = (v: number | null) => (v == null ? "—" : `${v}%`);

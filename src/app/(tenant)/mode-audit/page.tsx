@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { dateOffsetISO, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { PrintButton } from "./print-button";
@@ -47,8 +48,8 @@ export default async function ModeAuditPage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const today = new Date().toISOString().slice(0, 10);
-  const horizon60 = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const today = todayISO();
+  const horizon60 = dateOffsetISO(60);
 
   const count = (q: { count: number | null }) => q.count ?? 0;
 
