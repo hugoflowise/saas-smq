@@ -63,7 +63,7 @@ export default async function TenantLayout({ children }: { children: React.React
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar isAdmin={isAdmin} />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           email={email}
           role={role}
@@ -74,8 +74,8 @@ export default async function TenantLayout({ children }: { children: React.React
           notifications={notifications}
           unreadCount={unreadCount ?? 0}
         />
-        <main className="app-bg flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
-          <div className="mx-auto w-full max-w-screen-2xl">{children}</div>
+        <main className="app-bg flex-1 overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
+          <div className="mx-auto w-full min-w-0 max-w-screen-2xl">{children}</div>
         </main>
       </div>
     </div>
