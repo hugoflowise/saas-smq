@@ -1,5 +1,5 @@
 import { PrintShell, type Societe } from "@/components/print-shell";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -85,7 +85,7 @@ export default async function ReunionPrintPage({ params }: { params: Promise<{ i
       titre={reunion.titre}
       societe={tenant as Societe}
       meta={meta}
-      genereLe={formatDate(new Date().toISOString().slice(0, 10))}
+      genereLe={formatDate(todayISO())}
     >
       <div className="flex flex-col gap-6">
         {reunion.objectifs ? (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { todayISO } from "@/lib/format";
 
 export type CalEvent = { date: string; label: string; type: string; href: string };
 
@@ -180,7 +181,7 @@ function MonthView({ events }: { events: CalEvent[] }) {
 
 export function CalendrierClient({ events }: { events: CalEvent[] }) {
   const [view, setView] = useState<"mois" | "liste">("mois");
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
 
   const types = useMemo(() => [...new Set(events.map((e) => e.type))].sort(), [events]);
   const [actifs, setActifs] = useState<Set<string>>(() => new Set(types));

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -58,7 +59,7 @@ export async function createNcAction(input: unknown): Promise<ActionResult> {
     reference,
     intitule: d.intitule,
     description: d.description ?? null,
-    date_constat: d.dateConstat || new Date().toISOString().slice(0, 10),
+    date_constat: d.dateConstat || todayISO(),
     origine: d.origine,
     gravite: d.gravite,
     type: d.type,
@@ -225,7 +226,7 @@ export async function setNcStatutAction(input: unknown): Promise<ActionResult> {
     .from("non_conformites")
     .update({
       statut: parsed.data.statut,
-      date_cloture: isCloture ? new Date().toISOString().slice(0, 10) : null,
+      date_cloture: isCloture ? todayISO() : null,
       updated_by: ctx.userId,
     })
     .eq("id", parsed.data.id)
@@ -259,7 +260,7 @@ export async function quickUpdateNcAction(input: unknown): Promise<ActionResult>
   if (d.statut !== undefined) {
     patch.statut = d.statut;
     patch.date_cloture = ["cloturee", "efficace", "inefficace"].includes(d.statut)
-      ? new Date().toISOString().slice(0, 10)
+      ? todayISO()
       : null;
   }
   if (d.gravite !== undefined) patch.gravite = d.gravite;
@@ -293,13 +294,13 @@ export async function updateNcAction(input: unknown): Promise<ActionResult> {
     .update({
       intitule: d.intitule,
       description: d.description ?? null,
-      date_constat: d.dateConstat || new Date().toISOString().slice(0, 10),
+      date_constat: d.dateConstat || todayISO(),
       origine: d.origine,
       gravite: d.gravite,
       type: d.type,
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
-      date_cloture: isCloture ? new Date().toISOString().slice(0, 10) : null,
+      date_cloture: isCloture ? todayISO() : null,
       updated_by: ctx.userId,
     })
     .eq("id", d.id)

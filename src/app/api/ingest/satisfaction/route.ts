@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Webhook d'ingestion (Microsoft Forms via Power Automate).
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
   const { error } = await admin.from("enquetes_satisfaction").insert({
     tenant_id: tenant.id,
     client: d.client ?? null,
-    date_reponse: d.dateReponse || new Date().toISOString().slice(0, 10),
+    date_reponse: d.dateReponse || todayISO(),
     note_recommandation: d.noteRecommandation ?? null,
     note_satisfaction: d.noteSatisfaction ?? null,
     commentaire: d.commentaire ?? null,

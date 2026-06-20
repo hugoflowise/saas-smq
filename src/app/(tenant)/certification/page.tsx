@@ -3,7 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { BADGE_BASE } from "@/lib/badges";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { JalonDelete } from "./jalon-delete";
@@ -32,7 +32,7 @@ export default async function CertificationPage() {
   }
 
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { data: jalons } = await supabase
     .from("jalons_certification")
     .select("id, libelle, type, date_jalon, statut, description")

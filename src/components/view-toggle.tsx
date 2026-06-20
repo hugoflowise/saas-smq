@@ -3,7 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export function NcViewToggle() {
+/**
+ * Bascule d'affichage Liste / Kanban, pilotée par le paramètre d'URL `vue`
+ * (`?vue=kanban`, absent = liste). Partagée entre le Plan d'actions et les
+ * Non-conformités (la vue est lue côté serveur depuis `searchParams`).
+ */
+export function ViewToggle() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();

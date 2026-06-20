@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -36,7 +37,7 @@ export async function setCotationAction(input: unknown): Promise<ActionResult> {
       referentiel_iso_id: d.referentielId,
       cotation: d.cotation,
       commentaire: d.commentaire ?? null,
-      date_evaluation: new Date().toISOString().slice(0, 10),
+      date_evaluation: todayISO(),
       evaluateur_id: ctx.userId,
     },
     { onConflict: "tenant_id,referentiel_iso_id" },

@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { FournisseurDialog } from "./fournisseur-dialog";
@@ -41,7 +41,7 @@ export default async function FournisseursPage() {
   }
 
   const supabase = await createClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { data: fournisseurs } = await supabase
     .from("fournisseurs")
     .select(

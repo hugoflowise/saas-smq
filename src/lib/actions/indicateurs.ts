@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -73,7 +74,7 @@ export async function addValeurAction(input: unknown): Promise<ActionResult> {
     tenant_id: ctx.effectiveTenantId,
     indicateur_id: d.indicateurId,
     valeur: d.valeur,
-    date_mesure: d.dateMesure || new Date().toISOString().slice(0, 10),
+    date_mesure: d.dateMesure || todayISO(),
     commentaire: d.commentaire ?? null,
     created_by: ctx.userId,
   });

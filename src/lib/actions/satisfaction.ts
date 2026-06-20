@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -21,7 +22,7 @@ const updateSchema = z.object({ id: z.string().uuid(), ...base });
 function payload(d: z.infer<typeof createSchema>) {
   return {
     client: d.client ?? null,
-    date_reponse: d.dateReponse || new Date().toISOString().slice(0, 10),
+    date_reponse: d.dateReponse || todayISO(),
     note_recommandation: d.noteRecommandation ?? null,
     note_satisfaction: d.noteSatisfaction ?? null,
     commentaire: d.commentaire ?? null,
