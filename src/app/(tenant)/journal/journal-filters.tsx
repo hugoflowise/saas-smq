@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY } from "@/lib/journal";
 
 const SELECT_CLASS =
-  "h-9 rounded-lg border bg-card px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30";
+  "h-9 rounded-lg border border-input bg-card px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export function JournalFilters({
   entity,
