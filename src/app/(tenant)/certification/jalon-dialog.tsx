@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createJalonAction, updateJalonAction } from "@/lib/actions/cycle-certification";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export const JALON_TYPE_LABELS: Record<string, string> = {
@@ -36,33 +34,23 @@ export type JalonRow = {
 };
 
 export function JalonDialog({ jalon }: { jalon?: JalonRow }) {
-  const router = useRouter();
   const isEdit = Boolean(jalon);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      libelle: f.get("libelle"),
-      type: f.get("type"),
-      dateJalon: f.get("dateJalon") || undefined,
-      statut: f.get("statut"),
-      description: f.get("description") || undefined,
-    };
-    const result = isEdit
-      ? await updateJalonAction({ id: jalon?.id, ...data })
-      : await createJalonAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Jalon mis à jour." : "Jalon ajouté.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          libelle: f.get("libelle"),
+          type: f.get("type"),
+          dateJalon: f.get("dateJalon") || undefined,
+          statut: f.get("statut"),
+          description: f.get("description") || undefined,
+        };
+        return isEdit ? updateJalonAction({ id: jalon?.id, ...data }) : createJalonAction(data);
+      },
+      success: isEdit ? "Jalon mis à jour." : "Jalon ajouté.",
+    });
   }
 
   return (

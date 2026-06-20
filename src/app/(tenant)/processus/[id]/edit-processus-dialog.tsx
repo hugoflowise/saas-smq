@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProcessusAction } from "@/lib/actions/processus";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ProcessusForEdit = {
@@ -31,36 +29,24 @@ export type ProcessusForEdit = {
 };
 
 export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const result = await updateProcessusAction({
-      id: processus.id,
-      nom: form.get("nom"),
-      type: form.get("type"),
-      description: form.get("description") || undefined,
-      entrees: form.get("entrees") || undefined,
-      sorties: form.get("sorties") || undefined,
-      ressourcesAssociees: form.get("ressourcesAssociees") || undefined,
-      dateDerniereRevue: form.get("dateDerniereRevue") || undefined,
-      dateProchaineRevue: form.get("dateProchaineRevue") || undefined,
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) =>
+        updateProcessusAction({
+          id: processus.id,
+          nom: form.get("nom"),
+          type: form.get("type"),
+          description: form.get("description") || undefined,
+          entrees: form.get("entrees") || undefined,
+          sorties: form.get("sorties") || undefined,
+          ressourcesAssociees: form.get("ressourcesAssociees") || undefined,
+          dateDerniereRevue: form.get("dateDerniereRevue") || undefined,
+          dateProchaineRevue: form.get("dateProchaineRevue") || undefined,
+        }),
+      success: "Processus mis à jour.",
     });
-
-    setPending(false);
-
-    if (result.ok) {
-      toast.success("Processus mis à jour.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,32 +12,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createAuditAction } from "@/lib/actions/audits-revues";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function AuditDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const result = await createAuditAction({
-      typeAudit: f.get("typeAudit"),
-      organisme: f.get("organisme") || undefined,
-      datePrevue: f.get("datePrevue") || undefined,
-      dureePrevue: f.get("dureePrevue") || undefined,
-      statut: f.get("statut"),
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) =>
+        createAuditAction({
+          typeAudit: f.get("typeAudit"),
+          organisme: f.get("organisme") || undefined,
+          datePrevue: f.get("datePrevue") || undefined,
+          dureePrevue: f.get("dureePrevue") || undefined,
+          statut: f.get("statut"),
+        }),
+      success: "Audit planifié. Ouvrez-le pour renseigner le périmètre et le rapport.",
     });
-    setPending(false);
-    if (result.ok) {
-      toast.success("Audit planifié. Ouvrez-le pour renseigner le périmètre et le rapport.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
   }
 
   return (

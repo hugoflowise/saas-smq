@@ -1,9 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createAttenteAction, updateAttenteAction } from "@/lib/actions/parties-prenantes";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { criticiteResiduelle, MAITRISE_LABELS } from "@/lib/parties-prenantes";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -43,41 +42,33 @@ export function AttenteDialog({
   processus: { id: string; nom: string }[];
   attente?: AttenteRow;
 }) {
-  const router = useRouter();
   const isEdit = Boolean(attente);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
   const [maitrise, setMaitrise] = useState(attente?.maitrise ?? "partiel");
 
   const crit = criticiteResiduelle(priorite, maitrise);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      partieId,
-      attente: f.get("attente"),
-      risque: f.get("risque") || undefined,
-      opportunite: f.get("opportunite") || undefined,
-      maitrise,
-      moyensMaitrise: f.get("moyensMaitrise") || undefined,
-      processusId: f.get("processusId") || undefined,
-      integrationPa: f.get("integrationPa") === "on",
-      action: f.get("action") || undefined,
-      commentaire: f.get("commentaire") || undefined,
-    };
-    const result = isEdit
-      ? await updateAttenteAction({ id: attente?.id, ...data })
-      : await createAttenteAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Attente mise à jour." : "Attente ajoutée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          partieId,
+          attente: f.get("attente"),
+          risque: f.get("risque") || undefined,
+          opportunite: f.get("opportunite") || undefined,
+          maitrise,
+          moyensMaitrise: f.get("moyensMaitrise") || undefined,
+          processusId: f.get("processusId") || undefined,
+          integrationPa: f.get("integrationPa") === "on",
+          action: f.get("action") || undefined,
+          commentaire: f.get("commentaire") || undefined,
+        };
+        return isEdit
+          ? updateAttenteAction({ id: attente?.id, ...data })
+          : createAttenteAction(data);
+      },
+      success: isEdit ? "Attente mise à jour." : "Attente ajoutée.",
+    });
   }
 
   return (

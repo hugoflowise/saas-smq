@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createRoAction, updateRoAction } from "@/lib/actions/risques";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type RoRow = {
@@ -43,40 +41,30 @@ export function RoDialog({
   ro?: RoRow;
   presetProcessusId?: string;
 }) {
-  const router = useRouter();
   const isEdit = Boolean(ro);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const form = new FormData(event.currentTarget);
-    const data = {
-      intitule: form.get("intitule"),
-      type: form.get("type"),
-      processusId: form.get("processusId") || undefined,
-      cause: form.get("cause") || undefined,
-      consequence: form.get("consequence") || undefined,
-      gravite: form.get("gravite"),
-      probabilite: form.get("probabilite"),
-      graviteResiduelle: form.get("graviteResiduelle") || undefined,
-      probabiliteResiduelle: form.get("probabiliteResiduelle") || undefined,
-      traitementPrevu: form.get("traitementPrevu") || undefined,
-      statut: form.get("statut"),
-      dateRevue: form.get("dateRevue") || undefined,
-    };
-    const result = isEdit
-      ? await updateRoAction({ id: ro?.id, ...data })
-      : await createRoAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Risque/opportunité mis à jour." : "Risque/opportunité créé.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (form) => {
+        const data = {
+          intitule: form.get("intitule"),
+          type: form.get("type"),
+          processusId: form.get("processusId") || undefined,
+          cause: form.get("cause") || undefined,
+          consequence: form.get("consequence") || undefined,
+          gravite: form.get("gravite"),
+          probabilite: form.get("probabilite"),
+          graviteResiduelle: form.get("graviteResiduelle") || undefined,
+          probabiliteResiduelle: form.get("probabiliteResiduelle") || undefined,
+          traitementPrevu: form.get("traitementPrevu") || undefined,
+          statut: form.get("statut"),
+          dateRevue: form.get("dateRevue") || undefined,
+        };
+        return isEdit ? updateRoAction({ id: ro?.id, ...data }) : createRoAction(data);
+      },
+      success: isEdit ? "Risque/opportunité mis à jour." : "Risque/opportunité créé.",
+    });
   }
 
   return (

@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createReclamationAction, updateReclamationAction } from "@/lib/actions/registres";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ReclamationRow = {
@@ -31,36 +29,28 @@ export type ReclamationRow = {
 };
 
 export function ReclamationDialog({ reclamation }: { reclamation?: ReclamationRow }) {
-  const router = useRouter();
   const isEdit = Boolean(reclamation);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      objet: f.get("objet"),
-      client: f.get("client") || undefined,
-      dateReception: f.get("dateReception") || undefined,
-      canal: f.get("canal"),
-      gravite: f.get("gravite"),
-      description: f.get("description") || undefined,
-      traitement: f.get("traitement") || undefined,
-      statut: f.get("statut"),
-    };
-    const result = isEdit
-      ? await updateReclamationAction({ id: reclamation?.id, ...data })
-      : await createReclamationAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Réclamation mise à jour." : "Réclamation enregistrée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          objet: f.get("objet"),
+          client: f.get("client") || undefined,
+          dateReception: f.get("dateReception") || undefined,
+          canal: f.get("canal"),
+          gravite: f.get("gravite"),
+          description: f.get("description") || undefined,
+          traitement: f.get("traitement") || undefined,
+          statut: f.get("statut"),
+        };
+        return isEdit
+          ? updateReclamationAction({ id: reclamation?.id, ...data })
+          : createReclamationAction(data);
+      },
+      success: isEdit ? "Réclamation mise à jour." : "Réclamation enregistrée.",
+    });
   }
 
   return (

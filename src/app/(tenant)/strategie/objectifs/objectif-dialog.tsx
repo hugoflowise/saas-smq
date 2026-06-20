@@ -1,9 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createObjectifAction, updateObjectifAction } from "@/lib/actions/registres";
+import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ObjectifRow = {
@@ -45,39 +43,31 @@ export function ObjectifDialog({
   indicateurOptions?: { id: string; nom: string }[];
   presetProcessusId?: string;
 }) {
-  const router = useRouter();
   const isEdit = Boolean(objectif);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const { open, setOpen, pending, submit } = useDialogForm();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    const f = new FormData(event.currentTarget);
-    const data = {
-      intitule: f.get("intitule"),
-      description: f.get("description") || undefined,
-      echeance: f.get("echeance") || undefined,
-      fonctionConcernee: f.get("fonctionConcernee") || undefined,
-      statut: f.get("statut"),
-      valeurCible: f.get("valeurCible") || undefined,
-      valeurActuelle: f.get("valeurActuelle") || undefined,
-      unite: f.get("unite") || undefined,
-      sens: f.get("sens") || undefined,
-      processusId: f.get("processusId") || undefined,
-      indicateurId: f.get("indicateurId") || undefined,
-    };
-    const result = isEdit
-      ? await updateObjectifAction({ id: objectif?.id, ...data })
-      : await createObjectifAction(data);
-    setPending(false);
-    if (result.ok) {
-      toast.success(isEdit ? "Objectif mis à jour." : "Objectif créé.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    submit(event, {
+      action: (f) => {
+        const data = {
+          intitule: f.get("intitule"),
+          description: f.get("description") || undefined,
+          echeance: f.get("echeance") || undefined,
+          fonctionConcernee: f.get("fonctionConcernee") || undefined,
+          statut: f.get("statut"),
+          valeurCible: f.get("valeurCible") || undefined,
+          valeurActuelle: f.get("valeurActuelle") || undefined,
+          unite: f.get("unite") || undefined,
+          sens: f.get("sens") || undefined,
+          processusId: f.get("processusId") || undefined,
+          indicateurId: f.get("indicateurId") || undefined,
+        };
+        return isEdit
+          ? updateObjectifAction({ id: objectif?.id, ...data })
+          : createObjectifAction(data);
+      },
+      success: isEdit ? "Objectif mis à jour." : "Objectif créé.",
+    });
   }
 
   return (
