@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createActionFromRoAction, unlinkRoActionAction } from "@/lib/actions/risques";
 import { ACTION_STATUT_LABELS } from "@/lib/labels";
-
-const SELECT_CLASS =
-  "h-9 rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+import { SELECT_CLASS_INLINE as SELECT_CLASS } from "@/lib/ui-classes";
 
 type LinkedAction = {
   id: string;

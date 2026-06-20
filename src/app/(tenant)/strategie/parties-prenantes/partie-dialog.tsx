@@ -21,9 +21,7 @@ import {
   prioriteFromTotal,
   scoreTotal,
 } from "@/lib/parties-prenantes";
-
-const SELECT_CLASS =
-  "h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+import { SELECT_CLASS } from "@/lib/ui-classes";
 
 const NOTE_OPTIONS = [
   { value: 1, label: "1 · Faible" },

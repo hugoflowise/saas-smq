@@ -4,10 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { setCotationAction } from "@/lib/actions/conformite";
+import { SELECT_CLASS_COMPACT as SELECT_CLASS } from "@/lib/ui-classes";
 import { COTATION_DOT, COTATION_LABELS, type Cotation } from "./cotation-meta";
-
-const SELECT_CLASS =
-  "h-8 rounded-lg border border-input bg-card px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
 type Props = {
   referentielId: string;

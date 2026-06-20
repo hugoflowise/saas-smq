@@ -2,9 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
-
-const SELECT_CLASS =
-  "h-9 rounded-lg border border-input bg-card px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+import { SELECT_CLASS_FILTER as SELECT_CLASS } from "@/lib/ui-classes";
 
 export function FilterBar() {
   const router = useRouter();
