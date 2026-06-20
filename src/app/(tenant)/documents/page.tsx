@@ -2,7 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { StatTiles } from "@/components/stat-tiles";
 import {
   Table,
   TableBody,
@@ -228,18 +228,7 @@ export default async function DocumentsPage({
         </div>
       </PageHeader>
 
-      {rows.length > 0 ? (
-        <div className="mb-6 grid grid-cols-3 gap-4">
-          {tiles.map((t) => (
-            <Card key={t.label}>
-              <CardContent className="py-5">
-                <p className={`font-semibold text-3xl ${t.cls}`}>{t.value}</p>
-                <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : null}
+      {rows.length > 0 ? <StatTiles tiles={tiles} className="mb-6" /> : null}
 
       {rows.length === 0 ? (
         <EmptyState

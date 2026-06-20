@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/empty-state";
 import { KpiChart } from "@/components/kpi-chart";
 import { PageHeader } from "@/components/page-header";
+import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -84,13 +85,14 @@ export default async function EffectifPage() {
   const today = new Date().toISOString().slice(0, 10);
   const { effectifActuel, couverture, trend, mouvements } = computeEffectif(consultants, today);
 
+  const fmtPct = (v: number | null) => (v == null ? "—" : `${v}%`);
   const tiles = [
-    { label: "Effectif actuel", value: effectifActuel, cls: "text-foreground" },
-    { label: "Couverture ODM", value: couverture.odm, cls: pctClass(couverture.odm) },
-    { label: "Couverture PDP", value: couverture.pdp, cls: pctClass(couverture.pdp) },
+    { label: "Effectif actuel", value: effectifActuel ?? "—", cls: "text-foreground" },
+    { label: "Couverture ODM", value: fmtPct(couverture.odm), cls: pctClass(couverture.odm) },
+    { label: "Couverture PDP", value: fmtPct(couverture.pdp), cls: pctClass(couverture.pdp) },
     {
       label: "Couverture visites méd.",
-      value: couverture.visite,
+      value: fmtPct(couverture.visite),
       cls: pctClass(couverture.visite),
     },
   ];
@@ -113,22 +115,7 @@ export default async function EffectifPage() {
         />
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {tiles.map((t) => (
-              <Card key={t.label}>
-                <CardContent className="py-5">
-                  <p className={`font-semibold text-3xl ${t.cls}`}>
-                    {t.value == null
-                      ? "—"
-                      : t.label === "Effectif actuel"
-                        ? t.value
-                        : `${t.value}%`}
-                  </p>
-                  <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <StatTiles tiles={tiles} />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <Card>
