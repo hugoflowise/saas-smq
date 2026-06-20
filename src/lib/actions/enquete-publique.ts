@@ -1,9 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 const schema = z.object({
   token: z.string().uuid(),

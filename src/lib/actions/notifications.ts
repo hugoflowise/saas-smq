@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { ActionResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 /** Marque toutes les notifications de l'utilisateur comme lues. */
 export async function markAllNotificationsReadAction(): Promise<ActionResult> {

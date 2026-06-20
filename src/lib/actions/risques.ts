@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 const roQuickSchema = z.object({
   id: z.string().uuid(),

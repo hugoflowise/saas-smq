@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import type { ActionResult } from "@/lib/actions/types";
 import { notifyTenant } from "@/lib/notifications";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
-type ActionResult = { ok: true } | { ok: false; error: string };
 type PolitiqueUpdate = Database["public"]["Tables"]["politique_qualite"]["Update"];
 
 /**

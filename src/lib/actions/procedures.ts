@@ -3,12 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
+import type { ActionResult } from "@/lib/actions/types";
 import { notifyTenant } from "@/lib/notifications";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
-type ActionResult = { ok: true } | { ok: false; error: string };
 type ProcedureUpdate = Database["public"]["Tables"]["procedures"]["Update"];
 
 function permissions(role: string) {
