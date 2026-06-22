@@ -30,7 +30,8 @@ export function VeilleMotsCles({ initial }: { initial: string }) {
       <div className="flex flex-1 flex-col gap-1.5">
         <label htmlFor="motscles" className="text-muted-foreground text-xs">
           Mots-clés de veille (séparés par des virgules) : les nouveaux textes officiels
-          correspondants vous seront proposés.
+          correspondants vous seront proposés. Si vide, des mots-clés par défaut sont utilisés
+          (qualité, sécurité au travail, environnement, RGPD).
         </label>
         <Input
           id="motscles"

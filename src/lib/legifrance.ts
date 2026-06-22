@@ -30,6 +30,16 @@ export function legifranceConfigured(): boolean {
   return Boolean(process.env.LEGIFRANCE_CLIENT_ID && process.env.LEGIFRANCE_CLIENT_SECRET);
 }
 
+/**
+ * Mots-clés de veille par défaut (appliqués aux clients qui n'en ont pas
+ * configuré), pour qu'une société d'ingénierie / ESN reçoive d'emblée des
+ * suggestions pertinentes. Chaque client peut les remplacer.
+ */
+export const MOTS_CLES_DEFAUT = "qualité, sécurité au travail, environnement, RGPD";
+
+/** Nombre de textes récupérés par appel (volume volontairement modéré). */
+const TAILLE_PAGE = 15;
+
 /** Jeton OAuth2 (client_credentials). null si non configuré ou en cas d'échec. */
 async function getToken(): Promise<string | null> {
   const id = process.env.LEGIFRANCE_CLIENT_ID;
@@ -89,7 +99,7 @@ export async function rechercherTextesRecents(
       ],
       filtres: [{ facette: "DATE_SIGNATURE", dates: { start: depart } }],
       pageNumber: 1,
-      pageSize: 20,
+      pageSize: TAILLE_PAGE,
       operateur: "ET",
       sort: "SIGNATURE_DATE_DESC",
       typePagination: "DEFAUT",
