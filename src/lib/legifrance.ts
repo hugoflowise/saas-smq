@@ -76,24 +76,21 @@ export async function rechercherTextesRecents(
   if (!token) return [];
 
   const depart = new Date(Date.now() - joursRecents * 86_400_000).toISOString().slice(0, 10);
+  // Recherche dans le TITRE (bien plus pertinent que le plein texte) :
+  // un texte dont le titre contient l'un des mots-clés.
   const requete = {
     recherche: {
       champs: [
         {
-          typeChamp: "TEXTE",
-          criteres: [
-            {
-              typeRecherche: "UN_DES_MOTS",
-              valeur: motsCles.join(" "),
-              operateur: "ET",
-            },
-          ],
+          typeChamp: "TITLE",
+          criteres: [{ typeRecherche: "UN_DES_MOTS", valeur: motsCles.join(" "), operateur: "ET" }],
           operateur: "ET",
         },
       ],
-      filtres: [{ facette: "DATE_SIGNATURE", singleDate: depart, dates: { start: depart } }],
+      filtres: [{ facette: "DATE_SIGNATURE", dates: { start: depart } }],
       pageNumber: 1,
       pageSize: 20,
+      operateur: "ET",
       sort: "SIGNATURE_DATE_DESC",
       typePagination: "DEFAUT",
     },
@@ -115,18 +112,26 @@ export async function rechercherTextesRecents(
       return [];
     }
     const json = (await res.json()) as {
-      results?: { titles?: { id?: string; title?: string; cid?: string }[]; date?: string }[];
+      results?: {
+        titles?: { id?: string; cid?: string; title?: string }[];
+        datePublication?: string | null;
+      }[];
     };
     const textes: TexteOfficiel[] = [];
+    const titresVus = new Set<string>();
     for (const r of json.results ?? []) {
       const t = r.titles?.[0];
-      if (!t?.id && !t?.title) continue;
-      const ref = t?.cid ?? t?.id ?? t?.title ?? "";
+      if (!t?.title && !t?.cid && !t?.id) continue;
+      const cid = t?.cid ?? t?.id ?? null;
+      // Nettoie les balises de surlignage <mark> renvoyées dans le titre.
+      const titre = (t?.title ?? cid ?? "").replace(/<\/?mark>/g, "").trim();
+      if (titresVus.has(titre)) continue; // dédoublonnage par titre
+      titresVus.add(titre);
       textes.push({
-        ref,
-        titre: t?.title ?? ref,
-        dateTexte: r.date ?? null,
-        url: t?.id ? `https://www.legifrance.gouv.fr/jorf/id/${t.id}` : null,
+        ref: cid ?? titre,
+        titre,
+        dateTexte: r.datePublication ? r.datePublication.slice(0, 10) : null,
+        url: cid ? `https://www.legifrance.gouv.fr/jorf/id/${cid}` : null,
       });
     }
     return textes;
