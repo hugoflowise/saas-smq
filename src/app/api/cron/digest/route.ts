@@ -8,7 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 /**
  * Digest quotidien des échéances qualité (envoi e-mail).
  *
- * Déclenché par un Cron Vercel (voir `vercel.json`). Pour chaque tenant, agrège
+ * Déclenché par un Cron Vercel (voir `vercel.json` : tous les lundis ~6h UTC).
+ * Pour chaque tenant, agrège
  * les actions en retard, les échéances à venir (30 j) et les documents à réviser,
  * puis envoie un récapitulatif par e-mail aux membres qui n'ont pas désactivé
  * l'option. Les tenants sans rien à signaler sont ignorés (pas d'e-mail vide).
