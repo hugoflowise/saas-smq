@@ -11,6 +11,7 @@ import {
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { VeilleDialog } from "./veille-dialog";
 
 const DOMAINE_LABELS: Record<string, string> = {
@@ -87,22 +88,27 @@ export default async function VeillePage() {
                 <TableHead>Domaine</TableHead>
                 <TableHead>Application</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((t) => (
                 <TableRow key={t.id}>
-                  <TableCell className="font-medium">{t.intitule}</TableCell>
+                  <TableCell>
+                    <VeilleDialog
+                      veille={t}
+                      trigger={
+                        <button type="button" className={ROW_NAME_BUTTON}>
+                          {t.intitule}
+                        </button>
+                      }
+                    />
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {t.reference ?? "-"}
                   </TableCell>
                   <TableCell>{DOMAINE_LABELS[t.domaine] ?? t.domaine}</TableCell>
                   <TableCell>{formatDate(t.date_application)}</TableCell>
                   <TableCell>{STATUT_LABELS[t.statut] ?? t.statut}</TableCell>
-                  <TableCell>
-                    <VeilleDialog veille={t} />
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

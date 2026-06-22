@@ -6,6 +6,7 @@ import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { JalonDelete } from "./jalon-delete";
 import { JALON_TYPE_LABELS, JalonDialog } from "./jalon-dialog";
 
@@ -92,7 +93,16 @@ export default async function CertificationPage() {
                           {formatDate(j.date_jalon)}
                         </span>
                       </div>
-                      <p className="mt-1.5 font-semibold">{j.libelle}</p>
+                      <div className="mt-1.5">
+                        <JalonDialog
+                          jalon={j}
+                          trigger={
+                            <button type="button" className={`${ROW_NAME_BUTTON} font-semibold`}>
+                              {j.libelle}
+                            </button>
+                          }
+                        />
+                      </div>
                       {j.description ? (
                         <p className="mt-1 text-muted-foreground text-sm">{j.description}</p>
                       ) : null}
@@ -105,7 +115,6 @@ export default async function CertificationPage() {
                       </Link>
                     </div>
                     <div className="flex shrink-0 items-center">
-                      <JalonDialog jalon={j} />
                       <JalonDelete id={j.id} />
                     </div>
                   </div>

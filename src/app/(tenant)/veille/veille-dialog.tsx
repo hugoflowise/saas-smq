@@ -28,7 +28,13 @@ export type VeilleRow = {
   statut: string;
 };
 
-export function VeilleDialog({ veille }: { veille?: VeilleRow }) {
+export function VeilleDialog({
+  veille,
+  trigger,
+}: {
+  veille?: VeilleRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(veille);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -56,9 +62,11 @@ export function VeilleDialog({ veille }: { veille?: VeilleRow }) {
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouveau texte</Button>
           )

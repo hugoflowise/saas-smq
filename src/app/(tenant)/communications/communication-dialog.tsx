@@ -57,7 +57,13 @@ function Options({ map }: { map: Record<string, string> }) {
   );
 }
 
-export function CommunicationDialog({ communication }: { communication?: CommunicationRow }) {
+export function CommunicationDialog({
+  communication,
+  trigger,
+}: {
+  communication?: CommunicationRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(communication);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -87,9 +93,11 @@ export function CommunicationDialog({ communication }: { communication?: Communi
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouvelle communication</Button>
           )
