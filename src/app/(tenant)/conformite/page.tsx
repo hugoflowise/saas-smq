@@ -17,7 +17,7 @@ export default async function ConformitePage() {
     return (
       <div className="w-full">
         <PageHeader
-          title="Conformité ISO 9001"
+          title="Auto-diagnostic ISO 9001"
           description="Auto-évaluation de la conformité par chapitre."
         />
         <EmptyState
@@ -79,10 +79,10 @@ export default async function ConformitePage() {
     <div className="w-full">
       <ModuleTabs tabs={CONFORMITE_TABS} />
       <PageHeader
-        title="Conformité ISO 9001:2015"
-        description="Auto-évaluation de la conformité par chapitre."
+        title="Auto-diagnostic ISO 9001:2015"
+        description="Auto-évaluation de la conformité, chapitre par chapitre."
         isoClause="ISO 9001:2015"
-        help="Auto-évaluez la conformité chapitre par chapitre pour mesurer votre taux de couverture et identifier les écarts à traiter avant l'audit de certification."
+        help="Auto-évaluez la conformité chapitre par chapitre pour mesurer votre taux de couverture et identifier les écarts à traiter avant l'audit de certification. Chaque cotation conforme est à réévaluer au bout de 12 mois (badge « À réévaluer ») : un diagnostic n'est jamais acquis définitivement."
       />
 
       <Card className="mb-6">
