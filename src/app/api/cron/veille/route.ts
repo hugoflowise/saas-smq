@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       .filter(Boolean);
     if (motsCles.length === 0) continue;
 
-    const textes = await rechercherTextesRecents(motsCles, 30);
+    const textes = await rechercherTextesRecents(motsCles, 90);
     for (const t of textes) {
       // upsert pour ignorer les doublons (clé unique tenant_id+source+ref).
       const { error } = await admin.from("veille_suggestions").upsert(
