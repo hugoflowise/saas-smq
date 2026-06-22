@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { dateLimiteReevaluation, estAReevaluer } from "@/lib/conformite";
 import { dateOffsetISO, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -75,7 +76,7 @@ export default async function ModeAuditPage() {
     actionsRetard,
   ] = await Promise.all([
     supabase.from("referentiel_iso").select("id", { count: "exact", head: true }),
-    supabase.from("conformite_evaluation").select("cotation").eq("tenant_id", tid),
+    supabase.from("conformite_evaluation").select("cotation, date_evaluation").eq("tenant_id", tid),
     supabase
       .from("contexte_organisme")
       .select("id", { count: "exact", head: true })
@@ -150,6 +151,10 @@ export default async function ModeAuditPage() {
     (e) => e.cotation === "conforme" || e.cotation === "point_fort",
   ).length;
   const pctConforme = refCount > 0 ? Math.round((conformes / refCount) * 100) : 0;
+  const limiteReeval = dateLimiteReevaluation(today);
+  const cotationsAReevaluer = (evals.data ?? []).filter((e) =>
+    estAReevaluer(e.cotation, e.date_evaluation, limiteReeval),
+  ).length;
   const politiePubliee = politique.data?.statut === "publiee";
 
   const communications = await supabase
@@ -270,6 +275,12 @@ export default async function ModeAuditPage() {
           label: "Conformité ISO auto-évaluée",
           value: `${pctConforme}%`,
           ok: pctConforme >= 80,
+          href: "/conformite",
+        },
+        {
+          label: "Cotations à réévaluer (> 12 mois)",
+          value: `${cotationsAReevaluer}`,
+          ok: cotationsAReevaluer === 0,
           href: "/conformite",
         },
         {

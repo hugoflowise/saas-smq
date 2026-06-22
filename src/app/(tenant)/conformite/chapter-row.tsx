@@ -14,6 +14,7 @@ type Props = {
   preuves: string | null;
   cotation: Cotation;
   commentaire: string;
+  aReevaluer?: boolean;
 };
 
 export function ChapterRow({
@@ -23,9 +24,13 @@ export function ChapterRow({
   preuves,
   cotation: initialCotation,
   commentaire: initialCommentaire,
+  aReevaluer = false,
 }: Props) {
   const [cotation, setCotation] = useState<Cotation>(initialCotation);
   const [commentaire, setCommentaire] = useState(initialCommentaire);
+  // Recoter rafraîchit la date d'évaluation : on masque alors le rappel.
+  const [reevalue, setReevalue] = useState(false);
+  const afficherReevaluer = aReevaluer && !reevalue;
 
   async function save(nextCotation: Cotation, nextCommentaire: string) {
     const result = await setCotationAction({
@@ -33,7 +38,8 @@ export function ChapterRow({
       cotation: nextCotation,
       commentaire: nextCommentaire || undefined,
     });
-    if (!result.ok) toast.error(result.error);
+    if (result.ok) setReevalue(true);
+    else toast.error(result.error);
   }
 
   return (
@@ -43,6 +49,11 @@ export function ChapterRow({
         <div className="min-w-0">
           <p className="font-medium text-sm">
             <span className="text-muted-foreground">{chapitre}</span> {intitule}
+            {afficherReevaluer ? (
+              <span className="ml-2 inline-flex items-center rounded-full bg-status-pa/15 px-2 py-0.5 align-middle font-medium text-status-pa text-xs">
+                À réévaluer
+              </span>
+            ) : null}
           </p>
           {preuves ? <p className="text-muted-foreground text-xs">Preuves : {preuves}</p> : null}
         </div>

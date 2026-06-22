@@ -2,6 +2,8 @@ import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { dateLimiteReevaluation, estAReevaluer } from "@/lib/conformite";
+import { todayISO } from "@/lib/format";
 import { CONFORMITE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -36,16 +38,19 @@ export default async function ConformitePage() {
 
   const { data: evals } = await supabase
     .from("conformite_evaluation")
-    .select("referentiel_iso_id, cotation, commentaire")
+    .select("referentiel_iso_id, cotation, commentaire, date_evaluation")
     .eq("tenant_id", tid);
   const evalByRef = new Map((evals ?? []).map((e) => [e.referentiel_iso_id, e]));
 
+  const limiteReeval = dateLimiteReevaluation(todayISO());
   const chapters = (referentiel ?? []).map((r) => {
     const e = evalByRef.get(r.id);
+    const cotation = (e?.cotation ?? "non_evalue") as Cotation;
     return {
       ...r,
-      cotation: (e?.cotation ?? "non_evalue") as Cotation,
+      cotation,
       commentaire: e?.commentaire ?? "",
+      aReevaluer: estAReevaluer(cotation, e?.date_evaluation ?? null, limiteReeval),
     };
   });
 
@@ -59,10 +64,12 @@ export default async function ConformitePage() {
   ).length;
   const attention = chapters.filter((c) => c.cotation === "point_attention").length;
   const nonEvalues = chapters.filter((c) => c.cotation === "non_evalue").length;
+  const aReevaluer = chapters.filter((c) => c.aReevaluer).length;
   const pctConforme = total > 0 ? Math.round((conformes / total) * 100) : 0;
 
   const stats = [
     { label: "Conformes", value: conformes, cls: "text-status-conforme" },
+    { label: "À réévaluer", value: aReevaluer, cls: "text-status-pa" },
     { label: "Points d'attention", value: attention, cls: "text-status-pa" },
     { label: "Non-conformités", value: nc, cls: "text-status-nc-mineure" },
     { label: "Non évalués", value: nonEvalues, cls: "text-muted-foreground" },
@@ -112,6 +119,7 @@ export default async function ConformitePage() {
                     preuves={c.preuves_attendues}
                     cotation={c.cotation}
                     commentaire={c.commentaire}
+                    aReevaluer={c.aReevaluer}
                   />
                 ))}
               </div>
