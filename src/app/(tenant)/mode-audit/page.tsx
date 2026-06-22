@@ -79,8 +79,9 @@ export default async function ModeAuditPage() {
     supabase.from("conformite_evaluation").select("cotation, date_evaluation").eq("tenant_id", tid),
     supabase
       .from("contexte_organisme")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid),
+      .select("id, date_revue, prochain_revue")
+      .eq("tenant_id", tid)
+      .maybeSingle(),
     supabase
       .from("parties_interessees")
       .select("id", { count: "exact", head: true })
@@ -157,6 +158,17 @@ export default async function ModeAuditPage() {
   ).length;
   const politiePubliee = politique.data?.statut === "publiee";
 
+  // Contexte : existant + à jour. « À réévaluer » si la prochaine revue est
+  // dépassée, ou (à défaut) si la dernière revue date de plus de 12 mois.
+  const ctxRow = contexte.data;
+  const ctxExiste = Boolean(ctxRow);
+  const ctxAReviser =
+    ctxExiste &&
+    ((ctxRow?.prochain_revue != null && ctxRow.prochain_revue < today) ||
+      (ctxRow?.prochain_revue == null &&
+        ctxRow?.date_revue != null &&
+        ctxRow.date_revue < limiteReeval));
+
   const communications = await supabase
     .from("communications")
     .select("id", { count: "exact", head: true })
@@ -177,8 +189,8 @@ export default async function ModeAuditPage() {
       checks: [
         {
           label: "Analyse de contexte (SWOT / PESTEL)",
-          value: count(contexte) > 0 ? "Renseignée" : "À faire",
-          ok: count(contexte) > 0,
+          value: !ctxExiste ? "À faire" : ctxAReviser ? "À réévaluer" : "Renseignée",
+          ok: ctxExiste && !ctxAReviser,
           href: "/strategie/contexte",
         },
         {
