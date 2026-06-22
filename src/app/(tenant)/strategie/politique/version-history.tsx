@@ -25,19 +25,50 @@ export type VersionItem = {
   noteRevision?: string | null;
 };
 
-export function VersionHistory({ versions }: { versions: VersionItem[] }) {
+const STATUT_EN_COURS_LABEL: Record<string, string> = {
+  brouillon: "Brouillon",
+  en_revue: "En revue",
+  approuvee: "Approuvée, en attente de publication",
+};
+
+export function VersionHistory({
+  versions,
+  pending,
+}: {
+  versions: VersionItem[];
+  /** Version de travail non encore publiée (brouillon / en revue / approuvée). */
+  pending?: { version: string; statut: string } | null;
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
+
+  const pendingItem = pending ? (
+    <li className="flex flex-col gap-0.5 rounded-md border border-status-pa/40 border-dashed bg-status-pa/10 px-3 py-2 text-sm">
+      <span className="flex flex-wrap items-center gap-x-2">
+        <span className="font-semibold">{pending.version}</span>
+        <span className="inline-flex items-center rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-status-pa text-xs">
+          Non publiée
+        </span>
+      </span>
+      <span className="text-muted-foreground text-xs">
+        {STATUT_EN_COURS_LABEL[pending.statut] ?? pending.statut}
+      </span>
+    </li>
+  ) : null;
 
   if (versions.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
-        Aucune version publiée pour l'instant. La première publication créera la version v1.
-      </p>
+      <ul className="flex flex-col gap-2">
+        {pendingItem}
+        <li className="text-muted-foreground text-sm">
+          Aucune version publiée pour l'instant. La première publication créera la version v1.
+        </li>
+      </ul>
     );
   }
 
   return (
     <ul className="flex flex-col gap-2">
+      {pendingItem}
       {versions.map((v) => (
         <li
           key={v.id}

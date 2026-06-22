@@ -97,6 +97,7 @@ export default async function PolitiquePage() {
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}
             currentVersionDate={current?.approvedAt ?? null}
+            publishedCount={versions.length}
             canWrite={canWrite}
             canApprove={isApprover}
             drafterName={drafterName}
@@ -112,7 +113,14 @@ export default async function PolitiquePage() {
               <CardTitle className="text-base">Historique des versions</CardTitle>
             </CardHeader>
             <CardContent className="max-h-[70vh] overflow-y-auto">
-              <VersionHistory versions={versions} />
+              <VersionHistory
+                versions={versions}
+                pending={
+                  politique && politique.statut !== "publiee"
+                    ? { version: `v${versions.length + 1}`, statut: politique.statut }
+                    : null
+                }
+              />
             </CardContent>
           </Card>
         </aside>
