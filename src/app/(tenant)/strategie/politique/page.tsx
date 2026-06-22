@@ -1,4 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
@@ -8,7 +10,13 @@ import { getTenantContext } from "@/lib/tenant-context";
 import { PolitiqueClient } from "./politique-client";
 import { VersionHistory } from "./version-history";
 
-export default async function PolitiquePage() {
+export default async function PolitiquePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  const retourDocuments = from === "/documents";
   const ctx = await getTenantContext();
 
   if (!ctx.effectiveTenantId) {
@@ -83,6 +91,16 @@ export default async function PolitiquePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
+      {retourDocuments ? (
+        <Link
+          href="/documents"
+          className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Retour aux documents
+        </Link>
+      ) : null}
+
       <PageHeader
         title="Politique qualité"
         description="Document maîtrisé définissant les engagements qualité de la direction."

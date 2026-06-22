@@ -142,7 +142,7 @@ export default async function DocumentsPage({
       dateApprobation: politique.approved_at,
       revisionPrevue: null,
       processusNom: "Direction",
-      href: "/strategie/politique",
+      href: "/strategie/politique?from=/documents",
       registre: null,
     });
   }
@@ -160,7 +160,7 @@ export default async function DocumentsPage({
       dateApprobation: p.approved_at,
       revisionPrevue: null,
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
-      href: `/documentation/procedures/${p.id}`,
+      href: `/documentation/procedures/${p.id}?from=/documents`,
       registre: null,
     });
   }
