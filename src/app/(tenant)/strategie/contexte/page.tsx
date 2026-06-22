@@ -4,8 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ContexteForm } from "./contexte-form";
 
-function str(v: unknown): string {
-  return typeof v === "string" ? v : "";
+/**
+ * Convertit une case SWOT/PESTEL en liste de points.
+ * Rétrocompatible avec l'ancien format texte libre (découpé par ligne).
+ */
+function toList(v: unknown): string[] {
+  if (Array.isArray(v)) return v.filter((x): x is string => typeof x === "string");
+  if (typeof v === "string")
+    return v
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  return [];
 }
 
 export default async function ContextePage() {
@@ -46,18 +56,18 @@ export default async function ContextePage() {
       />
       <ContexteForm
         initialSwot={{
-          forces: str(swotRaw.forces),
-          faiblesses: str(swotRaw.faiblesses),
-          opportunites: str(swotRaw.opportunites),
-          menaces: str(swotRaw.menaces),
+          forces: toList(swotRaw.forces),
+          faiblesses: toList(swotRaw.faiblesses),
+          opportunites: toList(swotRaw.opportunites),
+          menaces: toList(swotRaw.menaces),
         }}
         initialPestel={{
-          politique: str(pestelRaw.politique),
-          economique: str(pestelRaw.economique),
-          sociologique: str(pestelRaw.sociologique),
-          technologique: str(pestelRaw.technologique),
-          ecologique: str(pestelRaw.ecologique),
-          legal: str(pestelRaw.legal),
+          politique: toList(pestelRaw.politique),
+          economique: toList(pestelRaw.economique),
+          sociologique: toList(pestelRaw.sociologique),
+          technologique: toList(pestelRaw.technologique),
+          ecologique: toList(pestelRaw.ecologique),
+          legal: toList(pestelRaw.legal),
         }}
         initialDateRevue={contexte?.date_revue ?? ""}
         initialProchainRevue={contexte?.prochain_revue ?? ""}
