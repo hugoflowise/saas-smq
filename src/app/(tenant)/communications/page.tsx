@@ -1,6 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { StatTiles } from "@/components/stat-tiles";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,12 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BADGE_BASE } from "@/lib/badges";
-import { formatDate, todayISO } from "@/lib/format";
+import { MODELE_CATEGORIES, MODELES_INTEGRES, type Modele } from "@/lib/communications";
+import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
-import { CANAL_LABELS, CommunicationDialog, TYPE_LABELS } from "./communication-dialog";
+import { EnvoyerModeleDialog } from "./envoyer-modele-dialog";
+import { ModeleDelete } from "./modele-delete";
+import { ModeleDialog } from "./modele-dialog";
 
 export default async function CommunicationsPage() {
   const ctx = await getTenantContext();
@@ -23,7 +24,7 @@ export default async function CommunicationsPage() {
       <div className="w-full">
         <PageHeader
           title="Communications"
-          description="Communication interne et externe sur le SMQ."
+          description="Modèles d'e-mails et communication interne sur le SMQ."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -34,44 +35,107 @@ export default async function CommunicationsPage() {
   }
 
   const supabase = await createClient();
-  const today = todayISO();
-  const { data: communications } = await supabase
-    .from("communications")
-    .select("id, sujet, type, canal, audience, message, date_prevue, date_realisee, statut")
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("date_prevue", { ascending: false, nullsFirst: false });
+  const tid = ctx.effectiveTenantId;
 
-  const items = communications ?? [];
-  const enRetard = (c: (typeof items)[number]) =>
-    c.statut === "planifiee" && c.date_prevue != null && c.date_prevue < today;
+  const [{ data: tenant }, { data: customs }, { data: envois }] = await Promise.all([
+    supabase.from("tenants").select("nom_societe, liste_diffusion").eq("id", tid).maybeSingle(),
+    supabase
+      .from("communication_modeles")
+      .select("id, categorie, titre, objet, corps")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("titre"),
+    supabase
+      .from("communications")
+      .select("id, sujet, audience, date_realisee, date_prevue, statut")
+      .eq("tenant_id", tid)
+      .order("date_realisee", { ascending: false, nullsFirst: false })
+      .limit(50),
+  ]);
 
-  const total = items.length;
-  const realisees = items.filter((c) => c.statut === "realisee").length;
-  const retard = items.filter(enRetard).length;
-  const tiles = [
-    { label: "Total", value: total, cls: "text-foreground" },
-    { label: "Planifiées", value: total - realisees, cls: "text-status-pf" },
-    { label: "Réalisées", value: realisees, cls: "text-status-conforme" },
-    { label: "En retard", value: retard, cls: "text-status-nc-mineure" },
-  ];
+  const societe = tenant?.nom_societe ?? "votre société";
+  const listeDiffusion = tenant?.liste_diffusion ?? null;
+
+  // Modèles fournis + personnalisés, regroupés par catégorie.
+  const customModeles: Modele[] = (customs ?? []).map((m) => ({ ...m, integre: false }));
+  const tousModeles = [...MODELES_INTEGRES, ...customModeles];
+  const categoriesPresentes = Object.keys(MODELE_CATEGORIES).filter((cat) =>
+    tousModeles.some((m) => m.categorie === cat),
+  );
+
+  const historique = envois ?? [];
 
   return (
     <div className="w-full">
       <PageHeader
         title="Communications"
-        description="Communication interne et externe sur le SMQ."
+        description="Bibliothèque de modèles d'e-mails (EPI, formations, ODM…) à envoyer en un clic."
         isoClause="ISO 9001 §7.4"
-        help="Déterminez les communications internes et externes pertinentes pour le SMQ : sur quoi, quand, avec qui, comment et par qui communiquer. Suivez leur réalisation."
+        help="Déterminez et tracez les communications internes et externes pertinentes pour le SMQ. Choisissez un modèle, personnalisez-le si besoin, puis ouvrez-le dans votre messagerie (Outlook) prêt à envoyer à une personne ou à toute la société. Chaque envoi est journalisé."
       >
-        <CommunicationDialog />
+        <ModeleDialog mode="creer" />
       </PageHeader>
 
-      {total > 0 ? <StatTiles tiles={tiles} className="mb-6" /> : null}
+      {!listeDiffusion ? (
+        <Card className="mb-6 border-status-pa/40">
+          <CardContent className="py-4 text-sm">
+            <span className="font-medium">Astuce :</span> renseignez une adresse de liste de
+            diffusion dans <span className="font-medium">Paramètres → Informations société</span>{" "}
+            pour pouvoir envoyer une communication à toute la société en un clic.
+          </CardContent>
+        </Card>
+      ) : null}
 
-      {total === 0 ? (
+      {/* Bibliothèque de modèles */}
+      <div className="flex flex-col gap-6">
+        {categoriesPresentes.map((cat) => {
+          const modeles = tousModeles.filter((m) => m.categorie === cat);
+          return (
+            <section key={cat}>
+              <h2 className="mb-2 font-semibold text-sm">{MODELE_CATEGORIES[cat]}</h2>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {modeles.map((m) => (
+                  <Card key={m.id} className="flex flex-col">
+                    <CardContent className="flex flex-1 flex-col gap-2 py-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-medium text-sm">{m.titre}</p>
+                        {m.integre ? (
+                          <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                            Fourni
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="line-clamp-2 flex-1 text-muted-foreground text-xs">{m.objet}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        <EnvoyerModeleDialog
+                          modele={m}
+                          societe={societe}
+                          listeDiffusion={listeDiffusion}
+                        />
+                        {m.integre ? (
+                          <ModeleDialog mode="dupliquer" modele={m} />
+                        ) : (
+                          <>
+                            <ModeleDialog mode="modifier" modele={m} />
+                            <ModeleDelete id={m.id} titre={m.titre} />
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {/* Historique des envois (traçabilité §7.4) */}
+      <h2 className="mt-8 mb-2 font-semibold text-sm">Historique des communications</h2>
+      {historique.length === 0 ? (
         <EmptyState
-          title="Aucune communication"
-          description="Planifiez vos communications qualité (lancement de démarche, politique, résultats…)."
+          title="Aucune communication envoyée"
+          description="Envoyez une communication depuis un modèle : elle apparaîtra ici pour la traçabilité."
         />
       ) : (
         <div className="rounded-2xl border bg-card">
@@ -79,50 +143,18 @@ export default async function CommunicationsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Sujet</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Canal</TableHead>
                 <TableHead>Audience</TableHead>
-                <TableHead>Date prévue</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((c) => {
-                const late = enRetard(c);
-                return (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      <CommunicationDialog
-                        communication={c}
-                        trigger={
-                          <button type="button" className={ROW_NAME_BUTTON}>
-                            {c.sujet}
-                          </button>
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>{TYPE_LABELS[c.type] ?? c.type}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {CANAL_LABELS[c.canal] ?? c.canal}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{c.audience ?? "-"}</TableCell>
-                    <TableCell>{formatDate(c.date_prevue)}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`${BADGE_BASE} ${
-                          c.statut === "realisee"
-                            ? "bg-status-conforme/15 text-status-conforme"
-                            : late
-                              ? "bg-status-nc-mineure/15 text-status-nc-mineure"
-                              : "bg-status-pf/15 text-status-pf"
-                        }`}
-                      >
-                        {c.statut === "realisee" ? "Réalisée" : late ? "En retard" : "Planifiée"}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {historique.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell className="font-medium">{c.sujet}</TableCell>
+                  <TableCell className="text-muted-foreground">{c.audience ?? "-"}</TableCell>
+                  <TableCell>{formatDate(c.date_realisee ?? c.date_prevue)}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

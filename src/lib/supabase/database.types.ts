@@ -380,6 +380,70 @@ export type Database = {
           },
         ]
       }
+      communication_modeles: {
+        Row: {
+          categorie: string
+          corps: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          objet: string
+          tenant_id: string
+          titre: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          categorie?: string
+          corps?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          objet: string
+          tenant_id: string
+          titre: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          categorie?: string
+          corps?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          objet?: string
+          tenant_id?: string
+          titre?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_modeles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_modeles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_modeles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communications: {
         Row: {
           audience: string | null
@@ -2787,6 +2851,7 @@ export type Database = {
           formule: Database["public"]["Enums"]["tenant_formule"]
           id: string
           ingest_token: string
+          liste_diffusion: string | null
           logo_url: string | null
           mentions_legales: string | null
           nom_societe: string
@@ -2811,6 +2876,7 @@ export type Database = {
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
           ingest_token?: string
+          liste_diffusion?: string | null
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe: string
@@ -2835,6 +2901,7 @@ export type Database = {
           formule?: Database["public"]["Enums"]["tenant_formule"]
           id?: string
           ingest_token?: string
+          liste_diffusion?: string | null
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe?: string
