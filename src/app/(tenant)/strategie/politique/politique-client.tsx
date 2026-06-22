@@ -29,6 +29,7 @@ type Props = {
   statut: string;
   currentVersion: string | null;
   currentVersionDate: string | null;
+  publishedCount: number;
   canWrite: boolean;
   canApprove: boolean;
   drafterName: string | null;
@@ -42,6 +43,7 @@ export function PolitiqueClient({
   statut,
   currentVersion,
   currentVersionDate,
+  publishedCount,
   canWrite,
   canApprove,
   drafterName,
@@ -55,11 +57,17 @@ export function PolitiqueClient({
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const editable = statut === "brouillon" && canWrite;
+  const isPublished = statut === "publiee";
+  // Numéro que prendra la version en cours une fois publiée.
+  const nextVersion = `v${publishedCount + 1}`;
 
   const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
   const documentMeta = [
     { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
-    ...(currentVersion ? [{ label: "Version", value: currentVersion }] : []),
+    {
+      label: "Version",
+      value: isPublished && currentVersion ? currentVersion : `${nextVersion} (projet)`,
+    },
     ...(approverName
       ? [
           { label: "Approuvée le", value: fmt(approvedAt ?? currentVersionDate) },
@@ -141,14 +149,21 @@ export function PolitiqueClient({
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">Statut</span>
           <Badge variant="secondary">{STATUT_LABELS[statut] ?? statut}</Badge>
-          {currentVersion ? (
+          {isPublished && currentVersion ? (
             <span className="text-muted-foreground text-sm">
               · {currentVersion}
-              {currentVersionDate
-                ? ` · publiée le ${new Date(currentVersionDate).toLocaleDateString("fr-FR")}`
+              {currentVersionDate ? ` · publiée le ${fmt(currentVersionDate)}` : ""}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">
+              · version en cours {nextVersion} (non publiée)
+              {currentVersion
+                ? ` · dernière publiée : ${currentVersion}${
+                    currentVersionDate ? ` le ${fmt(currentVersionDate)}` : ""
+                  }`
                 : ""}
             </span>
-          ) : null}
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -223,6 +238,17 @@ export function PolitiqueClient({
               {approvedAt ? ` le ${new Date(approvedAt).toLocaleDateString("fr-FR")}` : ""}
             </span>
           ) : null}
+        </div>
+      ) : null}
+
+      {statut === "approuvee" ? (
+        <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
+          <span className="font-medium text-status-pa">Approuvée, non encore publiée.</span>{" "}
+          <span className="text-muted-foreground">
+            Cette version deviendra officiellement {nextVersion} une fois
+            {canApprove ? " que vous aurez cliqué « Publier »." : " publiée par un approbateur."}
+            {currentVersion ? ` En attendant, la version en vigueur reste ${currentVersion}.` : ""}
+          </span>
         </div>
       ) : null}
 
