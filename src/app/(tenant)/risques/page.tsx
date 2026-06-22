@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
-import { todayISO } from "@/lib/format";
+import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RoStatutCell } from "./inline-cells";
@@ -117,7 +117,7 @@ export default async function RisquesPage() {
                   Probabilité →
                 </span>
               </div>
-              <div className="w-[280px] max-w-full">
+              <div className="w-[420px] max-w-full">
                 <div className="grid grid-cols-5 gap-1">
                   {[5, 4, 3, 2, 1].map((prob) =>
                     [1, 2, 3, 4, 5].map((grav) => {
@@ -173,44 +173,72 @@ export default async function RisquesPage() {
                 <TableHead>G × P</TableHead>
                 <TableHead>Criticité brute</TableHead>
                 <TableHead>Résiduelle</TableHead>
+                <TableHead>Revue</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/risques/${r.id}`} className="hover:text-primary hover:underline">
-                      {r.intitule}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{TYPE_LABELS[r.type] ?? r.type}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {r.gravite} × {r.probabilite}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`${BADGE_BASE} ${criticiteClass(r.criticite ?? 0)}`}>
-                      {r.criticite}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {r.criticite_residuelle != null ? (
-                      <span className={`${BADGE_BASE} ${criticiteClass(r.criticite_residuelle)}`}>
-                        {r.criticite_residuelle}
+              {items.map((r) => {
+                const aRevoir =
+                  r.statut !== "cloture" && r.date_revue != null && r.date_revue <= today;
+                return (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/risques/${r.id}`}
+                        className="hover:text-primary hover:underline"
+                      >
+                        {r.intitule}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{TYPE_LABELS[r.type] ?? r.type}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {r.gravite} × {r.probabilite}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`${BADGE_BASE} ${criticiteClass(r.criticite ?? 0)}`}>
+                        {r.criticite}
                       </span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <RoStatutCell id={r.id} value={r.statut} />
-                  </TableCell>
-                  <TableCell>
-                    <RoDialog processusOptions={processus ?? []} ro={r} />
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      {r.criticite_residuelle != null ? (
+                        <span className={`${BADGE_BASE} ${criticiteClass(r.criticite_residuelle)}`}>
+                          {r.criticite_residuelle}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {r.date_revue ? (
+                        aRevoir ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span
+                              className={`${BADGE_BASE} bg-status-pa/15 text-status-pa`}
+                              title={`Revue prévue le ${formatDate(r.date_revue)}`}
+                            >
+                              À revoir
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            {formatDate(r.date_revue)}
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <RoStatutCell id={r.id} value={r.statut} />
+                    </TableCell>
+                    <TableCell>
+                      <RoDialog processusOptions={processus ?? []} ro={r} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
