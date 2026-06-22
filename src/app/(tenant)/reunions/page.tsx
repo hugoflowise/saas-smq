@@ -1,6 +1,8 @@
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -76,6 +78,7 @@ export default async function ReunionsPage() {
                 <TableHead>Date</TableHead>
                 <TableHead>Avancement</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,6 +113,17 @@ export default async function ReunionsPage() {
                       >
                         {r.statut === "terminee" ? "Terminée" : "Planifiée"}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Compte rendu PDF"
+                        title="Compte rendu (PDF)"
+                        render={<Link href={`/print/reunion/${r.id}`} target="_blank" />}
+                      >
+                        <FileText className="size-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
