@@ -7,20 +7,22 @@ import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
+// Chaque case SWOT/PESTEL est une liste de points (chaînes).
+const liste = z.array(z.string());
 const contexteSchema = z.object({
   swot: z.object({
-    forces: z.string(),
-    faiblesses: z.string(),
-    opportunites: z.string(),
-    menaces: z.string(),
+    forces: liste,
+    faiblesses: liste,
+    opportunites: liste,
+    menaces: liste,
   }),
   pestel: z.object({
-    politique: z.string(),
-    economique: z.string(),
-    sociologique: z.string(),
-    technologique: z.string(),
-    ecologique: z.string(),
-    legal: z.string(),
+    politique: liste,
+    economique: liste,
+    sociologique: liste,
+    technologique: liste,
+    ecologique: liste,
+    legal: liste,
   }),
   dateRevue: z.string().optional(),
   prochainRevue: z.string().optional(),
