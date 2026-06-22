@@ -48,9 +48,11 @@ export type DocumentRow = {
 export function DocumentDialog({
   document,
   processus,
+  trigger,
 }: {
   document?: DocumentRow;
   processus: { id: string; nom: string }[];
+  trigger?: React.ReactElement;
 }) {
   const router = useRouter();
   const isEdit = Boolean(document);
@@ -158,9 +160,11 @@ export function DocumentDialog({
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Ajouter un document</Button>
           )
