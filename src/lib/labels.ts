@@ -84,3 +84,10 @@ export const AUDIT_STATUT_LABELS = {
   rapport_redige: "Rapport rédigé",
   cloture: "Clôturé",
 } as const;
+
+export const ROLE_LABELS = {
+  admin_flowise: "Administrateur Flowise",
+  dirigeant: "Dirigeant",
+  manager: "Manager",
+  auditeur: "Auditeur (lecture seule)",
+} as const;
