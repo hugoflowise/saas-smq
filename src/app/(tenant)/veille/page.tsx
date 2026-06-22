@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -51,27 +52,50 @@ export default async function VeillePage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const [{ data: textes }, { data: tenant }, { data: suggestions }] = await Promise.all([
-    supabase
-      .from("veille_reglementaire")
-      .select(
-        "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, statut",
-      )
-      .eq("tenant_id", tid)
-      .order("date_application", { ascending: false, nullsFirst: false }),
-    supabase.from("tenants").select("veille_mots_cles").eq("id", tid).maybeSingle(),
-    supabase
-      .from("veille_suggestions")
-      .select("id, titre, url, date_texte")
-      .eq("tenant_id", tid)
-      .eq("statut", "nouvelle")
-      .is("deleted_at", null)
-      .order("date_texte", { ascending: false, nullsFirst: false }),
-  ]);
+  const [{ data: textes }, { data: tenant }, { data: suggestions }, { data: derniere }] =
+    await Promise.all([
+      supabase
+        .from("veille_reglementaire")
+        .select(
+          "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, statut",
+        )
+        .eq("tenant_id", tid)
+        .order("date_application", { ascending: false, nullsFirst: false }),
+      supabase.from("tenants").select("veille_mots_cles").eq("id", tid).maybeSingle(),
+      supabase
+        .from("veille_suggestions")
+        .select("id, titre, url, date_texte")
+        .eq("tenant_id", tid)
+        .eq("statut", "nouvelle")
+        .is("deleted_at", null)
+        .order("date_texte", { ascending: false, nullsFirst: false }),
+      supabase
+        .from("veille_suggestions")
+        .select("created_at")
+        .eq("tenant_id", tid)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   const items = textes ?? [];
   const motsCles = tenant?.veille_mots_cles ?? "";
   const suggs = suggestions ?? [];
+
+  const tiles = [
+    { label: "Textes suivis", value: items.length, cls: "text-foreground" },
+    {
+      label: "À analyser",
+      value: items.filter((t) => t.statut === "a_analyser").length,
+      cls: "text-status-pa",
+    },
+    { label: "Suggestions à examiner", value: suggs.length, cls: "text-primary" },
+    {
+      label: "Dernière collecte",
+      value: derniere?.created_at ? formatDate(derniere.created_at) : "-",
+      cls: "text-foreground",
+    },
+  ];
 
   return (
     <div className="w-full">
@@ -83,6 +107,8 @@ export default async function VeillePage() {
       >
         <VeilleDialog />
       </PageHeader>
+
+      <StatTiles tiles={tiles} className="mb-6" />
 
       {/* Configuration des mots-clés (suggestions automatiques) */}
       <Card className="mb-4">
@@ -97,10 +123,7 @@ export default async function VeillePage() {
           <h2 className="mb-2 font-semibold text-sm">Suggestions à examiner ({suggs.length})</h2>
           <div className="flex flex-col gap-2">
             {suggs.map((s) => (
-              <div
-                key={s.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3"
-              >
+              <div key={s.id} className="flex flex-col gap-2 rounded-xl border bg-card px-4 py-3">
                 <div className="min-w-0">
                   <p className="font-medium text-sm">{s.titre}</p>
                   <p className="text-muted-foreground text-xs">

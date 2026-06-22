@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { legifranceConfigured, rechercherTextesRecents } from "@/lib/legifrance";
+import { legifranceConfigured, MOTS_CLES_DEFAUT, rechercherTextesRecents } from "@/lib/legifrance";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -22,17 +22,15 @@ export async function GET(request: Request) {
   }
 
   const admin = createAdminClient();
-  const { data: tenants } = await admin
-    .from("tenants")
-    .select("id, veille_mots_cles")
-    .not("veille_mots_cles", "is", null);
+  // Tous les clients : ceux sans mots-clés utilisent la liste par défaut.
+  const { data: tenants } = await admin.from("tenants").select("id, veille_mots_cles");
   if (!tenants || tenants.length === 0) {
     return NextResponse.json({ ok: true, suggestions: 0, tenants: 0 });
   }
 
   let suggestions = 0;
   for (const tenant of tenants) {
-    const motsCles = (tenant.veille_mots_cles ?? "")
+    const motsCles = (tenant.veille_mots_cles || MOTS_CLES_DEFAUT)
       .split(",")
       .map((m) => m.trim())
       .filter(Boolean);
