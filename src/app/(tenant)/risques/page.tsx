@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -11,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RoStatutCell } from "./inline-cells";
@@ -65,6 +67,21 @@ export default async function RisquesPage() {
     .order("criticite", { ascending: false });
 
   const items = ros ?? [];
+  const today = todayISO();
+
+  const risques = items.filter((r) => r.type === "risque");
+  const opportunites = items.filter((r) => r.type === "opportunite");
+  const critiqueEleve = risques.filter((r) => (r.criticite ?? 0) > 15).length;
+  const aRevoir = items.filter(
+    (r) => r.statut !== "cloture" && r.date_revue != null && r.date_revue <= today,
+  ).length;
+
+  const tiles = [
+    { label: "Risques", value: risques.length, cls: "text-foreground" },
+    { label: "Opportunités", value: opportunites.length, cls: "text-status-conforme" },
+    { label: "Criticité élevée (> 15)", value: critiqueEleve, cls: "text-status-nc-majeure" },
+    { label: "À revoir", value: aRevoir, cls: "text-status-pa" },
+  ];
 
   // Comptage par cellule (gravité × probabilité) pour la matrice (risques)
   const countByCell = new Map<string, number>();
@@ -85,37 +102,57 @@ export default async function RisquesPage() {
         <RoDialog processusOptions={processus ?? []} />
       </PageHeader>
 
-      {/* Matrice gravité × probabilité (risques) */}
+      <StatTiles tiles={tiles} className="mb-6" />
+
+      {/* Matrice gravité × probabilité (risques), compacte */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-base">Matrice de criticité (risques)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
-            <div className="flex items-center">
-              <span className="-rotate-90 whitespace-nowrap text-muted-foreground text-xs">
-                Probabilité →
-              </span>
-            </div>
-            <div className="flex-1">
-              <div className="grid grid-cols-5 gap-1">
-                {[5, 4, 3, 2, 1].map((prob) =>
-                  [1, 2, 3, 4, 5].map((grav) => {
-                    const c = grav * prob;
-                    const n = countByCell.get(`${grav}-${prob}`) ?? 0;
-                    return (
-                      <div
-                        key={`${grav}-${prob}`}
-                        className={`flex aspect-square flex-col items-center justify-center rounded ${cellBg(c)}`}
-                      >
-                        {n > 0 ? <span className="font-semibold text-sm">{n}</span> : null}
-                        <span className="text-[10px] text-muted-foreground">{c}</span>
-                      </div>
-                    );
-                  }),
-                )}
+          <div className="flex flex-wrap items-start gap-6">
+            <div className="flex gap-2">
+              <div className="flex items-center">
+                <span className="-rotate-90 whitespace-nowrap text-muted-foreground text-xs">
+                  Probabilité →
+                </span>
               </div>
-              <p className="mt-1 text-center text-muted-foreground text-xs">Gravité →</p>
+              <div className="w-[280px] max-w-full">
+                <div className="grid grid-cols-5 gap-1">
+                  {[5, 4, 3, 2, 1].map((prob) =>
+                    [1, 2, 3, 4, 5].map((grav) => {
+                      const c = grav * prob;
+                      const n = countByCell.get(`${grav}-${prob}`) ?? 0;
+                      return (
+                        <div
+                          key={`${grav}-${prob}`}
+                          className={`flex aspect-square flex-col items-center justify-center rounded ${cellBg(c)}`}
+                        >
+                          {n > 0 ? <span className="font-semibold text-sm">{n}</span> : null}
+                          <span className="text-[10px] text-muted-foreground">{c}</span>
+                        </div>
+                      );
+                    }),
+                  )}
+                </div>
+                <p className="mt-1 text-center text-muted-foreground text-xs">Gravité →</p>
+              </div>
+            </div>
+
+            {/* Légende */}
+            <div className="flex flex-col gap-1.5 text-xs">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-3 rounded bg-status-conforme/20" /> Faible (&lt; 9)
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-3 rounded bg-status-pa/25" /> Moyenne (9 à 15)
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-3 rounded bg-status-nc-mineure/25" /> Élevée (&gt; 15)
+              </span>
+              <span className="mt-1 text-muted-foreground">
+                Le chiffre dans chaque case = nombre de risques.
+              </span>
             </div>
           </div>
         </CardContent>
