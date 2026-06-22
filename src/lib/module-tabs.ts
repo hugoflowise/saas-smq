@@ -18,6 +18,6 @@ export const SATISFACTION_TABS: ModuleTab[] = [
 ];
 
 export const CONFORMITE_TABS: ModuleTab[] = [
-  { href: "/conformite", label: "Conformité ISO" },
+  { href: "/conformite", label: "Auto-diagnostic" },
   { href: "/veille", label: "Veille réglementaire" },
 ];

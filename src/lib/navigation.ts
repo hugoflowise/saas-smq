@@ -81,7 +81,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Objectifs & indicateurs", href: "/strategie/objectifs", icon: Target },
       { label: "Audits", href: "/audits", icon: Gauge },
-      { label: "Conformité & veille", href: "/conformite", icon: ClipboardCheck },
+      { label: "Auto-diagnostic & veille", href: "/conformite", icon: ClipboardCheck },
       { label: "Revues de direction", href: "/revues/direction", icon: ClipboardCheck },
       { label: "Cycle de certification", href: "/certification", icon: Milestone },
     ],

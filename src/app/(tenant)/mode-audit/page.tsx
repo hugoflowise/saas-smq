@@ -284,7 +284,7 @@ export default async function ModeAuditPage() {
       titre: "Évaluation des performances",
       checks: [
         {
-          label: "Conformité ISO auto-évaluée",
+          label: "Conformité ISO (auto-diagnostic)",
           value: `${pctConforme}%`,
           ok: pctConforme >= 80,
           href: "/conformite",
@@ -350,12 +350,32 @@ export default async function ModeAuditPage() {
   const totalChecks = chapitres.flatMap((c) => c.checks).length;
   const okChecks = chapitres.flatMap((c) => c.checks).filter((c) => c.ok).length;
 
-  const tiles = [
-    { label: "Conformité ISO", value: `${pctConforme}%`, cls: "text-status-conforme" },
+  const tiles: { label: string; value: string | number; cls?: string; href?: string }[] = [
+    {
+      label: "Conformité (auto-diagnostic)",
+      value: `${pctConforme}%`,
+      cls: "text-status-conforme",
+      href: "/conformite",
+    },
     { label: "Points conformes", value: `${okChecks}/${totalChecks}`, cls: "text-foreground" },
-    { label: "NC majeures ouvertes", value: count(ncMajeures), cls: "text-status-nc-majeure" },
-    { label: "Actions en retard", value: count(actionsRetard), cls: "text-status-pa" },
-    { label: "Processus à réviser", value: count(processusAReviser), cls: "text-status-pa" },
+    {
+      label: "NC majeures ouvertes",
+      value: count(ncMajeures),
+      cls: "text-status-nc-majeure",
+      href: "/nc",
+    },
+    {
+      label: "Actions en retard",
+      value: count(actionsRetard),
+      cls: "text-status-pa",
+      href: "/actions",
+    },
+    {
+      label: "Processus à réviser",
+      value: count(processusAReviser),
+      cls: "text-status-pa",
+      href: "/processus",
+    },
   ];
 
   return (
@@ -370,14 +390,30 @@ export default async function ModeAuditPage() {
       </PageHeader>
 
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {tiles.map((t) => (
-          <Card key={t.label}>
-            <CardContent className="py-5">
-              <p className={`font-semibold text-3xl ${t.cls}`}>{t.value}</p>
-              <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
-            </CardContent>
-          </Card>
-        ))}
+        {tiles.map((t) => {
+          const card = (
+            <Card
+              key={t.label}
+              className={
+                t.href
+                  ? "h-full transition-colors hover:border-primary/40 hover:bg-muted/40"
+                  : "h-full"
+              }
+            >
+              <CardContent className="py-5">
+                <p className={`font-semibold text-3xl ${t.cls ?? ""}`}>{t.value}</p>
+                <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
+              </CardContent>
+            </Card>
+          );
+          return t.href ? (
+            <Link key={t.label} href={t.href} className="block">
+              {card}
+            </Link>
+          ) : (
+            <div key={t.label}>{card}</div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
