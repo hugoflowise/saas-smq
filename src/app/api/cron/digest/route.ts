@@ -36,6 +36,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, envoyes: 0, tenants: 0 });
   }
 
+  // Superviseurs : reçoivent le digest de CHAQUE client (suivi global).
+  // = tous les admins Flowise + les adresses listées dans DIGEST_SUPERVISORS
+  // (séparées par des virgules). Pratique pour Léa + Hugo tant que les clients
+  // n'ont pas encore accès à l'app.
+  const { data: admins } = await admin.from("profiles").select("email").eq("role", "admin_flowise");
+  const superviseurs = new Set<string>();
+  for (const a of admins ?? []) if (a.email) superviseurs.add(a.email);
+  for (const e of (process.env.DIGEST_SUPERVISORS ?? "").split(","))
+    if (e.trim()) superviseurs.add(e.trim());
+
   let envoyes = 0;
   let tenantsAvecAlertes = 0;
 
@@ -44,14 +54,21 @@ export async function GET(request: Request) {
     if (!aDesAlertes(data)) continue;
     tenantsAvecAlertes++;
 
-    // Destinataires : membres du tenant qui acceptent les e-mails.
-    const { data: profiles } = await admin
-      .from("profiles")
-      .select("email, notification_preferences")
-      .eq("tenant_id", tenant.id);
-    const destinataires = (profiles ?? [])
-      .filter((p) => p.email && wantsEmail(p.notification_preferences))
-      .map((p) => p.email);
+    // Destinataires = superviseurs (toujours) + éventuellement les membres du
+    // tenant. L'envoi aux membres n'est activé que si DIGEST_INCLUDE_TENANT_MEMBERS
+    // vaut "true" (désactivé tant que les clients n'ont pas de vrais comptes,
+    // pour éviter d'envoyer à des adresses de test).
+    const membres: string[] = [];
+    if (process.env.DIGEST_INCLUDE_TENANT_MEMBERS === "true") {
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("email, notification_preferences")
+        .eq("tenant_id", tenant.id);
+      for (const p of profiles ?? []) {
+        if (p.email && wantsEmail(p.notification_preferences)) membres.push(p.email);
+      }
+    }
+    const destinataires = [...new Set([...membres, ...superviseurs])];
     if (destinataires.length === 0) continue;
 
     const html = digestEmailHtml({
