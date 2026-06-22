@@ -26,7 +26,7 @@ export async function getTenantContext(): Promise<TenantContext> {
     .eq("id", user?.id ?? "")
     .maybeSingle();
 
-  const role = profile?.role ?? "—";
+  const role = profile?.role ?? "-";
   const isAdmin = role === "admin_flowise";
   const effectiveTenantId = isAdmin ? await getActiveTenantId() : (profile?.tenant_id ?? null);
 

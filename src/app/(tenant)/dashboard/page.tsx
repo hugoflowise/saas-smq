@@ -273,13 +273,13 @@ export default async function DashboardPage() {
     },
     {
       label: "Objectifs atteints",
-      value: tauxObjectifs === null ? "—" : `${tauxObjectifs}%`,
+      value: tauxObjectifs === null ? "-" : `${tauxObjectifs}%`,
       href: "/strategie/objectifs",
       cls: "text-status-conforme",
     },
     {
       label: `NPS (${npsLabel(nps)})`,
-      value: nps ?? "—",
+      value: nps ?? "-",
       href: "/satisfaction",
       cls: npsClass(nps),
     },

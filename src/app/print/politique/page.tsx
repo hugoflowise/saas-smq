@@ -51,9 +51,9 @@ export default async function PolitiquePrintPage() {
 
   const meta = isPublished
     ? [
-        { label: "Version", value: version?.version ?? "—" },
+        { label: "Version", value: version?.version ?? "-" },
         { label: "Approuvée le", value: formatDate(version?.approved_at ?? null) },
-        { label: "Signataire", value: approverName ?? "—" },
+        { label: "Signataire", value: approverName ?? "-" },
         { label: "Statut", value: "Publiée" },
       ]
     : [{ label: "Statut", value: "Brouillon (non publié)" }];

@@ -101,7 +101,7 @@ export async function GET(request: Request) {
       ],
     });
 
-    const subject = `Échéances qualité — ${tenant.nom_societe}`;
+    const subject = `Échéances qualité : ${tenant.nom_societe}`;
     const results = await Promise.allSettled(
       destinataires.map((to) => sendEmail({ to, subject, html })),
     );

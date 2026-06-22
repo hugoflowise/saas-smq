@@ -190,7 +190,7 @@ export function ActionDialog({ processusOptions, action }: Props) {
                 className={SELECT_CLASS}
                 defaultValue={action?.processus_concerne ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

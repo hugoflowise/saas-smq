@@ -73,8 +73,8 @@ export default async function SatisfactionPage() {
     .slice(0, 6);
 
   const tiles = [
-    { label: `NPS global (${npsLabel(nps)})`, value: nps ?? "—", cls: npsClass(nps) },
-    { label: "Note moyenne /10", value: moyenne ?? "—", cls: "text-foreground" },
+    { label: `NPS global (${npsLabel(nps)})`, value: nps ?? "-", cls: npsClass(nps) },
+    { label: "Note moyenne /10", value: moyenne ?? "-", cls: "text-foreground" },
     { label: "Réponses", value: items.length, cls: "text-foreground" },
     { label: "Réclamations", value: reclamations, cls: "text-status-nc-mineure" },
   ];
@@ -126,7 +126,7 @@ export default async function SatisfactionPage() {
                   <div key={q.t} className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{q.t}</span>
                     <span className="flex items-center gap-2">
-                      <span className={`font-semibold ${npsClass(q.nps)}`}>{q.nps ?? "—"}</span>
+                      <span className={`font-semibold ${npsClass(q.nps)}`}>{q.nps ?? "-"}</span>
                       <span className="text-muted-foreground text-xs">({q.count})</span>
                     </span>
                   </div>
@@ -149,10 +149,10 @@ export default async function SatisfactionPage() {
                 <TableBody>
                   {items.map((e) => (
                     <TableRow key={e.id}>
-                      <TableCell className="font-medium">{e.client ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{e.client ?? "-"}</TableCell>
                       <TableCell>{formatDate(e.date_reponse)}</TableCell>
-                      <TableCell>{e.note_recommandation ?? "—"}</TableCell>
-                      <TableCell>{e.note_satisfaction ?? "—"}</TableCell>
+                      <TableCell>{e.note_recommandation ?? "-"}</TableCell>
+                      <TableCell>{e.note_satisfaction ?? "-"}</TableCell>
                       <TableCell>
                         {e.est_reclamation ? (
                           <span
@@ -161,7 +161,7 @@ export default async function SatisfactionPage() {
                             Réclamation
                           </span>
                         ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
+                          <span className="text-muted-foreground text-xs">-</span>
                         )}
                       </TableCell>
                       <TableCell>

@@ -156,7 +156,7 @@ export function NcDialog({
                 className={SELECT_CLASS}
                 defaultValue={nc?.processus_concerne ?? presetProcessusId ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

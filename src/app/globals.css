@@ -69,7 +69,7 @@
   /* Coral Flowise #FF5A5F (cf. CDC §12.3) */
   --primary: #ff5a5f;
   --primary-foreground: #ffffff;
-  /* Surface — fond doux légèrement bleuté (verre dépoli) */
+  /* Surface : fond doux légèrement bleuté (verre dépoli) */
   --surface: #eef1f7;
   /* Surfaces translucides (effet verre / Apple liquid glass) */
   --glass: oklch(1 0 0 / 72%);
@@ -114,7 +114,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  /* Coral Flowise — conservé en mode sombre */
+  /* Coral Flowise, conservé en mode sombre */
   --primary: #ff5a5f;
   --primary-foreground: #ffffff;
   --surface: oklch(0.165 0 0);

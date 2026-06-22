@@ -144,7 +144,7 @@ export function ObjectifDialog({
                 className={SELECT_CLASS}
                 defaultValue={objectif?.processus_id ?? presetProcessusId ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

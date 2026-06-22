@@ -141,7 +141,7 @@ export default async function IndicateurDetailPage({
                     <TableCell className="font-medium">
                       {v.valeur} {ind.unite ?? ""}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{v.commentaire ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{v.commentaire ?? "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

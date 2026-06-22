@@ -60,10 +60,10 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         procedure.reference_iso?.length
           ? { label: "Réf. ISO", value: procedure.reference_iso.join(", ") }
           : null,
-        { label: "Version", value: version?.version ?? "—" },
-        { label: "Rédacteur", value: version?.redacteur ?? "—" },
-        { label: "Vérificateur", value: version?.verificateur ?? "—" },
-        { label: "Approbateur", value: approverName ?? "—" },
+        { label: "Version", value: version?.version ?? "-" },
+        { label: "Rédacteur", value: version?.redacteur ?? "-" },
+        { label: "Vérificateur", value: version?.verificateur ?? "-" },
+        { label: "Approbateur", value: approverName ?? "-" },
         { label: "Approuvée le", value: formatDate(version?.approved_at ?? null) },
       ].filter((m): m is { label: string; value: string } => m !== null)
     : [{ label: "Statut", value: "Brouillon (non publié)" }];

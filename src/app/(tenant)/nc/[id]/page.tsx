@@ -21,7 +21,7 @@ function Field({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "—"}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "-"}</p>
     </div>
   );
 }

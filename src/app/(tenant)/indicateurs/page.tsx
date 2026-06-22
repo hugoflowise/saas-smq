@@ -93,7 +93,7 @@ export default async function IndicateursPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-baseline gap-1">
-                      <span className="font-semibold text-2xl">{last ? last.valeur : "—"}</span>
+                      <span className="font-semibold text-2xl">{last ? last.valeur : "-"}</span>
                       {ind.unite ? (
                         <span className="text-muted-foreground text-sm">{ind.unite}</span>
                       ) : null}

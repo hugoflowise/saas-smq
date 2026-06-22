@@ -78,15 +78,15 @@ export default async function AdminClientsPage() {
                     <TableCell>
                       {dirigeant ? (
                         <span className="flex flex-col">
-                          <span>{dirigeant.full_name ?? "—"}</span>
+                          <span>{dirigeant.full_name ?? "-"}</span>
                           <span className="text-muted-foreground text-xs">{dirigeant.email}</span>
                         </span>
                       ) : (
-                        "—"
+                        "-"
                       )}
                     </TableCell>
-                    <TableCell>{t.effectif_tranche ?? "—"}</TableCell>
-                    <TableCell>{t.secteur ?? "—"}</TableCell>
+                    <TableCell>{t.effectif_tranche ?? "-"}</TableCell>
+                    <TableCell>{t.secteur ?? "-"}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{t.statut}</Badge>
                     </TableCell>

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export type StatTile = {
   /** Libellé court sous la valeur. */
   label: string;
-  /** Valeur déjà formatée (nombre, pourcentage, « — »…). */
+  /** Valeur déjà formatée (nombre, pourcentage, « - »…). */
   value: ReactNode;
   /** Classe de couleur optionnelle pour la valeur (ex. status token). */
   cls?: string;

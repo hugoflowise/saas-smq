@@ -102,17 +102,17 @@ export default async function SuiviConsultantPage() {
 
   const tiles = [
     { label: "Suivis réalisés", value: items.length, cls: "text-foreground" },
-    { label: "Satisfaction exp. /5", value: satMoyenne ?? "—", cls: "text-status-conforme" },
-    { label: "Suivi manager /5", value: managerMoyenne ?? "—", cls: "text-status-conforme" },
-    { label: `eNPS (${npsLabel(nps)})`, value: nps ?? "—", cls: "text-status-pf" },
+    { label: "Satisfaction exp. /5", value: satMoyenne ?? "-", cls: "text-status-conforme" },
+    { label: "Suivi manager /5", value: managerMoyenne ?? "-", cls: "text-status-conforme" },
+    { label: `eNPS (${npsLabel(nps)})`, value: nps ?? "-", cls: "text-status-pf" },
     {
       label: "Conformité QSSE",
-      value: conformiteQsse != null ? `${conformiteQsse}%` : "—",
+      value: conformiteQsse != null ? `${conformiteQsse}%` : "-",
       cls: "text-status-pa",
     },
     {
       label: "Cohérence ODM",
-      value: coherenceOdm != null ? `${coherenceOdm}%` : "—",
+      value: coherenceOdm != null ? `${coherenceOdm}%` : "-",
       cls: "text-status-pa",
     },
     { label: "Alertes santé/RPS", value: alertes, cls: "text-status-nc-majeure" },
@@ -203,13 +203,13 @@ export default async function SuiviConsultantPage() {
                   </TableCell>
                   <TableCell className="font-medium">
                     <Link href={`/suivi-consultant/${s.id}`} className="block hover:text-primary">
-                      {s.nom ?? "—"}
+                      {s.nom ?? "-"}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{s.client ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{s.poste ?? "—"}</TableCell>
-                  <TableCell>{s.satisfaction_globale ?? "—"}</TableCell>
-                  <TableCell>{s.nps ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{s.client ?? "-"}</TableCell>
+                  <TableCell className="text-muted-foreground">{s.poste ?? "-"}</TableCell>
+                  <TableCell>{s.satisfaction_globale ?? "-"}</TableCell>
+                  <TableCell>{s.nps ?? "-"}</TableCell>
                   <TableCell>
                     {s.alerte ? (
                       <span
@@ -218,7 +218,7 @@ export default async function SuiviConsultantPage() {
                         Alerte
                       </span>
                     ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
+                      <span className="text-muted-foreground text-xs">-</span>
                     )}
                   </TableCell>
                 </TableRow>

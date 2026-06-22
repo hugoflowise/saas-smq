@@ -87,7 +87,7 @@ export default async function ProcessusPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2">
                   {colItems.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">—</p>
+                    <p className="text-muted-foreground text-sm">-</p>
                   ) : (
                     colItems.map((p) => (
                       <Link

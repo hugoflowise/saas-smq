@@ -93,9 +93,9 @@ export function ReunionActions({
           <Input name="descriptionCourte" required placeholder="Action décidée en réunion" />
           <div className="flex flex-wrap gap-2">
             <select name="priorite" className={SELECT_CLASS} defaultValue="p2">
-              <option value="p1">P1 — Haute</option>
-              <option value="p2">P2 — Moyenne</option>
-              <option value="p3">P3 — Basse</option>
+              <option value="p1">P1 · Haute</option>
+              <option value="p2">P2 · Moyenne</option>
+              <option value="p3">P3 · Basse</option>
             </select>
             <Input name="datePrevue" type="date" className="w-auto" />
             <Button type="submit" size="sm" disabled={pending}>

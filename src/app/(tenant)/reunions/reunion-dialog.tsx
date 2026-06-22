@@ -40,7 +40,7 @@ export function ReunionDialog() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="titre">Titre</Label>
-            <Input id="titre" name="titre" required placeholder="Comité QHSE — T1" />
+            <Input id="titre" name="titre" required placeholder="Comité QHSE T1" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">

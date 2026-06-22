@@ -57,7 +57,7 @@ export function CreateProcedureDialog({
               className={SELECT_CLASS}
               defaultValue={presetProcessusId ?? ""}
             >
-              <option value="">—</option>
+              <option value="">-</option>
               {processusOptions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nom}

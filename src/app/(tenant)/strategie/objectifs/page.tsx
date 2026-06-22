@@ -171,7 +171,7 @@ export default async function ObjectifsPage() {
                     ) : null}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {o.processus_id ? (processusNom.get(o.processus_id) ?? "—") : "—"}
+                    {o.processus_id ? (processusNom.get(o.processus_id) ?? "-") : "-"}
                   </TableCell>
                   <TableCell>
                     {o.valeur_cible !== null ? (
@@ -179,7 +179,7 @@ export default async function ObjectifsPage() {
                         <div className="flex items-center justify-between gap-2 text-xs">
                           <span className="flex items-center gap-1">
                             {o.indicateur_id ? (
-                              <span className="font-medium">{o.valeurEffective ?? "—"}</span>
+                              <span className="font-medium">{o.valeurEffective ?? "-"}</span>
                             ) : (
                               <ObjValeurActuelleCell
                                 id={o.id}

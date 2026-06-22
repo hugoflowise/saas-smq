@@ -56,7 +56,7 @@ export function PolitiqueClient({
   const [saved, setSaved] = useState(false);
   const editable = statut === "brouillon" && canWrite;
 
-  const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
+  const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
   const documentMeta = [
     { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
     ...(currentVersion ? [{ label: "Version", value: currentVersion }] : []),
