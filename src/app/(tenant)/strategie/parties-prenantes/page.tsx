@@ -44,7 +44,7 @@ export default async function PartiesPrenantesPage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
-  const [{ data: parties }, { data: attentes }] = await Promise.all([
+  const [{ data: parties }, { data: attentes }, { data: tenant }] = await Promise.all([
     supabase
       .from("parties_interessees")
       .select("id, nom, sphere, type, niveau_interaction, pouvoir, legitimite, urgence")
@@ -52,7 +52,9 @@ export default async function PartiesPrenantesPage() {
       .is("deleted_at", null)
       .order("nom", { ascending: true }),
     supabase.from("pi_attentes").select("partie_id").eq("tenant_id", tid).is("deleted_at", null),
+    supabase.from("tenants").select("nom_societe").eq("id", tid).maybeSingle(),
   ]);
+  const nomSociete = tenant?.nom_societe ?? "Notre organisme";
 
   const attentesCount = new Map<string, number>();
   for (const a of attentes ?? []) {
@@ -115,6 +117,7 @@ export default async function PartiesPrenantesPage() {
             </CardHeader>
             <CardContent>
               <Cartographie
+                societe={nomSociete}
                 parties={items.map((p) => ({
                   id: p.id,
                   nom: p.nom,
