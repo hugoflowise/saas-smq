@@ -13,6 +13,7 @@ const schema = z.object({
   codePostal: z.string().trim().optional(),
   ville: z.string().trim().optional(),
   mentionsLegales: z.string().trim().optional(),
+  listeDiffusion: z.string().trim().optional(),
 });
 
 /** Met à jour les informations légales du client (réservé dirigeant/admin). */
@@ -39,6 +40,7 @@ export async function updateInfosSocieteAction(input: unknown): Promise<ActionRe
       code_postal: d.codePostal ?? null,
       ville: d.ville ?? null,
       mentions_legales: d.mentionsLegales ?? null,
+      liste_diffusion: d.listeDiffusion ?? null,
     })
     .eq("id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };

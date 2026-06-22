@@ -16,6 +16,7 @@ export type InfosSociete = {
   code_postal: string | null;
   ville: string | null;
   mentions_legales: string | null;
+  liste_diffusion: string | null;
 };
 
 export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
@@ -33,6 +34,7 @@ export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
       codePostal: f.get("codePostal") || undefined,
       ville: f.get("ville") || undefined,
       mentionsLegales: f.get("mentionsLegales") || undefined,
+      listeDiffusion: f.get("listeDiffusion") || undefined,
     });
     setPending(false);
     if (result.ok) {
@@ -81,6 +83,20 @@ export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
           defaultValue={infos.mentions_legales ?? ""}
           placeholder="Ex. Capital 50 000 € · RCS Paris 123 456 789 · APE 7022Z"
         />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="listeDiffusion">Liste de diffusion « toute la société »</Label>
+        <Input
+          id="listeDiffusion"
+          name="listeDiffusion"
+          type="email"
+          defaultValue={infos.liste_diffusion ?? ""}
+          placeholder="Ex. tous@masociete.fr"
+        />
+        <p className="text-muted-foreground text-xs">
+          Adresse de liste de diffusion (créée dans Microsoft 365). Utilisée pour envoyer une
+          communication à toute la société depuis le module Communications.
+        </p>
       </div>
       <Button type="submit" disabled={pending} className="w-fit">
         {pending ? "Enregistrement…" : "Enregistrer"}
