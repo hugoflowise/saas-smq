@@ -33,8 +33,7 @@ export type Modele = {
  */
 export const VARIABLES: { cle: string; label: string }[] = [
   { cle: "societe", label: "Nom de la société" },
-  { cle: "destinataire", label: "Nom du destinataire" },
-  { cle: "date", label: "Date" },
+  { cle: "date", label: "Date du jour" },
 ];
 
 /** Remplace les variables `{cle}` dans un texte. Les clés absentes sont laissées telles quelles. */
@@ -103,7 +102,7 @@ export const MODELES_INTEGRES: Modele[] = [
     objet: "Convocation à une formation le {date}",
     integre: true,
     corps:
-      "Bonjour {destinataire},\n\nVous êtes convié(e) à une formation le {date}.\n\n- Intitulé : \n- Lieu : \n- Horaires : \n\nVotre présence est importante. Merci de me confirmer votre participation.\n\nBien cordialement,",
+      "Bonjour,\n\nVous êtes convié(e) à une formation le {date}.\n\n- Intitulé : \n- Lieu : \n- Horaires : \n\nVotre présence est importante. Merci de me confirmer votre participation.\n\nBien cordialement,",
   },
   {
     id: "odm-transmission",
@@ -112,7 +111,7 @@ export const MODELES_INTEGRES: Modele[] = [
     objet: "Ordre de mission",
     integre: true,
     corps:
-      "Bonjour {destinataire},\n\nVeuillez trouver les éléments de votre ordre de mission :\n\n- Client / site : \n- Dates : \n- Objet de la mission : \n\nMerci de vérifier ces informations et de me signaler toute anomalie.\n\nBien cordialement,",
+      "Bonjour,\n\nVeuillez trouver les éléments de votre ordre de mission :\n\n- Client / site : \n- Dates : \n- Objet de la mission : \n\nMerci de vérifier ces informations et de me signaler toute anomalie.\n\nBien cordialement,",
   },
   {
     id: "reunion-invitation",
