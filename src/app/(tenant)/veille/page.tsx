@@ -57,7 +57,7 @@ export default async function VeillePage() {
       supabase
         .from("veille_reglementaire")
         .select(
-          "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, statut",
+          "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, lien, statut",
         )
         .eq("tenant_id", tid)
         .order("date_application", { ascending: false, nullsFirst: false }),
@@ -179,6 +179,16 @@ export default async function VeillePage() {
                         </button>
                       }
                     />
+                    {t.lien ? (
+                      <a
+                        href={t.lien}
+                        target="_blank"
+                        rel="noopener"
+                        className="mt-0.5 block text-primary text-xs hover:underline"
+                      >
+                        Voir le texte
+                      </a>
+                    ) : null}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {t.reference ?? "-"}

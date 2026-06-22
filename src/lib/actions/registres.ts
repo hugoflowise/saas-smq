@@ -107,6 +107,7 @@ const veilleBase = {
   dateApplication: z.string().optional(),
   impactSmq: z.string().trim().optional(),
   actionsAPrevoir: z.string().trim().optional(),
+  lien: z.string().trim().optional(),
   statut: z.enum(["a_analyser", "analysee", "integree", "sans_objet"]),
 };
 const veilleCreate = z.object(veilleBase);
@@ -121,6 +122,7 @@ function veillePayload(d: z.infer<typeof veilleCreate>) {
     date_application: d.dateApplication || null,
     impact_smq: d.impactSmq ?? null,
     actions_a_prevoir: d.actionsAPrevoir ?? null,
+    lien: d.lien ?? null,
     statut: d.statut,
   };
 }

@@ -25,6 +25,7 @@ export type VeilleRow = {
   date_application: string | null;
   impact_smq: string | null;
   actions_a_prevoir: string | null;
+  lien: string | null;
   statut: string;
 };
 
@@ -49,6 +50,7 @@ export function VeilleDialog({
           dateApplication: f.get("dateApplication") || undefined,
           impactSmq: f.get("impactSmq") || undefined,
           actionsAPrevoir: f.get("actionsAPrevoir") || undefined,
+          lien: f.get("lien") || undefined,
           statut: f.get("statut"),
         };
         return isEdit ? updateVeilleAction({ id: veille?.id, ...data }) : createVeilleAction(data);
@@ -156,6 +158,16 @@ export function VeilleDialog({
               name="actionsAPrevoir"
               rows={2}
               defaultValue={veille?.actions_a_prevoir ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="lien">Lien vers le texte</Label>
+            <Input
+              id="lien"
+              name="lien"
+              type="url"
+              defaultValue={veille?.lien ?? ""}
+              placeholder="https://www.legifrance.gouv.fr/…"
             />
           </div>
           <Button type="submit" disabled={pending} className="mt-1">

@@ -2929,6 +2929,7 @@ export type Database = {
           id: string
           impact_smq: string | null
           intitule: string
+          lien: string | null
           reference: string | null
           responsable_id: string | null
           statut: Database["public"]["Enums"]["veille_statut"]
@@ -2947,6 +2948,7 @@ export type Database = {
           id?: string
           impact_smq?: string | null
           intitule: string
+          lien?: string | null
           reference?: string | null
           responsable_id?: string | null
           statut?: Database["public"]["Enums"]["veille_statut"]
@@ -2965,6 +2967,7 @@ export type Database = {
           id?: string
           impact_smq?: string | null
           intitule?: string
+          lien?: string | null
           reference?: string | null
           responsable_id?: string | null
           statut?: Database["public"]["Enums"]["veille_statut"]
