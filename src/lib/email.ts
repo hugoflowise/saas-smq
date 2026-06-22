@@ -94,3 +94,58 @@ export function notificationEmailHtml(opts: {
   <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Notification automatique — Flowise Pilotage SMQ</p>
 </div>`;
 }
+
+/** Une section de la liste du digest (titre + lignes cliquables). */
+export type DigestSection = {
+  titre: string;
+  /** Couleur d'accent de la pastille de date (token hex). */
+  accent: string;
+  lignes: { date: string; label: string; href?: string }[];
+};
+
+/**
+ * Gabarit HTML du **digest quotidien des échéances** : plusieurs sections
+ * (actions en retard, échéances à venir, documents à réviser), chacune en liste.
+ * `dateFr` formate une date ISO en « jj/mm/aaaa » (injecté pour rester pur/testable).
+ */
+export function digestEmailHtml(opts: {
+  sections: DigestSection[];
+  dateFr: (iso: string) => string;
+}): string {
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const lien = (href?: string) =>
+    href ? (href.startsWith("http") ? href : `${base}${href}`) : null;
+
+  const sectionsHtml = opts.sections
+    .filter((s) => s.lignes.length > 0)
+    .map((s) => {
+      const items = s.lignes
+        .map((l) => {
+          const href = lien(l.href);
+          const texte = href
+            ? `<a href="${href}" style="color:#0f172a;text-decoration:none">${l.label}</a>`
+            : `<span style="color:#0f172a">${l.label}</span>`;
+          return `<tr>
+            <td style="padding:6px 10px 6px 0;white-space:nowrap;vertical-align:top">
+              <span style="display:inline-block;background:${s.accent}1a;color:${s.accent};font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px">${opts.dateFr(l.date)}</span>
+            </td>
+            <td style="padding:6px 0;font-size:14px;line-height:1.5">${texte}</td>
+          </tr>`;
+        })
+        .join("");
+      return `<h2 style="margin:20px 0 4px;font-size:14px;color:#334155">${s.titre}</h2>
+        <table style="width:100%;border-collapse:collapse">${items}</table>`;
+    })
+    .join("");
+
+  return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <h1 style="margin:0;font-size:18px;color:#0f172a">Vos échéances qualité</h1>
+    <p style="margin:6px 0 0;color:#64748b;font-size:13px">Récapitulatif des points à traiter prochainement.</p>
+    ${sectionsHtml}
+    ${base ? `<a href="${base}/dashboard" style="display:inline-block;margin-top:20px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Ouvrir le tableau de bord</a>` : ""}
+  </div>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Digest automatique — Flowise Pilotage SMQ</p>
+</div>`;
+}
