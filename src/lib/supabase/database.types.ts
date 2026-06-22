@@ -2860,6 +2860,7 @@ export type Database = {
           statut: Database["public"]["Enums"]["tenant_statut"]
           survey_token: string
           updated_at: string
+          veille_mots_cles: string | null
           ville: string | null
         }
         Insert: {
@@ -2885,6 +2886,7 @@ export type Database = {
           statut?: Database["public"]["Enums"]["tenant_statut"]
           survey_token?: string
           updated_at?: string
+          veille_mots_cles?: string | null
           ville?: string | null
         }
         Update: {
@@ -2910,6 +2912,7 @@ export type Database = {
           statut?: Database["public"]["Enums"]["tenant_statut"]
           survey_token?: string
           updated_at?: string
+          veille_mots_cles?: string | null
           ville?: string | null
         }
         Relationships: []
@@ -2996,6 +2999,62 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      veille_suggestions: {
+        Row: {
+          created_at: string
+          date_texte: string | null
+          deleted_at: string | null
+          domaine: string | null
+          id: string
+          ref: string
+          resume: string | null
+          source: string
+          statut: string
+          tenant_id: string
+          titre: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_texte?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          id?: string
+          ref: string
+          resume?: string | null
+          source?: string
+          statut?: string
+          tenant_id: string
+          titre: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_texte?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          id?: string
+          ref?: string
+          resume?: string | null
+          source?: string
+          statut?: string
+          tenant_id?: string
+          titre?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "veille_suggestions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
