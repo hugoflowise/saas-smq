@@ -10,34 +10,47 @@ const DOT: Record<number, string> = {
   3: "bg-status-nc-mineure",
 };
 
-// Rayons (en % du conteneur, centre = 50/50) : anneau interne plus proche du centre.
-const R_INTERNE = 27;
-const R_EXTERNE = 43;
+// Espacement angulaire cible par nœud (px de circonférence) : garantit la lisibilité.
+const ESPACEMENT = 150;
+const ORG_R = 60; // rayon du disque central (organisme)
 
-/** Position {left, top} en % sur un cercle de rayon r, i-ème sur n (départ en haut). */
-function position(i: number, n: number, r: number): { left: string; top: string } {
-  const angle = (-90 + (360 / Math.max(n, 1)) * i) * (Math.PI / 180);
-  return {
-    left: `${50 + r * Math.cos(angle)}%`,
-    top: `${50 + r * Math.sin(angle)}%`,
-  };
+/**
+ * Calcule les rayons des anneaux et la taille du conteneur en fonction du
+ * nombre de parties : le cercle s'agrandit pour que tout reste lisible.
+ * - nœuds internes placés DANS la sphère interne (entre le disque et son bord) ;
+ * - nœuds externes placés DANS l'anneau externe.
+ */
+function geometrie(nInternes: number, nExternes: number) {
+  const rInternes = Math.max(ORG_R + 70, (nInternes * ESPACEMENT) / (2 * Math.PI));
+  const rBordInterne = rInternes + 46; // bord visuel de la sphère interne
+  const rExternes = Math.max(rBordInterne + 80, (nExternes * ESPACEMENT) / (2 * Math.PI));
+  const rBordExterne = rExternes + 46;
+  const size = Math.round((rBordExterne + 80) * 2); // + marge pour les étiquettes
+  return { rInternes, rBordInterne, rExternes, rBordExterne, size, centre: size / 2 };
 }
 
-function Noeud({ p, pos }: { p: CartoItem; pos: { left: string; top: string } }) {
+function position(i: number, n: number, r: number, centre: number) {
+  const angle = (-90 + (360 / Math.max(n, 1)) * i) * (Math.PI / 180);
+  return { left: centre + r * Math.cos(angle), top: centre + r * Math.sin(angle) };
+}
+
+function Noeud({ p, x, y }: { p: CartoItem; x: number; y: number }) {
   return (
     <Link
       href={`/strategie/parties-prenantes/${p.id}`}
-      style={pos}
-      className="-translate-x-1/2 -translate-y-1/2 absolute flex max-w-[120px] items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs shadow-soft transition-colors hover:border-primary hover:bg-muted"
+      style={{ left: x, top: y }}
+      className="-translate-x-1/2 -translate-y-1/2 absolute flex w-32 items-center gap-1.5 rounded-lg border bg-card px-2.5 py-1.5 text-xs leading-tight shadow-soft transition-colors hover:border-primary hover:bg-muted"
       title={`${p.nom} · priorité ${PRIORITE_LABELS[p.priorite]}`}
     >
-      <span className={`size-2 shrink-0 rounded-full ${DOT[p.priorite] ?? DOT[1]}`} />
-      <span className="min-w-0 truncate font-medium">{p.nom}</span>
+      <span
+        className={`mt-0.5 size-2 shrink-0 self-start rounded-full ${DOT[p.priorite] ?? DOT[1]}`}
+      />
+      <span className="font-medium">{p.nom}</span>
     </Link>
   );
 }
 
-export function Cartographie({ parties }: { parties: CartoItem[] }) {
+export function Cartographie({ societe, parties }: { societe: string; parties: CartoItem[] }) {
   const internes = parties.filter((p) => p.sphere === "interne");
   const externes = parties.filter((p) => p.sphere === "externe");
 
@@ -49,39 +62,57 @@ export function Cartographie({ parties }: { parties: CartoItem[] }) {
     );
   }
 
+  const g = geometrie(internes.length, externes.length);
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative mx-auto aspect-square w-full max-w-xl">
-        {/* Anneaux décoratifs */}
-        <div
-          className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-border border-dashed"
-          style={{ width: `${R_EXTERNE * 2}%`, height: `${R_EXTERNE * 2}%` }}
-        />
-        <div
-          className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-primary/30 border-dashed bg-primary/5"
-          style={{ width: `${R_INTERNE * 2}%`, height: `${R_INTERNE * 2}%` }}
-        />
+      {/* Conteneur scrollable si la carte dépasse (beaucoup de parties / petit écran) */}
+      <div className="overflow-auto">
+        <div className="relative mx-auto" style={{ width: g.size, height: g.size }}>
+          {/* Sphère externe */}
+          <div
+            className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-border border-dashed"
+            style={{ width: g.rBordExterne * 2, height: g.rBordExterne * 2 }}
+          />
+          {/* Sphère interne (remplie) */}
+          <div
+            className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 rounded-full border border-primary/30 border-dashed bg-primary/5"
+            style={{ width: g.rBordInterne * 2, height: g.rBordInterne * 2 }}
+          />
 
-        {/* Étiquettes des sphères */}
-        <span className="-translate-x-1/2 absolute top-[5%] left-1/2 text-muted-foreground text-xs">
-          Sphère externe
-        </span>
-        <span className="-translate-x-1/2 absolute top-[19%] left-1/2 font-medium text-primary text-xs">
-          Sphère interne
-        </span>
+          {/* Étiquettes des sphères (placées sur les bords, sans nœud) */}
+          <span
+            className="-translate-x-1/2 absolute left-1/2 rounded-full bg-background px-2 font-medium text-primary text-xs"
+            style={{ top: g.centre - g.rBordInterne - 9 }}
+          >
+            Sphère interne
+          </span>
+          <span
+            className="-translate-x-1/2 absolute left-1/2 rounded-full bg-background px-2 text-muted-foreground text-xs"
+            style={{ top: g.centre - g.rBordExterne - 9 }}
+          >
+            Sphère externe
+          </span>
 
-        {/* Centre : l'organisme */}
-        <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 flex size-[22%] flex-col items-center justify-center rounded-full bg-primary text-center text-primary-foreground">
-          <span className="px-2 font-semibold text-xs leading-tight">Notre organisme</span>
+          {/* Centre : la société */}
+          <div
+            className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 flex flex-col items-center justify-center rounded-full bg-primary p-2 text-center text-primary-foreground"
+            style={{ width: ORG_R * 2, height: ORG_R * 2 }}
+          >
+            <span className="font-semibold text-sm leading-tight">{societe}</span>
+          </div>
+
+          {/* Nœuds internes (dans la sphère interne) */}
+          {internes.map((p, i) => {
+            const { left, top } = position(i, internes.length, g.rInternes, g.centre);
+            return <Noeud key={p.id} p={p} x={left} y={top} />;
+          })}
+          {/* Nœuds externes (dans l'anneau externe) */}
+          {externes.map((p, i) => {
+            const { left, top } = position(i, externes.length, g.rExternes, g.centre);
+            return <Noeud key={p.id} p={p} x={left} y={top} />;
+          })}
         </div>
-
-        {/* Noeuds */}
-        {internes.map((p, i) => (
-          <Noeud key={p.id} p={p} pos={position(i, internes.length, R_INTERNE)} />
-        ))}
-        {externes.map((p, i) => (
-          <Noeud key={p.id} p={p} pos={position(i, externes.length, R_EXTERNE)} />
-        ))}
       </div>
 
       {/* Légende */}
