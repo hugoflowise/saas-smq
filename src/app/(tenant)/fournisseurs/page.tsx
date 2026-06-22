@@ -64,7 +64,7 @@ export default async function FournisseursPage() {
   const tiles = [
     { label: "Fournisseurs", value: items.length, cls: "text-foreground" },
     { label: "Critiques", value: critiques, cls: "text-status-nc-mineure" },
-    { label: "Note moyenne /5", value: noteMoyenne ?? "—", cls: "text-status-conforme" },
+    { label: "Note moyenne /5", value: noteMoyenne ?? "-", cls: "text-status-conforme" },
     { label: "À (ré)évaluer", value: aReevaluer, cls: "text-status-pa" },
   ];
 
@@ -74,7 +74,7 @@ export default async function FournisseursPage() {
         title="Fournisseurs"
         description="Évaluation et maîtrise des prestataires externes."
         isoClause="ISO 9001 §8.4"
-        help="Évaluez et surveillez vos prestataires externes selon leur impact. Soyez exhaustif : sous-traitants, intérim, formation, EPI, mais aussi banque, mutuelle, etc. — tout prestataire ayant un impact sur la qualité."
+        help="Évaluez et surveillez vos prestataires externes selon leur impact. Soyez exhaustif : sous-traitants, intérim, formation, EPI, mais aussi banque, mutuelle, etc. Tout prestataire ayant un impact sur la qualité est concerné."
       >
         <FournisseurDialog />
       </PageHeader>
@@ -115,14 +115,14 @@ export default async function FournisseursPage() {
               {items.map((f) => (
                 <TableRow key={f.id}>
                   <TableCell className="font-medium">{f.nom}</TableCell>
-                  <TableCell className="text-muted-foreground">{f.categorie ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{f.categorie ?? "-"}</TableCell>
                   <TableCell>
                     <span className={`${BADGE_BASE} ${CRITICITE_CLASS[f.criticite] ?? "bg-muted"}`}>
                       {CRITICITE_LABELS[f.criticite] ?? f.criticite}
                     </span>
                   </TableCell>
                   <TableCell>
-                    {f.note_evaluation != null ? `${f.note_evaluation}/5` : "—"}
+                    {f.note_evaluation != null ? `${f.note_evaluation}/5` : "-"}
                   </TableCell>
                   <TableCell>{formatDate(f.prochaine_evaluation)}</TableCell>
                   <TableCell className="text-muted-foreground">

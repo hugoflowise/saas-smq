@@ -94,7 +94,7 @@ export default async function ParametresPage() {
           <CopyField label="URL du webhook (HTTP POST)" value={endpoint} />
           <CopyField
             label="Jeton secret (en-tête x-ingest-token)"
-            value={tenant?.ingest_token ?? "—"}
+            value={tenant?.ingest_token ?? "-"}
           />
 
           <div className="rounded-lg border bg-surface p-3 text-muted-foreground text-sm">

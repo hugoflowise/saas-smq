@@ -155,7 +155,7 @@ export function RoDialog({
                 className={SELECT_CLASS}
                 defaultValue={ro?.gravite_residuelle ? String(ro.gravite_residuelle) : ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
                     {n}
@@ -171,7 +171,7 @@ export function RoDialog({
                 className={SELECT_CLASS}
                 defaultValue={ro?.probabilite_residuelle ? String(ro.probabilite_residuelle) : ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
                     {n}
@@ -187,7 +187,7 @@ export function RoDialog({
                 className={SELECT_CLASS}
                 defaultValue={ro?.processus_id ?? presetProcessusId ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

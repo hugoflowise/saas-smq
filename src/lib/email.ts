@@ -5,7 +5,7 @@ import { Resend } from "resend";
  * Envoi d'e-mails transactionnels via Resend.
  *
  * Conçu pour être **défensif** : tant que `RESEND_API_KEY` n'est pas défini,
- * toutes les fonctions deviennent des no-op silencieux — l'application
+ * toutes les fonctions deviennent des no-op silencieux : l'application
  * fonctionne normalement (les notifications in-app restent actives), aucun
  * e-mail n'est envoyé. Activer l'envoi = renseigner les variables d'env
  * (voir `.env.example`) et redémarrer.
@@ -91,7 +91,7 @@ export function notificationEmailHtml(opts: {
     ${corps}
     ${bouton}
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Notification automatique — Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Notification automatique · Flowise Pilotage SMQ</p>
 </div>`;
 }
 
@@ -146,6 +146,6 @@ export function digestEmailHtml(opts: {
     ${sectionsHtml}
     ${base ? `<a href="${base}/dashboard" style="display:inline-block;margin-top:20px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Ouvrir le tableau de bord</a>` : ""}
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Digest automatique — Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Digest automatique · Flowise Pilotage SMQ</p>
 </div>`;
 }

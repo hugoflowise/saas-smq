@@ -142,25 +142,25 @@ export default async function PartieDetailPage({ params }: { params: Promise<{ i
                       <p className="text-muted-foreground text-xs uppercase tracking-wide">
                         Risque encouru
                       </p>
-                      <p className="mt-0.5 whitespace-pre-wrap">{a.risque ?? "—"}</p>
+                      <p className="mt-0.5 whitespace-pre-wrap">{a.risque ?? "-"}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs uppercase tracking-wide">
                         Opportunité
                       </p>
-                      <p className="mt-0.5 whitespace-pre-wrap">{a.opportunite ?? "—"}</p>
+                      <p className="mt-0.5 whitespace-pre-wrap">{a.opportunite ?? "-"}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs uppercase tracking-wide">
                         Moyens de maîtrise
                       </p>
-                      <p className="mt-0.5 whitespace-pre-wrap">{a.moyens_maitrise ?? "—"}</p>
+                      <p className="mt-0.5 whitespace-pre-wrap">{a.moyens_maitrise ?? "-"}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground text-xs uppercase tracking-wide">
                         Action
                       </p>
-                      <p className="mt-0.5 whitespace-pre-wrap">{a.action ?? "—"}</p>
+                      <p className="mt-0.5 whitespace-pre-wrap">{a.action ?? "-"}</p>
                     </div>
                     {a.commentaire ? (
                       <div className="sm:col-span-2">
@@ -184,7 +184,7 @@ export default async function PartieDetailPage({ params }: { params: Promise<{ i
                       <span className="text-muted-foreground">
                         Processus :{" "}
                         <span className="text-foreground">
-                          {processusNom.get(a.processus_id) ?? "—"}
+                          {processusNom.get(a.processus_id) ?? "-"}
                         </span>
                       </span>
                     ) : null}

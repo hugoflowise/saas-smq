@@ -10,7 +10,7 @@ export function computeNps(notes: (number | null)[]): { nps: number | null; coun
 
 /** Appréciation qualitative d'un NPS. */
 export function npsLabel(nps: number | null): string {
-  if (nps == null) return "—";
+  if (nps == null) return "-";
   if (nps >= 70) return "Excellent";
   if (nps >= 30) return "Bon";
   if (nps >= 0) return "À améliorer";

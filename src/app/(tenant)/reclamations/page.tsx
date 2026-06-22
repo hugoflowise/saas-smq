@@ -80,7 +80,7 @@ export default async function ReclamationsPage() {
               {items.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">{r.objet}</TableCell>
-                  <TableCell>{r.client ?? "—"}</TableCell>
+                  <TableCell>{r.client ?? "-"}</TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
                   <TableCell>
                     <RecGraviteCell id={r.id} value={r.gravite} />

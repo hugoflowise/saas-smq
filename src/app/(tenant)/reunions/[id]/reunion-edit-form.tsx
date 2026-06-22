@@ -181,7 +181,7 @@ export function ReunionEditForm({ reunion }: { reunion: ReunionDetail }) {
                 <Input
                   value={p.sujet}
                   onChange={(e) => updatePoint(i, { sujet: e.target.value })}
-                  placeholder={`Point ${i + 1} — sujet`}
+                  placeholder={`Point ${i + 1} : sujet`}
                   className="h-8 font-medium"
                 />
                 <select

@@ -265,7 +265,7 @@ export default async function DocumentsPage({
                 return (
                   <TableRow key={r.key}>
                     <TableCell className="font-medium text-muted-foreground text-sm">
-                      {r.code ?? "—"}
+                      {r.code ?? "-"}
                     </TableCell>
                     <TableCell className="font-medium">
                       {r.href ? (
@@ -282,14 +282,14 @@ export default async function DocumentsPage({
                       ) : null}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{r.typeLabel}</TableCell>
-                    <TableCell className="text-sm">{r.version ?? "—"}</TableCell>
+                    <TableCell className="text-sm">{r.version ?? "-"}</TableCell>
                     <TableCell>
                       <span className={`${BADGE_BASE} ${DOC_STATUT_CLASS[r.statut] ?? "bg-muted"}`}>
                         {DOC_STATUT_LABELS[r.statut] ?? r.statut}
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {r.approbateur ?? "—"}
+                      {r.approbateur ?? "-"}
                       {r.dateApprobation ? (
                         <span className="block text-xs">le {formatDate(r.dateApprobation)}</span>
                       ) : null}
@@ -309,14 +309,14 @@ export default async function DocumentsPage({
                           {enRetard ? " · en retard" : bientot ? " · bientôt" : ""}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {r.registre?.fichier_nom ? (
                         <FichierLink id={r.registre.id} nom={r.registre.fichier_nom} />
                       ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
+                        <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell>

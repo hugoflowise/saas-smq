@@ -97,10 +97,10 @@ export default async function ProceduresPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {p.processus_id ? (processusName.get(p.processus_id) ?? "—") : "—"}
+                    {p.processus_id ? (processusName.get(p.processus_id) ?? "-") : "-"}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {p.reference_iso?.length ? p.reference_iso.join(", ") : "—"}
+                    {p.reference_iso?.length ? p.reference_iso.join(", ") : "-"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{STATUT_LABELS[p.statut] ?? p.statut}</Badge>

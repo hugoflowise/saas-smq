@@ -33,7 +33,7 @@ describe("computeNps", () => {
 
 describe("npsLabel", () => {
   it("mappe les seuils", () => {
-    expect(npsLabel(null)).toBe("—");
+    expect(npsLabel(null)).toBe("-");
     expect(npsLabel(70)).toBe("Excellent");
     expect(npsLabel(30)).toBe("Bon");
     expect(npsLabel(0)).toBe("À améliorer");

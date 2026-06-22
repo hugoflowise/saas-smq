@@ -96,7 +96,7 @@ export default async function CommunicationsPage() {
                     <TableCell className="text-muted-foreground">
                       {CANAL_LABELS[c.canal] ?? c.canal}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{c.audience ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.audience ?? "-"}</TableCell>
                     <TableCell>{formatDate(c.date_prevue)}</TableCell>
                     <TableCell>
                       <span

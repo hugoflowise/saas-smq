@@ -98,7 +98,7 @@ export default async function VeillePage() {
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.intitule}</TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {t.reference ?? "—"}
+                    {t.reference ?? "-"}
                   </TableCell>
                   <TableCell>{DOMAINE_LABELS[t.domaine] ?? t.domaine}</TableCell>
                   <TableCell>{formatDate(t.date_application)}</TableCell>

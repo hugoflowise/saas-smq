@@ -21,7 +21,7 @@ function Field({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "—"}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "-"}</p>
     </div>
   );
 }
@@ -52,8 +52,8 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
     .order("ordre_affichage", { ascending: true });
 
   const processusNom = action.processus_concerne
-    ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "—")
-    : "—";
+    ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
+    : "-";
 
   return (
     <div className="mx-auto w-full max-w-3xl">

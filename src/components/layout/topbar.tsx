@@ -85,7 +85,7 @@ export function TopBar({
         ) : (
           <div className="flex items-center gap-2 text-sm">
             <Building2 className="size-4 text-muted-foreground" />
-            <span className="max-w-[12rem] truncate font-medium">{activeTenantName ?? "—"}</span>
+            <span className="max-w-[12rem] truncate font-medium">{activeTenantName ?? "-"}</span>
           </div>
         )}
       </div>

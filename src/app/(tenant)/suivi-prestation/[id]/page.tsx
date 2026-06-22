@@ -9,8 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
 function val(v: unknown): string {
-  if (v == null || v === "") return "—";
-  if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
+  if (v == null || v === "") return "-";
+  if (Array.isArray(v)) return v.length ? v.join(", ") : "-";
   if (typeof v === "boolean") return v ? "Oui" : "Non";
   return String(v);
 }
@@ -42,7 +42,7 @@ export default async function SuiviDetailPage({ params }: { params: Promise<{ id
   const autre = (arr: unknown, autreVal: unknown) => {
     const base = Array.isArray(arr) ? [...arr] : [];
     if (typeof autreVal === "string" && autreVal.trim()) base.push(`Autre : ${autreVal}`);
-    return base.length ? base.join(", ") : "—";
+    return base.length ? base.join(", ") : "-";
   };
 
   return (
@@ -56,7 +56,7 @@ export default async function SuiviDetailPage({ params }: { params: Promise<{ id
       </Link>
 
       <PageHeader
-        title={`Suivi · ${suivi.client ?? "—"}`}
+        title={`Suivi · ${suivi.client ?? "-"}`}
         description={`${suivi.consultant ?? ""} · ${formatDate(suivi.date_suivi)}`}
       />
 

@@ -41,7 +41,7 @@ function Mouvement({
         {titre} <span className="text-foreground">{liste.length}</span>
       </p>
       {liste.length === 0 ? (
-        <p className="text-muted-foreground text-sm">—</p>
+        <p className="text-muted-foreground text-sm">-</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {liste.slice(0, 8).map((c) => (
@@ -85,9 +85,9 @@ export default async function EffectifPage() {
   const today = todayISO();
   const { effectifActuel, couverture, trend, mouvements } = computeEffectif(consultants, today);
 
-  const fmtPct = (v: number | null) => (v == null ? "—" : `${v}%`);
+  const fmtPct = (v: number | null) => (v == null ? "-" : `${v}%`);
   const tiles = [
-    { label: "Effectif actuel", value: effectifActuel ?? "—", cls: "text-foreground" },
+    { label: "Effectif actuel", value: effectifActuel ?? "-", cls: "text-foreground" },
     { label: "Couverture ODM", value: fmtPct(couverture.odm), cls: pctClass(couverture.odm) },
     { label: "Couverture PDP", value: fmtPct(couverture.pdp), cls: pctClass(couverture.pdp) },
     {
@@ -174,7 +174,7 @@ export default async function EffectifPage() {
                 {consultants.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">{nomComplet(c)}</TableCell>
-                    <TableCell className="text-muted-foreground">{c.entite ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.entite ?? "-"}</TableCell>
                     <TableCell>{formatDate(c.date_demarrage)}</TableCell>
                     <TableCell>{formatDate(c.date_fin)}</TableCell>
                     {[

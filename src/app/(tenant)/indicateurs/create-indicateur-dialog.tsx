@@ -91,7 +91,7 @@ export function CreateIndicateurDialog({
                 className={SELECT_CLASS}
                 defaultValue={presetProcessusId ?? ""}
               >
-                <option value="">— (global)</option>
+                <option value="">Aucun (global)</option>
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

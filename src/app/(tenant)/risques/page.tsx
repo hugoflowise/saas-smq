@@ -163,7 +163,7 @@ export default async function RisquesPage() {
                         {r.criticite_residuelle}
                       </span>
                     ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
+                      <span className="text-muted-foreground text-xs">-</span>
                     )}
                   </TableCell>
                   <TableCell>

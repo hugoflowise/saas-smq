@@ -83,11 +83,11 @@ export default async function SuiviPrestationPage() {
 
   const tiles = [
     { label: "Suivis réalisés", value: items.length, cls: "text-foreground" },
-    { label: "Satisfaction moy. /5", value: satMoyenne ?? "—", cls: "text-status-conforme" },
-    { label: `NPS (${npsLabel(nps)})`, value: nps ?? "—", cls: "text-status-pf" },
+    { label: "Satisfaction moy. /5", value: satMoyenne ?? "-", cls: "text-status-conforme" },
+    { label: `NPS (${npsLabel(nps)})`, value: nps ?? "-", cls: "text-status-pf" },
     {
       label: "Conformité QSSE",
-      value: conformiteQsse != null ? `${conformiteQsse}%` : "—",
+      value: conformiteQsse != null ? `${conformiteQsse}%` : "-",
       cls: "text-status-pa",
     },
     { label: "Réclamations", value: reclamations, cls: "text-status-nc-mineure" },
@@ -183,12 +183,12 @@ export default async function SuiviPrestationPage() {
                       href={`/suivi-prestation/${s.id}`}
                       className="hover:text-primary hover:underline"
                     >
-                      {s.client ?? "—"}
+                      {s.client ?? "-"}
                     </Link>
                   </TableCell>
-                  <TableCell>{s.consultant ?? "—"}</TableCell>
-                  <TableCell>{s.satisfaction_globale ?? "—"}</TableCell>
-                  <TableCell>{s.nps ?? "—"}</TableCell>
+                  <TableCell>{s.consultant ?? "-"}</TableCell>
+                  <TableCell>{s.satisfaction_globale ?? "-"}</TableCell>
+                  <TableCell>{s.nps ?? "-"}</TableCell>
                   <TableCell>
                     {s.est_reclamation ? (
                       <span

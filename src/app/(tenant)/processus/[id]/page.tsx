@@ -27,7 +27,7 @@ function Field({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "—"}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "-"}</p>
     </div>
   );
 }
@@ -233,7 +233,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-baseline gap-1">
-                            <span className="font-semibold text-2xl">{v ?? "—"}</span>
+                            <span className="font-semibold text-2xl">{v ?? "-"}</span>
                             {ind.unite ? (
                               <span className="text-muted-foreground text-sm">{ind.unite}</span>
                             ) : null}
@@ -296,7 +296,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                           <div className="flex w-40 flex-col gap-1">
                             <div className="flex items-center justify-between gap-2 text-xs">
                               <span className="text-muted-foreground">
-                                {o.valeurEffective ?? "—"} / {o.valeur_cible} {o.unite ?? ""}
+                                {o.valeurEffective ?? "-"} / {o.valeur_cible} {o.unite ?? ""}
                               </span>
                               {o.pct !== null ? (
                                 <span className="font-medium">{o.pct}%</span>

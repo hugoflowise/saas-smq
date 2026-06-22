@@ -233,7 +233,7 @@ export function DocumentDialog({
                 className={SELECT_CLASS}
                 defaultValue={document?.processus_id ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processus.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

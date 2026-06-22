@@ -98,7 +98,7 @@ export default async function ReunionsPage() {
                     </TableCell>
                     <TableCell>{formatDate(date)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {points.length > 0 ? `${traites}/${points.length} points` : "—"}
+                      {points.length > 0 ? `${traites}/${points.length} points` : "-"}
                     </TableCell>
                     <TableCell>
                       <span

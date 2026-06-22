@@ -14,12 +14,12 @@ function val(c: Champ, r: Record<string, unknown>): string {
     const base = Array.isArray(v) ? v.map(String) : [];
     const autre = r[`${c.key}_autre`];
     if (typeof autre === "string" && autre.trim()) base.push(`Autre : ${autre}`);
-    return base.length ? base.join(", ") : "—";
+    return base.length ? base.join(", ") : "-";
   }
   if (c.type === "date") {
-    return typeof v === "string" && v ? formatDate(v) : "—";
+    return typeof v === "string" && v ? formatDate(v) : "-";
   }
-  if (v == null || v === "") return "—";
+  if (v == null || v === "") return "-";
   return String(v);
 }
 
@@ -58,7 +58,7 @@ export default async function SuiviConsultantDetailPage({
       </Link>
 
       <PageHeader
-        title={`Suivi · ${suivi.nom ?? "—"}`}
+        title={`Suivi · ${suivi.nom ?? "-"}`}
         description={`${suivi.client ?? ""} · ${formatDate(suivi.created_at.slice(0, 10))}`}
       />
 

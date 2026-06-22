@@ -138,7 +138,7 @@ export function AttenteDialog({
                 className={SELECT_CLASS}
                 defaultValue={attente?.processus_id ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {processus.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}

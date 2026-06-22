@@ -34,7 +34,7 @@ export default async function TenantLayout({ children }: { children: React.React
     : { count: 0 };
 
   const email = profile?.email ?? user?.email ?? "";
-  const role = profile?.role ?? "—";
+  const role = profile?.role ?? "-";
   const isAdmin = role === "admin_flowise";
 
   let tenants: { id: string; nom: string }[] = [];

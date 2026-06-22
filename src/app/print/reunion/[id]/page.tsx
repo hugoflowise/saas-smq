@@ -73,8 +73,8 @@ export default async function ReunionPrintPage({ params }: { params: Promise<{ i
       label: "Date",
       value: formatDate(reunion.date_realisation ?? reunion.date_prevue),
     },
-    { label: "Lieu", value: reunion.lieu ?? "—" },
-    { label: "Animateur", value: reunion.animateur ?? "—" },
+    { label: "Lieu", value: reunion.lieu ?? "-" },
+    { label: "Animateur", value: reunion.animateur ?? "-" },
     { label: "Statut", value: reunion.statut === "terminee" ? "Terminée" : "Planifiée" },
   ];
 
@@ -98,11 +98,11 @@ export default async function ReunionPrintPage({ params }: { params: Promise<{ i
         <section className="grid grid-cols-2 gap-6">
           <div>
             <h2 className="mb-1 font-semibold text-sm uppercase tracking-wide">Convoqués</h2>
-            <p className="whitespace-pre-wrap text-sm">{reunion.convoques ?? "—"}</p>
+            <p className="whitespace-pre-wrap text-sm">{reunion.convoques ?? "-"}</p>
           </div>
           <div>
             <h2 className="mb-1 font-semibold text-sm uppercase tracking-wide">Présents</h2>
-            <p className="whitespace-pre-wrap text-sm">{reunion.presents ?? "—"}</p>
+            <p className="whitespace-pre-wrap text-sm">{reunion.presents ?? "-"}</p>
           </div>
         </section>
 
