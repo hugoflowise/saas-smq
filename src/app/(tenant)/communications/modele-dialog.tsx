@@ -58,7 +58,7 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
     ) : (
       <Button variant="ghost" size="sm" className="gap-1.5">
         <Copy className="size-3.5" />
-        Dupliquer
+        Personnaliser
       </Button>
     );
 

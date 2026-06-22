@@ -9,10 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MODELE_CATEGORIES, MODELES_INTEGRES, type Modele } from "@/lib/communications";
+import {
+  appliquerVariables,
+  MODELE_CATEGORIES,
+  MODELES_INTEGRES,
+  type Modele,
+} from "@/lib/communications";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { EnvoyerModeleDialog } from "./envoyer-modele-dialog";
 import { ModeleDelete } from "./modele-delete";
 import { ModeleDialog } from "./modele-dialog";
@@ -71,20 +77,10 @@ export default async function CommunicationsPage() {
         title="Communications"
         description="Bibliothèque de modèles d'e-mails (EPI, formations, ODM…) à envoyer en un clic."
         isoClause="ISO 9001 §7.4"
-        help="Déterminez et tracez les communications internes et externes pertinentes pour le SMQ. Choisissez un modèle, personnalisez-le si besoin, puis ouvrez-le dans votre messagerie (Outlook) prêt à envoyer à une personne ou à toute la société. Chaque envoi est journalisé."
+        help="Cliquez un modèle pour préparer l'e-mail : objet et message sont modifiables avant l'envoi, puis l'e-mail s'ouvre dans votre messagerie (Outlook) prêt à partir à une personne ou à toute la société. Chaque envoi est journalisé (traçabilité ISO §7.4). Pour l'option « toute la société », renseignez une adresse de liste de diffusion (créée dans Microsoft 365) dans Paramètres → Informations société."
       >
         <ModeleDialog mode="creer" />
       </PageHeader>
-
-      {!listeDiffusion ? (
-        <Card className="mb-6 border-status-pa/40">
-          <CardContent className="py-4 text-sm">
-            <span className="font-medium">Astuce :</span> renseignez une adresse de liste de
-            diffusion dans <span className="font-medium">Paramètres → Informations société</span>{" "}
-            pour pouvoir envoyer une communication à toute la société en un clic.
-          </CardContent>
-        </Card>
-      ) : null}
 
       {/* Bibliothèque de modèles */}
       <div className="flex flex-col gap-6">
@@ -98,14 +94,25 @@ export default async function CommunicationsPage() {
                   <Card key={m.id} className="flex flex-col">
                     <CardContent className="flex flex-1 flex-col gap-2 py-4">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm">{m.titre}</p>
+                        <EnvoyerModeleDialog
+                          modele={m}
+                          societe={societe}
+                          listeDiffusion={listeDiffusion}
+                          trigger={
+                            <button type="button" className={`${ROW_NAME_BUTTON} text-sm`}>
+                              {m.titre}
+                            </button>
+                          }
+                        />
                         {m.integre ? (
                           <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
                             Fourni
                           </span>
                         ) : null}
                       </div>
-                      <p className="line-clamp-2 flex-1 text-muted-foreground text-xs">{m.objet}</p>
+                      <p className="line-clamp-2 flex-1 text-muted-foreground text-xs">
+                        {appliquerVariables(m.objet, { societe })}
+                      </p>
                       <div className="mt-1 flex flex-wrap items-center gap-1">
                         <EnvoyerModeleDialog
                           modele={m}
