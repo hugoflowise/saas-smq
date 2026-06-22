@@ -1,5 +1,4 @@
 import { EmptyState } from "@/components/empty-state";
-import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import {
   Table,
@@ -10,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
-import { CONFORMITE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { VeilleDialog } from "./veille-dialog";
@@ -60,7 +58,6 @@ export default async function VeillePage() {
 
   return (
     <div className="w-full">
-      <ModuleTabs tabs={CONFORMITE_TABS} />
       <PageHeader
         title="Veille réglementaire"
         description="Textes applicables et analyse d'impact."

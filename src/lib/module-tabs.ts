@@ -16,8 +16,3 @@ export const SATISFACTION_TABS: ModuleTab[] = [
   { href: "/satisfaction", label: "Enquêtes & NPS" },
   { href: "/suivi-prestation", label: "Suivi de prestation" },
 ];
-
-export const CONFORMITE_TABS: ModuleTab[] = [
-  { href: "/conformite", label: "Auto-diagnostic" },
-  { href: "/veille", label: "Veille réglementaire" },
-];

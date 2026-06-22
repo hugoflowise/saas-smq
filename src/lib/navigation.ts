@@ -17,6 +17,7 @@ import {
   MessagesSquare,
   Milestone,
   Presentation,
+  Scale,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -81,7 +82,8 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Objectifs & indicateurs", href: "/strategie/objectifs", icon: Target },
       { label: "Audits", href: "/audits", icon: Gauge },
-      { label: "Auto-diagnostic & veille", href: "/conformite", icon: ClipboardCheck },
+      { label: "Auto-diagnostic", href: "/conformite", icon: ClipboardCheck },
+      { label: "Veille réglementaire", href: "/veille", icon: Scale },
       { label: "Revues de direction", href: "/revues/direction", icon: ClipboardCheck },
       { label: "Cycle de certification", href: "/certification", icon: Milestone },
     ],

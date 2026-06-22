@@ -21,6 +21,20 @@ export function dateLimiteReevaluation(today: string, mois = MOIS_VALIDITE_CONFO
 }
 
 /**
+ * Date à laquelle une cotation devra être réévaluée : date d'évaluation + délai.
+ * Renvoie null si l'élément n'a jamais été évalué.
+ */
+export function dateProchaineReevaluation(
+  dateEvaluation: string | null,
+  mois = MOIS_VALIDITE_CONFORMITE,
+): string | null {
+  if (!dateEvaluation) return null;
+  const d = new Date(dateEvaluation);
+  d.setMonth(d.getMonth() + mois);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
  * Une cotation « validée » (conforme ou point fort) dont l'évaluation est plus
  * ancienne que la date limite doit être réévaluée. Les autres cotations
  * (non évaluées, points d'attention, non-conformités) ne sont jamais concernées.
