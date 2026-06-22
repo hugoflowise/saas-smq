@@ -22,6 +22,7 @@ import { formatDate, todayISO } from "@/lib/format";
 import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
 import { DocumentsFilters } from "./documents-filters";
 import { FichierLink } from "./fichier-link";
@@ -248,13 +249,12 @@ export default async function DocumentsPage({
                 <TableHead className="w-40">Approbateur</TableHead>
                 <TableHead className="w-32">Révision prévue</TableHead>
                 <TableHead className="w-40">Fichier</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
                     Aucun document ne correspond aux filtres.
                   </TableCell>
                 </TableRow>
@@ -272,6 +272,16 @@ export default async function DocumentsPage({
                         <Link href={r.href} className="hover:text-primary hover:underline">
                           {r.titre}
                         </Link>
+                      ) : r.registre ? (
+                        <DocumentDialog
+                          document={r.registre}
+                          processus={processusList}
+                          trigger={
+                            <button type="button" className={ROW_NAME_BUTTON}>
+                              {r.titre}
+                            </button>
+                          }
+                        />
                       ) : (
                         r.titre
                       )}
@@ -318,11 +328,6 @@ export default async function DocumentsPage({
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {r.registre ? (
-                        <DocumentDialog document={r.registre} processus={processusList} />
-                      ) : null}
                     </TableCell>
                   </TableRow>
                 );

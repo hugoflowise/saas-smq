@@ -139,7 +139,6 @@ export default async function PartiesPrenantesPage() {
                   <TableHead>Total</TableHead>
                   <TableHead>Priorité</TableHead>
                   <TableHead>Attentes</TableHead>
-                  <TableHead className="w-12" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -171,9 +170,6 @@ export default async function PartiesPrenantesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{p.nbAttentes}</TableCell>
-                    <TableCell>
-                      <PartieDialog partie={p} />
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -175,7 +175,6 @@ export default async function RisquesPage() {
                 <TableHead>Résiduelle</TableHead>
                 <TableHead>Revue</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -232,9 +231,6 @@ export default async function RisquesPage() {
                     </TableCell>
                     <TableCell>
                       <RoStatutCell id={r.id} value={r.statut} />
-                    </TableCell>
-                    <TableCell>
-                      <RoDialog processusOptions={processus ?? []} ro={r} />
                     </TableCell>
                   </TableRow>
                 );
