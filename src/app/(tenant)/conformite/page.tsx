@@ -1,10 +1,8 @@
 import { EmptyState } from "@/components/empty-state";
-import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { dateLimiteReevaluation, estAReevaluer } from "@/lib/conformite";
 import { todayISO } from "@/lib/format";
-import { CONFORMITE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ChapterRow } from "./chapter-row";
@@ -46,11 +44,13 @@ export default async function ConformitePage() {
   const chapters = (referentiel ?? []).map((r) => {
     const e = evalByRef.get(r.id);
     const cotation = (e?.cotation ?? "non_evalue") as Cotation;
+    const dateEvaluation = e?.date_evaluation ?? null;
     return {
       ...r,
       cotation,
       commentaire: e?.commentaire ?? "",
-      aReevaluer: estAReevaluer(cotation, e?.date_evaluation ?? null, limiteReeval),
+      dateEvaluation,
+      aReevaluer: estAReevaluer(cotation, dateEvaluation, limiteReeval),
     };
   });
 
@@ -77,7 +77,6 @@ export default async function ConformitePage() {
 
   return (
     <div className="w-full">
-      <ModuleTabs tabs={CONFORMITE_TABS} />
       <PageHeader
         title="Auto-diagnostic ISO 9001:2015"
         description="Auto-évaluation de la conformité, chapitre par chapitre."
@@ -120,6 +119,7 @@ export default async function ConformitePage() {
                     cotation={c.cotation}
                     commentaire={c.commentaire}
                     aReevaluer={c.aReevaluer}
+                    dateEvaluation={c.dateEvaluation}
                   />
                 ))}
               </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dateLimiteReevaluation, estAReevaluer } from "./conformite";
+import { dateLimiteReevaluation, dateProchaineReevaluation, estAReevaluer } from "./conformite";
 
 describe("dateLimiteReevaluation", () => {
   it("recule de 12 mois par défaut", () => {
@@ -7,6 +7,15 @@ describe("dateLimiteReevaluation", () => {
   });
   it("accepte un délai personnalisé", () => {
     expect(dateLimiteReevaluation("2026-06-22", 6)).toBe("2025-12-22");
+  });
+});
+
+describe("dateProchaineReevaluation", () => {
+  it("avance de 12 mois par défaut", () => {
+    expect(dateProchaineReevaluation("2025-06-10")).toBe("2026-06-10");
+  });
+  it("renvoie null sans date d'évaluation", () => {
+    expect(dateProchaineReevaluation(null)).toBeNull();
   });
 });
 

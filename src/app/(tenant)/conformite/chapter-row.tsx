@@ -4,6 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { setCotationAction } from "@/lib/actions/conformite";
+import { dateProchaineReevaluation } from "@/lib/conformite";
+import { formatDate } from "@/lib/format";
 import { SELECT_CLASS_COMPACT as SELECT_CLASS } from "@/lib/ui-classes";
 import { COTATION_DOT, COTATION_LABELS, type Cotation } from "./cotation-meta";
 
@@ -15,6 +17,7 @@ type Props = {
   cotation: Cotation;
   commentaire: string;
   aReevaluer?: boolean;
+  dateEvaluation?: string | null;
 };
 
 export function ChapterRow({
@@ -25,12 +28,16 @@ export function ChapterRow({
   cotation: initialCotation,
   commentaire: initialCommentaire,
   aReevaluer = false,
+  dateEvaluation = null,
 }: Props) {
   const [cotation, setCotation] = useState<Cotation>(initialCotation);
   const [commentaire, setCommentaire] = useState(initialCommentaire);
   // Recoter rafraîchit la date d'évaluation : on masque alors le rappel.
   const [reevalue, setReevalue] = useState(false);
   const afficherReevaluer = aReevaluer && !reevalue;
+  const prochaineReeval = dateProchaineReevaluation(dateEvaluation);
+  const estValidee = cotation === "conforme" || cotation === "point_fort";
+  const afficherDates = Boolean(dateEvaluation) && cotation !== "non_evalue";
 
   async function save(nextCotation: Cotation, nextCommentaire: string) {
     const result = await setCotationAction({
@@ -56,6 +63,16 @@ export function ChapterRow({
             ) : null}
           </p>
           {preuves ? <p className="text-muted-foreground text-xs">Preuves : {preuves}</p> : null}
+          {reevalue ? (
+            <p className="text-muted-foreground text-xs">Évalué à l'instant.</p>
+          ) : afficherDates ? (
+            <p className="text-muted-foreground text-xs">
+              Évalué le {formatDate(dateEvaluation)}
+              {estValidee && prochaineReeval
+                ? ` · à revoir avant le ${formatDate(prochaineReeval)}`
+                : ""}
+            </p>
+          ) : null}
         </div>
       </div>
 
