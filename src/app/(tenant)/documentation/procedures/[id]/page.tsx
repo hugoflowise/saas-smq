@@ -20,7 +20,11 @@ export default async function ProcedureDetailPage({
   const { id } = await params;
   const { from } = await searchParams;
   const backHref = from?.startsWith("/") ? from : "/documentation/procedures";
-  const backLabel = from?.startsWith("/processus") ? "Retour au processus" : "Procédures";
+  const backLabel = from?.startsWith("/processus")
+    ? "Retour au processus"
+    : from === "/documents"
+      ? "Retour aux documents"
+      : "Procédures";
   const ctx = await getTenantContext();
   if (!ctx.effectiveTenantId) redirect("/documentation/procedures");
 
