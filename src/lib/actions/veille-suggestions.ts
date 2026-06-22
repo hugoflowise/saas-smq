@@ -52,7 +52,7 @@ export async function retenirSuggestionAction(id: string): Promise<ActionResult>
 
   const { data: sugg } = await supabase
     .from("veille_suggestions")
-    .select("titre, ref, domaine, date_texte")
+    .select("titre, ref, domaine, date_texte, url")
     .eq("id", id)
     .eq("tenant_id", ctx.effectiveTenantId)
     .maybeSingle();
@@ -72,6 +72,7 @@ export async function retenirSuggestionAction(id: string): Promise<ActionResult>
     reference: sugg.ref,
     domaine,
     date_publication: sugg.date_texte,
+    lien: sugg.url,
     statut: "a_analyser",
     created_by: ctx.userId,
   });
