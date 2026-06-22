@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, LogOut, Menu } from "lucide-react";
+import { Building2, LogOut, Menu, UserCog } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -112,6 +112,10 @@ export function TopBar({
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => router.push("/compte")}>
+              <UserCog className="size-4" />
+              Mon compte
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="size-4" />
               Se déconnecter
