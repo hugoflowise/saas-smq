@@ -13,6 +13,7 @@ import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { FournisseurDialog } from "./fournisseur-dialog";
 
 const CRITICITE_LABELS: Record<string, string> = {
@@ -108,13 +109,21 @@ export default async function FournisseursPage() {
                 <TableHead>Évaluation</TableHead>
                 <TableHead>Prochaine éval.</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((f) => (
                 <TableRow key={f.id}>
-                  <TableCell className="font-medium">{f.nom}</TableCell>
+                  <TableCell>
+                    <FournisseurDialog
+                      fournisseur={f}
+                      trigger={
+                        <button type="button" className={ROW_NAME_BUTTON}>
+                          {f.nom}
+                        </button>
+                      }
+                    />
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{f.categorie ?? "-"}</TableCell>
                   <TableCell>
                     <span className={`${BADGE_BASE} ${CRITICITE_CLASS[f.criticite] ?? "bg-muted"}`}>
@@ -127,9 +136,6 @@ export default async function FournisseursPage() {
                   <TableCell>{formatDate(f.prochaine_evaluation)}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {f.statut === "actif" ? "Actif" : "Inactif"}
-                  </TableCell>
-                  <TableCell>
-                    <FournisseurDialog fournisseur={f} />
                   </TableCell>
                 </TableRow>
               ))}

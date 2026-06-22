@@ -29,7 +29,13 @@ export type FournisseurRow = {
   commentaire: string | null;
 };
 
-export function FournisseurDialog({ fournisseur }: { fournisseur?: FournisseurRow }) {
+export function FournisseurDialog({
+  fournisseur,
+  trigger,
+}: {
+  fournisseur?: FournisseurRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(fournisseur);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -60,9 +66,11 @@ export function FournisseurDialog({ fournisseur }: { fournisseur?: FournisseurRo
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouveau fournisseur</Button>
           )

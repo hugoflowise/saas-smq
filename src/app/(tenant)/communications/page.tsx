@@ -13,6 +13,7 @@ import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { CANAL_LABELS, CommunicationDialog, TYPE_LABELS } from "./communication-dialog";
 
 export default async function CommunicationsPage() {
@@ -83,7 +84,6 @@ export default async function CommunicationsPage() {
                 <TableHead>Audience</TableHead>
                 <TableHead>Date prévue</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -91,7 +91,16 @@ export default async function CommunicationsPage() {
                 const late = enRetard(c);
                 return (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.sujet}</TableCell>
+                    <TableCell>
+                      <CommunicationDialog
+                        communication={c}
+                        trigger={
+                          <button type="button" className={ROW_NAME_BUTTON}>
+                            {c.sujet}
+                          </button>
+                        }
+                      />
+                    </TableCell>
                     <TableCell>{TYPE_LABELS[c.type] ?? c.type}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {CANAL_LABELS[c.canal] ?? c.canal}
@@ -110,9 +119,6 @@ export default async function CommunicationsPage() {
                       >
                         {c.statut === "realisee" ? "Réalisée" : late ? "En retard" : "Planifiée"}
                       </span>
-                    </TableCell>
-                    <TableCell>
-                      <CommunicationDialog communication={c} />
                     </TableCell>
                   </TableRow>
                 );

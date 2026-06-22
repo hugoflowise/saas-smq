@@ -16,6 +16,7 @@ import { type Consultant, computeEffectif, nomComplet } from "@/lib/effectif";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { ConsultantDelete } from "./consultant-delete";
 import { ConsultantDialog } from "./consultant-dialog";
 
@@ -173,7 +174,16 @@ export default async function EffectifPage() {
               <TableBody>
                 {consultants.map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">{nomComplet(c)}</TableCell>
+                    <TableCell>
+                      <ConsultantDialog
+                        consultant={c}
+                        trigger={
+                          <button type="button" className={ROW_NAME_BUTTON}>
+                            {nomComplet(c)}
+                          </button>
+                        }
+                      />
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{c.entite ?? "-"}</TableCell>
                     <TableCell>{formatDate(c.date_demarrage)}</TableCell>
                     <TableCell>{formatDate(c.date_fin)}</TableCell>
@@ -196,7 +206,6 @@ export default async function EffectifPage() {
                     ))}
                     <TableCell>
                       <div className="flex items-center">
-                        <ConsultantDialog consultant={c} />
                         <ConsultantDelete id={c.id} />
                       </div>
                     </TableCell>

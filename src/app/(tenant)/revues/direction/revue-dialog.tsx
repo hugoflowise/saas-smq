@@ -26,7 +26,13 @@ export type RevueRow = {
   decisions: string | null;
 };
 
-export function RevueDialog({ revue }: { revue?: RevueRow }) {
+export function RevueDialog({
+  revue,
+  trigger,
+}: {
+  revue?: RevueRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(revue);
   const { open, setOpen, pending, submit } = useDialogForm();
   const currentYear = new Date().getFullYear();
@@ -53,9 +59,11 @@ export function RevueDialog({ revue }: { revue?: RevueRow }) {
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouvelle revue</Button>
           )

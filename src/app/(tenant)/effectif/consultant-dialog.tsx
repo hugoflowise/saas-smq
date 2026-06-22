@@ -28,7 +28,13 @@ export type ConsultantRow = {
   visite_medicale: boolean;
 };
 
-export function ConsultantDialog({ consultant }: { consultant?: ConsultantRow }) {
+export function ConsultantDialog({
+  consultant,
+  trigger,
+}: {
+  consultant?: ConsultantRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(consultant);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -60,9 +66,11 @@ export function ConsultantDialog({ consultant }: { consultant?: ConsultantRow })
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouveau consultant</Button>
           )

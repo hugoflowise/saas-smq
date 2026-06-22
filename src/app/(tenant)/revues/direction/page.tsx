@@ -11,6 +11,7 @@ import {
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { RevueDialog } from "./revue-dialog";
 
 const STATUT_LABELS: Record<string, string> = {
@@ -66,18 +67,23 @@ export default async function RevuesDirectionPage() {
                 <TableHead>Année</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((r) => (
                 <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.annee}</TableCell>
+                  <TableCell>
+                    <RevueDialog
+                      revue={r}
+                      trigger={
+                        <button type="button" className={ROW_NAME_BUTTON}>
+                          {r.annee}
+                        </button>
+                      }
+                    />
+                  </TableCell>
                   <TableCell>{formatDate(r.date_realisation)}</TableCell>
                   <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>
-                  <TableCell>
-                    <RevueDialog revue={r} />
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

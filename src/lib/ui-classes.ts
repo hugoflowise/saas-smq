@@ -20,3 +20,10 @@ export const SELECT_CLASS = `h-9 w-full bg-transparent px-3 text-sm ${SELECT_FOC
 export const SELECT_CLASS_INLINE = `h-9 bg-transparent px-3 text-sm ${SELECT_FOCUS}`;
 export const SELECT_CLASS_FILTER = `h-9 bg-card px-3 text-sm ${SELECT_FOCUS}`;
 export const SELECT_CLASS_COMPACT = `h-8 bg-card px-2 text-sm ${SELECT_FOCUS}`;
+
+/**
+ * Nom d'une ligne de tableau rendu cliquable pour ouvrir l'édition.
+ * Convention de l'app : on clique le nom (pas d'icône crayon séparée).
+ */
+export const ROW_NAME_BUTTON =
+  "cursor-pointer text-left font-medium hover:text-primary hover:underline";

@@ -17,6 +17,7 @@ import { SATISFACTION_TABS } from "@/lib/module-tabs";
 import { computeNps, npsLabel, trimestre } from "@/lib/nps";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { EnqueteDelete } from "./enquete-delete";
 import { EnqueteDialog } from "./enquete-dialog";
 import { ExportButton } from "./export-button";
@@ -149,7 +150,16 @@ export default async function SatisfactionPage() {
                 <TableBody>
                   {items.map((e) => (
                     <TableRow key={e.id}>
-                      <TableCell className="font-medium">{e.client ?? "-"}</TableCell>
+                      <TableCell>
+                        <EnqueteDialog
+                          enquete={e}
+                          trigger={
+                            <button type="button" className={ROW_NAME_BUTTON}>
+                              {e.client ?? "-"}
+                            </button>
+                          }
+                        />
+                      </TableCell>
                       <TableCell>{formatDate(e.date_reponse)}</TableCell>
                       <TableCell>{e.note_recommandation ?? "-"}</TableCell>
                       <TableCell>{e.note_satisfaction ?? "-"}</TableCell>
@@ -166,7 +176,6 @@ export default async function SatisfactionPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <EnqueteDialog enquete={e} />
                           <EnqueteDelete id={e.id} />
                         </div>
                       </TableCell>

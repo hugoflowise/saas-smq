@@ -28,7 +28,13 @@ export type ReclamationRow = {
   statut: string;
 };
 
-export function ReclamationDialog({ reclamation }: { reclamation?: ReclamationRow }) {
+export function ReclamationDialog({
+  reclamation,
+  trigger,
+}: {
+  reclamation?: ReclamationRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(reclamation);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -58,9 +64,11 @@ export function ReclamationDialog({ reclamation }: { reclamation?: ReclamationRo
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouvelle réclamation</Button>
           )

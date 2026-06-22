@@ -33,7 +33,13 @@ export type JalonRow = {
   description: string | null;
 };
 
-export function JalonDialog({ jalon }: { jalon?: JalonRow }) {
+export function JalonDialog({
+  jalon,
+  trigger,
+}: {
+  jalon?: JalonRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(jalon);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -58,9 +64,11 @@ export function JalonDialog({ jalon }: { jalon?: JalonRow }) {
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Ajouter un jalon</Button>
           )

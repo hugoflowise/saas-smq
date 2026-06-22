@@ -26,7 +26,13 @@ export type EnqueteRow = {
   source: string | null;
 };
 
-export function EnqueteDialog({ enquete }: { enquete?: EnqueteRow }) {
+export function EnqueteDialog({
+  enquete,
+  trigger,
+}: {
+  enquete?: EnqueteRow;
+  trigger?: React.ReactElement;
+}) {
   const isEdit = Boolean(enquete);
   const { open, setOpen, pending, submit } = useDialogForm();
 
@@ -55,9 +61,11 @@ export function EnqueteDialog({ enquete }: { enquete?: EnqueteRow }) {
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Ajouter une réponse</Button>
           )

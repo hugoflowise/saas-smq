@@ -11,6 +11,7 @@ import {
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { RecGraviteCell, RecStatutCell } from "./inline-cells";
 import { ReclamationDialog } from "./reclamation-dialog";
 
@@ -73,13 +74,21 @@ export default async function ReclamationsPage() {
                 <TableHead>Gravité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Reçue le</TableHead>
-                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((r) => (
                 <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.objet}</TableCell>
+                  <TableCell>
+                    <ReclamationDialog
+                      reclamation={r}
+                      trigger={
+                        <button type="button" className={ROW_NAME_BUTTON}>
+                          {r.objet}
+                        </button>
+                      }
+                    />
+                  </TableCell>
                   <TableCell>{r.client ?? "-"}</TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
                   <TableCell>
@@ -89,9 +98,6 @@ export default async function ReclamationsPage() {
                     <RecStatutCell id={r.id} value={r.statut} />
                   </TableCell>
                   <TableCell>{formatDate(r.date_reception)}</TableCell>
-                  <TableCell>
-                    <ReclamationDialog reclamation={r} />
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
