@@ -31,11 +31,16 @@ export function EvenementDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button>+ Événement</Button>} />
+      <DialogTrigger render={<Button variant="outline">Autre événement</Button>} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouvel événement</DialogTitle>
+          <DialogTitle>Autre événement</DialogTitle>
         </DialogHeader>
+        <p className="text-muted-foreground text-sm">
+          Pour un événement ponctuel sans module dédié (CODIR, fermeture annuelle, salon…). Les
+          audits, revues, réunions, actions… se créent dans leur module et apparaissent
+          automatiquement ici : utilisez le bouton « Planifier ».
+        </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="titre">Titre</Label>
@@ -43,7 +48,7 @@ export function EvenementDialog() {
               id="titre"
               name="titre"
               required
-              placeholder="CODIR qualité, réunion d'équipe…"
+              placeholder="CODIR, fermeture annuelle, salon…"
             />
           </div>
           <div className="flex flex-col gap-2">

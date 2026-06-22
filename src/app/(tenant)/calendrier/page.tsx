@@ -8,6 +8,7 @@ import { getTenantContext } from "@/lib/tenant-context";
 import { type CalEvent, CalendrierClient } from "./calendrier-client";
 import { EvenementDelete } from "./evenement-delete";
 import { EvenementDialog } from "./evenement-dialog";
+import { PlanifierMenu } from "./planifier-menu";
 
 export default async function CalendrierPage() {
   const ctx = await getTenantContext();
@@ -158,8 +159,9 @@ export default async function CalendrierPage() {
       <PageHeader
         title="Calendrier qualité"
         description="Échéances et événements agrégés : audits, revues, actions, R&O, communications, certification, réunions, révisions de documents."
-        help="Vue consolidée des échéances de tous les modules. Filtrez par type d'événement (couleurs) et basculez entre vue mois et liste. D'autres types (formations, EPI, habilitations, visites médicales…) viendront avec les données Boond."
+        help="Vue consolidée des échéances de tous les modules. Les audits, revues, réunions, actions… se créent dans leur module (bouton « Planifier ») et apparaissent ici automatiquement. « Autre événement » sert aux dates ponctuelles sans module dédié. Filtrez par type (couleurs), basculez entre vue mois et liste."
       >
+        <PlanifierMenu />
         <EvenementDialog />
       </PageHeader>
 
