@@ -35,7 +35,7 @@ export default async function ReunionPrintPage({ params }: { params: Promise<{ i
   const { data: tenant } = await supabase
     .from("tenants")
     .select(
-      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales",
+      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte",
     )
     .eq("id", tid)
     .maybeSingle();

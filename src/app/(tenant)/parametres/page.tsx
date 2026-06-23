@@ -31,7 +31,7 @@ export default async function ParametresPage() {
   const { data: tenant } = await admin
     .from("tenants")
     .select(
-      "ingest_token, survey_token, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, liste_diffusion",
+      "ingest_token, survey_token, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, liste_diffusion, couleur_charte",
     )
     .eq("id", ctx.effectiveTenantId)
     .maybeSingle();
@@ -64,6 +64,7 @@ export default async function ParametresPage() {
               ville: tenant?.ville ?? null,
               mentions_legales: tenant?.mentions_legales ?? null,
               liste_diffusion: tenant?.liste_diffusion ?? null,
+              couleur_charte: tenant?.couleur_charte ?? null,
             }}
           />
         </CardContent>

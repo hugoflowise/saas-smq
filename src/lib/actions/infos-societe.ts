@@ -14,6 +14,11 @@ const schema = z.object({
   ville: z.string().trim().optional(),
   mentionsLegales: z.string().trim().optional(),
   listeDiffusion: z.string().trim().optional(),
+  couleurCharte: z
+    .string()
+    .trim()
+    .regex(/^#?[0-9a-f]{6}$/i, "Couleur invalide (format #rrggbb).")
+    .optional(),
 });
 
 /** Met à jour les informations légales du client (réservé dirigeant/admin). */
@@ -41,6 +46,11 @@ export async function updateInfosSocieteAction(input: unknown): Promise<ActionRe
       ville: d.ville ?? null,
       mentions_legales: d.mentionsLegales ?? null,
       liste_diffusion: d.listeDiffusion ?? null,
+      couleur_charte: d.couleurCharte
+        ? d.couleurCharte.startsWith("#")
+          ? d.couleurCharte
+          : `#${d.couleurCharte}`
+        : null,
     })
     .eq("id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
