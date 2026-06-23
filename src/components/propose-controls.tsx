@@ -6,12 +6,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { validerElementAction, validerToutAction } from "@/lib/actions/validation";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 type TableProposee = "processus" | "actions" | "parties_interessees";
 
 /** Bouton « Valider » pour un élément prérempli (le rend pris en compte). */
 export function ValiderButton({ table, id }: { table: TableProposee; id: string }) {
   const router = useRouter();
+  const readOnly = useReadOnly();
   const [pending, setPending] = useState(false);
 
   async function valider(e: React.MouseEvent) {
@@ -28,6 +30,8 @@ export function ValiderButton({ table, id }: { table: TableProposee; id: string 
       toast.error(r.error);
     }
   }
+
+  if (readOnly) return null;
 
   return (
     <Button
@@ -59,6 +63,7 @@ export function ProposeBanner({
   libelle: string;
 }) {
   const router = useRouter();
+  const readOnly = useReadOnly();
   const [pending, setPending] = useState(false);
   if (count <= 0) return null;
 
@@ -81,16 +86,18 @@ export function ProposeBanner({
         Passez chaque élément en revue, puis validez-le, modifiez-le ou supprimez-le. Tant qu'un
         élément n'est pas validé, il n'est pas comptabilisé.
       </p>
-      <Button
-        size="sm"
-        variant="outline"
-        className="shrink-0 gap-1.5"
-        disabled={pending}
-        onClick={validerTout}
-      >
-        <Check className="size-3.5" />
-        Tout valider
-      </Button>
+      {readOnly ? null : (
+        <Button
+          size="sm"
+          variant="outline"
+          className="shrink-0 gap-1.5"
+          disabled={pending}
+          onClick={validerTout}
+        >
+          <Check className="size-3.5" />
+          Tout valider
+        </Button>
+      )}
     </div>
   );
 }
