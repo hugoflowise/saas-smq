@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -54,7 +55,9 @@ export function ViewAsSwitcher({ simulating, role }: { simulating: boolean; role
         }
       />
       <DropdownMenuContent align="start" className="w-52">
-        <DropdownMenuLabel>Prévisualiser en tant que</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Prévisualiser en tant que</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => choisir(null)}>
           {!simulating ? <Check className="size-4" /> : <span className="size-4" />}
