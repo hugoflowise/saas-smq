@@ -1,6 +1,5 @@
-export const metadata = { title: "Conditions d'utilisation · Flowise Pilotage SMQ" };
+export const metadata = { title: "Conditions d'utilisation · flowise" };
 
-// Modèle de CGU SaaS à faire valider juridiquement.
 export default function CguPage() {
   return (
     <article>
@@ -10,8 +9,8 @@ export default function CguPage() {
       <h2>1. Objet</h2>
       <p>
         Les présentes conditions générales d'utilisation (les « CGU ») régissent l'accès et
-        l'utilisation de l'application « Flowise Pilotage SMQ » (le « Service »), solution en ligne
-        de pilotage du système de management de la qualité (norme ISO 9001), éditée par Flowise (l'«
+        l'utilisation de l'application « flowise » (le « Service »), solution en ligne de pilotage
+        du système de management de la qualité (norme ISO 9001), éditée par la société Flowise (l'«
         Éditeur »). L'utilisation du Service implique l'acceptation pleine et entière des présentes
         CGU.
       </p>
@@ -28,8 +27,8 @@ export default function CguPage() {
       <p>
         Le Service permet notamment de gérer la documentation qualité, les processus, les actions
         d'amélioration, les non-conformités, les audits, les indicateurs et la veille réglementaire,
-        dans un environnement multi-organisations cloisonné. L'Éditeur peut faire évoluer les
-        fonctionnalités du Service à tout moment.
+        au sein d'un espace dédié et sécurisé propre à l'organisation. L'Éditeur peut faire évoluer
+        les fonctionnalités du Service à tout moment.
       </p>
 
       <h2>4. Obligations de l'utilisateur</h2>
@@ -60,7 +59,7 @@ export default function CguPage() {
       <p>
         Le traitement des données personnelles est décrit dans la{" "}
         <a href="/confidentialite">politique de confidentialité</a>. Les modalités de sous-traitance
-        des données pour le compte de l'organisation cliente peuvent faire l'objet d'un accord de
+        des données pour le compte de l'organisation cliente font l'objet d'un accord de
         sous-traitance dédié (DPA).
       </p>
 
@@ -69,22 +68,21 @@ export default function CguPage() {
         Le Service est un outil d'aide au pilotage de la qualité ; il ne se substitue pas au
         jugement professionnel de l'utilisateur ni à un conseil juridique ou de certification.
         L'Éditeur ne saurait être tenu responsable des décisions prises sur la base des informations
-        gérées dans le Service. [à compléter : limitations de responsabilité selon le contrat
-        commercial.]
+        gérées dans le Service. Les éventuelles limitations de responsabilité sont précisées dans le
+        contrat commercial conclu entre l'Éditeur et l'organisation cliente.
       </p>
 
       <h2>9. Durée et résiliation</h2>
       <p>
         Les conditions de durée, de résiliation et de réversibilité (récupération des données) sont
-        précisées dans le contrat commercial liant l'organisation cliente à l'Éditeur. [à
-        compléter.]
+        définies dans le contrat commercial conclu entre l'Éditeur et l'organisation cliente.
       </p>
 
       <h2>10. Droit applicable</h2>
       <p>
         Les présentes CGU sont régies par le droit français. Tout litige relatif à leur
-        interprétation ou à leur exécution relève des tribunaux compétents de [à compléter], à
-        défaut de résolution amiable.
+        interprétation ou à leur exécution relève des tribunaux compétents de Paris, à défaut de
+        résolution amiable.
       </p>
     </article>
   );
