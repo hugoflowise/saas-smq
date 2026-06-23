@@ -117,6 +117,23 @@ export function inviteEmailHtml(opts: {
 </div>`;
 }
 
+/**
+ * Gabarit HTML de l'e-mail de réinitialisation de mot de passe.
+ * `actionLink` est le lien (absolu) menant à la page de définition du mot de passe.
+ */
+export function resetEmailHtml(opts: { actionLink: string }): string {
+  return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <h1 style="margin:0;font-size:18px;color:#0f172a">Réinitialisation de votre mot de passe</h1>
+    <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">Vous avez demandé à réinitialiser votre mot de passe. Cliquez ci-dessous pour en définir un nouveau. Ce lien est valable un temps limité.</p>
+    <a href="${opts.actionLink}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Définir un nouveau mot de passe</a>
+    <p style="margin:16px 0 0;color:#94a3b8;font-size:12px">Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.</p>
+  </div>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Sécurité · Flowise Pilotage SMQ</p>
+</div>`;
+}
+
 /** Une section de la liste du digest (titre + lignes cliquables). */
 export type DigestSection = {
   titre: string;

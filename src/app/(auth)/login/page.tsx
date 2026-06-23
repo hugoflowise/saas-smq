@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,13 @@ export default function LoginPage() {
             >
               {status === "link" ? "Envoi…" : "Recevoir plutôt un lien par e-mail"}
             </Button>
+
+            <Link
+              href="/mot-de-passe-oublie"
+              className="text-center text-muted-foreground text-sm hover:text-foreground"
+            >
+              Mot de passe oublié ?
+            </Link>
           </form>
         )}
       </CardContent>

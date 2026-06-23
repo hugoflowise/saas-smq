@@ -7,7 +7,14 @@ import type { Database } from "./database.types";
  * `/api/cron` n'a pas de session (déclenché par le Cron Vercel) et se protège
  * lui-même via `CRON_SECRET`.
  */
-const PUBLIC_PATHS = ["/login", "/auth", "/api/ingest", "/api/cron", "/enquete"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/mot-de-passe-oublie",
+  "/auth",
+  "/api/ingest",
+  "/api/cron",
+  "/enquete",
+];
 
 /**
  * Rafraîchit la session Supabase à chaque requête et protège les routes
