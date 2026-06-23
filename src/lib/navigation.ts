@@ -17,6 +17,7 @@ import {
   MessagesSquare,
   Milestone,
   Presentation,
+  Rocket,
   Scale,
   ScrollText,
   Settings,
@@ -45,6 +46,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Pilotage",
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Mise en route", href: "/mise-en-route", icon: Rocket },
       { label: "Calendrier qualité", href: "/calendrier", icon: CalendarDays },
       { label: "Réunions QHSE", href: "/reunions", icon: MessagesSquare },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
