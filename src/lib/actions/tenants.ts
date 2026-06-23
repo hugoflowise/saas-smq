@@ -8,6 +8,7 @@ import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIONS_STANDARDS } from "@/lib/templates/actions-standards";
+import { PARTIES_PRENANTES_STANDARDS } from "@/lib/templates/parties-prenantes";
 import { PROCESSUS_STANDARDS } from "@/lib/templates/processus";
 
 /** Vérifie que l'utilisateur courant est admin Flowise. */
@@ -94,20 +95,25 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: `Rattachement du dirigeant impossible : ${profileError.message}` };
   }
 
-  // 4) Provisioning : cartographie processus standard SI/ESN (Annexe B)
+  // Provisioning : tous les éléments préremplis sont marqués « proposés »
+  // (propose: true, valide_le: null). Le client doit les revoir et les valider :
+  // tant qu'ils ne le sont pas, ils sont signalés et exclus des compteurs.
+
+  // 4) Cartographie processus standard SI/ESN (Annexe B)
   const { error: seedError } = await admin.from("processus").insert(
     PROCESSUS_STANDARDS.map((p, index) => ({
       tenant_id: tenant.id,
       nom: p.nom,
       type: p.type,
       ordre_affichage: index,
+      propose: true,
     })),
   );
   if (seedError) {
     return { ok: false, error: `Initialisation des processus impossible : ${seedError.message}` };
   }
 
-  // 5) Provisioning : 80 actions standards ISO 9001 (démarrage SMQ)
+  // 5) 80 actions standards ISO 9001 (démarrage SMQ)
   const year = new Date().getFullYear();
   const { error: actionsError } = await admin.from("actions").insert(
     ACTIONS_STANDARDS.map((a) => ({
@@ -121,10 +127,32 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
       reference_iso: a.referenceIso.length > 0 ? a.referenceIso : null,
       indicateur_efficacite: a.indicateur,
       statut: "a_faire" as const,
+      propose: true,
     })),
   );
   if (actionsError) {
     return { ok: false, error: `Initialisation des actions impossible : ${actionsError.message}` };
+  }
+
+  // 6) Parties prenantes types pour une société d'ingénierie / ESN
+  const { error: partiesError } = await admin.from("parties_interessees").insert(
+    PARTIES_PRENANTES_STANDARDS.map((p) => ({
+      tenant_id: tenant.id,
+      nom: p.nom,
+      type: p.type,
+      sphere: p.sphere,
+      niveau_interaction: p.niveauInteraction,
+      pouvoir: p.pouvoir,
+      legitimite: p.legitimite,
+      urgence: p.urgence,
+      propose: true,
+    })),
+  );
+  if (partiesError) {
+    return {
+      ok: false,
+      error: `Initialisation des parties prenantes impossible : ${partiesError.message}`,
+    };
   }
 
   revalidatePath("/admin/clients");

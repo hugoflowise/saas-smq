@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { ProposeBadge } from "@/components/propose-badge";
+import { ProposeBanner, ValiderButton } from "@/components/propose-controls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { dateOffsetISO, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -34,11 +36,12 @@ export default async function ProcessusPage() {
   const supabase = await createClient();
   const { data: processus } = await supabase
     .from("processus")
-    .select("id, nom, type, description, date_prochaine_revue")
+    .select("id, nom, type, description, date_prochaine_revue, propose, valide_le")
     .eq("tenant_id", ctx.effectiveTenantId)
     .order("ordre_affichage", { ascending: true });
 
   const items = processus ?? [];
+  const aValider = items.filter((p) => p.propose && !p.valide_le).length;
 
   const today = todayISO();
   const horizon60 = dateOffsetISO(60);
@@ -61,6 +64,8 @@ export default async function ProcessusPage() {
       >
         <CreateProcessusDialog />
       </PageHeader>
+
+      <ProposeBanner table="processus" count={aValider} libelle="processus" />
 
       {aReviser > 0 ? (
         <div className="mb-4 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-2.5 text-sm text-status-pa">
@@ -89,31 +94,41 @@ export default async function ProcessusPage() {
                   {colItems.length === 0 ? (
                     <p className="text-muted-foreground text-sm">-</p>
                   ) : (
-                    colItems.map((p) => (
-                      <Link
-                        key={p.id}
-                        href={`/processus/${p.id}`}
-                        className="rounded-md border bg-surface px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-medium">{p.nom}</p>
-                          {revueAlerte(p.date_prochaine_revue) === "retard" ? (
-                            <span className="shrink-0 rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-[10px] text-status-nc-mineure">
-                              Revue en retard
-                            </span>
-                          ) : revueAlerte(p.date_prochaine_revue) === "bientot" ? (
-                            <span className="shrink-0 rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-[10px] text-status-pa">
-                              À réviser
-                            </span>
+                    colItems.map((p) => {
+                      const aValiderCard = p.propose && !p.valide_le;
+                      return (
+                        <div key={p.id} className="overflow-hidden rounded-md border bg-surface">
+                          <Link
+                            href={`/processus/${p.id}`}
+                            className="block px-3 py-2 text-sm transition-colors hover:bg-primary/5"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-medium">{p.nom}</p>
+                              {revueAlerte(p.date_prochaine_revue) === "retard" ? (
+                                <span className="shrink-0 rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-[10px] text-status-nc-mineure">
+                                  Revue en retard
+                                </span>
+                              ) : revueAlerte(p.date_prochaine_revue) === "bientot" ? (
+                                <span className="shrink-0 rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-[10px] text-status-pa">
+                                  À réviser
+                                </span>
+                              ) : null}
+                            </div>
+                            {p.description ? (
+                              <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs">
+                                {p.description}
+                              </p>
+                            ) : null}
+                            {aValiderCard ? <ProposeBadge className="mt-1.5" /> : null}
+                          </Link>
+                          {aValiderCard ? (
+                            <div className="flex justify-end border-t bg-card px-3 py-1.5">
+                              <ValiderButton table="processus" id={p.id} />
+                            </div>
                           ) : null}
                         </div>
-                        {p.description ? (
-                          <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs">
-                            {p.description}
-                          </p>
-                        ) : null}
-                      </Link>
-                    ))
+                      );
+                    })
                   )}
                 </CardContent>
               </Card>

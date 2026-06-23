@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { ProposeBadge } from "@/components/propose-badge";
+import { ProposeBanner, ValiderButton } from "@/components/propose-controls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -47,7 +49,9 @@ export default async function PartiesPrenantesPage() {
   const [{ data: parties }, { data: attentes }, { data: tenant }] = await Promise.all([
     supabase
       .from("parties_interessees")
-      .select("id, nom, sphere, type, niveau_interaction, pouvoir, legitimite, urgence")
+      .select(
+        "id, nom, sphere, type, niveau_interaction, pouvoir, legitimite, urgence, propose, valide_le",
+      )
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("nom", { ascending: true }),
@@ -72,14 +76,21 @@ export default async function PartiesPrenantesPage() {
   });
   const tri = [...items].sort((a, b) => b.total - a.total);
 
-  const hautes = items.filter((p) => p.priorite === 3).length;
-  const internes = items.filter((p) => p.sphere === "interne").length;
+  /** Un élément « proposé » non encore validé n'est pas comptabilisé. */
+  const estAValider = (p: { propose: boolean; valide_le: string | null }) =>
+    p.propose && !p.valide_le;
+  const aValider = items.filter(estAValider).length;
+  // Les compteurs ne tiennent compte que des parties prenantes validées.
+  const comptes = items.filter((p) => !estAValider(p));
+
+  const hautes = comptes.filter((p) => p.priorite === 3).length;
+  const internes = comptes.filter((p) => p.sphere === "interne").length;
 
   const tiles = [
-    { label: "Parties prenantes", value: items.length, cls: "text-foreground" },
+    { label: "Parties prenantes", value: comptes.length, cls: "text-foreground" },
     { label: "Priorité haute", value: hautes, cls: "text-status-nc-mineure" },
     { label: "Sphère interne", value: internes, cls: "text-primary" },
-    { label: "Sphère externe", value: items.length - internes, cls: "text-foreground" },
+    { label: "Sphère externe", value: comptes.length - internes, cls: "text-foreground" },
   ];
 
   return (
@@ -100,6 +111,7 @@ export default async function PartiesPrenantesPage() {
         />
       ) : (
         <div className="flex flex-col gap-6">
+          <ProposeBanner table="parties_interessees" count={aValider} libelle="parties prenantes" />
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {tiles.map((t) => (
               <Card key={t.label}>
@@ -145,12 +157,18 @@ export default async function PartiesPrenantesPage() {
                 {tri.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">
-                      <Link
-                        href={`/strategie/parties-prenantes/${p.id}`}
-                        className="hover:text-primary hover:underline"
-                      >
-                        {p.nom}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/strategie/parties-prenantes/${p.id}`}
+                          className="hover:text-primary hover:underline"
+                        >
+                          {p.nom}
+                        </Link>
+                        {estAValider(p) ? <ProposeBadge /> : null}
+                        {estAValider(p) ? (
+                          <ValiderButton table="parties_interessees" id={p.id} />
+                        ) : null}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {SPHERE_LABELS[p.sphere] ?? p.sphere}
