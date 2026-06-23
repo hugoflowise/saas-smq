@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createReclamationAction, updateReclamationAction } from "@/lib/actions/registres";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -37,6 +38,7 @@ export function ReclamationDialog({
 }) {
   const isEdit = Boolean(reclamation);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -58,6 +60,10 @@ export function ReclamationDialog({
       success: isEdit ? "Réclamation mise à jour." : "Réclamation enregistrée.",
     });
   }
+
+  // Lecture seule (auditeur) : en édition on garde le trigger fourni (libellé de
+  // ligne) mais inerte ; le crayon par défaut est masqué. En création on masque tout.
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

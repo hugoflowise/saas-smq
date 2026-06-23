@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createModeleAction, updateModeleAction } from "@/lib/actions/communications-modeles";
 import { MODELE_CATEGORIES, type Modele } from "@/lib/communications";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -25,6 +26,7 @@ type Mode = "creer" | "modifier" | "dupliquer";
  */
 export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) {
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
   const isModifier = mode === "modifier";
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -65,6 +67,8 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
   // En duplication, on préremplit avec le contenu fourni mais sans id (= création).
   const titreDefaut =
     mode === "dupliquer" ? `${modele?.titre ?? ""} (copie)` : (modele?.titre ?? "");
+
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

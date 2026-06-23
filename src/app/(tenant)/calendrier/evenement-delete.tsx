@@ -6,10 +6,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { deleteEvenementAction } from "@/lib/actions/evenements";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function EvenementDelete({ id }: { id: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function remove() {
     if (!confirm("Supprimer cet événement ?")) return;
@@ -19,6 +21,9 @@ export function EvenementDelete({ id }: { id: string }) {
     if (r.ok) router.refresh();
     else toast.error(r.error);
   }
+
+  // Suppression masquée pour l'auditeur (lecture seule).
+  if (readOnly) return null;
 
   return (
     <Button variant="ghost" size="icon" aria-label="Supprimer" disabled={pending} onClick={remove}>

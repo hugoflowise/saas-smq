@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createRoAction, updateRoAction } from "@/lib/actions/risques";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -43,6 +44,7 @@ export function RoDialog({
 }) {
   const isEdit = Boolean(ro);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -66,6 +68,9 @@ export function RoDialog({
       success: isEdit ? "Risque/opportunité mis à jour." : "Risque/opportunité créé.",
     });
   }
+
+  // Lecture seule : on masque le bouton de création comme le crayon d'édition.
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateRoStatutAction } from "@/lib/actions/risques";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
@@ -17,6 +18,7 @@ const STATUT_LABELS: Record<string, string> = {
 export function RoStatutCell({ id, value }: { id: string; value: string }) {
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value;
@@ -28,6 +30,11 @@ export function RoStatutCell({ id, value }: { id: string; value: string }) {
         setVal(value);
       }
     });
+  }
+
+  // Lecture seule : affichage statique du libellé courant, sans select.
+  if (readOnly) {
+    return <span className="text-sm">{STATUT_LABELS[val] ?? val}</span>;
   }
 
   return (

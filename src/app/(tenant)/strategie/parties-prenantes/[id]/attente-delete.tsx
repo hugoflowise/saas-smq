@@ -6,10 +6,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { deleteAttenteAction } from "@/lib/actions/parties-prenantes";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function AttenteDelete({ id, partieId }: { id: string; partieId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function handleDelete() {
     if (!confirm("Supprimer cette attente ?")) return;
@@ -23,6 +25,9 @@ export function AttenteDelete({ id, partieId }: { id: string; partieId: string }
       toast.error(result.error);
     }
   }
+
+  // Lecture seule : on masque le bouton de suppression.
+  if (readOnly) return null;
 
   return (
     <Button

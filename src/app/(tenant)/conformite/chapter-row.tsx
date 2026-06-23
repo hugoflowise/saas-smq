@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { setCotationAction } from "@/lib/actions/conformite";
 import { dateProchaineReevaluation } from "@/lib/conformite";
 import { formatDate } from "@/lib/format";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS_COMPACT as SELECT_CLASS } from "@/lib/ui-classes";
 import { COTATION_DOT, COTATION_LABELS, type Cotation } from "./cotation-meta";
 
@@ -34,6 +35,7 @@ export function ChapterRow({
   const [commentaire, setCommentaire] = useState(initialCommentaire);
   // Recoter rafraîchit la date d'évaluation : on masque alors le rappel.
   const [reevalue, setReevalue] = useState(false);
+  const readOnly = useReadOnly();
   const afficherReevaluer = aReevaluer && !reevalue;
   const prochaineReeval = dateProchaineReevaluation(dateEvaluation);
   const estValidee = cotation === "conforme" || cotation === "point_fort";
@@ -77,28 +79,42 @@ export function ChapterRow({
       </div>
 
       <div className="flex flex-col gap-2 sm:w-[28rem] sm:flex-row">
-        <select
-          className={SELECT_CLASS}
-          value={cotation}
-          onChange={(e) => {
-            const v = e.target.value as Cotation;
-            setCotation(v);
-            void save(v, commentaire);
-          }}
-        >
-          {Object.entries(COTATION_LABELS).map(([v, l]) => (
-            <option key={v} value={v}>
-              {l}
-            </option>
-          ))}
-        </select>
-        <Input
-          className="h-8 flex-1"
-          placeholder="Commentaire…"
-          value={commentaire}
-          onChange={(e) => setCommentaire(e.target.value)}
-          onBlur={() => save(cotation, commentaire)}
-        />
+        {readOnly ? (
+          <>
+            {/* Lecture seule : cotation et commentaire affichés sans interaction. */}
+            <span className="flex h-8 items-center rounded-md border bg-muted/40 px-3 text-sm">
+              {COTATION_LABELS[cotation]}
+            </span>
+            <span className="flex h-8 flex-1 items-center rounded-md border bg-muted/40 px-3 text-muted-foreground text-sm">
+              {commentaire || "-"}
+            </span>
+          </>
+        ) : (
+          <>
+            <select
+              className={SELECT_CLASS}
+              value={cotation}
+              onChange={(e) => {
+                const v = e.target.value as Cotation;
+                setCotation(v);
+                void save(v, commentaire);
+              }}
+            >
+              {Object.entries(COTATION_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+            <Input
+              className="h-8 flex-1"
+              placeholder="Commentaire…"
+              value={commentaire}
+              onChange={(e) => setCommentaire(e.target.value)}
+              onBlur={() => save(cotation, commentaire)}
+            />
+          </>
+        )}
       </div>
     </div>
   );

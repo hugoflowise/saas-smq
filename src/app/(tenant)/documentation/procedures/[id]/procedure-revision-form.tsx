@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProcedureRevisionAction } from "@/lib/actions/procedures";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function ProcedureRevisionForm({
   id,
@@ -29,6 +30,7 @@ export function ProcedureRevisionForm({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,7 +50,7 @@ export function ProcedureRevisionForm({
     }
   }
 
-  const disabled = !canWrite || !editable;
+  const disabled = readOnly || !canWrite || !editable;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-sm">
@@ -82,7 +84,7 @@ export function ProcedureRevisionForm({
           placeholder="Ce qui a changé dans cette version…"
         />
       </div>
-      {disabled ? (
+      {readOnly ? null : disabled ? (
         <p className="text-muted-foreground text-xs">
           {canWrite
             ? "Modifiable uniquement lorsque la procédure est en brouillon."

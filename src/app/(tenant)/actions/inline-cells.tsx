@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateActionAction } from "@/lib/actions/plan-actions";
 import { COTATION_BADGE_CLASS } from "@/lib/badges";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
 
 const COTATION_OPTIONS: Record<string, string> = {
@@ -16,6 +17,9 @@ const COTATION_OPTIONS: Record<string, string> = {
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
+
+// Affichage statique (lecture seule auditeur) : même gabarit que le select mais inerte.
+const STATIC = "inline-flex h-8 items-center rounded-md border border-input px-2 text-sm";
 
 const STATUT_CLASS: Record<string, string> = {
   a_faire: "bg-muted text-foreground",
@@ -35,6 +39,7 @@ const PRIORITE_CLASS: Record<string, string> = {
 export function StatutCell({ id, value }: { id: string; value: string }) {
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value;
@@ -46,6 +51,14 @@ export function StatutCell({ id, value }: { id: string; value: string }) {
         setVal(value);
       }
     });
+  }
+
+  if (readOnly) {
+    return (
+      <span className={`${STATIC} font-medium ${STATUT_CLASS[val] ?? ""}`}>
+        {ACTION_STATUT_LABELS[val as keyof typeof ACTION_STATUT_LABELS] ?? val}
+      </span>
+    );
   }
 
   return (
@@ -69,6 +82,7 @@ export function StatutCell({ id, value }: { id: string; value: string }) {
 export function PrioriteCell({ id, value }: { id: string; value: string }) {
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value;
@@ -80,6 +94,14 @@ export function PrioriteCell({ id, value }: { id: string; value: string }) {
         setVal(value);
       }
     });
+  }
+
+  if (readOnly) {
+    return (
+      <span className={`${STATIC} font-medium ${PRIORITE_CLASS[val] ?? ""}`}>
+        {ACTION_PRIORITE_LABELS[val as keyof typeof ACTION_PRIORITE_LABELS] ?? val}
+      </span>
+    );
   }
 
   return (
@@ -103,6 +125,7 @@ export function PrioriteCell({ id, value }: { id: string; value: string }) {
 export function CotationCell({ id, value }: { id: string; value: string | null }) {
   const [val, setVal] = useState(value ?? "non_evalue");
   const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value;
@@ -114,6 +137,16 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
         setVal(value ?? "non_evalue");
       }
     });
+  }
+
+  if (readOnly) {
+    return (
+      <span
+        className={`${STATIC} font-medium ${val !== "non_evalue" ? (COTATION_BADGE_CLASS[val] ?? "") : ""}`}
+      >
+        {COTATION_OPTIONS[val] ?? val}
+      </span>
+    );
   }
 
   return (
@@ -137,6 +170,7 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
 export function EcheanceCell({ id, value }: { id: string; value: string | null }) {
   const [val, setVal] = useState(value ?? "");
   const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const next = e.target.value;
@@ -148,6 +182,10 @@ export function EcheanceCell({ id, value }: { id: string; value: string | null }
         setVal(value ?? "");
       }
     });
+  }
+
+  if (readOnly) {
+    return <span className={STATIC}>{val ? new Date(val).toLocaleDateString("fr-FR") : "-"}</span>;
   }
 
   return (

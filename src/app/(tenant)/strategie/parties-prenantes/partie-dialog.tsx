@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPartieAction, updatePartieAction } from "@/lib/actions/parties-prenantes";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   PRIORITE_CLASS,
@@ -45,6 +46,7 @@ export function PartieDialog({ partie }: { partie?: PartieRow }) {
   const [pouvoir, setPouvoir] = useState(partie?.pouvoir ?? 2);
   const [legitimite, setLegitimite] = useState(partie?.legitimite ?? 2);
   const [urgence, setUrgence] = useState(partie?.urgence ?? 2);
+  const readOnly = useReadOnly();
 
   const total = scoreTotal(pouvoir, legitimite, urgence);
   const priorite = prioriteFromTotal(total);
@@ -66,6 +68,9 @@ export function PartieDialog({ partie }: { partie?: PartieRow }) {
       success: isEdit ? "Partie prenante mise à jour." : "Partie prenante créée.",
     });
   }
+
+  // Lecture seule : on masque le bouton de création comme le crayon d'édition.
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveContexteAction } from "@/lib/actions/contexte";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 type Swot = { forces: string[]; faiblesses: string[]; opportunites: string[]; menaces: string[] };
 type Pestel = {
@@ -61,6 +62,8 @@ function PointList({
   onChange: (items: string[]) => void;
   placeholder: string;
 }) {
+  const readOnly = useReadOnly();
+
   return (
     <div className="flex flex-col gap-1.5">
       {items.map((item, i) => (
@@ -76,26 +79,32 @@ function PointList({
             className="h-8"
             onChange={(e) => onChange(items.map((x, idx) => (idx === i ? e.target.value : x)))}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 shrink-0"
-            aria-label="Retirer le point"
-            onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-          >
-            <X className="size-4" />
-          </Button>
+          {/* Lecture seule : pas de bouton de suppression. */}
+          {!readOnly && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0"
+              aria-label="Retirer le point"
+              onClick={() => onChange(items.filter((_, idx) => idx !== i))}
+            >
+              <X className="size-4" />
+            </Button>
+          )}
         </div>
       ))}
-      <button
-        type="button"
-        onClick={() => onChange([...items, ""])}
-        className="inline-flex items-center gap-1 self-start text-primary text-xs hover:underline"
-      >
-        <Plus className="size-3.5" />
-        Ajouter un point
-      </button>
+      {/* Lecture seule : pas de bouton d'ajout. */}
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={() => onChange([...items, ""])}
+          className="inline-flex items-center gap-1 self-start text-primary text-xs hover:underline"
+        >
+          <Plus className="size-3.5" />
+          Ajouter un point
+        </button>
+      )}
     </div>
   );
 }
@@ -117,6 +126,7 @@ export function ContexteForm({
   const [dateRevue, setDateRevue] = useState(initialDateRevue);
   const [prochainRevue, setProchainRevue] = useState(initialProchainRevue);
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   // Nettoie les points vides avant envoi.
   const clean = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
@@ -222,9 +232,12 @@ export function ContexteForm({
             onChange={(e) => setProchainRevue(e.target.value)}
           />
         </div>
-        <Button onClick={save} disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer le contexte"}
-        </Button>
+        {/* Lecture seule : pas de bouton d'enregistrement. */}
+        {!readOnly && (
+          <Button onClick={save} disabled={pending}>
+            {pending ? "Enregistrement…" : "Enregistrer le contexte"}
+          </Button>
+        )}
       </section>
     </div>
   );

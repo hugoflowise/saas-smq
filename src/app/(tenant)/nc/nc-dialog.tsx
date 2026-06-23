@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createNcAction, updateNcAction } from "@/lib/actions/nc";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   NC_GRAVITE_LABELS,
@@ -57,6 +58,7 @@ export function NcDialog({
 }) {
   const isEdit = Boolean(nc);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -76,6 +78,10 @@ export function NcDialog({
       success: isEdit ? "Non-conformité mise à jour." : "Non-conformité créée.",
     });
   }
+
+  // Lecture seule (auditeur) : masquer toute écriture. Pas de prop trigger ici,
+  // donc on masque aussi bien le bouton de création que l'icône crayon.
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

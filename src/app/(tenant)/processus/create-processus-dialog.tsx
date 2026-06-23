@@ -13,11 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProcessusAction } from "@/lib/actions/processus";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateProcessusDialog() {
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -30,6 +32,8 @@ export function CreateProcessusDialog() {
       success: "Processus créé.",
     });
   }
+
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

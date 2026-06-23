@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createAttenteAction, updateAttenteAction } from "@/lib/actions/parties-prenantes";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { criticiteResiduelle, MAITRISE_LABELS } from "@/lib/parties-prenantes";
 import { SELECT_CLASS } from "@/lib/ui-classes";
@@ -45,6 +46,7 @@ export function AttenteDialog({
   const isEdit = Boolean(attente);
   const { open, setOpen, pending, submit } = useDialogForm();
   const [maitrise, setMaitrise] = useState(attente?.maitrise ?? "partiel");
+  const readOnly = useReadOnly();
 
   const crit = criticiteResiduelle(priorite, maitrise);
 
@@ -70,6 +72,9 @@ export function AttenteDialog({
       success: isEdit ? "Attente mise à jour." : "Attente ajoutée.",
     });
   }
+
+  // Lecture seule : on masque le bouton de création comme le crayon d'édition.
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

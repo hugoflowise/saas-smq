@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateAuditAction } from "@/lib/actions/audits-revues";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type AuditDetail = {
@@ -33,6 +34,7 @@ export function AuditEditForm({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
   const selected = new Set(audit.processus_audites ?? []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -175,11 +177,13 @@ export function AuditEditForm({
         </p>
       </div>
 
-      <div>
-        <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer l'audit"}
-        </Button>
-      </div>
+      {readOnly ? null : (
+        <div>
+          <Button type="submit" disabled={pending}>
+            {pending ? "Enregistrement…" : "Enregistrer l'audit"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }
