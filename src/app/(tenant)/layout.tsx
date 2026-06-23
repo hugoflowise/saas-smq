@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
+import { LegalFooter } from "@/components/legal-footer";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
 import { canManageUsers, isReadOnly } from "@/lib/permissions";
@@ -95,6 +96,7 @@ export default async function TenantLayout({ children }: { children: React.React
               </div>
             ) : null}
             <ReadOnlyProvider value={isReadOnly(role)}>{children}</ReadOnlyProvider>
+            <LegalFooter className="mt-10 border-t pt-6 print:hidden" />
           </div>
         </main>
       </div>

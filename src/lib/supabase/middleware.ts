@@ -10,6 +10,9 @@ import type { Database } from "./database.types";
 const PUBLIC_PATHS = [
   "/login",
   "/mot-de-passe-oublie",
+  "/mentions-legales",
+  "/cgu",
+  "/confidentialite",
   "/auth",
   "/api/ingest",
   "/api/cron",
