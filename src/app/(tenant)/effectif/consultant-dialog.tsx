@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createConsultantAction, updateConsultantAction } from "@/lib/actions/consultants";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 
 export type ConsultantRow = {
@@ -37,6 +38,7 @@ export function ConsultantDialog({
 }) {
   const isEdit = Boolean(consultant);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -60,6 +62,8 @@ export function ConsultantDialog({
       success: isEdit ? "Consultant mis à jour." : "Consultant ajouté.",
     });
   }
+
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createJalonAction, updateJalonAction } from "@/lib/actions/cycle-certification";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -42,6 +43,7 @@ export function JalonDialog({
 }) {
   const isEdit = Boolean(jalon);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -58,6 +60,9 @@ export function JalonDialog({
       success: isEdit ? "Jalon mis à jour." : "Jalon ajouté.",
     });
   }
+
+  // Lecture seule (auditeur) : pas d'édition ni de création.
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

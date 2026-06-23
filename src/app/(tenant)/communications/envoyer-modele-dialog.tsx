@@ -21,6 +21,7 @@ import {
   type Modele,
   todayLabel,
 } from "@/lib/communications";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function EnvoyerModeleDialog({
@@ -43,6 +44,7 @@ export function EnvoyerModeleDialog({
   const [objet, setObjet] = useState(() => appliquerVariables(modele.objet, valeurs));
   const [corps, setCorps] = useState(() => appliquerVariables(modele.corps, valeurs));
   const [envoi, setEnvoi] = useState(false);
+  const readOnly = useReadOnly();
 
   const to = cible === "societe" ? (listeDiffusion ?? "") : email;
 
@@ -61,6 +63,8 @@ export function EnvoyerModeleDialog({
     else toast.success("E-mail ouvert dans votre messagerie et communication enregistrée.");
     setOpen(false);
   }
+
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

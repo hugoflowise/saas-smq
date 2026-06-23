@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { updateReunionAction } from "@/lib/actions/reunions";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type Point = {
@@ -60,6 +61,7 @@ export function ReunionEditForm({ reunion }: { reunion: ReunionDetail }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [points, setPoints] = useState<Point[]>(reunion.points ?? []);
+  const readOnly = useReadOnly();
 
   const traites = points.filter((p) => p.statut === "traite").length;
 
@@ -181,16 +183,18 @@ export function ReunionEditForm({ reunion }: { reunion: ReunionDetail }) {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <Label>Ordre du jour</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={addPoint}
-              >
-                <Plus className="size-4" />
-                Ajouter un point
-              </Button>
+              {readOnly ? null : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={addPoint}
+                >
+                  <Plus className="size-4" />
+                  Ajouter un point
+                </Button>
+              )}
             </div>
             {points.length === 0 ? (
               <p className="text-muted-foreground text-sm">
@@ -209,15 +213,17 @@ export function ReunionEditForm({ reunion }: { reunion: ReunionDetail }) {
                       placeholder="Sujet à aborder"
                       className="h-8 font-medium"
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Retirer le point"
-                      onClick={() => removePoint(i)}
-                    >
-                      <X className="size-4" />
-                    </Button>
+                    {readOnly ? null : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Retirer le point"
+                        onClick={() => removePoint(i)}
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    )}
                   </div>
                   <Textarea
                     value={p.prepa}
@@ -341,11 +347,13 @@ export function ReunionEditForm({ reunion }: { reunion: ReunionDetail }) {
         </TabsContent>
       </Tabs>
 
-      <div>
-        <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer la réunion"}
-        </Button>
-      </div>
+      {readOnly ? null : (
+        <div>
+          <Button type="submit" disabled={pending}>
+            {pending ? "Enregistrement…" : "Enregistrer la réunion"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

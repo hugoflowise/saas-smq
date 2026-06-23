@@ -6,10 +6,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { deleteModeleAction } from "@/lib/actions/communications-modeles";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function ModeleDelete({ id, titre }: { id: string; titre: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function remove() {
     if (!window.confirm(`Supprimer le modèle « ${titre} » ?`)) return;
@@ -23,6 +25,8 @@ export function ModeleDelete({ id, titre }: { id: string; titre: string }) {
       toast.error(r.error);
     }
   }
+
+  if (readOnly) return null;
 
   return (
     <Button

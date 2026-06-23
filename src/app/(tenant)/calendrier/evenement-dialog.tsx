@@ -12,10 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createEvenementAction } from "@/lib/actions/evenements";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 
 export function EvenementDialog() {
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -28,6 +30,9 @@ export function EvenementDialog() {
       success: "Événement ajouté.",
     });
   }
+
+  // Création uniquement : masquée pour l'auditeur (lecture seule).
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

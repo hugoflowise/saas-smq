@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createActionAction, updateActionAction } from "@/lib/actions/plan-actions";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   ACTION_ORIGINE_LABELS,
@@ -68,6 +69,7 @@ function Options({ map }: { map: Record<string, string> }) {
 export function ActionDialog({ processusOptions, action }: Props) {
   const isEdit = Boolean(action);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -95,6 +97,10 @@ export function ActionDialog({ processusOptions, action }: Props) {
       success: isEdit ? "Action mise à jour." : "Action créée.",
     });
   }
+
+  // Lecture seule (auditeur) : masquer toute écriture. Pas de prop trigger ici,
+  // donc on masque aussi bien le bouton « Nouvelle action » que l'icône crayon.
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

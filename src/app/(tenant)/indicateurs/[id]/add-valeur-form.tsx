@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addValeurAction } from "@/lib/actions/indicateurs";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function AddValeurForm({ indicateurId }: { indicateurId: string }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,6 +34,8 @@ export function AddValeurForm({ indicateurId }: { indicateurId: string }) {
       toast.error(result.error);
     }
   }
+
+  if (readOnly) return null;
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">

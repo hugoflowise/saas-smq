@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { setActionStatutAction } from "@/lib/actions/plan-actions";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS, ACTION_STATUTS } from "@/lib/labels";
 import type { ActionRow } from "./action-dialog";
 
@@ -31,7 +32,7 @@ const PRIORITE_DOT: Record<string, string> = {
   p3: "bg-status-conforme",
 };
 
-function Card({ action }: { action: KanbanAction }) {
+function Card({ action, readOnly }: { action: KanbanAction; readOnly: boolean }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: action.id,
   });
@@ -41,14 +42,15 @@ function Card({ action }: { action: KanbanAction }) {
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
+      ref={readOnly ? undefined : setNodeRef}
+      style={readOnly ? undefined : style}
       className={`group relative rounded-xl bg-card shadow-soft ring-1 ring-foreground/5 transition-shadow hover:ring-foreground/10 ${isDragging ? "opacity-60" : ""}`}
     >
+      {/* En lecture seule (auditeur) : pas de drag, contenu statique. */}
       <div
-        {...listeners}
-        {...attributes}
-        className="cursor-grab touch-none px-3.5 py-3 pr-9 text-sm active:cursor-grabbing"
+        {...(readOnly ? {} : listeners)}
+        {...(readOnly ? {} : attributes)}
+        className={`px-3.5 py-3 pr-9 text-sm ${readOnly ? "" : "cursor-grab touch-none active:cursor-grabbing"}`}
       >
         <div className="flex items-center gap-2">
           <span
@@ -78,7 +80,15 @@ function Card({ action }: { action: KanbanAction }) {
   );
 }
 
-function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }) {
+function Column({
+  statut,
+  actions,
+  readOnly,
+}: {
+  statut: Statut;
+  actions: KanbanAction[];
+  readOnly: boolean;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: statut });
   return (
     <div className="flex w-72 shrink-0 flex-col">
@@ -91,13 +101,13 @@ function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }
         </span>
       </div>
       <div
-        ref={setNodeRef}
+        ref={readOnly ? undefined : setNodeRef}
         className={`flex min-h-32 flex-1 flex-col gap-2.5 rounded-2xl p-2.5 transition-colors ${
-          isOver ? "bg-primary/5 ring-1 ring-primary/30" : "bg-foreground/[0.025]"
+          !readOnly && isOver ? "bg-primary/5 ring-1 ring-primary/30" : "bg-foreground/[0.025]"
         }`}
       >
         {actions.map((a) => (
-          <Card key={a.id} action={a} />
+          <Card key={a.id} action={a} readOnly={readOnly} />
         ))}
       </div>
     </div>
@@ -107,6 +117,7 @@ function Column({ statut, actions }: { statut: Statut; actions: KanbanAction[] }
 export function ActionsKanban({ initial }: { initial: KanbanAction[] }) {
   const [items, setItems] = useState(initial);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const readOnly = useReadOnly();
 
   async function handleDragEnd(event: DragEndEvent) {
     const id = String(event.active.id);
@@ -126,11 +137,33 @@ export function ActionsKanban({ initial }: { initial: KanbanAction[] }) {
     }
   }
 
+  // En lecture seule (auditeur) : on n'enveloppe pas dans un DndContext et on ne
+  // câble aucun handler de déplacement ; les cartes restent visibles et cliquables.
+  if (readOnly) {
+    return (
+      <div className="flex gap-3 overflow-x-auto pb-2">
+        {ACTION_STATUTS.map((statut) => (
+          <Column
+            key={statut}
+            statut={statut}
+            actions={items.filter((a) => a.statut === statut)}
+            readOnly
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {ACTION_STATUTS.map((statut) => (
-          <Column key={statut} statut={statut} actions={items.filter((a) => a.statut === statut)} />
+          <Column
+            key={statut}
+            statut={statut}
+            actions={items.filter((a) => a.statut === statut)}
+            readOnly={false}
+          />
         ))}
       </div>
     </DndContext>

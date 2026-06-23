@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createRevueAction, updateRevueAction } from "@/lib/actions/audits-revues";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -35,6 +36,7 @@ export function RevueDialog({
 }) {
   const isEdit = Boolean(revue);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
   const currentYear = new Date().getFullYear();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -53,6 +55,9 @@ export function RevueDialog({
       success: isEdit ? "Revue mise à jour." : "Revue de direction créée.",
     });
   }
+
+  // Lecture seule (auditeur) : pas d'édition ni de création.
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

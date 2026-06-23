@@ -23,6 +23,7 @@ import {
   updateDocumentMaitriseAction,
 } from "@/lib/actions/documents-maitrise";
 import { DOC_MAITRISE_TYPE_LABELS } from "@/lib/documents";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { createClient } from "@/lib/supabase/client";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -60,6 +61,7 @@ export function DocumentDialog({
   const [pending, setPending] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [fichierNom, setFichierNom] = useState(document?.fichier_nom ?? null);
+  const readOnly = useReadOnly();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -154,6 +156,8 @@ export function DocumentDialog({
       toast.error(r.error);
     }
   }
+
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

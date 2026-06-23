@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createFournisseurAction, updateFournisseurAction } from "@/lib/actions/fournisseurs";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -38,6 +39,7 @@ export function FournisseurDialog({
 }) {
   const isEdit = Boolean(fournisseur);
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -60,6 +62,8 @@ export function FournisseurDialog({
       success: isEdit ? "Fournisseur mis à jour." : "Fournisseur ajouté.",
     });
   }
+
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

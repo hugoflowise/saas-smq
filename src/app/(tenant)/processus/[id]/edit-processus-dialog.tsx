@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProcessusAction } from "@/lib/actions/processus";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -30,6 +31,7 @@ export type ProcessusForEdit = {
 
 export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit }) {
   const { open, setOpen, pending, submit } = useDialogForm();
+  const readOnly = useReadOnly();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -48,6 +50,8 @@ export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit
       success: "Processus mis à jour.",
     });
   }
+
+  if (readOnly) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

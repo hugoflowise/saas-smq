@@ -6,10 +6,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { deleteEnqueteAction } from "@/lib/actions/satisfaction";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export function EnqueteDelete({ id }: { id: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const readOnly = useReadOnly();
 
   async function remove() {
     if (!confirm("Supprimer cette réponse ?")) return;
@@ -19,6 +21,8 @@ export function EnqueteDelete({ id }: { id: string }) {
     if (r.ok) router.refresh();
     else toast.error(r.error);
   }
+
+  if (readOnly) return null;
 
   return (
     <Button variant="ghost" size="icon" aria-label="Supprimer" disabled={pending} onClick={remove}>
