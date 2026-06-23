@@ -33,6 +33,7 @@ export type Database = {
           origine: Database["public"]["Enums"]["action_origine"]
           priorite: Database["public"]["Enums"]["action_priorite"]
           processus_concerne: string | null
+          propose: boolean
           recommandation: string | null
           reference: string
           reference_iso: string[] | null
@@ -42,6 +43,7 @@ export type Database = {
           type: Database["public"]["Enums"]["action_type"]
           updated_at: string
           updated_by: string | null
+          valide_le: string | null
         }
         Insert: {
           cause_fondamentale?: string | null
@@ -61,6 +63,7 @@ export type Database = {
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
+          propose?: boolean
           recommandation?: string | null
           reference: string
           reference_iso?: string[] | null
@@ -70,6 +73,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["action_type"]
           updated_at?: string
           updated_by?: string | null
+          valide_le?: string | null
         }
         Update: {
           cause_fondamentale?: string | null
@@ -89,6 +93,7 @@ export type Database = {
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
+          propose?: boolean
           recommandation?: string | null
           reference?: string
           reference_iso?: string[] | null
@@ -98,6 +103,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["action_type"]
           updated_at?: string
           updated_by?: string | null
+          valide_le?: string | null
         }
         Relationships: [
           {
@@ -1571,12 +1577,14 @@ export type Database = {
           niveau_interaction: Database["public"]["Enums"]["pi_interaction"]
           nom: string
           pouvoir: number
+          propose: boolean
           sphere: Database["public"]["Enums"]["pi_sphere"]
           tenant_id: string
           type: Database["public"]["Enums"]["pi_type"]
           updated_at: string
           updated_by: string | null
           urgence: number
+          valide_le: string | null
         }
         Insert: {
           attentes?: string | null
@@ -1590,12 +1598,14 @@ export type Database = {
           niveau_interaction?: Database["public"]["Enums"]["pi_interaction"]
           nom: string
           pouvoir?: number
+          propose?: boolean
           sphere?: Database["public"]["Enums"]["pi_sphere"]
           tenant_id: string
           type?: Database["public"]["Enums"]["pi_type"]
           updated_at?: string
           updated_by?: string | null
           urgence?: number
+          valide_le?: string | null
         }
         Update: {
           attentes?: string | null
@@ -1609,12 +1619,14 @@ export type Database = {
           niveau_interaction?: Database["public"]["Enums"]["pi_interaction"]
           nom?: string
           pouvoir?: number
+          propose?: boolean
           sphere?: Database["public"]["Enums"]["pi_sphere"]
           tenant_id?: string
           type?: Database["public"]["Enums"]["pi_type"]
           updated_at?: string
           updated_by?: string | null
           urgence?: number
+          valide_le?: string | null
         }
         Relationships: [
           {
@@ -2072,12 +2084,14 @@ export type Database = {
           nom: string
           ordre_affichage: number
           pilote_id: string | null
+          propose: boolean
           ressources_associees: string | null
           sorties: string | null
           tenant_id: string
           type: Database["public"]["Enums"]["processus_type"]
           updated_at: string
           updated_by: string | null
+          valide_le: string | null
         }
         Insert: {
           created_at?: string
@@ -2091,12 +2105,14 @@ export type Database = {
           nom: string
           ordre_affichage?: number
           pilote_id?: string | null
+          propose?: boolean
           ressources_associees?: string | null
           sorties?: string | null
           tenant_id: string
           type: Database["public"]["Enums"]["processus_type"]
           updated_at?: string
           updated_by?: string | null
+          valide_le?: string | null
         }
         Update: {
           created_at?: string
@@ -2110,12 +2126,14 @@ export type Database = {
           nom?: string
           ordre_affichage?: number
           pilote_id?: string | null
+          propose?: boolean
           ressources_associees?: string | null
           sorties?: string | null
           tenant_id?: string
           type?: Database["public"]["Enums"]["processus_type"]
           updated_at?: string
           updated_by?: string | null
+          valide_le?: string | null
         }
         Relationships: [
           {

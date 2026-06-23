@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { ProposeBadge } from "@/components/propose-badge";
+import { ProposeBanner, ValiderButton } from "@/components/propose-controls";
 import {
   Table,
   TableBody,
@@ -59,7 +61,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires, cotation",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires, cotation, propose, valide_le",
     )
     .eq("tenant_id", ctx.effectiveTenantId);
 
@@ -98,6 +100,7 @@ export default async function ActionsPage({
 
   const items = actions ?? [];
   const options = processusOptions ?? [];
+  const aValider = items.filter((a) => a.propose && !a.valide_le).length;
 
   return (
     <div className="w-full">
@@ -110,6 +113,8 @@ export default async function ActionsPage({
         <ViewToggle />
         <ActionDialog processusOptions={options} />
       </PageHeader>
+
+      <ProposeBanner table="actions" count={aValider} libelle="actions de démarrage" />
 
       <div className="mb-3 flex flex-wrap gap-1.5">
         {[
@@ -165,9 +170,18 @@ export default async function ActionsPage({
                     </Link>
                   </TableCell>
                   <TableCell className="font-medium">
-                    <Link href={`/actions/${a.id}`} className="hover:text-primary hover:underline">
-                      {a.description_courte}
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/actions/${a.id}`}
+                        className="hover:text-primary hover:underline"
+                      >
+                        {a.description_courte}
+                      </Link>
+                      {a.propose && !a.valide_le ? <ProposeBadge /> : null}
+                      {a.propose && !a.valide_le ? (
+                        <ValiderButton table="actions" id={a.id} />
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <CotationCell id={a.id} value={a.cotation} />
