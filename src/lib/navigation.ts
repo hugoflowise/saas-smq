@@ -25,6 +25,7 @@ import {
   Smile,
   Target,
   Truck,
+  UserCog,
   Users,
   UsersRound,
 } from "lucide-react";
@@ -100,11 +101,15 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Configuration",
     items: [
+      { label: "Utilisateurs", href: "/utilisateurs", icon: UserCog },
       { label: "Main courante", href: "/journal", icon: History },
       { label: "Paramètres", href: "/parametres", icon: Settings },
     ],
   },
 ];
+
+/** Items réservés aux gestionnaires d'utilisateurs (dirigeant/admin) : masqués sinon. */
+export const NAV_ITEMS_GESTION_UTILISATEURS = ["/utilisateurs"];
 
 /** Section réservée à l'admin Flowise (affichée uniquement pour ce rôle). */
 export const ADMIN_NAV_SECTION: NavSection = {

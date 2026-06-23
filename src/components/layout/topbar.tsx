@@ -29,6 +29,8 @@ type TopBarProps = {
   canSimulate: boolean;
   /** Vrai si une vue simulée est active. */
   simulating: boolean;
+  /** Peut gérer les utilisateurs (affiche l'entrée de menu dédiée). */
+  canManageUsers: boolean;
   tenants: { id: string; nom: string }[];
   activeTenantId: string | null;
   activeTenantName: string | null;
@@ -42,6 +44,7 @@ export function TopBar({
   isAdmin,
   canSimulate,
   simulating,
+  canManageUsers,
   tenants,
   activeTenantId,
   activeTenantName,
@@ -81,7 +84,11 @@ export function TopBar({
               />
             </SheetTitle>
             <div className="overflow-y-auto">
-              <NavLinks isAdmin={isAdmin} onNavigate={() => setMobileOpen(false)} />
+              <NavLinks
+                isAdmin={isAdmin}
+                canManageUsers={canManageUsers}
+                onNavigate={() => setMobileOpen(false)}
+              />
             </div>
           </SheetContent>
         </Sheet>

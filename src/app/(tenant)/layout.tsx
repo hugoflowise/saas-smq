@@ -2,7 +2,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
-import { isReadOnly } from "@/lib/permissions";
+import { canManageUsers, isReadOnly } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getSimulatedRole } from "@/lib/view-as-cookie";
@@ -71,7 +71,7 @@ export default async function TenantLayout({ children }: { children: React.React
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar isAdmin={isAdmin} />
+      <Sidebar isAdmin={isAdmin} canManageUsers={canManageUsers(role)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           email={email}
@@ -79,6 +79,7 @@ export default async function TenantLayout({ children }: { children: React.React
           isAdmin={isAdmin}
           canSimulate={realIsAdmin}
           simulating={simulating}
+          canManageUsers={canManageUsers(role)}
           tenants={tenants}
           activeTenantId={activeTenantId}
           activeTenantName={activeTenantName}
