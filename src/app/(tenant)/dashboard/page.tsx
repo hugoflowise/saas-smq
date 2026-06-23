@@ -166,6 +166,30 @@ export default async function DashboardPage() {
 
   const retard = actionsRetard ?? [];
 
+  // Éléments préremplis restant à valider (cf. page Mise en route)
+  const [partiesAValider, processusAValider, actionsAValider] = await Promise.all([
+    supabase
+      .from("parties_interessees")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("propose", true)
+      .is("valide_le", null),
+    supabase
+      .from("processus")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("propose", true)
+      .is("valide_le", null),
+    supabase
+      .from("actions")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .eq("propose", true)
+      .is("valide_le", null),
+  ]);
+  const aValiderTotal =
+    (partiesAValider.count ?? 0) + (processusAValider.count ?? 0) + (actionsAValider.count ?? 0);
+
   // Échéances à venir (30 jours) : agrégation multi-modules
   const [auditsAvenir, revuesAvenir, roAvenir, actionsAvenir, reunionsAvenir, jalonsAvenir] =
     await Promise.all([
@@ -317,6 +341,19 @@ export default async function DashboardPage() {
         title="Tableau de bord"
         description="Vue d'ensemble du Système de Management de la Qualité."
       />
+
+      {aValiderTotal > 0 ? (
+        <Link href="/mise-en-route" className="mb-6 block">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-3 transition-colors hover:bg-status-pa/15">
+            <p className="text-sm text-status-pa">
+              <strong>{aValiderTotal}</strong> élément{aValiderTotal > 1 ? "s" : ""} prérempli
+              {aValiderTotal > 1 ? "s" : ""} {aValiderTotal > 1 ? "restent" : "reste"} à passer en
+              revue et valider.
+            </p>
+            <span className="shrink-0 font-medium text-primary text-sm">Mise en route →</span>
+          </div>
+        </Link>
+      ) : null}
 
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((s) => (
