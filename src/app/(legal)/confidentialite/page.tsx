@@ -1,6 +1,5 @@
-export const metadata = { title: "Politique de confidentialité · Flowise Pilotage SMQ" };
+export const metadata = { title: "Politique de confidentialité · flowise" };
 
-// Modèle de politique de confidentialité (RGPD) à faire valider juridiquement.
 export default function ConfidentialitePage() {
   return (
     <article>
@@ -8,17 +7,18 @@ export default function ConfidentialitePage() {
       <p className="text-muted-foreground text-xs">Dernière mise à jour : juin 2026</p>
 
       <p>
-        La présente politique décrit la manière dont l'application « Flowise Pilotage SMQ » traite
-        les données à caractère personnel, conformément au Règlement général sur la protection des
-        données (RGPD) et à la loi « Informatique et Libertés ».
+        La présente politique décrit la manière dont l'application « flowise » traite les données à
+        caractère personnel, conformément au Règlement général sur la protection des données (RGPD)
+        et à la loi « Informatique et Libertés ».
       </p>
 
       <h2>1. Responsable du traitement</h2>
       <p>
         Pour les données liées à la gestion du Service (comptes, accès), le responsable de
-        traitement est Flowise [à compléter : raison sociale et adresse]. Pour les données saisies
-        par une organisation cliente dans son espace, Flowise agit en qualité de sous-traitant, pour
-        le compte de l'organisation cliente (responsable de traitement).
+        traitement est la société Flowise, 50 avenue des Champs-Élysées, 75008 Paris
+        (contact@flowise.fr). Pour les données saisies par une organisation cliente dans son espace,
+        Flowise agit en qualité de sous-traitant, pour le compte de l'organisation cliente
+        (responsable de traitement).
       </p>
 
       <h2>2. Données collectées</h2>
@@ -41,13 +41,11 @@ export default function ConfidentialitePage() {
       <h2>4. Destinataires et sous-traitants</h2>
       <p>
         Les données sont accessibles aux personnes habilitées de l'organisation cliente et de
-        l'Éditeur. L'Éditeur fait appel aux sous-traitants suivants :
+        l'Éditeur. L'Éditeur fait appel aux sous-traitants suivants, dont l'hébergement est situé au
+        sein de l'Union européenne :
       </p>
       <ul>
-        <li>
-          Supabase (hébergement de la base de données et des fichiers, infrastructure AWS, Union
-          européenne) ;
-        </li>
+        <li>Supabase (hébergement de la base de données et des fichiers, infrastructure AWS) ;</li>
         <li>Vercel (hébergement et diffusion de l'application) ;</li>
         <li>Resend (envoi des e-mails transactionnels) ;</li>
         <li>Sentry (supervision technique et détection des erreurs).</li>
@@ -57,46 +55,36 @@ export default function ConfidentialitePage() {
         les besoins du Service.
       </p>
 
-      <h2>5. Transferts hors Union européenne</h2>
+      <h2>5. Durées de conservation</h2>
       <p>
-        Lorsque certains prestataires sont susceptibles de traiter des données hors de l'Union
-        européenne, ces transferts sont encadrés par des garanties appropriées (clauses
-        contractuelles types de la Commission européenne). [à compléter / confirmer selon les
-        prestataires retenus.]
+        Les données sont conservées pendant la durée de la relation contractuelle, puis supprimées
+        au plus tard un (1) an après la fin de celle-ci, sous réserve des obligations légales de
+        conservation.
       </p>
 
-      <h2>6. Durées de conservation</h2>
-      <p>
-        Les données sont conservées pendant la durée de la relation contractuelle, puis archivées ou
-        supprimées dans des délais raisonnables. [à compléter : durées précises par catégorie de
-        données.]
-      </p>
-
-      <h2>7. Vos droits</h2>
+      <h2>6. Vos droits</h2>
       <p>
         Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, de
         portabilité et d'opposition au traitement de vos données. Pour les données métier d'une
         organisation cliente, ces demandes sont à adresser à cette organisation (responsable de
-        traitement). Pour exercer vos droits, contactez [à compléter : adresse e-mail dédiée / DPO].
+        traitement). Pour les données gérées par l'Éditeur, écrivez à contact@flowise.fr.
       </p>
 
-      <h2>8. Réclamation</h2>
+      <h2>7. Réclamation</h2>
       <p>
         Vous pouvez introduire une réclamation auprès de la Commission nationale de l'informatique
         et des libertés (CNIL), 3 place de Fontenoy, 75007 Paris (
-        <a href="https://www.cnil.fr">cnil.fr</a>
-        ).
+        <a href="https://www.cnil.fr">cnil.fr</a>).
       </p>
 
-      <h2>9. Cookies et traceurs</h2>
+      <h2>8. Cookies et traceurs</h2>
       <p>
         L'application utilise uniquement les cookies strictement nécessaires à son fonctionnement
-        (authentification, sécurité). Aucun cookie publicitaire n'est déposé. [à compléter si des
-        outils de mesure d'audience sont ajoutés.]
+        (authentification, sécurité). Aucun cookie publicitaire n'est déposé.
       </p>
 
-      <h2>10. Contact</h2>
-      <p>Pour toute question relative à la présente politique : [à compléter : adresse e-mail].</p>
+      <h2>9. Contact</h2>
+      <p>Pour toute question relative à la présente politique : contact@flowise.fr.</p>
     </article>
   );
 }
