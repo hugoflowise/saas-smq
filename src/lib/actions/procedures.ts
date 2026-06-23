@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { notifyTenant } from "@/lib/notifications";
+import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -12,8 +13,7 @@ import { getTenantContext } from "@/lib/tenant-context";
 type ProcedureUpdate = Database["public"]["Tables"]["procedures"]["Update"];
 
 function permissions(role: string) {
-  const approver = role === "admin_flowise" || role === "dirigeant";
-  return { approver, writer: approver || role === "manager" };
+  return { approver: canApprove(role), writer: canWrite(role) };
 }
 
 const TRANSITIONS: Record<string, string[]> = {

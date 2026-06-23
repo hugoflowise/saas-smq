@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import type { ActionResult } from "@/lib/actions/types";
 import { notifyTenant } from "@/lib/notifications";
+import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -16,8 +17,7 @@ type PolitiqueUpdate = Database["public"]["Tables"]["politique_qualite"]["Update
  * - approver (approuve + signe, demande des modifs, publie) : admin Flowise, dirigeant
  */
 function permissions(role: string) {
-  const approver = role === "admin_flowise" || role === "dirigeant";
-  return { approver, writer: approver || role === "manager" };
+  return { approver: canApprove(role), writer: canWrite(role) };
 }
 
 /** Transitions de statut autorisées (hors publication, gérée à part). */

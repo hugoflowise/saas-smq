@@ -1,6 +1,8 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { getActiveTenantId } from "@/lib/active-tenant";
+import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
+import { isReadOnly } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getSimulatedRole } from "@/lib/view-as-cookie";
@@ -84,7 +86,15 @@ export default async function TenantLayout({ children }: { children: React.React
           unreadCount={unreadCount ?? 0}
         />
         <main className="app-bg flex-1 overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
-          <div className="mx-auto w-full min-w-0 max-w-screen-2xl">{children}</div>
+          <div className="mx-auto w-full min-w-0 max-w-screen-2xl">
+            {isReadOnly(role) ? (
+              <div className="mb-6 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-2.5 text-sm text-status-pa">
+                Mode lecture seule : le rôle auditeur permet de consulter le système qualité mais
+                pas de le modifier.
+              </div>
+            ) : null}
+            <ReadOnlyProvider value={isReadOnly(role)}>{children}</ReadOnlyProvider>
+          </div>
         </main>
       </div>
     </div>

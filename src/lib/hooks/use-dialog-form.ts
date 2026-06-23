@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { ActionResult } from "@/lib/actions/types";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 /**
  * Cycle de vie commun aux dialogues de formulaire (création / modification).
@@ -32,6 +33,7 @@ import type { ActionResult } from "@/lib/actions/types";
  */
 export function useDialogForm() {
   const router = useRouter();
+  const readOnly = useReadOnly();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -49,6 +51,10 @@ export function useDialogForm() {
     },
   ) {
     event.preventDefault();
+    if (readOnly) {
+      toast.error("Lecture seule : votre rôle auditeur ne permet pas de modifier les données.");
+      return;
+    }
     const formData = new FormData(event.currentTarget);
     setPending(true);
     try {
