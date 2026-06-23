@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { setActiveTenantId } from "@/lib/active-tenant";
+import { inviteEmailHtml, sendEmail } from "@/lib/email";
 import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -93,6 +94,26 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
 
   if (profileError) {
     return { ok: false, error: `Rattachement du dirigeant impossible : ${profileError.message}` };
+  }
+
+  // E-mail de bienvenue : lien sécurisé pour que le dirigeant définisse son
+  // mot de passe et accède à son espace (best-effort, n'échoue pas la création).
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const { data: lien } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email: data.dirigeantEmail,
+    options: { redirectTo: `${base}/auth/callback?next=/bienvenue` },
+  });
+  if (lien?.properties?.action_link) {
+    await sendEmail({
+      to: data.dirigeantEmail,
+      subject: `Bienvenue sur Flowise Pilotage SMQ : ${data.nomSociete}`,
+      html: inviteEmailHtml({
+        societe: data.nomSociete,
+        roleLabel: "Dirigeant",
+        actionLink: lien.properties.action_link,
+      }),
+    });
   }
 
   // Provisioning : tous les éléments préremplis sont marqués « proposés »
