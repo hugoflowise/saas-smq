@@ -3,6 +3,7 @@ import { TopBar } from "@/components/layout/topbar";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getSimulatedRole } from "@/lib/view-as-cookie";
 
 export default async function TenantLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -34,14 +35,20 @@ export default async function TenantLayout({ children }: { children: React.React
     : { count: 0 };
 
   const email = profile?.email ?? user?.email ?? "";
-  const role = profile?.role ?? "-";
-  const isAdmin = role === "admin_flowise";
+  const realRole = profile?.role ?? "-";
+  const realIsAdmin = realRole === "admin_flowise";
+
+  // Vue simulée (admin uniquement) : affiche l'app sous un autre rôle.
+  const simulatedRole = realIsAdmin ? await getSimulatedRole() : null;
+  const simulating = Boolean(simulatedRole);
+  const role = simulatedRole ?? realRole; // rôle affiché
+  const isAdmin = realIsAdmin && !simulating; // admin « effectif » (nav, switcher)
 
   let tenants: { id: string; nom: string }[] = [];
   let activeTenantId: string | null = null;
   let activeTenantName: string | null = null;
 
-  if (isAdmin) {
+  if (realIsAdmin) {
     const admin = createAdminClient();
     const { data } = await admin
       .from("tenants")
@@ -68,6 +75,8 @@ export default async function TenantLayout({ children }: { children: React.React
           email={email}
           role={role}
           isAdmin={isAdmin}
+          canSimulate={realIsAdmin}
+          simulating={simulating}
           tenants={tenants}
           activeTenantId={activeTenantId}
           activeTenantName={activeTenantName}
