@@ -95,6 +95,28 @@ export function notificationEmailHtml(opts: {
 </div>`;
 }
 
+/**
+ * Gabarit HTML de l'e-mail d'invitation : un collègue est invité à rejoindre
+ * l'espace qualité d'une société. `actionLink` est le lien (absolu) pour
+ * définir son mot de passe et accéder à l'application.
+ */
+export function inviteEmailHtml(opts: {
+  societe: string;
+  roleLabel: string;
+  actionLink: string;
+}): string {
+  return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <h1 style="margin:0;font-size:18px;color:#0f172a">Vous êtes invité à rejoindre ${opts.societe}</h1>
+    <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">Vous avez accès à l'espace qualité de ${opts.societe} en tant que <strong>${opts.roleLabel}</strong>. Cliquez ci-dessous pour définir votre mot de passe et vous connecter.</p>
+    <a href="${opts.actionLink}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Définir mon mot de passe</a>
+    <p style="margin:16px 0 0;color:#94a3b8;font-size:12px">Si vous n'attendiez pas cette invitation, ignorez cet e-mail.</p>
+  </div>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Invitation · Flowise Pilotage SMQ</p>
+</div>`;
+}
+
 /** Une section de la liste du digest (titre + lignes cliquables). */
 export type DigestSection = {
   titre: string;

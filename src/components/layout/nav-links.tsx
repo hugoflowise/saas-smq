@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ADMIN_NAV_SECTION, NAV_SECTIONS } from "@/lib/navigation";
+import { ADMIN_NAV_SECTION, NAV_ITEMS_GESTION_UTILISATEURS, NAV_SECTIONS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, href: string) {
@@ -12,13 +12,22 @@ function isActive(pathname: string, href: string) {
 /** Liste des sections/items de navigation. Partagée sidebar desktop + menu mobile. */
 export function NavLinks({
   isAdmin = false,
+  canManageUsers = false,
   onNavigate,
 }: {
   isAdmin?: boolean;
+  canManageUsers?: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const sections = isAdmin ? [...NAV_SECTIONS, ADMIN_NAV_SECTION] : NAV_SECTIONS;
+  const baseSections = isAdmin ? [...NAV_SECTIONS, ADMIN_NAV_SECTION] : NAV_SECTIONS;
+  // Masque les items de gestion des utilisateurs si l'utilisateur n'y a pas droit.
+  const sections = canManageUsers
+    ? baseSections
+    : baseSections.map((s) => ({
+        ...s,
+        items: s.items.filter((i) => !NAV_ITEMS_GESTION_UTILISATEURS.includes(i.href)),
+      }));
 
   return (
     <nav className="px-3 py-4">
