@@ -17,6 +17,7 @@ export type InfosSociete = {
   ville: string | null;
   mentions_legales: string | null;
   liste_diffusion: string | null;
+  couleur_charte: string | null;
 };
 
 export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
@@ -35,6 +36,7 @@ export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
       ville: f.get("ville") || undefined,
       mentionsLegales: f.get("mentionsLegales") || undefined,
       listeDiffusion: f.get("listeDiffusion") || undefined,
+      couleurCharte: f.get("couleurCharte") || undefined,
     });
     setPending(false);
     if (result.ok) {
@@ -83,6 +85,22 @@ export function InfosSocieteForm({ infos }: { infos: InfosSociete }) {
           defaultValue={infos.mentions_legales ?? ""}
           placeholder="Ex. Capital 50 000 € · RCS Paris 123 456 789 · APE 7022Z"
         />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="couleurCharte">Couleur de la charte (documents générés)</Label>
+        <div className="flex items-center gap-3">
+          <input
+            id="couleurCharte"
+            name="couleurCharte"
+            type="color"
+            defaultValue={infos.couleur_charte ?? "#0b1120"}
+            className="h-9 w-14 cursor-pointer rounded-md border bg-transparent p-1"
+          />
+          <span className="text-muted-foreground text-xs">
+            Couleur principale appliquée à l'en-tête, aux filets et aux accents des documents
+            (procédures, politique, comptes-rendus…). Votre logo apparaît déjà sur ces documents.
+          </span>
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="listeDiffusion">Liste de diffusion « toute la société »</Label>

@@ -2860,6 +2860,7 @@ export type Database = {
           boond_account_id: string | null
           boond_oauth_token: string | null
           code_postal: string | null
+          couleur_charte: string | null
           created_at: string
           date_souscription: string | null
           effectif_tranche:
@@ -2886,6 +2887,7 @@ export type Database = {
           boond_account_id?: string | null
           boond_oauth_token?: string | null
           code_postal?: string | null
+          couleur_charte?: string | null
           created_at?: string
           date_souscription?: string | null
           effectif_tranche?:
@@ -2912,6 +2914,7 @@ export type Database = {
           boond_account_id?: string | null
           boond_oauth_token?: string | null
           code_postal?: string | null
+          couleur_charte?: string | null
           created_at?: string
           date_souscription?: string | null
           effectif_tranche?:
