@@ -19,11 +19,16 @@ import { createClient } from "@/lib/supabase/client";
 import { NavLinks } from "./nav-links";
 import { NotificationBell, type NotificationItem } from "./notification-bell";
 import { TenantSwitcher } from "./tenant-switcher";
+import { ViewAsSwitcher } from "./view-as-switcher";
 
 type TopBarProps = {
   email: string;
   role: string;
   isAdmin: boolean;
+  /** Vrai admin Flowise : peut activer la vue simulée (même en cours de simulation). */
+  canSimulate: boolean;
+  /** Vrai si une vue simulée est active. */
+  simulating: boolean;
   tenants: { id: string; nom: string }[];
   activeTenantId: string | null;
   activeTenantName: string | null;
@@ -35,6 +40,8 @@ export function TopBar({
   email,
   role,
   isAdmin,
+  canSimulate,
+  simulating,
   tenants,
   activeTenantId,
   activeTenantName,
@@ -79,7 +86,7 @@ export function TopBar({
           </SheetContent>
         </Sheet>
 
-        {/* Sélecteur de tenant (admin) ou tenant fixe (dirigeant) */}
+        {/* Sélecteur de tenant (admin) ou tenant fixe (dirigeant / vue simulée) */}
         {isAdmin ? (
           <TenantSwitcher tenants={tenants} activeTenantId={activeTenantId} />
         ) : (
@@ -88,6 +95,9 @@ export function TopBar({
             <span className="max-w-[12rem] truncate font-medium">{activeTenantName ?? "-"}</span>
           </div>
         )}
+
+        {/* Vue simulée (admin Flowise uniquement) */}
+        {canSimulate ? <ViewAsSwitcher simulating={simulating} role={role} /> : null}
       </div>
 
       <div className="flex items-center gap-1">
