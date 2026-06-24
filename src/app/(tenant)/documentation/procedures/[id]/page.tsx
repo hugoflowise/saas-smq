@@ -41,7 +41,7 @@ export default async function ProcedureDetailPage({
     supabase
       .from("procedures")
       .select(
-        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, redacteur, verificateur, note_revision, processus_id, reference_iso",
+        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso",
       )
       .eq("id", id)
       .eq("tenant_id", tid)
@@ -80,9 +80,13 @@ export default async function ProcedureDetailPage({
     ),
   ] as string[];
   const { data: persons } = personIds.length
-    ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name, email, signature_image")
+        .in("id", personIds)
     : { data: [] };
   const nameById = new Map((persons ?? []).map((p) => [p.id, p.full_name ?? p.email]));
+  const signatureById = new Map((persons ?? []).map((p) => [p.id, p.signature_image]));
 
   const versions = (rawVersions ?? []).map((v) => ({
     id: v.id,
@@ -141,8 +145,15 @@ export default async function ProcedureDetailPage({
             canWrite={canWrite}
             canApprove={isApprover}
             drafterName={procedure.created_by ? (nameById.get(procedure.created_by) ?? null) : null}
+            drafterSignature={
+              procedure.created_by ? (signatureById.get(procedure.created_by) ?? null) : null
+            }
+            drafterSignedAt={procedure.soumis_le ?? null}
             approverName={
               procedure.approved_by ? (nameById.get(procedure.approved_by) ?? null) : null
+            }
+            approverSignature={
+              procedure.approved_by ? (signatureById.get(procedure.approved_by) ?? null) : null
             }
             approvedAt={procedure.approved_at}
             printHref={`/print/procedure/${procedure.id}`}

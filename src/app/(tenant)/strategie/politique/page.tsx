@@ -52,7 +52,7 @@ export default async function PolitiquePage({
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("contenu, statut, version_actuelle_id, created_by, approved_by, approved_at")
+    .select("contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le")
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -73,9 +73,13 @@ export default async function PolitiquePage({
     ),
   ] as string[];
   const { data: persons } = personIds.length
-    ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name, email, signature_image")
+        .in("id", personIds)
     : { data: [] };
   const nameById = new Map((persons ?? []).map((p) => [p.id, p.full_name ?? p.email]));
+  const signatureById = new Map((persons ?? []).map((p) => [p.id, p.signature_image]));
 
   const versions = (rawVersions ?? []).map((v) => ({
     id: v.id,
@@ -127,7 +131,14 @@ export default async function PolitiquePage({
             canWrite={canWrite}
             canApprove={isApprover}
             drafterName={drafterName}
+            drafterSignature={
+              politique?.created_by ? (signatureById.get(politique.created_by) ?? null) : null
+            }
+            drafterSignedAt={politique?.soumis_le ?? null}
             approverName={approverName}
+            approverSignature={
+              politique?.approved_by ? (signatureById.get(politique.approved_by) ?? null) : null
+            }
             approvedAt={politique?.approved_at ?? null}
             printHref="/print/politique"
             labelDocument="politique"

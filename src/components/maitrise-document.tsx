@@ -43,7 +43,10 @@ export function MaitriseDocument({
   canWrite,
   canApprove,
   drafterName,
+  drafterSignature,
+  drafterSignedAt,
   approverName,
+  approverSignature,
   approvedAt,
   printHref,
   labelDocument,
@@ -66,7 +69,10 @@ export function MaitriseDocument({
   canWrite: boolean;
   canApprove: boolean;
   drafterName: string | null;
+  drafterSignature?: string | null;
+  drafterSignedAt?: string | null;
   approverName: string | null;
+  approverSignature?: string | null;
   approvedAt: string | null;
   printHref: string;
   /** Nom du document pour les messages (« politique », « procédure »). */
@@ -213,12 +219,12 @@ export function MaitriseDocument({
           ) : null}
 
           {statut === "brouillon" && canWrite ? (
-            <Button
-              onClick={() => transition("en_revue", "Soumise à approbation.")}
-              disabled={pending}
-            >
-              Soumettre à approbation
-            </Button>
+            <SignatureCapture
+              triggerLabel="Soumettre à approbation"
+              title={`Soumettre ${labelDocument} à approbation`}
+              description="Signez avec votre mot de passe pour soumettre ce document à approbation."
+              onSigned={() => transition("en_revue", "Soumise à approbation.")}
+            />
           ) : null}
           {statut === "en_revue" && canApprove ? (
             <>
@@ -300,6 +306,25 @@ export function MaitriseDocument({
           onChange={handleChange}
           bare={!editable}
         />
+        {drafterName || approverName ? (
+          <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
+            <Signataire
+              label="Rédigé par"
+              nom={drafterName}
+              image={drafterSignature ?? null}
+              date={drafterSignedAt ?? null}
+              signe={Boolean(drafterSignedAt)}
+            />
+            <Signataire
+              label="Approuvé par"
+              nom={approverName}
+              image={approverSignature ?? null}
+              date={approvedAt ?? null}
+              signe={Boolean(approverName)}
+              border
+            />
+          </div>
+        ) : null}
       </DocumentPaper>
 
       {!editable ? (
@@ -313,4 +338,46 @@ export function MaitriseDocument({
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Cellule de signature (rédacteur / approbateur) avec image et horodatage. */
+function Signataire({
+  label,
+  nom,
+  image,
+  date,
+  signe,
+  border,
+}: {
+  label: string;
+  nom: string | null;
+  image: string | null;
+  date: string | null;
+  signe: boolean;
+  border?: boolean;
+}) {
+  return (
+    <div className={border ? "border-l" : ""}>
+      <div
+        className="px-3 py-1.5 font-semibold"
+        style={{ backgroundColor: "var(--charte)", color: "var(--charte-contrast)" }}
+      >
+        {label}
+      </div>
+      <div className="flex min-h-24 flex-col px-3 py-2">
+        <p className="font-medium">{nom?.trim() ? nom : "-"}</p>
+        {signe && image ? (
+          // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
+          <img src={image} alt="Signature" className="mt-1 h-12 w-auto object-contain" />
+        ) : null}
+        {signe ? (
+          <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
+            Signé électroniquement{date ? ` le ${fmt(date)}` : ""}
+          </p>
+        ) : label === "Approuvé par" ? (
+          <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
+        ) : null}
+      </div>
+    </div>
+  );
 }
