@@ -6,6 +6,7 @@ import { VersionHistory } from "@/app/(tenant)/strategie/politique/version-histo
 import type { Societe } from "@/components/document-paper";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
+import { type ProcDef, ProcedureSections, type ProcRef } from "@/components/procedure-sections";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   publishProcedureAction,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/actions/procedures";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ProcedureInfosEditor } from "./procedure-infos-editor";
 import { ProcedureRevisionForm } from "./procedure-revision-form";
 
 export default async function ProcedureDetailPage({
@@ -41,7 +43,7 @@ export default async function ProcedureDetailPage({
     supabase
       .from("procedures")
       .select(
-        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso",
+        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
       )
       .eq("id", id)
       .eq("tenant_id", tid)
@@ -118,6 +120,45 @@ export default async function ProcedureDetailPage({
       : []),
   ];
 
+  // Rubriques structurées de la procédure (objet, références, glossaire, définitions).
+  const refsDoc = (procedure.references_doc as unknown as ProcRef[] | null) ?? [];
+  const refsAppli = (procedure.references_appli as unknown as ProcRef[] | null) ?? [];
+  const definitions = (procedure.definitions as unknown as ProcDef[] | null) ?? [];
+  const sectionsData = {
+    objet: procedure.objet,
+    domaineApplication: procedure.domaine_application,
+    resume: procedure.resume,
+    diffusion: procedure.diffusion,
+    glossaireSigles: procedure.glossaire_sigles,
+    glossaireSymboles: procedure.glossaire_symboles,
+    glossaireAbreviations: procedure.glossaire_abreviations,
+    definitions,
+    referencesDoc: refsDoc,
+    referencesAppli: refsAppli,
+  };
+  const infosInitial = {
+    id: procedure.id,
+    objet: procedure.objet ?? "",
+    domaineApplication: procedure.domaine_application ?? "",
+    resume: procedure.resume ?? "",
+    diffusion: procedure.diffusion ?? "",
+    glossaireSigles: procedure.glossaire_sigles ?? "",
+    glossaireSymboles: procedure.glossaire_symboles ?? "",
+    glossaireAbreviations: procedure.glossaire_abreviations ?? "",
+    definitions: definitions.map((d) => ({ terme: d.terme ?? "", definition: d.definition ?? "" })),
+    referencesDoc: refsDoc.map((r) => ({
+      numero: r.numero ?? "",
+      reference: r.reference ?? "",
+      designation: r.designation ?? "",
+    })),
+    referencesAppli: refsAppli.map((r) => ({
+      numero: r.numero ?? "",
+      reference: r.reference ?? "",
+      designation: r.designation ?? "",
+    })),
+  };
+  const enBrouillon = procedure.statut === "brouillon" && canWrite;
+
   return (
     <div className="mx-auto w-full max-w-6xl">
       <Link
@@ -130,6 +171,12 @@ export default async function ProcedureDetailPage({
 
       <PageHeader title={procedure.titre} />
 
+      {enBrouillon ? (
+        <div className="mb-6">
+          <ProcedureInfosEditor initial={infosInitial} />
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">
           <MaitriseDocument
@@ -137,6 +184,7 @@ export default async function ProcedureDetailPage({
             titre={procedure.titre}
             societe={tenant as Societe}
             metaExtra={metaExtra}
+            beforeContent={<ProcedureSections {...sectionsData} />}
             initialContenu={(procedure.contenu ?? null) as JSONContent | null}
             statut={procedure.statut}
             currentVersion={current?.version ?? null}

@@ -135,6 +135,73 @@ export async function saveProcedureContenuAction(id: string, contenu: Json): Pro
   return { ok: true };
 }
 
+const refSchema = z.object({
+  numero: z.string().trim().optional().default(""),
+  reference: z.string().trim().optional().default(""),
+  designation: z.string().trim().optional().default(""),
+});
+const infosSchema = z.object({
+  id: z.string().uuid(),
+  objet: z.string().trim().optional(),
+  domaineApplication: z.string().trim().optional(),
+  resume: z.string().trim().optional(),
+  diffusion: z.string().trim().optional(),
+  glossaireSigles: z.string().trim().optional(),
+  glossaireSymboles: z.string().trim().optional(),
+  glossaireAbreviations: z.string().trim().optional(),
+  definitions: z
+    .array(
+      z.object({
+        terme: z.string().trim().optional().default(""),
+        definition: z.string().trim().optional().default(""),
+      }),
+    )
+    .default([]),
+  referencesDoc: z.array(refSchema).default([]),
+  referencesAppli: z.array(refSchema).default([]),
+});
+
+/** Enregistre les rubriques structurées de la procédure (objet, références, définitions…). */
+export async function saveProcedureInfosAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
+
+  const parsed = infosSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+
+  const { supabase, procedure } = await loadProcedure(ctx.effectiveTenantId, d.id);
+  if (!procedure) return { ok: false, error: "Procédure introuvable." };
+  if (procedure.statut !== "brouillon") {
+    return { ok: false, error: "La procédure n'est modifiable qu'en brouillon." };
+  }
+
+  const { error } = await supabase
+    .from("procedures")
+    .update({
+      objet: d.objet ?? null,
+      domaine_application: d.domaineApplication ?? null,
+      resume: d.resume ?? null,
+      diffusion: d.diffusion ?? null,
+      glossaire_sigles: d.glossaireSigles ?? null,
+      glossaire_symboles: d.glossaireSymboles ?? null,
+      glossaire_abreviations: d.glossaireAbreviations ?? null,
+      definitions: d.definitions.filter((x) => x.terme || x.definition),
+      references_doc: d.referencesDoc.filter((x) => x.reference || x.designation),
+      references_appli: d.referencesAppli.filter((x) => x.reference || x.designation),
+      updated_by: ctx.userId,
+    })
+    .eq("id", d.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/documentation/procedures/${d.id}`);
+  return { ok: true };
+}
+
 export async function transitionProcedureStatutAction(
   id: string,
   target: string,

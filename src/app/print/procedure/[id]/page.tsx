@@ -1,5 +1,6 @@
 import type { JSONContent } from "@tiptap/react";
 import { PrintShell, type Societe } from "@/components/print-shell";
+import { type ProcDef, ProcedureSections, type ProcRef } from "@/components/procedure-sections";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,9 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
 
   const { data: procedure } = await supabase
     .from("procedures")
-    .select("titre, contenu, version_actuelle_id, reference_iso")
+    .select(
+      "titre, contenu, version_actuelle_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+    )
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -77,6 +80,18 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
       meta={meta}
       genereLe={formatDate(todayISO())}
     >
+      <ProcedureSections
+        objet={procedure.objet}
+        domaineApplication={procedure.domaine_application}
+        resume={procedure.resume}
+        diffusion={procedure.diffusion}
+        glossaireSigles={procedure.glossaire_sigles}
+        glossaireSymboles={procedure.glossaire_symboles}
+        glossaireAbreviations={procedure.glossaire_abreviations}
+        definitions={(procedure.definitions as unknown as ProcDef[] | null) ?? []}
+        referencesDoc={(procedure.references_doc as unknown as ProcRef[] | null) ?? []}
+        referencesAppli={(procedure.references_appli as unknown as ProcRef[] | null) ?? []}
+      />
       <TiptapEditor content={contenu} editable={false} bare />
     </PrintShell>
   );

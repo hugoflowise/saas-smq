@@ -52,6 +52,7 @@ export function MaitriseDocument({
   labelDocument,
   signatureTitle,
   signatureDescription,
+  beforeContent,
   onSaveContenu,
   onTransition,
   onPublish,
@@ -79,6 +80,8 @@ export function MaitriseDocument({
   labelDocument: string;
   signatureTitle: string;
   signatureDescription: string;
+  /** Rubriques structurées rendues dans le document, avant le contenu riche. */
+  beforeContent?: React.ReactNode;
   onSaveContenu: (contenu: Json) => Promise<ActionResult>;
   onTransition: (target: string) => Promise<ActionResult>;
   onPublish: () => Promise<ActionResult>;
@@ -299,6 +302,7 @@ export function MaitriseDocument({
         meta={documentMeta}
         className="border"
       >
+        {beforeContent}
         <TiptapEditor
           key={statut}
           content={initialContenu}
