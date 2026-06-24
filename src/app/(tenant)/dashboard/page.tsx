@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
+import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { objectifProgress } from "@/lib/objectifs";
@@ -105,7 +106,7 @@ export default async function DashboardPage() {
   // Indicateurs + dernières valeurs (sert aussi aux objectifs liés)
   const { data: indicateurs } = await supabase
     .from("indicateurs")
-    .select("id, seuil_alerte_min, seuil_alerte_max")
+    .select("id, cible, sens")
     .eq("tenant_id", tid);
   const { data: valeurs } = await supabase
     .from("indicateurs_valeurs")
@@ -119,10 +120,7 @@ export default async function DashboardPage() {
   const indicateursHorsSeuil = (indicateurs ?? []).filter((i) => {
     const v = lastVal.get(i.id);
     if (v === undefined) return false;
-    return (
-      (i.seuil_alerte_min !== null && v < i.seuil_alerte_min) ||
-      (i.seuil_alerte_max !== null && v > i.seuil_alerte_max)
-    );
+    return horsCible(v, i.cible, i.sens);
   }).length;
 
   // Objectifs qualité (progression)
@@ -322,7 +320,7 @@ export default async function DashboardPage() {
       cls: "text-status-nc-majeure",
     },
     {
-      label: "Indicateurs hors seuil",
+      label: "Indicateurs hors cible",
       value: indicateursHorsSeuil,
       href: "/indicateurs",
       cls: "text-status-pa",

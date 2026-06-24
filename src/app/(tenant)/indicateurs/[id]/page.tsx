@@ -13,8 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
+import { cibleAffichee, FREQUENCE_LABELS } from "@/lib/indicateurs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { IndicateurDialog } from "../create-indicateur-dialog";
 import { AddValeurForm } from "./add-valeur-form";
 
 export default async function IndicateurDetailPage({
@@ -37,7 +39,7 @@ export default async function IndicateurDetailPage({
   const { data: ind } = await supabase
     .from("indicateurs")
     .select(
-      "id, nom, description, unite, cible, seuil_alerte_min, seuil_alerte_max, frequence_mesure",
+      "id, nom, description, processus_id, type, unite, formule_calcul, cible, sens, frequence_mesure",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -45,7 +47,7 @@ export default async function IndicateurDetailPage({
 
   if (!ind) notFound();
 
-  const [{ data: valeurs }, { data: objectifs }] = await Promise.all([
+  const [{ data: valeurs }, { data: objectifs }, { data: processusOptions }] = await Promise.all([
     supabase
       .from("indicateurs_valeurs")
       .select("id, valeur, date_mesure, commentaire")
@@ -58,6 +60,7 @@ export default async function IndicateurDetailPage({
       .eq("indicateur_id", id)
       .is("deleted_at", null)
       .order("created_at"),
+    supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
   ]);
 
   const points = (valeurs ?? []).map((v) => ({
@@ -75,7 +78,37 @@ export default async function IndicateurDetailPage({
         {backLabel}
       </Link>
 
-      <PageHeader title={ind.nom} description={ind.description ?? undefined} />
+      <PageHeader title={ind.nom} description={ind.description ?? undefined}>
+        <IndicateurDialog indicateur={ind} processusOptions={processusOptions ?? []} />
+      </PageHeader>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Caractéristiques</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="sm:col-span-3">
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Méthode / formule de calcul
+            </p>
+            <p className="mt-1 whitespace-pre-wrap text-sm">{ind.formule_calcul?.trim() || "-"}</p>
+          </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Objectif / cible
+            </p>
+            <p className="mt-1 text-sm">{cibleAffichee(ind.cible, ind.sens, ind.unite)}</p>
+          </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Fréquence
+            </p>
+            <p className="mt-1 text-sm">
+              {FREQUENCE_LABELS[ind.frequence_mesure] ?? ind.frequence_mesure}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="mb-6">
         <CardHeader>

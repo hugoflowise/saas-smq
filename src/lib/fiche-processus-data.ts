@@ -1,20 +1,13 @@
 import type { Societe } from "@/components/document-paper";
 import type { FicheProcessusData } from "@/components/fiche-processus";
 import { formatDate, nomPersonne, todayISO } from "@/lib/format";
+import { cibleAffichee, FREQUENCE_LABELS } from "@/lib/indicateurs";
 import { createClient } from "@/lib/supabase/server";
 
 const TYPE_LABELS: Record<string, string> = {
   pilotage: "Pilotage",
   realisation: "Réalisation",
   support: "Support",
-};
-
-const FREQUENCE_LABELS: Record<string, string> = {
-  quotidien: "Quotidienne",
-  hebdo: "Hebdomadaire",
-  mensuel: "Mensuelle",
-  trimestriel: "Trimestrielle",
-  annuel: "Annuelle",
 };
 
 export type FicheInitialData = {
@@ -102,7 +95,7 @@ export async function loadFicheProcessusData(
       .order("ordre"),
     supabase
       .from("indicateurs")
-      .select("nom, cible, unite, formule_calcul, frequence_mesure")
+      .select("nom, cible, unite, sens, formule_calcul, frequence_mesure")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("nom"),
@@ -172,8 +165,7 @@ export async function loadFicheProcessusData(
     })),
     indicateurs: (indicateursRes.data ?? []).map((ind) => ({
       nom: ind.nom,
-      cible: ind.cible,
-      unite: ind.unite,
+      cible: cibleAffichee(ind.cible, ind.sens, ind.unite),
       formule: ind.formule_calcul,
       frequence: FREQUENCE_LABELS[ind.frequence_mesure] ?? ind.frequence_mesure,
     })),
