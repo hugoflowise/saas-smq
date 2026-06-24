@@ -2086,8 +2086,15 @@ export type Database = {
           fiche_approuvee_le: string | null
           fiche_approuvee_par: string | null
           fiche_note_revision: string | null
+          fiche_publiee_le: string | null
           fiche_redacteur: string | null
+          fiche_redige_le: string | null
+          fiche_redige_par: string | null
+          fiche_reference: string | null
           fiche_signature: Json | null
+          fiche_soumis_le: string | null
+          fiche_soumis_par: string | null
+          fiche_statut: Database["public"]["Enums"]["document_statut"]
           fiche_verificateur: string | null
           fiche_version: string | null
           finalite: string | null
@@ -2122,8 +2129,15 @@ export type Database = {
           fiche_approuvee_le?: string | null
           fiche_approuvee_par?: string | null
           fiche_note_revision?: string | null
+          fiche_publiee_le?: string | null
           fiche_redacteur?: string | null
+          fiche_redige_le?: string | null
+          fiche_redige_par?: string | null
+          fiche_reference?: string | null
           fiche_signature?: Json | null
+          fiche_soumis_le?: string | null
+          fiche_soumis_par?: string | null
+          fiche_statut?: Database["public"]["Enums"]["document_statut"]
           fiche_verificateur?: string | null
           fiche_version?: string | null
           finalite?: string | null
@@ -2158,8 +2172,15 @@ export type Database = {
           fiche_approuvee_le?: string | null
           fiche_approuvee_par?: string | null
           fiche_note_revision?: string | null
+          fiche_publiee_le?: string | null
           fiche_redacteur?: string | null
+          fiche_redige_le?: string | null
+          fiche_redige_par?: string | null
+          fiche_reference?: string | null
           fiche_signature?: Json | null
+          fiche_soumis_le?: string | null
+          fiche_soumis_par?: string | null
+          fiche_statut?: Database["public"]["Enums"]["document_statut"]
           fiche_verificateur?: string | null
           fiche_version?: string | null
           finalite?: string | null
@@ -2194,6 +2215,20 @@ export type Database = {
           {
             foreignKeyName: "processus_fiche_approuvee_par_fkey"
             columns: ["fiche_approuvee_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_redige_par_fkey"
+            columns: ["fiche_redige_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_soumis_par_fkey"
+            columns: ["fiche_soumis_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

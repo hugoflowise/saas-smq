@@ -27,10 +27,7 @@ export type FicheInitialData = {
   ressourcesLogicielles: string;
   ressourcesFinancieres: string;
   ressourcesDocumentaires: string;
-  ficheRedacteur: string;
-  ficheVerificateur: string;
-  ficheVersion: string;
-  ficheNoteRevision: string;
+  reference: string;
   activites: { activite: string; responsable: string; documents: string }[];
   interactions: { fournisseur: string; nature: string; client: string }[];
 };
@@ -48,6 +45,7 @@ export async function loadFicheProcessusData(
 ): Promise<{
   data: FicheProcessusData;
   initial: FicheInitialData;
+  statut: string;
   isApproved: boolean;
   users: FicheUser[];
 } | null> {
@@ -56,7 +54,7 @@ export async function loadFicheProcessusData(
   const { data: p } = await supabase
     .from("processus")
     .select(
-      "id, nom, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_version, fiche_redacteur, fiche_verificateur, fiche_approuvee_par, fiche_approuvee_le, fiche_note_revision",
+      "id, nom, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_statut, fiche_reference, fiche_version, fiche_redige_par, fiche_soumis_par, fiche_approuvee_par, fiche_approuvee_le, fiche_publiee_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -120,7 +118,12 @@ export async function loadFicheProcessusData(
       .order("titre"),
   ]);
 
-  const personIds = [p.pilote_id, p.fiche_approuvee_par].filter(Boolean) as string[];
+  const personIds = [
+    p.pilote_id,
+    p.fiche_redige_par,
+    p.fiche_soumis_par,
+    p.fiche_approuvee_par,
+  ].filter(Boolean) as string[];
   const { data: persons } = personIds.length
     ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
     : { data: [] };
@@ -193,12 +196,14 @@ export async function loadFicheProcessusData(
       })),
       ...(docsRes.data ?? []).map((d) => ({ reference: d.code, intitule: d.titre, type: d.type })),
     ],
+    reference: p.fiche_reference,
+    statut: p.fiche_statut,
     version: p.fiche_version,
-    redacteur: p.fiche_redacteur,
-    verificateur: p.fiche_verificateur,
+    versionDate: p.fiche_publiee_le,
+    redacteur: p.fiche_redige_par ? (nameById.get(p.fiche_redige_par) ?? null) : null,
+    verificateur: p.fiche_soumis_par ? (nameById.get(p.fiche_soumis_par) ?? null) : null,
     approbateur: p.fiche_approuvee_par ? (nameById.get(p.fiche_approuvee_par) ?? null) : null,
     approuveeLe: p.fiche_approuvee_le,
-    noteRevision: p.fiche_note_revision,
     genereLe: formatDate(todayISO()),
   };
 
@@ -219,10 +224,7 @@ export async function loadFicheProcessusData(
     ressourcesLogicielles: p.ressources_logicielles ?? "",
     ressourcesFinancieres: p.ressources_financieres ?? "",
     ressourcesDocumentaires: p.ressources_documentaires ?? "",
-    ficheRedacteur: p.fiche_redacteur ?? "",
-    ficheVerificateur: p.fiche_verificateur ?? "",
-    ficheVersion: p.fiche_version ?? "",
-    ficheNoteRevision: p.fiche_note_revision ?? "",
+    reference: p.fiche_reference ?? "",
     activites: (activitesRes.data ?? []).map((a) => ({
       activite: a.activite,
       responsable: a.responsable ?? "",
@@ -235,5 +237,11 @@ export async function loadFicheProcessusData(
     })),
   };
 
-  return { data, initial, isApproved: Boolean(p.fiche_approuvee_par), users: usersList };
+  return {
+    data,
+    initial,
+    statut: p.fiche_statut,
+    isApproved: Boolean(p.fiche_approuvee_par),
+    users: usersList,
+  };
 }

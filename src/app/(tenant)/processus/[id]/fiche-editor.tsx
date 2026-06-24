@@ -32,10 +32,7 @@ export type FicheEditorInitial = {
   ressourcesLogicielles: string;
   ressourcesFinancieres: string;
   ressourcesDocumentaires: string;
-  ficheRedacteur: string;
-  ficheVerificateur: string;
-  ficheVersion: string;
-  ficheNoteRevision: string;
+  reference: string;
   activites: Activite[];
   interactions: Interaction[];
 };
@@ -75,10 +72,7 @@ export function FicheEditor({
       ressourcesLogicielles: f.get("ressourcesLogicielles") || undefined,
       ressourcesFinancieres: f.get("ressourcesFinancieres") || undefined,
       ressourcesDocumentaires: f.get("ressourcesDocumentaires") || undefined,
-      ficheRedacteur: f.get("ficheRedacteur") || undefined,
-      ficheVerificateur: f.get("ficheVerificateur") || undefined,
-      ficheVersion: f.get("ficheVersion") || undefined,
-      ficheNoteRevision: f.get("ficheNoteRevision") || undefined,
+      reference: f.get("reference") || undefined,
       activites: activites.filter((a) => a.activite.trim()),
       interactions: interactions.filter((it) => it.fournisseur.trim() || it.client.trim()),
     });
@@ -100,6 +94,12 @@ export function FicheEditor({
       {/* 1. Carte d'identité */}
       <Bloc titre="Carte d'identité du processus">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Champ
+            name="reference"
+            label="Référence du document"
+            defaultValue={initial.reference}
+            ligne
+          />
           <Champ name="nom" label="Intitulé du processus" defaultValue={initial.nom} ligne />
           <div className="flex flex-col gap-2">
             <Label htmlFor="type">Type de processus</Label>
@@ -266,30 +266,10 @@ export function FicheEditor({
         ))}
       </Liste>
 
-      {/* 9. Validation (rédacteur / vérificateur / version) */}
-      <Bloc titre="Validation">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Champ
-            name="ficheRedacteur"
-            label="Rédigé par"
-            defaultValue={initial.ficheRedacteur}
-            ligne
-          />
-          <Champ
-            name="ficheVerificateur"
-            label="Vérifié par"
-            defaultValue={initial.ficheVerificateur}
-            ligne
-          />
-          <Champ name="ficheVersion" label="Version" defaultValue={initial.ficheVersion} ligne />
-          <Champ
-            name="ficheNoteRevision"
-            label="Nature de la révision"
-            defaultValue={initial.ficheNoteRevision}
-            ligne
-          />
-        </div>
-      </Bloc>
+      <p className="text-muted-foreground text-xs">
+        Rédacteur, vérificateur, approbateur et version se renseignent automatiquement au fil du
+        cycle de vie (soumission, approbation, publication).
+      </p>
 
       <div className="flex gap-2">
         <Button type="submit" disabled={pending}>

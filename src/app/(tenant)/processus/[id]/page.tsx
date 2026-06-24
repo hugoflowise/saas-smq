@@ -196,9 +196,9 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               data={fiche.data}
               initial={fiche.initial}
               users={fiche.users}
+              statut={fiche.statut}
               canWrite={canWrite(ctx.role)}
               canApprove={canApprove(ctx.role)}
-              isApproved={fiche.isApproved}
               printHref={`/print/processus-fiche/${id}`}
             />
           ) : null}
