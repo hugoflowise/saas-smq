@@ -7,7 +7,13 @@ export type FicheActivite = {
   documents: string | null;
 };
 export type FicheInteraction = { sens: string; partenaire: string; nature: string | null };
-export type FicheIndicateur = { nom: string; cible: number | null; unite: string | null };
+export type FicheIndicateur = {
+  nom: string;
+  cible: number | null;
+  unite: string | null;
+  formule: string | null;
+  frequence: string | null;
+};
 export type FicheRisque = { intitule: string; type: string; criticite: number | null };
 export type FicheDocument = { reference: string | null; intitule: string; type: string };
 
@@ -202,6 +208,8 @@ export function FicheProcessus(data: FicheProcessusData) {
             <thead>
               <tr style={HEAD}>
                 <th className="px-3 py-1.5 text-left font-semibold">Indicateur</th>
+                <th className="px-3 py-1.5 text-left font-semibold">Formule / mode de calcul</th>
+                <th className="px-3 py-1.5 text-left font-semibold">Fréquence</th>
                 <th className="px-3 py-1.5 text-left font-semibold">Objectif / cible</th>
               </tr>
             </thead>
@@ -209,6 +217,8 @@ export function FicheProcessus(data: FicheProcessusData) {
               {data.indicateurs.map((ind) => (
                 <tr key={ind.nom} className="border-b align-top">
                   <td className="px-3 py-2">{ind.nom}</td>
+                  <td className="whitespace-pre-wrap px-3 py-2">{ind.formule?.trim() || "-"}</td>
+                  <td className="px-3 py-2">{ind.frequence ?? "-"}</td>
                   <td className="px-3 py-2">
                     {ind.cible !== null ? `${ind.cible}${ind.unite ? ` ${ind.unite}` : ""}` : "-"}
                   </td>
@@ -281,7 +291,8 @@ export function FicheProcessus(data: FicheProcessusData) {
             <tr style={HEAD}>
               <th className="px-3 py-1.5 text-left font-semibold">Version</th>
               <th className="px-3 py-1.5 text-left font-semibold">Date</th>
-              <th className="px-3 py-1.5 text-left font-semibold">Nature</th>
+              <th className="px-3 py-1.5 text-left font-semibold">Nature de la modification</th>
+              <th className="px-3 py-1.5 text-left font-semibold">Rédacteur</th>
             </tr>
           </thead>
           <tbody>
@@ -289,6 +300,7 @@ export function FicheProcessus(data: FicheProcessusData) {
               <td className="px-3 py-2">{data.version ?? "Projet"}</td>
               <td className="px-3 py-2">{data.approuveeLe ? formatDate(data.approuveeLe) : "-"}</td>
               <td className="px-3 py-2">{data.noteRevision ?? "Création de la fiche"}</td>
+              <td className="px-3 py-2">{data.redacteur?.trim() || "-"}</td>
             </tr>
           </tbody>
         </table>
