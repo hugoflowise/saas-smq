@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export type Societe = {
   nom_societe: string;
   logo_url: string | null;
@@ -12,14 +14,28 @@ export type Societe = {
 };
 
 // Couleur d'accent par défaut (neutre) si le client n'a pas défini de charte.
-const CHARTE_DEFAUT = "#0b1120";
+const CHARTE_DEFAUT = "#5b7a8c";
 
-/** Convertit un hex (#rrggbb) en rgba ; retombe sur la couleur par défaut si invalide. */
-function hexToRgba(hex: string, alpha: number): string {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) return hexToRgba(CHARTE_DEFAUT, alpha);
-  const n = Number.parseInt(m[1], 16);
+function normHex(hex: string | null | undefined): string {
+  return /^#?[0-9a-f]{6}$/i.test((hex ?? "").trim())
+    ? `#${(hex as string).trim().replace(/^#/, "")}`
+    : CHARTE_DEFAUT;
+}
+
+/** Convertit un hex (#rrggbb) en rgba. */
+function rgba(hex: string, alpha: number): string {
+  const n = Number.parseInt(hex.replace(/^#/, ""), 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+/** Texte lisible (blanc ou foncé) sur un fond de couleur charte. */
+function texteContraste(hex: string): string {
+  const n = Number.parseInt(hex.replace(/^#/, ""), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? "#0b1120" : "#ffffff";
 }
 
 function ligneLegale(s: Societe): string {
@@ -34,9 +50,10 @@ function ligneLegale(s: Societe): string {
 }
 
 /**
- * Feuille de document officiel : en-tête (logo client + titre + métadonnées),
- * corps, pied de page légal société. Les accents (surtitre, filets, encadré de
- * métadonnées) reprennent la couleur de charte du client.
+ * Feuille de document officiel, calquée sur le modèle de fiche maîtrisée :
+ * bandeau d'en-tête coloré (type + intitulé) + mini-tableau d'identité + logo,
+ * titres de section et tableaux à la couleur de charte, pied de page légal.
+ * Utilisée à l'écran (édition + lecture) et à l'impression.
  */
 export function DocumentPaper({
   surtitre,
@@ -55,51 +72,69 @@ export function DocumentPaper({
   className?: string;
   children: React.ReactNode;
 }) {
-  const charte = /^#?[0-9a-f]{6}$/i.test((societe.couleur_charte ?? "").trim())
-    ? (societe.couleur_charte as string)
-    : CHARTE_DEFAUT;
+  const charte = normHex(societe.couleur_charte);
+  const surBande = texteContraste(charte);
+  const items = meta ?? [];
+
+  // Les titres de section du corps (h1/h2/h3) reprennent la couleur de charte.
+  const style = { "--charte": charte } as CSSProperties;
 
   return (
     <article
-      className={`doc-page mx-auto max-w-3xl bg-white p-12 text-[#0b1120] shadow-sm ${className ?? ""}`}
+      style={style}
+      className={`doc-page mx-auto max-w-3xl bg-white p-10 text-[#0b1120] shadow-sm ${className ?? ""}`}
     >
-      <header
-        className="mb-8 flex items-start justify-between gap-6 pb-5"
-        style={{ borderBottom: `2px solid ${hexToRgba(charte, 0.3)}` }}
-      >
-        <div className="min-w-0 border-l-4 pl-3" style={{ borderColor: charte }}>
+      <header className="mb-8 flex items-stretch gap-3">
+        {/* Bandeau titre coloré (type + intitulé) */}
+        <div
+          className="flex min-w-0 flex-1 flex-col justify-center rounded-md px-4 py-3"
+          style={{ backgroundColor: charte, color: surBande }}
+        >
           {surtitre ? (
-            <p
-              className="font-medium text-xs uppercase tracking-[0.12em]"
-              style={{ color: charte }}
-            >
-              {surtitre}
-            </p>
+            <p className="font-semibold text-sm uppercase tracking-[0.08em]">{surtitre}</p>
           ) : null}
-          <h1 className="mt-1 font-semibold text-2xl tracking-tight">{titre}</h1>
-          <p className="mt-1 text-[#0b1120]/60 text-sm">{societe.nom_societe}</p>
+          <p className="mt-0.5 text-sm italic opacity-90">{titre}</p>
         </div>
+
+        {/* Mini-tableau d'identité (statut, version…) */}
+        {items.length > 0 ? (
+          <div
+            className="hidden w-64 shrink-0 overflow-hidden rounded-md border text-xs sm:block"
+            style={{ borderColor: rgba(charte, 0.35) }}
+          >
+            {items.slice(0, 3).map((m) => (
+              <div key={m.label} className="flex border-b last:border-b-0">
+                <span
+                  className="w-24 shrink-0 px-2 py-1.5 font-semibold"
+                  style={{ backgroundColor: rgba(charte, 0.12), color: rgba(charte, 0.95) }}
+                >
+                  {m.label}
+                </span>
+                <span className="px-2 py-1.5">{m.value}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         {societe.logo_url ? (
           // biome-ignore lint/performance/noImgElement: logo client, document imprimable
           <img
             src={societe.logo_url}
             alt={societe.nom_societe}
-            className="h-16 w-auto shrink-0 object-contain"
+            className="h-16 w-auto shrink-0 self-start object-contain"
           />
         ) : null}
       </header>
 
-      {meta && meta.length > 0 ? (
+      {/* Métadonnées complémentaires (au-delà des 3 affichées dans l'en-tête) */}
+      {items.length > 3 ? (
         <dl
           className="mb-8 grid grid-cols-2 gap-x-8 gap-y-2 rounded-lg p-4 text-sm sm:grid-cols-3"
-          style={{ backgroundColor: hexToRgba(charte, 0.06) }}
+          style={{ backgroundColor: rgba(charte, 0.06) }}
         >
-          {meta.map((m) => (
+          {items.slice(3).map((m) => (
             <div key={m.label} className="flex flex-col">
-              <dt
-                className="text-xs uppercase tracking-wide"
-                style={{ color: hexToRgba(charte, 0.8) }}
-              >
+              <dt className="text-xs uppercase tracking-wide" style={{ color: rgba(charte, 0.8) }}>
                 {m.label}
               </dt>
               <dd className="font-medium">{m.value}</dd>
@@ -108,16 +143,22 @@ export function DocumentPaper({
         </dl>
       ) : null}
 
-      <div className="leading-relaxed">{children}</div>
+      <div className="leading-relaxed [&_:is(h1,h2,h3)]:font-semibold [&_:is(h1,h2,h3)]:text-[color:var(--charte)]">
+        {children}
+      </div>
 
       <footer
-        className="mt-12 pt-4 text-[#0b1120]/55 text-[11px] leading-relaxed"
-        style={{ borderTop: `1px solid ${hexToRgba(charte, 0.25)}` }}
+        className="mt-12 flex flex-wrap items-center justify-between gap-2 pt-3 text-[#0b1120]/55 text-[11px] leading-relaxed"
+        style={{ borderTop: `2px solid ${rgba(charte, 0.3)}` }}
       >
-        <p className="font-medium">{ligneLegale(societe)}</p>
-        {societe.mentions_legales ? <p>{societe.mentions_legales}</p> : null}
-        {genereLe ? <p className="mt-1">Document généré le {genereLe}.</p> : null}
+        <p className="font-medium italic">{titre}</p>
+        {genereLe ? <p>Document généré le {genereLe}</p> : null}
       </footer>
+
+      <div className="mt-1 text-[#0b1120]/45 text-[10px] leading-relaxed">
+        <p>{ligneLegale(societe)}</p>
+        {societe.mentions_legales ? <p>{societe.mentions_legales}</p> : null}
+      </div>
     </article>
   );
 }
