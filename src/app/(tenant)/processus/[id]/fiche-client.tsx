@@ -8,12 +8,14 @@ import { FicheProcessus, type FicheProcessusData } from "@/components/fiche-proc
 import { SignatureCapture } from "@/components/signature-capture";
 import { Button } from "@/components/ui/button";
 import { approveFicheProcessusAction } from "@/lib/actions/processus-fiche";
+import type { FicheUser } from "@/lib/fiche-processus-data";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { FicheEditor, type FicheEditorInitial } from "./fiche-editor";
 
 export function FicheClient({
   data,
   initial,
+  users,
   canWrite,
   canApprove,
   isApproved,
@@ -21,6 +23,7 @@ export function FicheClient({
 }: {
   data: FicheProcessusData;
   initial: FicheEditorInitial;
+  users: FicheUser[];
   canWrite: boolean;
   canApprove: boolean;
   isApproved: boolean;
@@ -41,7 +44,7 @@ export function FicheClient({
   }
 
   if (editing) {
-    return <FicheEditor initial={initial} onDone={() => setEditing(false)} />;
+    return <FicheEditor initial={initial} users={users} onDone={() => setEditing(false)} />;
   }
 
   return (

@@ -2294,9 +2294,11 @@ export type Database = {
       }
       processus_interactions: {
         Row: {
+          client: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
+          fournisseur: string | null
           id: string
           nature: string | null
           ordre: number
@@ -2308,9 +2310,11 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          client?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          fournisseur?: string | null
           id?: string
           nature?: string | null
           ordre?: number
@@ -2322,9 +2326,11 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          client?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          fournisseur?: string | null
           id?: string
           nature?: string | null
           ordre?: number
