@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,6 +60,9 @@ export default async function NcDetailPage({
     .select("id, nom")
     .eq("tenant_id", tid)
     .order("ordre_affichage", { ascending: true });
+  const processusNom = nc.processus_concerne
+    ? ((processusOptions ?? []).find((p) => p.id === nc.processus_concerne)?.nom ?? null)
+    : null;
 
   const { data: links } = await supabase
     .from("nc_actions")
@@ -134,6 +138,14 @@ export default async function NcDetailPage({
             <CardContent className="grid grid-cols-1 gap-5 pt-6 sm:grid-cols-2">
               <Field label="Description" value={nc.description} />
               <Field label="Date de constat" value={nc.date_constat} />
+              <div>
+                <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                  Processus concerné
+                </p>
+                <p className="mt-1 text-sm">
+                  <ProcessusLink id={nc.processus_concerne} nom={processusNom} />
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

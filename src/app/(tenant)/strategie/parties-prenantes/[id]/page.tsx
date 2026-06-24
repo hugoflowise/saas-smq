@@ -2,6 +2,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   criticiteClass,
@@ -183,9 +184,10 @@ export default async function PartieDetailPage({ params }: { params: Promise<{ i
                     {a.processus_id ? (
                       <span className="text-muted-foreground">
                         Processus :{" "}
-                        <span className="text-foreground">
-                          {processusNom.get(a.processus_id) ?? "-"}
-                        </span>
+                        <ProcessusLink
+                          id={a.processus_id}
+                          nom={processusNom.get(a.processus_id) ?? null}
+                        />
                       </span>
                     ) : null}
                     {a.integration_pa ? (

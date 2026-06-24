@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
@@ -94,7 +95,10 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
         <CardContent className="grid grid-cols-2 gap-5 pt-6 sm:grid-cols-3">
           <Field label="Type" value={TYPE_LABELS[ro.type] ?? ro.type} />
           <Field label="Statut" value={STATUT_LABELS[ro.statut] ?? ro.statut} />
-          <Field label="Processus" value={processusNom} />
+          <Field
+            label="Processus"
+            value={<ProcessusLink id={ro.processus_id} nom={processusNom} />}
+          />
           <Field label="Gravité × Probabilité" value={`${ro.gravite} × ${ro.probabilite}`} />
           <Field
             label="Criticité brute"
