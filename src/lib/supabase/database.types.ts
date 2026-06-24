@@ -1909,14 +1909,24 @@ export type Database = {
           contenu: Json | null
           created_at: string
           created_by: string | null
+          definitions: Json
           deleted_at: string | null
           description_courte: string | null
+          diffusion: string | null
+          domaine_application: string | null
+          glossaire_abreviations: string | null
+          glossaire_sigles: string | null
+          glossaire_symboles: string | null
           id: string
           note_revision: string | null
+          objet: string | null
           pilote_id: string | null
           processus_id: string | null
           redacteur: string | null
           reference_iso: string[] | null
+          references_appli: Json
+          references_doc: Json
+          resume: string | null
           signature_data: Json | null
           soumis_le: string | null
           soumis_par: string | null
@@ -1934,14 +1944,24 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          definitions?: Json
           deleted_at?: string | null
           description_courte?: string | null
+          diffusion?: string | null
+          domaine_application?: string | null
+          glossaire_abreviations?: string | null
+          glossaire_sigles?: string | null
+          glossaire_symboles?: string | null
           id?: string
           note_revision?: string | null
+          objet?: string | null
           pilote_id?: string | null
           processus_id?: string | null
           redacteur?: string | null
           reference_iso?: string[] | null
+          references_appli?: Json
+          references_doc?: Json
+          resume?: string | null
           signature_data?: Json | null
           soumis_le?: string | null
           soumis_par?: string | null
@@ -1959,14 +1979,24 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          definitions?: Json
           deleted_at?: string | null
           description_courte?: string | null
+          diffusion?: string | null
+          domaine_application?: string | null
+          glossaire_abreviations?: string | null
+          glossaire_sigles?: string | null
+          glossaire_symboles?: string | null
           id?: string
           note_revision?: string | null
+          objet?: string | null
           pilote_id?: string | null
           processus_id?: string | null
           redacteur?: string | null
           reference_iso?: string[] | null
+          references_appli?: Json
+          references_doc?: Json
+          resume?: string | null
           signature_data?: Json | null
           soumis_le?: string | null
           soumis_par?: string | null
