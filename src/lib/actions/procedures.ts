@@ -77,44 +77,6 @@ async function loadProcedure(tenantId: string, id: string) {
   return { supabase, procedure: data };
 }
 
-const revisionSchema = z.object({
-  redacteur: z.string().trim().optional(),
-  verificateur: z.string().trim().optional(),
-  noteRevision: z.string().trim().optional(),
-});
-
-/** Met à jour les responsabilités (rédacteur/vérificateur) et la note de révision (brouillon). */
-export async function updateProcedureRevisionAction(
-  id: string,
-  input: unknown,
-): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
-
-  const parsed = revisionSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
-  }
-
-  const { supabase, procedure } = await loadProcedure(ctx.effectiveTenantId, id);
-  if (!procedure) return { ok: false, error: "Procédure introuvable." };
-
-  const { error } = await supabase
-    .from("procedures")
-    .update({
-      redacteur: parsed.data.redacteur ?? null,
-      verificateur: parsed.data.verificateur ?? null,
-      note_revision: parsed.data.noteRevision ?? null,
-      updated_by: ctx.userId,
-    })
-    .eq("id", id);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath(`/documentation/procedures/${id}`);
-  return { ok: true };
-}
-
 export async function saveProcedureContenuAction(id: string, contenu: Json): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
@@ -290,6 +252,15 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
     .eq("procedure_id", id);
   const version = `v${(count ?? 0) + 1}`;
 
+  // Rubriques structurées figées dans l'instantané de version (phase 2).
+  const { data: sections } = await supabase
+    .from("procedures")
+    .select(
+      "objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
   const { data: created, error: versionError } = await supabase
     .from("procedures_versions")
     .insert({
@@ -297,6 +268,7 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
       procedure_id: id,
       version,
       contenu_snapshot: procedure.contenu,
+      sections_snapshot: (sections ?? null) as Json,
       approved_by: procedure.approved_by,
       approved_at: procedure.approved_at,
       signature_data: procedure.signature_data,

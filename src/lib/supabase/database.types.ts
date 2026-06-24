@@ -2071,6 +2071,7 @@ export type Database = {
           pdf_url: string | null
           procedure_id: string
           redacteur: string | null
+          sections_snapshot: Json | null
           signature_data: Json | null
           tenant_id: string
           verificateur: string | null
@@ -2086,6 +2087,7 @@ export type Database = {
           pdf_url?: string | null
           procedure_id: string
           redacteur?: string | null
+          sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id: string
           verificateur?: string | null
@@ -2101,6 +2103,7 @@ export type Database = {
           pdf_url?: string | null
           procedure_id?: string
           redacteur?: string | null
+          sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id?: string
           verificateur?: string | null

@@ -16,7 +16,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ProcedureInfosEditor } from "./procedure-infos-editor";
-import { ProcedureRevisionForm } from "./procedure-revision-form";
 
 export default async function ProcedureDetailPage({
   params,
@@ -215,25 +214,6 @@ export default async function ProcedureDetailPage({
         </div>
 
         <aside className="flex flex-col gap-6 lg:sticky lg:top-4 lg:self-start">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Responsabilités &amp; révision</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProcedureRevisionForm
-                id={procedure.id}
-                redacteur={procedure.redacteur}
-                verificateur={procedure.verificateur}
-                noteRevision={procedure.note_revision}
-                approverName={
-                  procedure.approved_by ? (nameById.get(procedure.approved_by) ?? null) : null
-                }
-                canWrite={canWrite}
-                editable={procedure.statut === "brouillon"}
-              />
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Historique des versions</CardTitle>
