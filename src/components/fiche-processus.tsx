@@ -33,13 +33,23 @@ export type FicheProcessusData = {
   risques: FicheRisque[];
   opportunites: FicheRisque[];
   documents: FicheDocument[];
+  reference: string | null;
+  statut: string;
   version: string | null;
+  versionDate: string | null;
   redacteur: string | null;
   verificateur: string | null;
   approbateur: string | null;
   approuveeLe: string | null;
-  noteRevision: string | null;
   genereLe?: string;
+};
+
+const STATUT_LABELS: Record<string, string> = {
+  brouillon: "Brouillon",
+  en_revue: "En revue",
+  approuvee: "Approuvée",
+  publiee: "Publiée",
+  archivee: "Archivée",
 };
 
 const HEAD: React.CSSProperties = {
@@ -74,10 +84,13 @@ function Puces({ texte }: { texte: string | null }) {
 
 /** Rendu de la fiche d'identité d'un processus, sur le gabarit officiel charté. */
 export function FicheProcessus(data: FicheProcessusData) {
+  const versionValue =
+    data.version && data.versionDate
+      ? `${data.version} - ${formatDate(data.versionDate)}`
+      : `Projet (${STATUT_LABELS[data.statut] ?? data.statut})`;
   const meta = [
-    { label: "Version", value: data.version ? data.version : "Projet (non approuvée)" },
-    { label: "Type", value: data.typeLabel },
-    ...(data.piloteName ? [{ label: "Pilote", value: data.piloteName }] : []),
+    { label: "Référence", value: data.reference?.trim() || "-" },
+    { label: "Version / Date", value: versionValue },
   ];
 
   const carte: [string, string | null][] = [
@@ -315,8 +328,10 @@ export function FicheProcessus(data: FicheProcessusData) {
           <tbody>
             <tr className="border-b align-top">
               <td className="px-3 py-2">{data.version ?? "Projet"}</td>
-              <td className="px-3 py-2">{data.approuveeLe ? formatDate(data.approuveeLe) : "-"}</td>
-              <td className="px-3 py-2">{data.noteRevision ?? "Création de la fiche"}</td>
+              <td className="px-3 py-2">{data.versionDate ? formatDate(data.versionDate) : "-"}</td>
+              <td className="px-3 py-2">
+                {data.version ? "Version publiée" : "Création de la fiche"}
+              </td>
               <td className="px-3 py-2">{data.redacteur?.trim() || "-"}</td>
             </tr>
           </tbody>

@@ -5,9 +5,11 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { canApprove, canWrite } from "@/lib/permissions";
-import type { Json } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+
+type ProcessusUpdate = Database["public"]["Tables"]["processus"]["Update"];
 
 const ficheSchema = z.object({
   id: z.string().uuid(),
@@ -26,10 +28,7 @@ const ficheSchema = z.object({
   ressourcesLogicielles: z.string().trim().optional(),
   ressourcesFinancieres: z.string().trim().optional(),
   ressourcesDocumentaires: z.string().trim().optional(),
-  ficheRedacteur: z.string().trim().optional(),
-  ficheVerificateur: z.string().trim().optional(),
-  ficheVersion: z.string().trim().optional(),
-  ficheNoteRevision: z.string().trim().optional(),
+  reference: z.string().trim().optional(),
   activites: z
     .array(
       z.object({
@@ -64,6 +63,17 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
+  // Modifiable uniquement en brouillon (comme les autres documents maîtrisés).
+  const { data: current } = await supabase
+    .from("processus")
+    .select("fiche_statut, fiche_redige_par")
+    .eq("id", d.id)
+    .eq("tenant_id", tid)
+    .maybeSingle();
+  if (current && current.fiche_statut !== "brouillon") {
+    return { ok: false, error: "La fiche n'est modifiable qu'en brouillon." };
+  }
+
   const { error: upErr } = await supabase
     .from("processus")
     .update({
@@ -82,10 +92,10 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
       ressources_logicielles: d.ressourcesLogicielles ?? null,
       ressources_financieres: d.ressourcesFinancieres ?? null,
       ressources_documentaires: d.ressourcesDocumentaires ?? null,
-      fiche_redacteur: d.ficheRedacteur ?? null,
-      fiche_verificateur: d.ficheVerificateur ?? null,
-      fiche_version: d.ficheVersion ?? null,
-      fiche_note_revision: d.ficheNoteRevision ?? null,
+      fiche_reference: d.reference ?? null,
+      // Rédacteur = premier auteur du brouillon (renseigné automatiquement).
+      fiche_redige_par: current?.fiche_redige_par ?? ctx.userId,
+      fiche_redige_le: current?.fiche_redige_par ? undefined : new Date().toISOString(),
       updated_by: ctx.userId,
     })
     .eq("id", d.id)
@@ -138,38 +148,115 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
   return { ok: true };
 }
 
-/** Approuve et signe la fiche d'identité (réservé dirigeant/admin). */
-export async function approveFicheProcessusAction(id: string): Promise<ActionResult> {
+/** Transitions de statut autorisées (publication gérée à part). */
+const TRANSITIONS: Record<string, string[]> = {
+  brouillon: ["en_revue"],
+  en_revue: ["brouillon", "approuvee"],
+  approuvee: ["en_revue"],
+  publiee: ["brouillon"], // démarre une nouvelle version
+  archivee: [],
+};
+
+/** Lettre de version suivante : A, B, C… (première publication = A). */
+function prochaineVersion(actuelle: string | null): string {
+  if (!actuelle?.trim()) return "A";
+  const code = actuelle.trim().toUpperCase().charCodeAt(0);
+  return code >= 65 && code < 90 ? String.fromCharCode(code + 1) : "A";
+}
+
+/**
+ * Change le statut de la fiche dans le cycle de vie documentaire.
+ * - soumettre (brouillon -> en_revue) et nouvelle version (publiee -> brouillon) : rédacteur
+ * - demander des modifs / approuver (depuis en_revue) : approbateur (dirigeant)
+ * L'approbation est signée électroniquement.
+ */
+export async function transitionFicheAction(id: string, target: string): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  if (!canApprove(ctx.role)) return { ok: false, error: "Seul le dirigeant peut approuver." };
+  const tid = ctx.effectiveTenantId;
 
   const supabase = await createClient();
-  const h = await headers();
-  const { data: existing } = await supabase
+  const { data: fiche } = await supabase
     .from("processus")
-    .select("fiche_version")
+    .select("fiche_statut")
     .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId)
+    .eq("tenant_id", tid)
     .maybeSingle();
+  if (!fiche) return { ok: false, error: "Fiche introuvable." };
+
+  if (!TRANSITIONS[fiche.fiche_statut]?.includes(target)) {
+    return { ok: false, error: "Transition non autorisée." };
+  }
+
+  // Depuis « en revue » (approuver / renvoyer) => approbateur ; sinon rédacteur.
+  const allowed = fiche.fiche_statut === "en_revue" ? canApprove(ctx.role) : canWrite(ctx.role);
+  if (!allowed) return { ok: false, error: "Droits insuffisants pour cette action." };
+
+  const update: ProcessusUpdate = {
+    fiche_statut: target as ProcessusUpdate["fiche_statut"],
+    updated_by: ctx.userId,
+  };
+
+  if (target === "en_revue") {
+    // Vérificateur = celui qui soumet à approbation.
+    update.fiche_soumis_par = ctx.userId;
+    update.fiche_soumis_le = new Date().toISOString();
+  }
+
+  if (target === "approuvee") {
+    const h = await headers();
+    update.fiche_approuvee_par = ctx.userId;
+    update.fiche_approuvee_le = new Date().toISOString();
+    update.fiche_signature = {
+      user_id: ctx.userId,
+      signed_at: new Date().toISOString(),
+      ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      user_agent: h.get("user-agent") ?? null,
+    } satisfies Json;
+  }
+
+  const { error } = await supabase
+    .from("processus")
+    .update(update)
+    .eq("id", id)
+    .eq("tenant_id", tid);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/processus/${id}`);
+  return { ok: true };
+}
+
+/** Publie la fiche approuvée : fige la version (A, B, C…) et sa date. */
+export async function publishFicheAction(id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canApprove(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+  const tid = ctx.effectiveTenantId;
+
+  const supabase = await createClient();
+  const { data: fiche } = await supabase
+    .from("processus")
+    .select("fiche_statut, fiche_version")
+    .eq("id", id)
+    .eq("tenant_id", tid)
+    .maybeSingle();
+  if (!fiche) return { ok: false, error: "Fiche introuvable." };
+  if (fiche.fiche_statut !== "approuvee") {
+    return { ok: false, error: "La fiche doit être approuvée avant publication." };
+  }
 
   const { error } = await supabase
     .from("processus")
     .update({
-      fiche_approuvee_par: ctx.userId,
-      fiche_approuvee_le: new Date().toISOString(),
-      fiche_version: existing?.fiche_version || "A",
-      fiche_signature: {
-        user_id: ctx.userId,
-        signed_at: new Date().toISOString(),
-        ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-        user_agent: h.get("user-agent") ?? null,
-      } satisfies Json,
+      fiche_statut: "publiee",
+      fiche_version: prochaineVersion(fiche.fiche_version),
+      fiche_publiee_le: new Date().toISOString(),
       updated_by: ctx.userId,
     })
     .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
+    .eq("tenant_id", tid);
   if (error) return { ok: false, error: error.message };
 
   revalidatePath(`/processus/${id}`);
