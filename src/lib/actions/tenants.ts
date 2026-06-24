@@ -187,6 +187,7 @@ const updateTenantSchema = z.object({
   secteur: z.enum(["SI", "ESN", "AT", "autre"]).optional(),
   dirigeantId: z.string().uuid().optional(),
   dirigeantNom: z.string().trim().optional(),
+  responsableFlowiseId: z.string().uuid().optional().or(z.literal("")),
 });
 
 export async function updateTenantAction(input: unknown): Promise<ActionResult> {
@@ -206,6 +207,7 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
       nom_societe: data.nomSociete,
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
+      responsable_flowise_id: data.responsableFlowiseId ? data.responsableFlowiseId : null,
     })
     .eq("id", data.tenantId);
 

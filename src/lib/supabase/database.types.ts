@@ -3083,6 +3083,7 @@ export type Database = {
           logo_url: string | null
           mentions_legales: string | null
           nom_societe: string
+          responsable_flowise_id: string | null
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
           siret: string | null
           statut: Database["public"]["Enums"]["tenant_statut"]
@@ -3110,6 +3111,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe: string
+          responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           siret?: string | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
@@ -3137,6 +3139,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe?: string
+          responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           siret?: string | null
           statut?: Database["public"]["Enums"]["tenant_statut"]
@@ -3145,7 +3148,15 @@ export type Database = {
           veille_mots_cles?: string | null
           ville?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tenants_responsable_flowise_id_fkey"
+            columns: ["responsable_flowise_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       veille_reglementaire: {
         Row: {
