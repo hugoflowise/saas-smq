@@ -9,6 +9,14 @@ const TYPE_LABELS: Record<string, string> = {
   support: "Support",
 };
 
+const FREQUENCE_LABELS: Record<string, string> = {
+  quotidien: "Quotidienne",
+  hebdo: "Hebdomadaire",
+  mensuel: "Mensuelle",
+  trimestriel: "Trimestrielle",
+  annuel: "Annuelle",
+};
+
 export type FicheInitialData = {
   id: string;
   finalite: string;
@@ -78,7 +86,7 @@ export async function loadFicheProcessusData(
       .order("ordre"),
     supabase
       .from("indicateurs")
-      .select("nom, cible, unite")
+      .select("nom, cible, unite, formule_calcul, frequence_mesure")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("nom"),
@@ -125,7 +133,13 @@ export async function loadFicheProcessusData(
     ressources: p.ressources_associees,
     activites: activitesRes.data ?? [],
     interactions: interactionsRes.data ?? [],
-    indicateurs: indicateursRes.data ?? [],
+    indicateurs: (indicateursRes.data ?? []).map((ind) => ({
+      nom: ind.nom,
+      cible: ind.cible,
+      unite: ind.unite,
+      formule: ind.formule_calcul,
+      frequence: FREQUENCE_LABELS[ind.frequence_mesure] ?? ind.frequence_mesure,
+    })),
     risques: risques.filter((r) => r.type === "risque"),
     opportunites: risques.filter((r) => r.type !== "risque"),
     documents: [
