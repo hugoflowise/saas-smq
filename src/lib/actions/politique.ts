@@ -90,6 +90,12 @@ export async function transitionPolitiqueStatutAction(target: string): Promise<A
     updated_by: ctx.userId,
   };
 
+  // Soumission signée : le rédacteur signe au moment de soumettre à approbation.
+  if (target === "en_revue") {
+    update.soumis_par = ctx.userId;
+    update.soumis_le = new Date().toISOString();
+  }
+
   // Approbation = signature électronique (CDC §8.3)
   if (target === "approuvee") {
     const h = await headers();

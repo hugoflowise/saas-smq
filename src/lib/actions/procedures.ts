@@ -157,6 +157,10 @@ export async function transitionProcedureStatutAction(
     statut: target as ProcedureUpdate["statut"],
     updated_by: ctx.userId,
   };
+  if (target === "en_revue") {
+    update.soumis_par = ctx.userId;
+    update.soumis_le = new Date().toISOString();
+  }
   if (target === "approuvee") {
     const h = await headers();
     update.approved_by = ctx.userId;

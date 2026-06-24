@@ -1763,6 +1763,8 @@ export type Database = {
           created_by: string | null
           id: string
           signature_data: Json | null
+          soumis_le: string | null
+          soumis_par: string | null
           statut: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           updated_at: string
@@ -1777,6 +1779,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           signature_data?: Json | null
+          soumis_le?: string | null
+          soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           updated_at?: string
@@ -1791,6 +1795,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           signature_data?: Json | null
+          soumis_le?: string | null
+          soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id?: string
           updated_at?: string
@@ -1808,6 +1814,13 @@ export type Database = {
           {
             foreignKeyName: "politique_qualite_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_soumis_par_fkey"
+            columns: ["soumis_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1905,6 +1918,8 @@ export type Database = {
           redacteur: string | null
           reference_iso: string[] | null
           signature_data: Json | null
+          soumis_le: string | null
+          soumis_par: string | null
           statut: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           titre: string
@@ -1928,6 +1943,8 @@ export type Database = {
           redacteur?: string | null
           reference_iso?: string[] | null
           signature_data?: Json | null
+          soumis_le?: string | null
+          soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id: string
           titre: string
@@ -1951,6 +1968,8 @@ export type Database = {
           redacteur?: string | null
           reference_iso?: string[] | null
           signature_data?: Json | null
+          soumis_le?: string | null
+          soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
           tenant_id?: string
           titre?: string
@@ -1986,6 +2005,13 @@ export type Database = {
             columns: ["processus_id"]
             isOneToOne: false
             referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procedures_soumis_par_fkey"
+            columns: ["soumis_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
