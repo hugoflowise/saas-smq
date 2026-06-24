@@ -1,3 +1,4 @@
+import type { NotificationItem } from "@/components/layout/notification-bell";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { LegalFooter } from "@/components/legal-footer";
@@ -19,23 +20,6 @@ export default async function TenantLayout({ children }: { children: React.React
     .select("email, role, tenant_id")
     .eq("id", user?.id ?? "")
     .maybeSingle();
-
-  const { data: notifs } = user
-    ? await supabase
-        .from("notifications")
-        .select("id, title, body, link, is_read, created_at")
-        .eq("recipient_user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(15)
-    : { data: [] };
-  const notifications = notifs ?? [];
-  const { count: unreadCount } = user
-    ? await supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("recipient_user_id", user.id)
-        .eq("is_read", false)
-    : { count: 0 };
 
   const email = profile?.email ?? user?.email ?? "";
   const realRole = profile?.role ?? "-";
@@ -68,6 +52,51 @@ export default async function TenantLayout({ children }: { children: React.React
       .eq("id", profile.tenant_id)
       .maybeSingle();
     activeTenantName = tenant?.nom_societe ?? null;
+  }
+
+  // Notifications. En vue simulée, l'admin voit celles adressées au rôle simulé
+  // dans le client actif (pour vérifier que les notifications fonctionnent) ;
+  // sinon, ses propres notifications.
+  const COLS = "id, title, body, link, is_read, created_at";
+  let notifications: NotificationItem[] = [];
+  let unreadCount = 0;
+  if (simulating && simulatedRole && activeTenantId) {
+    const admin = createAdminClient();
+    const { data: roleUsers } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("tenant_id", activeTenantId)
+      .eq("role", simulatedRole);
+    const ids = (roleUsers ?? []).map((u) => u.id);
+    if (ids.length > 0) {
+      const { data } = await admin
+        .from("notifications")
+        .select(COLS)
+        .in("recipient_user_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(15);
+      notifications = data ?? [];
+      const { count } = await admin
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .in("recipient_user_id", ids)
+        .eq("is_read", false);
+      unreadCount = count ?? 0;
+    }
+  } else if (user) {
+    const { data } = await supabase
+      .from("notifications")
+      .select(COLS)
+      .eq("recipient_user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(15);
+    notifications = data ?? [];
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("recipient_user_id", user.id)
+      .eq("is_read", false);
+    unreadCount = count ?? 0;
   }
 
   return (

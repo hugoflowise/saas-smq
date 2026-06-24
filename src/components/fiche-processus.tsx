@@ -339,11 +339,10 @@ export function FicheProcessus(data: FicheProcessusData) {
             </tr>
           </tbody>
         </table>
-        <div className="grid grid-cols-3 overflow-hidden rounded-md border text-sm">
+        <div className="grid grid-cols-2 overflow-hidden rounded-md border text-sm">
           {(
             [
               { label: "Rédigé par", nom: data.redacteur, date: null, signe: false },
-              { label: "Vérifié par", nom: data.verificateur, date: null, signe: false },
               {
                 label: "Approuvé par",
                 nom: data.approbateur,
@@ -363,7 +362,9 @@ export function FicheProcessus(data: FicheProcessusData) {
                     Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
                   </p>
                 ) : (
-                  <p className="mt-auto text-[#0b1120]/40 text-xs">Date et signature</p>
+                  <p className="mt-auto text-[#0b1120]/40 text-xs">
+                    {c.label === "Approuvé par" ? "En attente d'approbation" : "Date et signature"}
+                  </p>
                 )}
               </div>
             </div>
