@@ -23,7 +23,24 @@ export default async function FicheProcessusPrintPage({
 
   return (
     <div className="min-h-full bg-surface print:bg-white">
-      <style>{`@media print { @page { margin: 14mm; } .doc-page { box-shadow: none !important; border: none !important; } }`}</style>
+      {/*
+        Impression A4 : on enveloppe le document dans un <table> dont le <thead>
+        se répète automatiquement en haut de chaque feuille (seule méthode fiable
+        et multi-navigateurs pour un en-tête récurrent) et réserve sa hauteur.
+        Les sauts de page évitent de couper les lignes de tableau. La numérotation
+        des feuilles est fournie par l'option « En-têtes et pieds de page » du
+        navigateur à l'impression.
+      */}
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm 14mm; }
+          .doc-page { box-shadow: none !important; border: none !important; padding: 0 !important; max-width: 100% !important; }
+          tr { break-inside: avoid; }
+          h2 { break-after: avoid; }
+          .fiche-print-table { width: 100%; border-collapse: collapse; }
+          .fiche-print-bande { display: table-header-group; }
+        }
+      `}</style>
 
       <div className="flex items-center justify-between gap-2 border-b bg-card px-6 py-3 print:hidden">
         <Link
@@ -37,7 +54,26 @@ export default async function FicheProcessusPrintPage({
       </div>
 
       <div className="my-8 print:my-0">
-        <FicheProcessus {...fiche.data} />
+        <table className="fiche-print-table">
+          {/* En-tête répété sur chaque feuille à l'impression (masqué à l'écran). */}
+          <thead className="fiche-print-bande hidden">
+            <tr>
+              <td className="pb-3">
+                <div className="mx-auto flex max-w-3xl items-baseline justify-between gap-3 border-[#0b1120]/15 border-b pb-1.5 text-[10px] text-[#0b1120]/60">
+                  <span className="font-medium">{fiche.data.societe.nom_societe}</span>
+                  <span className="italic">Fiche d'identité du processus : {fiche.data.nom}</span>
+                </div>
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <FicheProcessus {...fiche.data} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
