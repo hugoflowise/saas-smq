@@ -38,6 +38,8 @@ export type FicheProcessusData = {
   version: string | null;
   versionDate: string | null;
   redacteur: string | null;
+  signatureRedacteur?: string | null;
+  redacteurSigneLe?: string | null;
   verificateur: string | null;
   approbateur: string | null;
   signatureApprobateur?: string | null;
@@ -343,7 +345,13 @@ export function FicheProcessus(data: FicheProcessusData) {
         <div className="grid grid-cols-2 overflow-hidden rounded-md border text-sm">
           {(
             [
-              { label: "Rédigé par", nom: data.redacteur, date: null, signe: false, image: null },
+              {
+                label: "Rédigé par",
+                nom: data.redacteur,
+                date: data.redacteurSigneLe ?? null,
+                signe: Boolean(data.redacteurSigneLe),
+                image: data.signatureRedacteur ?? null,
+              },
               {
                 label: "Approuvé par",
                 nom: data.approbateur,
