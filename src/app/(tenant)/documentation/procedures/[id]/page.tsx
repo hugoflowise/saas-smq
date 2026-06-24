@@ -100,7 +100,15 @@ export default async function ProcedureDetailPage({
   const canWrite = isApprover || ctx.role === "manager";
 
   const metaExtra = [
-    ...(processus?.nom ? [{ label: "Processus", value: processus.nom }] : []),
+    ...(processus?.nom && procedure.processus_id
+      ? [
+          {
+            label: "Processus",
+            value: processus.nom,
+            href: `/processus/${procedure.processus_id}`,
+          },
+        ]
+      : []),
     ...(procedure.reference_iso?.length
       ? [{ label: "Réf. ISO", value: procedure.reference_iso.join(", ") }]
       : []),

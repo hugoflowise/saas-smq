@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Flowise · Pilotage SMQ",
-    template: "%s · Flowise SMQ",
+    default: "flowise.",
+    template: "%s · flowise.",
   },
   description:
     "Outil de pilotage du Système de Management de la Qualité (ISO 9001) pour sociétés d'ingénierie et ESN.",

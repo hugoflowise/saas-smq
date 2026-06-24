@@ -57,7 +57,7 @@ export function MaitriseDocument({
   titre: string;
   societe: Societe;
   /** Métadonnées spécifiques au document (ex. Processus, Réf. ISO). */
-  metaExtra?: { label: string; value: string }[];
+  metaExtra?: { label: string; value: string; href?: string }[];
   initialContenu: JSONContent | null;
   statut: string;
   currentVersion: string | null;

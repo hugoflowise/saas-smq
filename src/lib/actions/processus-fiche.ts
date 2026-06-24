@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
-import { notifyRole, notifyUsers } from "@/lib/notifications";
+import { notifyRole, notifyTenant, notifyUsers } from "@/lib/notifications";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -265,7 +265,7 @@ export async function publishFicheAction(id: string): Promise<ActionResult> {
   const { data: fiche } = await supabase
     .from("processus")
     .select(
-      "fiche_statut, fiche_redige_par, fiche_soumis_par, fiche_approuvee_par, fiche_approuvee_le, fiche_signature",
+      "nom, fiche_statut, fiche_redige_par, fiche_soumis_par, fiche_approuvee_par, fiche_approuvee_le, fiche_signature",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -315,6 +315,13 @@ export async function publishFicheAction(id: string): Promise<ActionResult> {
     .eq("id", id)
     .eq("tenant_id", tid);
   if (error) return { ok: false, error: error.message };
+
+  await notifyTenant(tid, {
+    type: "approval_granted",
+    title: "Fiche d'identité publiée",
+    body: `La fiche du processus « ${fiche.nom} » a été publiée (version ${version}).`,
+    link: `/processus/${id}`,
+  });
 
   revalidatePath(`/processus/${id}`);
   return { ok: true };
