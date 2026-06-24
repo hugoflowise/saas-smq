@@ -19,6 +19,11 @@ const FREQUENCE_LABELS: Record<string, string> = {
 
 export type FicheInitialData = {
   id: string;
+  nom: string;
+  type: string;
+  piloteId: string;
+  dateDerniereRevue: string;
+  dateProchaineRevue: string;
   finalite: string;
   perimetre: string;
   referentiels: string;
@@ -34,8 +39,10 @@ export type FicheInitialData = {
   ficheVersion: string;
   ficheNoteRevision: string;
   activites: { activite: string; responsable: string; documents: string }[];
-  interactions: { sens: "entrant" | "sortant"; partenaire: string; nature: string }[];
+  interactions: { fournisseur: string; nature: string; client: string }[];
 };
+
+export type FicheUser = { id: string; nom: string };
 
 /**
  * Charge et assemble toutes les données de la fiche d'identité d'un processus,
@@ -45,13 +52,18 @@ export type FicheInitialData = {
 export async function loadFicheProcessusData(
   tid: string,
   id: string,
-): Promise<{ data: FicheProcessusData; initial: FicheInitialData; isApproved: boolean } | null> {
+): Promise<{
+  data: FicheProcessusData;
+  initial: FicheInitialData;
+  isApproved: boolean;
+  users: FicheUser[];
+} | null> {
   const supabase = await createClient();
 
   const { data: p } = await supabase
     .from("processus")
     .select(
-      "id, nom, type, entrees, sorties, ressources_associees, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_version, fiche_redacteur, fiche_verificateur, fiche_approuvee_par, fiche_approuvee_le, fiche_note_revision",
+      "id, nom, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_version, fiche_redacteur, fiche_verificateur, fiche_approuvee_par, fiche_approuvee_le, fiche_note_revision",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -83,7 +95,7 @@ export async function loadFicheProcessusData(
       .order("ordre"),
     supabase
       .from("processus_interactions")
-      .select("sens, partenaire, nature")
+      .select("fournisseur, nature, client")
       .eq("processus_id", id)
       .eq("tenant_id", tid)
       .is("deleted_at", null)
@@ -121,6 +133,17 @@ export async function loadFicheProcessusData(
     : { data: [] };
   const nameById = new Map((persons ?? []).map((x) => [x.id, nomPersonne(x.full_name, x.email)]));
 
+  // Utilisateurs du client : pour sélectionner le pilote du processus.
+  const { data: users } = await supabase
+    .from("profiles")
+    .select("id, full_name, email")
+    .eq("tenant_id", tid)
+    .order("full_name");
+  const usersList = (users ?? []).map((u) => ({
+    id: u.id,
+    nom: nomPersonne(u.full_name, u.email),
+  }));
+
   const typeLabel = TYPE_LABELS[p.type] ?? p.type;
   const risques = risquesRes.data ?? [];
 
@@ -142,7 +165,11 @@ export async function loadFicheProcessusData(
       { type: "Documentaires", detail: p.ressources_documentaires },
     ],
     activites: activitesRes.data ?? [],
-    interactions: interactionsRes.data ?? [],
+    interactions: (interactionsRes.data ?? []).map((it) => ({
+      fournisseur: it.fournisseur ?? "",
+      nature: it.nature,
+      client: it.client ?? "",
+    })),
     indicateurs: (indicateursRes.data ?? []).map((ind) => ({
       nom: ind.nom,
       cible: ind.cible,
@@ -171,6 +198,11 @@ export async function loadFicheProcessusData(
 
   const initial: FicheInitialData = {
     id: p.id,
+    nom: p.nom,
+    type: p.type,
+    piloteId: p.pilote_id ?? "",
+    dateDerniereRevue: p.date_derniere_revue ?? "",
+    dateProchaineRevue: p.date_prochaine_revue ?? "",
     finalite: p.finalite ?? "",
     perimetre: p.perimetre ?? "",
     referentiels: p.referentiels ?? "",
@@ -191,11 +223,11 @@ export async function loadFicheProcessusData(
       documents: a.documents ?? "",
     })),
     interactions: (interactionsRes.data ?? []).map((it) => ({
-      sens: it.sens,
-      partenaire: it.partenaire,
+      fournisseur: it.fournisseur ?? "",
       nature: it.nature ?? "",
+      client: it.client ?? "",
     })),
   };
 
-  return { data, initial, isApproved: Boolean(p.fiche_approuvee_par) };
+  return { data, initial, isApproved: Boolean(p.fiche_approuvee_par), users: usersList };
 }

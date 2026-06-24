@@ -17,7 +17,6 @@ import { objectifProgress } from "@/lib/objectifs";
 import { canApprove, canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { EditProcessusDialog } from "./edit-processus-dialog";
 import { FicheClient } from "./fiche-client";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -66,9 +65,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   const { data: processus } = await supabase
     .from("processus")
-    .select(
-      "id, nom, type, description, entrees, sorties, date_derniere_revue, date_prochaine_revue",
-    )
+    .select("id, nom, type, date_derniere_revue, date_prochaine_revue")
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -173,9 +170,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         Processus
       </Link>
 
-      <PageHeader title={processus.nom}>
-        <EditProcessusDialog processus={processus} />
-      </PageHeader>
+      <PageHeader title={processus.nom} />
       <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <Badge variant="secondary">{TYPE_LABELS[processus.type] ?? processus.type}</Badge>
         <span className="text-muted-foreground text-sm">
@@ -199,6 +194,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
             <FicheClient
               data={fiche.data}
               initial={fiche.initial}
+              users={fiche.users}
               canWrite={canWrite(ctx.role)}
               canApprove={canApprove(ctx.role)}
               isApproved={fiche.isApproved}

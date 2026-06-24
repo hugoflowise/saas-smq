@@ -6,7 +6,7 @@ export type FicheActivite = {
   responsable: string | null;
   documents: string | null;
 };
-export type FicheInteraction = { sens: string; partenaire: string; nature: string | null };
+export type FicheInteraction = { fournisseur: string; nature: string | null; client: string };
 export type FicheIndicateur = {
   nom: string;
   cible: number | null;
@@ -154,10 +154,10 @@ export function FicheProcessus(data: FicheProcessusData) {
             <tbody>
               {data.interactions.map((it, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: rendu statique
-                <tr key={`${it.sens}-${it.partenaire}-${i}`} className="border-b align-top">
-                  <td className="px-3 py-2">{it.sens === "entrant" ? it.partenaire : data.nom}</td>
+                <tr key={`${it.fournisseur}-${it.client}-${i}`} className="border-b align-top">
+                  <td className="px-3 py-2">{it.fournisseur?.trim() || "-"}</td>
                   <td className="px-3 py-2">{it.nature ?? "-"}</td>
-                  <td className="px-3 py-2">{it.sens === "entrant" ? data.nom : it.partenaire}</td>
+                  <td className="px-3 py-2">{it.client?.trim() || "-"}</td>
                 </tr>
               ))}
             </tbody>

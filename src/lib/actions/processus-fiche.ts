@@ -11,6 +11,11 @@ import { getTenantContext } from "@/lib/tenant-context";
 
 const ficheSchema = z.object({
   id: z.string().uuid(),
+  nom: z.string().trim().min(2, "Nom requis."),
+  type: z.enum(["pilotage", "realisation", "support"]),
+  piloteId: z.string().uuid().optional().or(z.literal("")),
+  dateDerniereRevue: z.string().optional(),
+  dateProchaineRevue: z.string().optional(),
   finalite: z.string().trim().optional(),
   perimetre: z.string().trim().optional(),
   referentiels: z.string().trim().optional(),
@@ -37,9 +42,9 @@ const ficheSchema = z.object({
   interactions: z
     .array(
       z.object({
-        sens: z.enum(["entrant", "sortant"]),
-        partenaire: z.string().trim().min(1),
+        fournisseur: z.string().trim().optional(),
         nature: z.string().trim().optional(),
+        client: z.string().trim().optional(),
       }),
     )
     .default([]),
@@ -62,6 +67,11 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
   const { error: upErr } = await supabase
     .from("processus")
     .update({
+      nom: d.nom,
+      type: d.type,
+      pilote_id: d.piloteId ? d.piloteId : null,
+      date_derniere_revue: d.dateDerniereRevue || null,
+      date_prochaine_revue: d.dateProchaineRevue || null,
       finalite: d.finalite ?? null,
       perimetre: d.perimetre ?? null,
       referentiels: d.referentiels ?? null,
@@ -104,15 +114,20 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
     .delete()
     .eq("processus_id", d.id)
     .eq("tenant_id", tid);
-  if (d.interactions.length > 0) {
+  // On ne garde que les lignes ayant au moins un fournisseur ou un client.
+  const interactions = d.interactions.filter((it) => it.fournisseur || it.client);
+  if (interactions.length > 0) {
     const { error } = await supabase.from("processus_interactions").insert(
-      d.interactions.map((it, i) => ({
+      interactions.map((it, i) => ({
         tenant_id: tid,
         processus_id: d.id,
         ordre: i,
-        sens: it.sens,
-        partenaire: it.partenaire,
+        fournisseur: it.fournisseur ?? null,
+        client: it.client ?? null,
         nature: it.nature ?? null,
+        // Colonnes héritées (NOT NULL) conservées pour compatibilité.
+        sens: "entrant" as const,
+        partenaire: it.fournisseur || it.client || "-",
         created_by: ctx.userId,
       })),
     );

@@ -9,13 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { saveFicheProcessusAction } from "@/lib/actions/processus-fiche";
+import type { FicheUser } from "@/lib/fiche-processus-data";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Activite = { activite: string; responsable: string; documents: string };
-type Interaction = { sens: "entrant" | "sortant"; partenaire: string; nature: string };
+type Interaction = { fournisseur: string; nature: string; client: string };
 
 export type FicheEditorInitial = {
   id: string;
+  nom: string;
+  type: string;
+  piloteId: string;
+  dateDerniereRevue: string;
+  dateProchaineRevue: string;
   finalite: string;
   perimetre: string;
   referentiels: string;
@@ -36,9 +42,11 @@ export type FicheEditorInitial = {
 
 export function FicheEditor({
   initial,
+  users,
   onDone,
 }: {
   initial: FicheEditorInitial;
+  users: FicheUser[];
   onDone: () => void;
 }) {
   const router = useRouter();
@@ -52,6 +60,11 @@ export function FicheEditor({
     setPending(true);
     const result = await saveFicheProcessusAction({
       id: initial.id,
+      nom: f.get("nom"),
+      type: f.get("type"),
+      piloteId: f.get("piloteId") || "",
+      dateDerniereRevue: f.get("dateDerniereRevue") || undefined,
+      dateProchaineRevue: f.get("dateProchaineRevue") || undefined,
       finalite: f.get("finalite") || undefined,
       perimetre: f.get("perimetre") || undefined,
       referentiels: f.get("referentiels") || undefined,
@@ -67,7 +80,7 @@ export function FicheEditor({
       ficheVersion: f.get("ficheVersion") || undefined,
       ficheNoteRevision: f.get("ficheNoteRevision") || undefined,
       activites: activites.filter((a) => a.activite.trim()),
-      interactions: interactions.filter((it) => it.partenaire.trim()),
+      interactions: interactions.filter((it) => it.fournisseur.trim() || it.client.trim()),
     });
     setPending(false);
     if (result.ok) {
@@ -80,30 +93,86 @@ export function FicheEditor({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Champ name="finalite" label="Finalité" defaultValue={initial.finalite} />
-        <Champ name="perimetre" label="Périmètre" defaultValue={initial.perimetre} />
-        <Champ
-          name="referentiels"
-          label="Référentiels applicables"
-          defaultValue={initial.referentiels}
-        />
-        <Champ
-          name="entrees"
-          label="Données d'entrée (une par ligne)"
-          defaultValue={initial.entrees}
-        />
-        <Champ
-          name="sorties"
-          label="Données de sortie (une par ligne)"
-          defaultValue={initial.sorties}
-        />
-      </div>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm"
+    >
+      {/* 1. Carte d'identité */}
+      <Bloc titre="Carte d'identité du processus">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Champ name="nom" label="Intitulé du processus" defaultValue={initial.nom} ligne />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="type">Type de processus</Label>
+            <select id="type" name="type" className={SELECT_CLASS} defaultValue={initial.type}>
+              <option value="pilotage">Pilotage</option>
+              <option value="realisation">Réalisation</option>
+              <option value="support">Support</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="piloteId">Pilote du processus</Label>
+            <select
+              id="piloteId"
+              name="piloteId"
+              className={SELECT_CLASS}
+              defaultValue={initial.piloteId}
+            >
+              <option value="">Non défini</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Champ
+            name="referentiels"
+            label="Référentiels applicables"
+            defaultValue={initial.referentiels}
+          />
+          <Champ name="finalite" label="Finalité" defaultValue={initial.finalite} />
+          <Champ name="perimetre" label="Périmètre" defaultValue={initial.perimetre} />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="dateDerniereRevue">Dernière revue</Label>
+            <Input
+              id="dateDerniereRevue"
+              name="dateDerniereRevue"
+              type="date"
+              defaultValue={initial.dateDerniereRevue}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="dateProchaineRevue">Prochaine revue</Label>
+            <Input
+              id="dateProchaineRevue"
+              name="dateProchaineRevue"
+              type="date"
+              defaultValue={initial.dateProchaineRevue}
+            />
+          </div>
+        </div>
+      </Bloc>
 
-      {/* Ressources nécessaires, par type (section 5 de la fiche) */}
-      <div className="flex flex-col gap-2">
-        <p className="font-medium text-sm">Ressources nécessaires</p>
+      {/* 2. Données d'entrée et de sortie (alignées côte à côte) */}
+      <Bloc titre="Données d'entrée et de sortie">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Champ
+            name="entrees"
+            label="Données d'entrée"
+            hint="une par ligne"
+            defaultValue={initial.entrees}
+          />
+          <Champ
+            name="sorties"
+            label="Données de sortie"
+            hint="une par ligne"
+            defaultValue={initial.sorties}
+          />
+        </div>
+      </Bloc>
+
+      {/* 5. Ressources nécessaires, par type */}
+      <Bloc titre="Ressources nécessaires">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Champ
             name="ressourcesHumaines"
@@ -131,9 +200,9 @@ export function FicheEditor({
             defaultValue={initial.ressourcesDocumentaires}
           />
         </div>
-      </div>
+      </Bloc>
 
-      {/* Activités */}
+      {/* 4. Description des activités */}
       <Liste
         titre="Description des activités"
         ajout={() => setActivites((a) => [...a, { activite: "", responsable: "", documents: "" }])}
@@ -161,61 +230,66 @@ export function FicheEditor({
         ))}
       </Liste>
 
-      {/* Interactions */}
+      {/* 3. Interactions : 3 colonnes (fournisseur / nature / client) comme la fiche de référence */}
       <Liste
         titre="Interactions avec les autres processus"
-        ajout={() =>
-          setInteractions((a) => [...a, { sens: "entrant", partenaire: "", nature: "" }])
-        }
+        ajout={() => setInteractions((a) => [...a, { fournisseur: "", nature: "", client: "" }])}
       >
+        {interactions.length > 0 ? (
+          <div className="hidden gap-2 px-1 text-muted-foreground text-xs sm:grid sm:grid-cols-[1fr_1fr_1fr_auto]">
+            <span>Processus fournisseur</span>
+            <span>Nature de l'interaction</span>
+            <span>Processus client</span>
+            <span />
+          </div>
+        ) : null}
         {interactions.map((it, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
-          <div key={`int-${i}`} className="grid grid-cols-1 gap-2 sm:grid-cols-[auto_1fr_1fr_auto]">
-            <select
-              className={SELECT_CLASS}
-              value={it.sens}
-              onChange={(e) => majInteraction(setInteractions, i, "sens", e.target.value)}
-            >
-              <option value="entrant">Entrant (fournisseur)</option>
-              <option value="sortant">Sortant (client)</option>
-            </select>
+          <div key={`int-${i}`} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
             <Input
-              placeholder="Processus / entité"
-              value={it.partenaire}
-              onChange={(e) => majInteraction(setInteractions, i, "partenaire", e.target.value)}
+              placeholder="Processus fournisseur"
+              value={it.fournisseur}
+              onChange={(e) => majInteraction(setInteractions, i, "fournisseur", e.target.value)}
             />
             <Input
               placeholder="Nature de l'interaction"
               value={it.nature}
               onChange={(e) => majInteraction(setInteractions, i, "nature", e.target.value)}
             />
+            <Input
+              placeholder="Processus client"
+              value={it.client}
+              onChange={(e) => majInteraction(setInteractions, i, "client", e.target.value)}
+            />
             <SupprBtn onClick={() => setInteractions((arr) => arr.filter((_, j) => j !== i))} />
           </div>
         ))}
       </Liste>
 
-      {/* Validation */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Champ
-          name="ficheRedacteur"
-          label="Rédigé par"
-          defaultValue={initial.ficheRedacteur}
-          mono
-        />
-        <Champ
-          name="ficheVerificateur"
-          label="Vérifié par"
-          defaultValue={initial.ficheVerificateur}
-          mono
-        />
-        <Champ name="ficheVersion" label="Version" defaultValue={initial.ficheVersion} mono />
-        <Champ
-          name="ficheNoteRevision"
-          label="Nature de la révision"
-          defaultValue={initial.ficheNoteRevision}
-          mono
-        />
-      </div>
+      {/* 9. Validation (rédacteur / vérificateur / version) */}
+      <Bloc titre="Validation">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Champ
+            name="ficheRedacteur"
+            label="Rédigé par"
+            defaultValue={initial.ficheRedacteur}
+            ligne
+          />
+          <Champ
+            name="ficheVerificateur"
+            label="Vérifié par"
+            defaultValue={initial.ficheVerificateur}
+            ligne
+          />
+          <Champ name="ficheVersion" label="Version" defaultValue={initial.ficheVersion} ligne />
+          <Champ
+            name="ficheNoteRevision"
+            label="Nature de la révision"
+            defaultValue={initial.ficheNoteRevision}
+            ligne
+          />
+        </div>
+      </Bloc>
 
       <div className="flex gap-2">
         <Button type="submit" disabled={pending}>
@@ -229,21 +303,38 @@ export function FicheEditor({
   );
 }
 
+/** Groupe de champs avec titre de section, homogène sur toute la fiche. */
+function Bloc({ titre, children }: { titre: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h3 className="border-b pb-1.5 font-semibold text-sm">{titre}</h3>
+      {children}
+    </section>
+  );
+}
+
 function Champ({
   name,
   label,
   defaultValue,
-  mono,
+  hint,
+  ligne,
 }: {
   name: string;
   label: string;
   defaultValue: string;
-  mono?: boolean;
+  hint?: string;
+  ligne?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={name}>{label}</Label>
-      {mono ? (
+      <Label htmlFor={name}>
+        {label}
+        {hint ? (
+          <span className="ml-1 font-normal text-muted-foreground text-xs">({hint})</span>
+        ) : null}
+      </Label>
+      {ligne ? (
         <Input id={name} name={name} defaultValue={defaultValue} />
       ) : (
         <Textarea id={name} name={name} rows={3} defaultValue={defaultValue} />
@@ -262,16 +353,16 @@ function Liste({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <p className="font-medium text-sm">{titre}</p>
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between border-b pb-1.5">
+        <h3 className="font-semibold text-sm">{titre}</h3>
         <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={ajout}>
           <Plus className="size-3.5" />
           Ajouter
         </Button>
       </div>
       <div className="flex flex-col gap-2">{children}</div>
-    </div>
+    </section>
   );
 }
 
