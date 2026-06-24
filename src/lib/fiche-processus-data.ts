@@ -75,7 +75,7 @@ export async function loadFicheProcessusData(
     supabase
       .from("tenants")
       .select(
-        "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte",
+        "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte, responsable_flowise_id",
       )
       .eq("id", tid)
       .maybeSingle(),
@@ -136,6 +136,20 @@ export async function loadFicheProcessusData(
     id: u.id,
     nom: nomPersonne(u.full_name, u.email),
   }));
+
+  // Responsable Qualité Flowise rattaché (offre premium) : aussi pilote possible.
+  const rqId = (tenantRes.data as { responsable_flowise_id?: string | null } | null)
+    ?.responsable_flowise_id;
+  if (rqId && !usersList.some((u) => u.id === rqId)) {
+    const { data: rq } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .eq("id", rqId)
+      .maybeSingle();
+    if (rq) {
+      usersList.unshift({ id: rq.id, nom: `${nomPersonne(rq.full_name, rq.email)} (Flowise)` });
+    }
+  }
 
   const typeLabel = TYPE_LABELS[p.type] ?? p.type;
   const risques = risquesRes.data ?? [];

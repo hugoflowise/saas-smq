@@ -35,8 +35,21 @@ export default async function AdminClientsPage() {
   const admin = createAdminClient();
   const { data: tenants } = await admin
     .from("tenants")
-    .select("id, nom_societe, formule, statut, effectif_tranche, secteur, logo_url, created_at")
+    .select(
+      "id, nom_societe, formule, statut, effectif_tranche, secteur, logo_url, responsable_flowise_id, created_at",
+    )
     .order("created_at", { ascending: false });
+
+  // Équipe Flowise (admin Flowise) : candidats au rôle de Responsable Qualité.
+  const { data: equipeFlowise } = await admin
+    .from("profiles")
+    .select("id, full_name, email")
+    .eq("role", "admin_flowise")
+    .order("full_name");
+  const flowiseTeam = (equipeFlowise ?? []).map((m) => ({
+    id: m.id,
+    nom: m.full_name?.trim() || m.email,
+  }));
 
   // Dirigeant de chaque tenant
   const tenantIds = (tenants ?? []).map((t) => t.id);
@@ -92,12 +105,14 @@ export default async function AdminClientsPage() {
                     </TableCell>
                     <TableCell>
                       <EditTenantDialog
+                        flowiseTeam={flowiseTeam}
                         tenant={{
                           id: t.id,
                           nom_societe: t.nom_societe,
                           effectif_tranche: t.effectif_tranche,
                           secteur: t.secteur,
                           logo_url: t.logo_url,
+                          responsable_flowise_id: t.responsable_flowise_id,
                         }}
                         dirigeant={
                           dirigeant

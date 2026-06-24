@@ -25,11 +25,20 @@ type Tenant = {
   effectif_tranche: string | null;
   secteur: string | null;
   logo_url: string | null;
+  responsable_flowise_id: string | null;
 };
 
 type Dirigeant = { id: string; full_name: string | null; email: string } | null;
 
-export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirigeant: Dirigeant }) {
+export function EditTenantDialog({
+  tenant,
+  dirigeant,
+  flowiseTeam,
+}: {
+  tenant: Tenant;
+  dirigeant: Dirigeant;
+  flowiseTeam: { id: string; nom: string }[];
+}) {
   const router = useRouter();
   const { open, setOpen, pending, submit } = useDialogForm();
   const [uploading, setUploading] = useState(false);
@@ -61,6 +70,7 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
           secteur: form.get("secteur") || undefined,
           dirigeantId: dirigeant?.id,
           dirigeantNom: form.get("dirigeantNom") || undefined,
+          responsableFlowiseId: form.get("responsableFlowiseId") || "",
         }),
       success: "Client mis à jour.",
     });
@@ -123,6 +133,26 @@ export function EditTenantDialog({ tenant, dirigeant }: { tenant: Tenant; dirige
               <p className="text-muted-foreground text-xs">{dirigeant.email}</p>
             </div>
           ) : null}
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="responsableFlowiseId">Responsable Qualité Flowise</Label>
+            <select
+              id="responsableFlowiseId"
+              name="responsableFlowiseId"
+              className={SELECT_CLASS}
+              defaultValue={tenant.responsable_flowise_id ?? ""}
+            >
+              <option value="">Aucun</option>
+              {flowiseTeam.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nom}
+                </option>
+              ))}
+            </select>
+            <p className="text-muted-foreground text-xs">
+              Sélectionnable comme pilote de processus chez ce client (offre premium).
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
