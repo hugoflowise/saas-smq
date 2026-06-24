@@ -1,6 +1,6 @@
 import type { Societe } from "@/components/document-paper";
 import type { FicheProcessusData } from "@/components/fiche-processus";
-import { formatDate, todayISO } from "@/lib/format";
+import { formatDate, nomPersonne, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -107,7 +107,7 @@ export async function loadFicheProcessusData(
   const { data: persons } = personIds.length
     ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
     : { data: [] };
-  const nameById = new Map((persons ?? []).map((x) => [x.id, x.full_name ?? x.email]));
+  const nameById = new Map((persons ?? []).map((x) => [x.id, nomPersonne(x.full_name, x.email)]));
 
   const typeLabel = TYPE_LABELS[p.type] ?? p.type;
   const risques = risquesRes.data ?? [];
