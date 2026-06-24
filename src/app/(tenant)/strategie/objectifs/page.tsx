@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -170,8 +171,11 @@ export default async function ObjectifsPage() {
                       </Link>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {o.processus_id ? (processusNom.get(o.processus_id) ?? "-") : "-"}
+                  <TableCell className="text-sm">
+                    <ProcessusLink
+                      id={o.processus_id}
+                      nom={o.processus_id ? (processusNom.get(o.processus_id) ?? null) : null}
+                    />
                   </TableCell>
                   <TableCell>
                     {o.valeur_cible !== null ? (

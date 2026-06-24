@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { KpiChart } from "@/components/kpi-chart";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -105,6 +106,21 @@ export default async function IndicateurDetailPage({
             </p>
             <p className="mt-1 text-sm">
               {FREQUENCE_LABELS[ind.frequence_mesure] ?? ind.frequence_mesure}
+            </p>
+          </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Processus
+            </p>
+            <p className="mt-1 text-sm">
+              <ProcessusLink
+                id={ind.processus_id}
+                nom={
+                  ind.processus_id
+                    ? ((processusOptions ?? []).find((p) => p.id === ind.processus_id)?.nom ?? null)
+                    : null
+                }
+              />
             </p>
           </div>
         </CardContent>

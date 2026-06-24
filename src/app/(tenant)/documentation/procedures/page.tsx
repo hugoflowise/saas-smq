@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -97,7 +98,10 @@ export default async function ProceduresPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {p.processus_id ? (processusName.get(p.processus_id) ?? "-") : "-"}
+                    <ProcessusLink
+                      id={p.processus_id}
+                      nom={p.processus_id ? (processusName.get(p.processus_id) ?? null) : null}
+                    />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {p.reference_iso?.length ? p.reference_iso.join(", ") : "-"}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
@@ -87,7 +88,17 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Origine" value={ACTION_ORIGINE_LABELS[action.origine]} />
-          <Field label="Processus concerné" value={processusNom} />
+          <div>
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Processus concerné
+            </p>
+            <p className="mt-1 text-sm">
+              <ProcessusLink
+                id={action.processus_concerne}
+                nom={action.processus_concerne ? processusNom : null}
+              />
+            </p>
+          </div>
           <Field
             label="Cotation"
             value={

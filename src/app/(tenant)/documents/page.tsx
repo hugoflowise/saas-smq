@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { ProcessusLink } from "@/components/processus-link";
 import { StatTiles } from "@/components/stat-tiles";
 import {
   Table,
@@ -41,6 +42,7 @@ type MatriceRow = {
   dateApprobation: string | null;
   revisionPrevue: string | null;
   processusNom: string | null;
+  processusId: string | null;
   href: string | null;
   registre: DocumentRow | null;
 };
@@ -142,6 +144,7 @@ export default async function DocumentsPage({
       dateApprobation: politique.approved_at,
       revisionPrevue: null,
       processusNom: "Direction",
+      processusId: null,
       href: "/strategie/politique?from=/documents",
       registre: null,
     });
@@ -160,6 +163,7 @@ export default async function DocumentsPage({
       dateApprobation: p.approved_at,
       revisionPrevue: null,
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
+      processusId: p.processus_id,
       href: `/documentation/procedures/${p.id}?from=/documents`,
       registre: null,
     });
@@ -178,6 +182,7 @@ export default async function DocumentsPage({
       dateApprobation: d.date_approbation,
       revisionPrevue: d.date_revision_prevue,
       processusNom: d.processus_id ? (processusNom.get(d.processus_id) ?? null) : null,
+      processusId: d.processus_id,
       href: null,
       registre: d as DocumentRow,
     });
@@ -286,8 +291,8 @@ export default async function DocumentsPage({
                         r.titre
                       )}
                       {r.processusNom ? (
-                        <span className="block text-muted-foreground text-xs">
-                          {r.processusNom}
+                        <span className="block text-xs text-muted-foreground">
+                          <ProcessusLink id={r.processusId} nom={r.processusNom} />
                         </span>
                       ) : null}
                     </TableCell>
