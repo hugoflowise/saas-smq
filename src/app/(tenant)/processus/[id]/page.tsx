@@ -67,7 +67,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   const { data: processus } = await supabase
     .from("processus")
     .select(
-      "id, nom, type, description, entrees, sorties, ressources_associees, date_derniere_revue, date_prochaine_revue",
+      "id, nom, type, description, entrees, sorties, date_derniere_revue, date_prochaine_revue",
     )
     .eq("id", id)
     .eq("tenant_id", tid)

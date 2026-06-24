@@ -24,7 +24,11 @@ export type FicheInitialData = {
   referentiels: string;
   entrees: string;
   sorties: string;
-  ressources: string;
+  ressourcesHumaines: string;
+  ressourcesMaterielles: string;
+  ressourcesLogicielles: string;
+  ressourcesFinancieres: string;
+  ressourcesDocumentaires: string;
   ficheRedacteur: string;
   ficheVerificateur: string;
   ficheVersion: string;
@@ -47,7 +51,7 @@ export async function loadFicheProcessusData(
   const { data: p } = await supabase
     .from("processus")
     .select(
-      "id, nom, type, entrees, sorties, ressources_associees, pilote_id, finalite, perimetre, referentiels, fiche_version, fiche_redacteur, fiche_verificateur, fiche_approuvee_par, fiche_approuvee_le, fiche_note_revision",
+      "id, nom, type, entrees, sorties, ressources_associees, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_version, fiche_redacteur, fiche_verificateur, fiche_approuvee_par, fiche_approuvee_le, fiche_note_revision",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -130,7 +134,13 @@ export async function loadFicheProcessusData(
     referentiels: p.referentiels,
     entrees: p.entrees,
     sorties: p.sorties,
-    ressources: p.ressources_associees,
+    ressources: [
+      { type: "Humaines", detail: p.ressources_humaines },
+      { type: "Matérielles", detail: p.ressources_materielles },
+      { type: "Logicielles / SI", detail: p.ressources_logicielles },
+      { type: "Financières", detail: p.ressources_financieres },
+      { type: "Documentaires", detail: p.ressources_documentaires },
+    ],
     activites: activitesRes.data ?? [],
     interactions: interactionsRes.data ?? [],
     indicateurs: (indicateursRes.data ?? []).map((ind) => ({
@@ -166,7 +176,11 @@ export async function loadFicheProcessusData(
     referentiels: p.referentiels ?? "",
     entrees: p.entrees ?? "",
     sorties: p.sorties ?? "",
-    ressources: p.ressources_associees ?? "",
+    ressourcesHumaines: p.ressources_humaines ?? "",
+    ressourcesMaterielles: p.ressources_materielles ?? "",
+    ressourcesLogicielles: p.ressources_logicielles ?? "",
+    ressourcesFinancieres: p.ressources_financieres ?? "",
+    ressourcesDocumentaires: p.ressources_documentaires ?? "",
     ficheRedacteur: p.fiche_redacteur ?? "",
     ficheVerificateur: p.fiche_verificateur ?? "",
     ficheVersion: p.fiche_version ?? "",

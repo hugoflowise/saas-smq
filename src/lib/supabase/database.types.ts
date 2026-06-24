@@ -2096,6 +2096,11 @@ export type Database = {
           propose: boolean
           referentiels: string | null
           ressources_associees: string | null
+          ressources_documentaires: string | null
+          ressources_financieres: string | null
+          ressources_humaines: string | null
+          ressources_logicielles: string | null
+          ressources_materielles: string | null
           sorties: string | null
           tenant_id: string
           type: Database["public"]["Enums"]["processus_type"]
@@ -2127,6 +2132,11 @@ export type Database = {
           propose?: boolean
           referentiels?: string | null
           ressources_associees?: string | null
+          ressources_documentaires?: string | null
+          ressources_financieres?: string | null
+          ressources_humaines?: string | null
+          ressources_logicielles?: string | null
+          ressources_materielles?: string | null
           sorties?: string | null
           tenant_id: string
           type: Database["public"]["Enums"]["processus_type"]
@@ -2158,6 +2168,11 @@ export type Database = {
           propose?: boolean
           referentiels?: string | null
           ressources_associees?: string | null
+          ressources_documentaires?: string | null
+          ressources_financieres?: string | null
+          ressources_humaines?: string | null
+          ressources_logicielles?: string | null
+          ressources_materielles?: string | null
           sorties?: string | null
           tenant_id?: string
           type?: Database["public"]["Enums"]["processus_type"]
