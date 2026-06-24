@@ -125,9 +125,13 @@ export async function loadFicheProcessusData(
     p.fiche_approuvee_par,
   ].filter(Boolean) as string[];
   const { data: persons } = personIds.length
-    ? await supabase.from("profiles").select("id, full_name, email").in("id", personIds)
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name, email, signature_image")
+        .in("id", personIds)
     : { data: [] };
   const nameById = new Map((persons ?? []).map((x) => [x.id, nomPersonne(x.full_name, x.email)]));
+  const signatureById = new Map((persons ?? []).map((x) => [x.id, x.signature_image]));
 
   // Utilisateurs du client : pour sélectionner le pilote du processus.
   const { data: users } = await supabase
@@ -203,6 +207,9 @@ export async function loadFicheProcessusData(
     redacteur: p.fiche_redige_par ? (nameById.get(p.fiche_redige_par) ?? null) : null,
     verificateur: p.fiche_soumis_par ? (nameById.get(p.fiche_soumis_par) ?? null) : null,
     approbateur: p.fiche_approuvee_par ? (nameById.get(p.fiche_approuvee_par) ?? null) : null,
+    signatureApprobateur: p.fiche_approuvee_par
+      ? (signatureById.get(p.fiche_approuvee_par) ?? null)
+      : null,
     approuveeLe: p.fiche_approuvee_le,
     genereLe: formatDate(todayISO()),
   };
