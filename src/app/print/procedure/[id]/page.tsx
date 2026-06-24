@@ -40,7 +40,9 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
   const { data: version } = procedure.version_actuelle_id
     ? await supabase
         .from("procedures_versions")
-        .select("version, approved_at, approved_by, contenu_snapshot, redacteur, verificateur")
+        .select(
+          "version, approved_at, approved_by, contenu_snapshot, sections_snapshot, redacteur, verificateur",
+        )
         .eq("id", procedure.version_actuelle_id)
         .maybeSingle()
     : { data: null };
@@ -57,6 +59,23 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
 
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? procedure.contenu ?? null) as JSONContent | null;
+
+  // Pour une version publiée, on restitue les rubriques figées dans l'instantané ;
+  // sinon (brouillon), les rubriques courantes de la procédure.
+  type SectionsSrc = {
+    objet: string | null;
+    domaine_application: string | null;
+    resume: string | null;
+    diffusion: string | null;
+    glossaire_sigles: string | null;
+    glossaire_symboles: string | null;
+    glossaire_abreviations: string | null;
+    definitions: unknown;
+    references_doc: unknown;
+    references_appli: unknown;
+  };
+  const src = ((version?.sections_snapshot as unknown as SectionsSrc | null) ??
+    procedure) as SectionsSrc;
 
   const meta = isPublished
     ? [
@@ -81,16 +100,16 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
       genereLe={formatDate(todayISO())}
     >
       <ProcedureSections
-        objet={procedure.objet}
-        domaineApplication={procedure.domaine_application}
-        resume={procedure.resume}
-        diffusion={procedure.diffusion}
-        glossaireSigles={procedure.glossaire_sigles}
-        glossaireSymboles={procedure.glossaire_symboles}
-        glossaireAbreviations={procedure.glossaire_abreviations}
-        definitions={(procedure.definitions as unknown as ProcDef[] | null) ?? []}
-        referencesDoc={(procedure.references_doc as unknown as ProcRef[] | null) ?? []}
-        referencesAppli={(procedure.references_appli as unknown as ProcRef[] | null) ?? []}
+        objet={src.objet}
+        domaineApplication={src.domaine_application}
+        resume={src.resume}
+        diffusion={src.diffusion}
+        glossaireSigles={src.glossaire_sigles}
+        glossaireSymboles={src.glossaire_symboles}
+        glossaireAbreviations={src.glossaire_abreviations}
+        definitions={(src.definitions as unknown as ProcDef[] | null) ?? []}
+        referencesDoc={(src.references_doc as unknown as ProcRef[] | null) ?? []}
+        referencesAppli={(src.references_appli as unknown as ProcRef[] | null) ?? []}
       />
       <TiptapEditor content={contenu} editable={false} bare />
     </PrintShell>
