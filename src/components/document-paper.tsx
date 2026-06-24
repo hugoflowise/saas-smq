@@ -38,6 +38,16 @@ function texteContraste(hex: string): string {
   return luminance > 0.6 ? "#0b1120" : "#ffffff";
 }
 
+/** Couleurs de charte résolues (réutilisé par l'en-tête répété à l'impression). */
+export function charteColors(couleur: string | null | undefined) {
+  const charte = normHex(couleur);
+  return {
+    charte,
+    contrast: texteContraste(charte),
+    teinte: (alpha: number) => rgba(charte, alpha),
+  };
+}
+
 function ligneLegale(s: Societe): string {
   const parts = [
     s.nom_societe,
@@ -62,6 +72,7 @@ export function DocumentPaper({
   meta,
   genereLe,
   className,
+  hideHeaderOnPrint,
   children,
 }: {
   surtitre?: string;
@@ -70,6 +81,8 @@ export function DocumentPaper({
   meta?: { label: string; value: string }[];
   genereLe?: string;
   className?: string;
+  /** Masque l'en-tête à l'impression (un en-tête répété est alors fourni autour). */
+  hideHeaderOnPrint?: boolean;
   children: React.ReactNode;
 }) {
   const charte = normHex(societe.couleur_charte);
@@ -85,7 +98,9 @@ export function DocumentPaper({
       style={style}
       className={`doc-page mx-auto max-w-3xl bg-white p-10 text-[#0b1120] shadow-sm ${className ?? ""}`}
     >
-      <header className="mb-8 flex items-stretch gap-3">
+      <header
+        className={`mb-8 flex items-stretch gap-3 ${hideHeaderOnPrint ? "print:hidden" : ""}`}
+      >
         {/* Bandeau titre coloré (type + intitulé) */}
         <div
           className="flex min-w-0 flex-1 flex-col justify-center rounded-md px-4 py-3"

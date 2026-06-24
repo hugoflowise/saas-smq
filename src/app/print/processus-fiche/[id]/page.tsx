@@ -1,9 +1,19 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { charteColors } from "@/components/document-paper";
 import { FicheProcessus } from "@/components/fiche-processus";
 import { PrintButton } from "@/components/print-button";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
+import { formatDate } from "@/lib/format";
 import { getTenantContext } from "@/lib/tenant-context";
+
+const STATUT_LABELS: Record<string, string> = {
+  brouillon: "Brouillon",
+  en_revue: "En revue",
+  approuvee: "Approuvée",
+  publiee: "Publiée",
+  archivee: "Archivée",
+};
 
 export default async function FicheProcessusPrintPage({
   params,
@@ -21,15 +31,22 @@ export default async function FicheProcessusPrintPage({
     return <p className="p-8 text-sm">Processus introuvable.</p>;
   }
 
+  const { data } = fiche;
+  const { charte, contrast, teinte } = charteColors(data.societe.couleur_charte);
+  const versionValue =
+    data.version && data.versionDate
+      ? `${data.version} - ${formatDate(data.versionDate)}`
+      : `Projet (${STATUT_LABELS[data.statut] ?? data.statut})`;
+  const reference = data.reference?.trim() || "-";
+
   return (
     <div className="min-h-full bg-surface print:bg-white">
       {/*
-        Impression A4 : on enveloppe le document dans un <table> dont le <thead>
+        Impression A4 : le document est enveloppé dans un <table> dont le <thead>
         se répète automatiquement en haut de chaque feuille (seule méthode fiable
-        et multi-navigateurs pour un en-tête récurrent) et réserve sa hauteur.
-        Les sauts de page évitent de couper les lignes de tableau. La numérotation
-        des feuilles est fournie par l'option « En-têtes et pieds de page » du
-        navigateur à l'impression.
+        multi-navigateurs) et réserve sa hauteur. L'en-tête de DocumentPaper est
+        masqué à l'impression (hideHeaderOnPrint) pour laisser place à ce bandeau
+        répété. Numérotation des feuilles via l'option du navigateur.
       */}
       <style>{`
         @media print {
@@ -58,10 +75,44 @@ export default async function FicheProcessusPrintPage({
           {/* En-tête répété sur chaque feuille à l'impression (masqué à l'écran). */}
           <thead className="fiche-print-bande hidden">
             <tr>
-              <td className="pb-3">
-                <div className="mx-auto flex max-w-3xl items-baseline justify-between gap-3 border-[#0b1120]/15 border-b pb-1.5 text-[10px] text-[#0b1120]/60">
-                  <span className="font-medium">{fiche.data.societe.nom_societe}</span>
-                  <span className="italic">Fiche d'identité du processus : {fiche.data.nom}</span>
+              <td className="pb-4">
+                <div className="mx-auto flex max-w-3xl items-stretch gap-3">
+                  <div
+                    className="flex min-w-0 flex-1 flex-col justify-center rounded-md px-4 py-3"
+                    style={{ backgroundColor: charte, color: contrast }}
+                  >
+                    <p className="font-semibold text-sm uppercase tracking-[0.08em]">
+                      Fiche d'identité du processus
+                    </p>
+                    <p className="mt-0.5 text-sm italic opacity-90">{data.nom}</p>
+                  </div>
+                  <div
+                    className="w-64 shrink-0 overflow-hidden rounded-md border text-xs"
+                    style={{ borderColor: teinte(0.35) }}
+                  >
+                    {[
+                      { label: "Référence", value: reference },
+                      { label: "Version / Date", value: versionValue },
+                    ].map((m) => (
+                      <div key={m.label} className="flex border-b last:border-b-0">
+                        <span
+                          className="w-24 shrink-0 px-2 py-1.5 font-semibold"
+                          style={{ backgroundColor: teinte(0.12), color: teinte(0.95) }}
+                        >
+                          {m.label}
+                        </span>
+                        <span className="px-2 py-1.5">{m.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {data.societe.logo_url ? (
+                    // biome-ignore lint/performance/noImgElement: logo client, document imprimable
+                    <img
+                      src={data.societe.logo_url}
+                      alt={data.societe.nom_societe}
+                      className="h-16 w-auto shrink-0 self-start object-contain"
+                    />
+                  ) : null}
                 </div>
               </td>
             </tr>
@@ -69,7 +120,7 @@ export default async function FicheProcessusPrintPage({
           <tbody>
             <tr>
               <td>
-                <FicheProcessus {...fiche.data} />
+                <FicheProcessus {...data} hideHeaderOnPrint />
               </td>
             </tr>
           </tbody>

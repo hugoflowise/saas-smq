@@ -42,6 +42,8 @@ export type FicheProcessusData = {
   approbateur: string | null;
   approuveeLe: string | null;
   genereLe?: string;
+  /** Masque l'en-tête à l'impression (en-tête répété fourni par la page d'impression). */
+  hideHeaderOnPrint?: boolean;
 };
 
 const STATUT_LABELS: Record<string, string> = {
@@ -110,6 +112,7 @@ export function FicheProcessus(data: FicheProcessusData) {
       meta={meta}
       genereLe={data.genereLe}
       className="border"
+      hideHeaderOnPrint={data.hideHeaderOnPrint}
     >
       {/* 1. Carte d'identité */}
       <Section titre="1. Carte d'identité du processus">
