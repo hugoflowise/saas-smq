@@ -2498,6 +2498,7 @@ export type Database = {
           last_seen: string | null
           notification_preferences: Json
           role: Database["public"]["Enums"]["user_role"]
+          signature_image: string | null
           tenant_id: string | null
           updated_at: string
         }
@@ -2510,6 +2511,7 @@ export type Database = {
           last_seen?: string | null
           notification_preferences?: Json
           role?: Database["public"]["Enums"]["user_role"]
+          signature_image?: string | null
           tenant_id?: string | null
           updated_at?: string
         }
@@ -2522,6 +2524,7 @@ export type Database = {
           last_seen?: string | null
           notification_preferences?: Json
           role?: Database["public"]["Enums"]["user_role"]
+          signature_image?: string | null
           tenant_id?: string | null
           updated_at?: string
         }

@@ -4,6 +4,7 @@ import { ROLE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { ChangePasswordForm } from "./change-password-form";
 import { NomForm } from "./nom-form";
+import { SignaturePad } from "./signature-pad";
 
 /** Page « Mon compte » : infos de l'utilisateur connecté et changement de mot de passe. */
 export default async function ComptePage() {
@@ -13,7 +14,7 @@ export default async function ComptePage() {
   } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, role")
+    .select("full_name, email, role, signature_image")
     .eq("id", user?.id ?? "")
     .maybeSingle();
 
@@ -40,6 +41,15 @@ export default async function ComptePage() {
               {role ? (ROLE_LABELS[role] ?? role) : "-"}
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Ma signature</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SignaturePad current={profile?.signature_image ?? null} />
         </CardContent>
       </Card>
 
