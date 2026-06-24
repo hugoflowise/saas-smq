@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -157,13 +158,6 @@ const TRANSITIONS: Record<string, string[]> = {
   archivee: [],
 };
 
-/** Lettre de version suivante : A, B, C… (première publication = A). */
-function prochaineVersion(actuelle: string | null): string {
-  if (!actuelle?.trim()) return "A";
-  const code = actuelle.trim().toUpperCase().charCodeAt(0);
-  return code >= 65 && code < 90 ? String.fromCharCode(code + 1) : "A";
-}
-
 /**
  * Change le statut de la fiche dans le cycle de vie documentaire.
  * - soumettre (brouillon -> en_revue) et nouvelle version (publiee -> brouillon) : rédacteur
@@ -238,7 +232,9 @@ export async function publishFicheAction(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: fiche } = await supabase
     .from("processus")
-    .select("fiche_statut, fiche_version")
+    .select(
+      "fiche_statut, fiche_redige_par, fiche_soumis_par, fiche_approuvee_par, fiche_approuvee_le, fiche_signature",
+    )
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -247,12 +243,41 @@ export async function publishFicheAction(id: string): Promise<ActionResult> {
     return { ok: false, error: "La fiche doit être approuvée avant publication." };
   }
 
+  // Version = lettre suivante d'après le nombre de versions déjà figées (A, B, C…).
+  const { count } = await supabase
+    .from("processus_fiche_versions")
+    .select("id", { count: "exact", head: true })
+    .eq("processus_id", id);
+  const version = String.fromCharCode(65 + (count ?? 0));
+  const publishedAt = new Date().toISOString();
+
+  // Instantané complet de la fiche au moment de la publication.
+  const loaded = await loadFicheProcessusData(tid, id);
+  const snapshot = loaded
+    ? ({ ...loaded.data, version, versionDate: publishedAt, statut: "publiee" } as unknown as Json)
+    : null;
+
+  const { error: versionError } = await supabase.from("processus_fiche_versions").insert({
+    tenant_id: tid,
+    processus_id: id,
+    version,
+    snapshot,
+    redige_par: fiche.fiche_redige_par,
+    soumis_par: fiche.fiche_soumis_par,
+    approved_by: fiche.fiche_approuvee_par,
+    approved_at: fiche.fiche_approuvee_le,
+    signature_data: fiche.fiche_signature,
+  });
+  if (versionError) {
+    return { ok: false, error: `Création de la version impossible : ${versionError.message}` };
+  }
+
   const { error } = await supabase
     .from("processus")
     .update({
       fiche_statut: "publiee",
-      fiche_version: prochaineVersion(fiche.fiche_version),
-      fiche_publiee_le: new Date().toISOString(),
+      fiche_version: version,
+      fiche_publiee_le: publishedAt,
       updated_by: ctx.userId,
     })
     .eq("id", id)

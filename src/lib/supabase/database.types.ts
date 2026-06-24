@@ -2330,6 +2330,84 @@ export type Database = {
           },
         ]
       }
+      processus_fiche_versions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          processus_id: string
+          redige_par: string | null
+          signature_data: Json | null
+          snapshot: Json | null
+          soumis_par: string | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          processus_id: string
+          redige_par?: string | null
+          signature_data?: Json | null
+          snapshot?: Json | null
+          soumis_par?: string | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          processus_id?: string
+          redige_par?: string | null
+          signature_data?: Json | null
+          snapshot?: Json | null
+          soumis_par?: string | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processus_fiche_versions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_versions_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_versions_redige_par_fkey"
+            columns: ["redige_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_versions_soumis_par_fkey"
+            columns: ["soumis_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       processus_interactions: {
         Row: {
           client: string | null
