@@ -159,6 +159,24 @@ export function FicheClient({
         </div>
       </div>
 
+      {statut === "brouillon" ? (
+        <div className="rounded-lg border bg-muted/40 px-3 py-2 text-muted-foreground text-sm">
+          Étape : <span className="font-medium text-foreground">rédaction</span>. Complétez la
+          fiche, puis « Soumettre à approbation » (rédacteur : manager ou dirigeant).
+        </div>
+      ) : null}
+      {statut === "en_revue" ? (
+        <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
+          <span className="font-medium text-status-pa">
+            En attente d'approbation par le dirigeant.
+          </span>{" "}
+          <span className="text-muted-foreground">
+            {canApprove
+              ? "Vérifiez la fiche puis « Approuver et signer »."
+              : "Seul le dirigeant peut approuver et signer."}
+          </span>
+        </div>
+      ) : null}
       {statut === "approuvee" ? (
         <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
           <span className="font-medium text-status-pa">Approuvée, non encore publiée.</span>{" "}
