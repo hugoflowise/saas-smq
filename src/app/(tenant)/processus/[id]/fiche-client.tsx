@@ -92,17 +92,17 @@ export function FicheClient({
           {editable ? <Button onClick={() => setEditing(true)}>Modifier la fiche</Button> : null}
 
           {statut === "brouillon" && canWrite && !readOnly ? (
-            <Button
-              disabled={pending}
-              onClick={() =>
+            <SignatureCapture
+              triggerLabel="Soumettre à approbation"
+              title="Soumettre la fiche à approbation"
+              description="Signez avec votre mot de passe pour soumettre cette fiche à approbation."
+              onSigned={() =>
                 run(
                   () => transitionFicheAction(initial.id, "en_revue"),
                   "Fiche soumise à approbation.",
                 )
               }
-            >
-              Soumettre à approbation
-            </Button>
+            />
           ) : null}
 
           {statut === "en_revue" && canApprove && !readOnly ? (
