@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
+import { notifyRole, notifyUsers } from "@/lib/notifications";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -173,11 +174,12 @@ export async function transitionFicheAction(id: string, target: string): Promise
   const supabase = await createClient();
   const { data: fiche } = await supabase
     .from("processus")
-    .select("fiche_statut")
+    .select("fiche_statut, fiche_redige_par, nom")
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
   if (!fiche) return { ok: false, error: "Fiche introuvable." };
+  const statutAvant = fiche.fiche_statut;
 
   if (!TRANSITIONS[fiche.fiche_statut]?.includes(target)) {
     return { ok: false, error: "Transition non autorisée." };
@@ -216,6 +218,31 @@ export async function transitionFicheAction(id: string, target: string): Promise
     .eq("id", id)
     .eq("tenant_id", tid);
   if (error) return { ok: false, error: error.message };
+
+  // Notification ciblée sur la personne qui doit agir à l'étape suivante.
+  const lien = `/processus/${id}`;
+  if (target === "en_revue") {
+    await notifyRole(tid, ["dirigeant"], {
+      type: "approval_request",
+      title: "Fiche d'identité à approuver",
+      body: `La fiche du processus « ${fiche.nom} » est en attente de votre approbation.`,
+      link: lien,
+    });
+  } else if (target === "approuvee") {
+    await notifyUsers([fiche.fiche_redige_par], {
+      type: "approval_granted",
+      title: "Fiche d'identité approuvée",
+      body: `La fiche du processus « ${fiche.nom} » a été approuvée et signée.`,
+      link: lien,
+    });
+  } else if (statutAvant === "en_revue" && target === "brouillon") {
+    await notifyUsers([fiche.fiche_redige_par], {
+      type: "mention",
+      title: "Modifications demandées",
+      body: `Des modifications sont demandées sur la fiche du processus « ${fiche.nom} ».`,
+      link: lien,
+    });
+  }
 
   revalidatePath(`/processus/${id}`);
   return { ok: true };

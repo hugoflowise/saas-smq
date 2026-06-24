@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { notifyTenant } from "@/lib/notifications";
+import { notifyRole, notifyTenant, notifyUsers } from "@/lib/notifications";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -69,7 +69,7 @@ async function loadProcedure(tenantId: string, id: string) {
   const { data } = await supabase
     .from("procedures")
     .select(
-      "id, statut, contenu, approved_by, approved_at, signature_data, redacteur, verificateur, note_revision",
+      "id, titre, statut, contenu, created_by, approved_by, approved_at, signature_data, redacteur, verificateur, note_revision",
     )
     .eq("tenant_id", tenantId)
     .eq("id", id)
@@ -171,6 +171,32 @@ export async function transitionProcedureStatutAction(
 
   const { error } = await supabase.from("procedures").update(update).eq("id", id);
   if (error) return { ok: false, error: error.message };
+
+  // Notification ciblée sur la personne qui doit agir à l'étape suivante.
+  const lien = `/documentation/procedures/${id}`;
+  if (target === "en_revue") {
+    await notifyRole(ctx.effectiveTenantId, ["dirigeant"], {
+      type: "approval_request",
+      title: "Procédure à approuver",
+      body: `La procédure « ${procedure.titre} » est en attente de votre approbation.`,
+      link: lien,
+    });
+  } else if (target === "approuvee") {
+    await notifyUsers([procedure.created_by], {
+      type: "approval_granted",
+      title: "Procédure approuvée",
+      body: `La procédure « ${procedure.titre} » a été approuvée et signée.`,
+      link: lien,
+    });
+  } else if (procedure.statut === "en_revue" && target === "brouillon") {
+    await notifyUsers([procedure.created_by], {
+      type: "mention",
+      title: "Modifications demandées",
+      body: `Des modifications sont demandées sur la procédure « ${procedure.titre} ».`,
+      link: lien,
+    });
+  }
+
   revalidatePath(`/documentation/procedures/${id}`);
   return { ok: true };
 }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import type { ActionResult } from "@/lib/actions/types";
-import { notifyTenant } from "@/lib/notifications";
+import { notifyRole, notifyTenant, notifyUsers } from "@/lib/notifications";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -33,7 +33,7 @@ async function loadPolitique(tenantId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("politique_qualite")
-    .select("id, statut, contenu, approved_by, approved_at, signature_data")
+    .select("id, statut, contenu, created_by, approved_by, approved_at, signature_data")
     .eq("tenant_id", tenantId)
     .maybeSingle();
   return { supabase, politique: data };
@@ -106,6 +106,32 @@ export async function transitionPolitiqueStatutAction(target: string): Promise<A
   const { error } = await supabase.from("politique_qualite").update(update).eq("id", politique.id);
 
   if (error) return { ok: false, error: error.message };
+
+  // Notification ciblée sur la personne qui doit agir à l'étape suivante.
+  const lien = "/strategie/politique";
+  if (target === "en_revue") {
+    await notifyRole(ctx.effectiveTenantId, ["dirigeant"], {
+      type: "approval_request",
+      title: "Politique qualité à approuver",
+      body: "La politique qualité est en attente de votre approbation.",
+      link: lien,
+    });
+  } else if (target === "approuvee") {
+    await notifyUsers([politique.created_by], {
+      type: "approval_granted",
+      title: "Politique qualité approuvée",
+      body: "La politique qualité a été approuvée et signée.",
+      link: lien,
+    });
+  } else if (politique.statut === "en_revue" && target === "brouillon") {
+    await notifyUsers([politique.created_by], {
+      type: "mention",
+      title: "Modifications demandées",
+      body: "Des modifications sont demandées sur la politique qualité.",
+      link: lien,
+    });
+  }
+
   revalidatePath("/strategie/politique");
   return { ok: true };
 }
