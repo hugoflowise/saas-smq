@@ -26,15 +26,6 @@ const TYPE_LABELS: Record<string, string> = {
   support: "Support",
 };
 
-function Field({ label, value }: { label: string; value: string | null }) {
-  return (
-    <div>
-      <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm">{value?.trim() ? value : "-"}</p>
-    </div>
-  );
-}
-
 type RelatedItem = { id: string; href: string; primary: string; secondary?: string };
 
 function RelatedList({ items, empty }: { items: RelatedItem[]; empty: string }) {
@@ -185,41 +176,42 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       <PageHeader title={processus.nom}>
         <EditProcessusDialog processus={processus} />
       </PageHeader>
-      <Badge variant="secondary" className="mb-6">
-        {TYPE_LABELS[processus.type] ?? processus.type}
-      </Badge>
+      <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <Badge variant="secondary">{TYPE_LABELS[processus.type] ?? processus.type}</Badge>
+        <span className="text-muted-foreground text-sm">
+          Dernière revue : {formatDate(processus.date_derniere_revue)} · Prochaine :{" "}
+          {formatDate(processus.date_prochaine_revue)}
+        </span>
+      </div>
 
-      <Tabs defaultValue="apercu">
+      <Tabs defaultValue="fiche">
         <TabsList>
-          <TabsTrigger value="apercu">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="fiche">Fiche d'identité</TabsTrigger>
+          <TabsTrigger value="indicateurs">Indicateurs ({indList.length})</TabsTrigger>
           <TabsTrigger value="objectifs">Objectifs ({objList.length})</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
           <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="apercu" className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Présentation</CardTitle>
-              <p className="text-muted-foreground text-sm">
-                Synthèse opérationnelle. Le document complet et imprimable est dans l'onglet « Fiche
-                d'identité ».
-              </p>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field label="Description" value={processus.description} />
-              <Field label="Dernière revue" value={formatDate(processus.date_derniere_revue)} />
-              <Field label="Prochaine revue" value={formatDate(processus.date_prochaine_revue)} />
-            </CardContent>
-          </Card>
+        <TabsContent value="fiche">
+          {fiche ? (
+            <FicheClient
+              data={fiche.data}
+              initial={fiche.initial}
+              canWrite={canWrite(ctx.role)}
+              canApprove={canApprove(ctx.role)}
+              isApproved={fiche.isApproved}
+              printHref={`/print/processus-fiche/${id}`}
+            />
+          ) : null}
+        </TabsContent>
 
+        <TabsContent value="indicateurs" className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            <CreateIndicateurDialog processusOptions={processusOptions} presetProcessusId={id} />
+          </div>
           <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-sm">Indicateurs ({indList.length})</h2>
-              <CreateIndicateurDialog processusOptions={processusOptions} presetProcessusId={id} />
-            </div>
             {indList.length === 0 ? (
               <EmptyState
                 title="Aucun indicateur"
@@ -262,19 +254,6 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               </div>
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="fiche">
-          {fiche ? (
-            <FicheClient
-              data={fiche.data}
-              initial={fiche.initial}
-              canWrite={canWrite(ctx.role)}
-              canApprove={canApprove(ctx.role)}
-              isApproved={fiche.isApproved}
-              printHref={`/print/processus-fiche/${id}`}
-            />
-          ) : null}
         </TabsContent>
 
         <TabsContent value="objectifs" className="flex flex-col gap-3">
