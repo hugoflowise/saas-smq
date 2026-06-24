@@ -209,7 +209,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-6xl">
       <Link
         href="/processus"
         className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
@@ -237,30 +237,34 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="fiche" className="flex flex-col gap-6">
+        <TabsContent value="fiche">
           {fiche ? (
-            <>
-              <FicheClient
-                data={fiche.data}
-                initial={fiche.initial}
-                users={fiche.users}
-                statut={fiche.statut}
-                canWrite={canWrite(ctx.role)}
-                canApprove={canApprove(ctx.role)}
-                printHref={`/print/processus-fiche/${id}`}
-              />
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Historique des versions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <FicheVersionHistory
-                    versions={ficheVersions}
-                    pending={{ version: fiche.data.version ?? "", statut: fiche.statut }}
-                  />
-                </CardContent>
-              </Card>
-            </>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <div className="min-w-0">
+                <FicheClient
+                  data={fiche.data}
+                  initial={fiche.initial}
+                  users={fiche.users}
+                  statut={fiche.statut}
+                  canWrite={canWrite(ctx.role)}
+                  canApprove={canApprove(ctx.role)}
+                  printHref={`/print/processus-fiche/${id}`}
+                />
+              </div>
+              <aside className="lg:sticky lg:top-4 lg:self-start">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Historique des versions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="max-h-[70vh] overflow-y-auto">
+                    <FicheVersionHistory
+                      versions={ficheVersions}
+                      pending={{ version: fiche.data.version ?? "", statut: fiche.statut }}
+                    />
+                  </CardContent>
+                </Card>
+              </aside>
+            </div>
           ) : null}
         </TabsContent>
 
