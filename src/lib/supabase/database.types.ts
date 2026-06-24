@@ -1040,6 +1040,7 @@ export type Database = {
           id: string
           nom: string
           processus_id: string | null
+          sens: Database["public"]["Enums"]["objectif_sens"]
           seuil_alerte_max: number | null
           seuil_alerte_min: number | null
           source: Database["public"]["Enums"]["indicateur_source"]
@@ -1061,6 +1062,7 @@ export type Database = {
           id?: string
           nom: string
           processus_id?: string | null
+          sens?: Database["public"]["Enums"]["objectif_sens"]
           seuil_alerte_max?: number | null
           seuil_alerte_min?: number | null
           source?: Database["public"]["Enums"]["indicateur_source"]
@@ -1082,6 +1084,7 @@ export type Database = {
           id?: string
           nom?: string
           processus_id?: string | null
+          sens?: Database["public"]["Enums"]["objectif_sens"]
           seuil_alerte_max?: number | null
           seuil_alerte_min?: number | null
           source?: Database["public"]["Enums"]["indicateur_source"]

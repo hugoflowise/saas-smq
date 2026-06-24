@@ -9,8 +9,7 @@ export type FicheActivite = {
 export type FicheInteraction = { fournisseur: string; nature: string | null; client: string };
 export type FicheIndicateur = {
   nom: string;
-  cible: number | null;
-  unite: string | null;
+  cible: string;
   formule: string | null;
   frequence: string | null;
 };
@@ -239,9 +238,7 @@ export function FicheProcessus(data: FicheProcessusData) {
                   <td className="px-3 py-2">{ind.nom}</td>
                   <td className="whitespace-pre-wrap px-3 py-2">{ind.formule?.trim() || "-"}</td>
                   <td className="px-3 py-2">{ind.frequence ?? "-"}</td>
-                  <td className="px-3 py-2">
-                    {ind.cible !== null ? `${ind.cible}${ind.unite ? ` ${ind.unite}` : ""}` : "-"}
-                  </td>
+                  <td className="px-3 py-2">{ind.cible}</td>
                 </tr>
               ))}
             </tbody>

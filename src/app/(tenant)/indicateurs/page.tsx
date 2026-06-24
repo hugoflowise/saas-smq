@@ -3,16 +3,11 @@ import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cibleAffichee, horsCible } from "@/lib/indicateurs";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CreateIndicateurDialog } from "./create-indicateur-dialog";
-
-function isOutOfBounds(value: number, min: number | null, max: number | null) {
-  if (min !== null && value < min) return true;
-  if (max !== null && value > max) return true;
-  return false;
-}
 
 export default async function IndicateursPage() {
   const ctx = await getTenantContext();
@@ -43,7 +38,7 @@ export default async function IndicateursPage() {
 
   const { data: indicateurs } = await supabase
     .from("indicateurs")
-    .select("id, nom, unite, cible, seuil_alerte_min, seuil_alerte_max, frequence_mesure")
+    .select("id, nom, unite, cible, sens, frequence_mesure")
     .eq("tenant_id", tid)
     .order("nom", { ascending: true });
 
@@ -83,8 +78,7 @@ export default async function IndicateursPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((ind) => {
             const last = lastByIndicateur.get(ind.id);
-            const alert =
-              last && isOutOfBounds(last.valeur, ind.seuil_alerte_min, ind.seuil_alerte_max);
+            const alert = last && horsCible(last.valeur, ind.cible, ind.sens);
             return (
               <Link key={ind.id} href={`/indicateurs/${ind.id}`}>
                 <Card className="h-full transition-colors hover:border-primary/40">
@@ -99,10 +93,12 @@ export default async function IndicateursPage() {
                       ) : null}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                      {ind.cible !== null ? <span>Cible : {ind.cible}</span> : null}
+                      {ind.cible !== null ? (
+                        <span>Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}</span>
+                      ) : null}
                       {alert ? (
                         <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">
-                          Hors seuil
+                          Hors cible
                         </span>
                       ) : null}
                     </div>

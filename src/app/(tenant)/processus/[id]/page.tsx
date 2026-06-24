@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
 import { formatDate } from "@/lib/format";
+import { cibleAffichee, horsCible } from "@/lib/indicateurs";
 import { objectifProgress } from "@/lib/objectifs";
 import { canApprove, canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
@@ -81,7 +82,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("titre"),
     supabase
       .from("indicateurs")
-      .select("id, nom, unite, cible, seuil_alerte_min, seuil_alerte_max")
+      .select("id, nom, unite, cible, sens")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("nom"),
@@ -217,10 +218,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {indList.map((ind) => {
                   const v = lastVal.get(ind.id);
-                  const alert =
-                    v !== undefined &&
-                    ((ind.seuil_alerte_min !== null && v < ind.seuil_alerte_min) ||
-                      (ind.seuil_alerte_max !== null && v > ind.seuil_alerte_max));
+                  const alert = v !== undefined && horsCible(v, ind.cible, ind.sens);
                   return (
                     <Link key={ind.id} href={`/indicateurs/${ind.id}${from}`}>
                       <Card className="h-full transition-colors hover:border-primary/40">
@@ -235,10 +233,12 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                             ) : null}
                           </div>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                            {ind.cible !== null ? <span>Cible : {ind.cible}</span> : null}
+                            {ind.cible !== null ? (
+                              <span>Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}</span>
+                            ) : null}
                             {alert ? (
                               <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">
-                                Hors seuil
+                                Hors cible
                               </span>
                             ) : null}
                           </div>
