@@ -361,11 +361,9 @@ export function FicheProcessus(data: FicheProcessusData) {
                   <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
                     Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
                   </p>
-                ) : (
-                  <p className="mt-auto text-[#0b1120]/40 text-xs">
-                    {c.label === "Approuvé par" ? "En attente d'approbation" : "Date et signature"}
-                  </p>
-                )}
+                ) : c.label === "Approuvé par" ? (
+                  <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
+                ) : null}
               </div>
             </div>
           ))}
