@@ -21,7 +21,11 @@ export type FicheEditorInitial = {
   referentiels: string;
   entrees: string;
   sorties: string;
-  ressources: string;
+  ressourcesHumaines: string;
+  ressourcesMaterielles: string;
+  ressourcesLogicielles: string;
+  ressourcesFinancieres: string;
+  ressourcesDocumentaires: string;
   ficheRedacteur: string;
   ficheVerificateur: string;
   ficheVersion: string;
@@ -53,7 +57,11 @@ export function FicheEditor({
       referentiels: f.get("referentiels") || undefined,
       entrees: f.get("entrees") || undefined,
       sorties: f.get("sorties") || undefined,
-      ressources: f.get("ressources") || undefined,
+      ressourcesHumaines: f.get("ressourcesHumaines") || undefined,
+      ressourcesMaterielles: f.get("ressourcesMaterielles") || undefined,
+      ressourcesLogicielles: f.get("ressourcesLogicielles") || undefined,
+      ressourcesFinancieres: f.get("ressourcesFinancieres") || undefined,
+      ressourcesDocumentaires: f.get("ressourcesDocumentaires") || undefined,
       ficheRedacteur: f.get("ficheRedacteur") || undefined,
       ficheVerificateur: f.get("ficheVerificateur") || undefined,
       ficheVersion: f.get("ficheVersion") || undefined,
@@ -91,11 +99,38 @@ export function FicheEditor({
           label="Données de sortie (une par ligne)"
           defaultValue={initial.sorties}
         />
-        <Champ
-          name="ressources"
-          label="Ressources (une par ligne)"
-          defaultValue={initial.ressources}
-        />
+      </div>
+
+      {/* Ressources nécessaires, par type (section 5 de la fiche) */}
+      <div className="flex flex-col gap-2">
+        <p className="font-medium text-sm">Ressources nécessaires</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Champ
+            name="ressourcesHumaines"
+            label="Humaines"
+            defaultValue={initial.ressourcesHumaines}
+          />
+          <Champ
+            name="ressourcesMaterielles"
+            label="Matérielles"
+            defaultValue={initial.ressourcesMaterielles}
+          />
+          <Champ
+            name="ressourcesLogicielles"
+            label="Logicielles / SI"
+            defaultValue={initial.ressourcesLogicielles}
+          />
+          <Champ
+            name="ressourcesFinancieres"
+            label="Financières"
+            defaultValue={initial.ressourcesFinancieres}
+          />
+          <Champ
+            name="ressourcesDocumentaires"
+            label="Documentaires"
+            defaultValue={initial.ressourcesDocumentaires}
+          />
+        </div>
       </div>
 
       {/* Activités */}

@@ -27,7 +27,7 @@ export type FicheProcessusData = {
   referentiels: string | null;
   entrees: string | null;
   sorties: string | null;
-  ressources: string | null;
+  ressources: { type: string; detail: string | null }[];
   activites: FicheActivite[];
   interactions: FicheInteraction[];
   indicateurs: FicheIndicateur[];
@@ -196,7 +196,27 @@ export function FicheProcessus(data: FicheProcessusData) {
 
       {/* 5. Ressources */}
       <Section titre="5. Ressources nécessaires">
-        <Puces texte={data.ressources} />
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr style={HEAD}>
+              <th className="w-44 px-3 py-1.5 text-left font-semibold">Type de ressource</th>
+              <th className="px-3 py-1.5 text-left font-semibold">Détail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.ressources.map((r) => (
+              <tr key={r.type} className="border-b align-top">
+                <th
+                  className="px-3 py-2 text-left font-semibold"
+                  style={{ backgroundColor: "color-mix(in srgb, var(--charte) 10%, white)" }}
+                >
+                  {r.type}
+                </th>
+                <td className="whitespace-pre-wrap px-3 py-2">{r.detail?.trim() || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Section>
 
       {/* 6. Indicateurs */}

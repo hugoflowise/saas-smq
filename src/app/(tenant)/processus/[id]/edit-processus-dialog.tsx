@@ -24,7 +24,6 @@ export type ProcessusForEdit = {
   description: string | null;
   entrees: string | null;
   sorties: string | null;
-  ressources_associees: string | null;
   date_derniere_revue: string | null;
   date_prochaine_revue: string | null;
 };
@@ -43,7 +42,6 @@ export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit
           description: form.get("description") || undefined,
           entrees: form.get("entrees") || undefined,
           sorties: form.get("sorties") || undefined,
-          ressourcesAssociees: form.get("ressourcesAssociees") || undefined,
           dateDerniereRevue: form.get("dateDerniereRevue") || undefined,
           dateProchaineRevue: form.get("dateProchaineRevue") || undefined,
         }),
@@ -109,15 +107,6 @@ export function EditProcessusDialog({ processus }: { processus: ProcessusForEdit
                 defaultValue={processus.sorties ?? ""}
               />
             </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="ressourcesAssociees">Ressources associées</Label>
-            <Textarea
-              id="ressourcesAssociees"
-              name="ressourcesAssociees"
-              rows={2}
-              defaultValue={processus.ressources_associees ?? ""}
-            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
