@@ -71,11 +71,10 @@ export function FicheVersionHistory({
                 <span className="font-semibold">Version {v.version}</span>
                 <span className="text-muted-foreground">publiée le {formatDate(v.approvedAt)}</span>
               </span>
-              {v.redacteur || v.verificateur || v.approbateur ? (
+              {v.redacteur || v.approbateur ? (
                 <span className="text-muted-foreground text-xs">
                   {[
                     v.redacteur ? `Réd. ${v.redacteur}` : null,
-                    v.verificateur ? `Vérif. ${v.verificateur}` : null,
                     v.approbateur ? `Appr. ${v.approbateur}` : null,
                   ]
                     .filter(Boolean)
