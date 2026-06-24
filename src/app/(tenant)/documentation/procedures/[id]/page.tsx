@@ -3,11 +3,17 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { VersionHistory } from "@/app/(tenant)/strategie/politique/version-history";
+import type { Societe } from "@/components/document-paper";
+import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  publishProcedureAction,
+  saveProcedureContenuAction,
+  transitionProcedureStatutAction,
+} from "@/lib/actions/procedures";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { ProcedureClient } from "./procedure-client";
 import { ProcedureRevisionForm } from "./procedure-revision-form";
 
 export default async function ProcedureDetailPage({
@@ -31,16 +37,30 @@ export default async function ProcedureDetailPage({
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
-  const { data: procedure } = await supabase
-    .from("procedures")
-    .select(
-      "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, redacteur, verificateur, note_revision",
-    )
-    .eq("id", id)
-    .eq("tenant_id", tid)
-    .maybeSingle();
+  const [{ data: procedure }, { data: tenant }] = await Promise.all([
+    supabase
+      .from("procedures")
+      .select(
+        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, redacteur, verificateur, note_revision, processus_id, reference_iso",
+      )
+      .eq("id", id)
+      .eq("tenant_id", tid)
+      .maybeSingle(),
+    supabase
+      .from("tenants")
+      .select(
+        "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte",
+      )
+      .eq("id", tid)
+      .maybeSingle(),
+  ]);
 
   if (!procedure) notFound();
+
+  // Processus rattaché (affiché dans les métadonnées du document).
+  const { data: processus } = procedure.processus_id
+    ? await supabase.from("processus").select("nom").eq("id", procedure.processus_id).maybeSingle()
+    : { data: null };
 
   const { data: rawVersions } = await supabase
     .from("procedures_versions")
@@ -79,6 +99,13 @@ export default async function ProcedureDetailPage({
   const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
   const canWrite = isApprover || ctx.role === "manager";
 
+  const metaExtra = [
+    ...(processus?.nom ? [{ label: "Processus", value: processus.nom }] : []),
+    ...(procedure.reference_iso?.length
+      ? [{ label: "Réf. ISO", value: procedure.reference_iso.join(", ") }]
+      : []),
+  ];
+
   return (
     <div className="mx-auto w-full max-w-6xl">
       <Link
@@ -93,12 +120,16 @@ export default async function ProcedureDetailPage({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">
-          <ProcedureClient
-            id={procedure.id}
+          <MaitriseDocument
+            surtitre="Procédure"
+            titre={procedure.titre}
+            societe={tenant as Societe}
+            metaExtra={metaExtra}
             initialContenu={(procedure.contenu ?? null) as JSONContent | null}
             statut={procedure.statut}
             currentVersion={current?.version ?? null}
             currentVersionDate={current?.approvedAt ?? null}
+            publishedCount={versions.length}
             canWrite={canWrite}
             canApprove={isApprover}
             drafterName={procedure.created_by ? (nameById.get(procedure.created_by) ?? null) : null}
@@ -106,6 +137,13 @@ export default async function ProcedureDetailPage({
               procedure.approved_by ? (nameById.get(procedure.approved_by) ?? null) : null
             }
             approvedAt={procedure.approved_at}
+            printHref={`/print/procedure/${procedure.id}`}
+            labelDocument="procédure"
+            signatureTitle="Approuver la procédure"
+            signatureDescription="Signez avec votre mot de passe pour approuver ce document."
+            onSaveContenu={saveProcedureContenuAction.bind(null, procedure.id)}
+            onTransition={transitionProcedureStatutAction.bind(null, procedure.id)}
+            onPublish={publishProcedureAction.bind(null, procedure.id)}
           />
         </div>
 

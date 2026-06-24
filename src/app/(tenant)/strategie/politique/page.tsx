@@ -3,11 +3,16 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
+import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  publishPolitiqueAction,
+  savePolitiqueContenuAction,
+  transitionPolitiqueStatutAction,
+} from "@/lib/actions/politique";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { PolitiqueClient } from "./politique-client";
 import { VersionHistory } from "./version-history";
 
 export default async function PolitiquePage({
@@ -40,7 +45,7 @@ export default async function PolitiquePage({
   const { data: tenant } = await supabase
     .from("tenants")
     .select(
-      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales",
+      "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte",
     )
     .eq("id", tid)
     .maybeSingle();
@@ -110,7 +115,10 @@ export default async function PolitiquePage({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">
-          <PolitiqueClient
+          <MaitriseDocument
+            surtitre="Document maîtrisé"
+            titre="Politique qualité"
+            societe={tenant as Societe}
             initialContenu={(politique?.contenu ?? null) as JSONContent | null}
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}
@@ -121,7 +129,13 @@ export default async function PolitiquePage({
             drafterName={drafterName}
             approverName={approverName}
             approvedAt={politique?.approved_at ?? null}
-            societe={tenant as Societe}
+            printHref="/print/politique"
+            labelDocument="politique"
+            signatureTitle="Approuver la politique qualité"
+            signatureDescription="Signez avec votre mot de passe pour approuver ce document."
+            onSaveContenu={savePolitiqueContenuAction}
+            onTransition={transitionPolitiqueStatutAction}
+            onPublish={publishPolitiqueAction}
           />
         </div>
 

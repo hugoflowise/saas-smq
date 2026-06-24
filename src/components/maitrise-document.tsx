@@ -10,11 +10,8 @@ import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  publishPolitiqueAction,
-  savePolitiqueContenuAction,
-  transitionPolitiqueStatutAction,
-} from "@/lib/actions/politique";
+import type { ActionResult } from "@/lib/actions/types";
+import type { Json } from "@/lib/supabase/database.types";
 
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
@@ -24,21 +21,20 @@ const STATUT_LABELS: Record<string, string> = {
   archivee: "Archivée",
 };
 
-type Props = {
-  initialContenu: JSONContent | null;
-  statut: string;
-  currentVersion: string | null;
-  currentVersionDate: string | null;
-  publishedCount: number;
-  canWrite: boolean;
-  canApprove: boolean;
-  drafterName: string | null;
-  approverName: string | null;
-  approvedAt: string | null;
-  societe: Societe;
-};
+const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
 
-export function PolitiqueClient({
+/**
+ * Document maîtrisé (politique, procédure…) : workflow de validation commun
+ * (statut, version, soumission, approbation/signature, publication) et édition
+ * DIRECTEMENT sur le gabarit officiel (logo + charte du client visibles en
+ * rédigeant). Les actions serveur sont fournies par la page appelante, ce qui
+ * permet de partager exactement la même logique entre tous les documents.
+ */
+export function MaitriseDocument({
+  surtitre,
+  titre,
+  societe,
+  metaExtra,
   initialContenu,
   statut,
   currentVersion,
@@ -49,19 +45,48 @@ export function PolitiqueClient({
   drafterName,
   approverName,
   approvedAt,
-  societe,
-}: Props) {
+  printHref,
+  labelDocument,
+  signatureTitle,
+  signatureDescription,
+  onSaveContenu,
+  onTransition,
+  onPublish,
+}: {
+  surtitre: string;
+  titre: string;
+  societe: Societe;
+  /** Métadonnées spécifiques au document (ex. Processus, Réf. ISO). */
+  metaExtra?: { label: string; value: string }[];
+  initialContenu: JSONContent | null;
+  statut: string;
+  currentVersion: string | null;
+  currentVersionDate: string | null;
+  publishedCount: number;
+  canWrite: boolean;
+  canApprove: boolean;
+  drafterName: string | null;
+  approverName: string | null;
+  approvedAt: string | null;
+  printHref: string;
+  /** Nom du document pour les messages (« politique », « procédure »). */
+  labelDocument: string;
+  signatureTitle: string;
+  signatureDescription: string;
+  onSaveContenu: (contenu: Json) => Promise<ActionResult>;
+  onTransition: (target: string) => Promise<ActionResult>;
+  onPublish: () => Promise<ActionResult>;
+}) {
   const router = useRouter();
   const contenuRef = useRef<JSONContent | null>(initialContenu);
   const dirtyRef = useRef(false);
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
+
   const editable = statut === "brouillon" && canWrite;
   const isPublished = statut === "publiee";
-  // Numéro que prendra la version en cours une fois publiée.
   const nextVersion = `v${publishedCount + 1}`;
 
-  const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
   const documentMeta = [
     { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
     {
@@ -70,11 +95,12 @@ export function PolitiqueClient({
     },
     ...(approverName
       ? [
-          { label: "Approuvée le", value: fmt(approvedAt ?? currentVersionDate) },
+          { label: "Approuvé le", value: fmt(approvedAt ?? currentVersionDate) },
           { label: "Signataire", value: approverName },
         ]
       : []),
     ...(drafterName ? [{ label: "Rédacteur", value: drafterName }] : []),
+    ...(metaExtra ?? []),
   ];
 
   function handleChange(c: JSONContent) {
@@ -84,7 +110,7 @@ export function PolitiqueClient({
   }
 
   async function persist(): Promise<boolean> {
-    const result = await savePolitiqueContenuAction((contenuRef.current ?? {}) as never);
+    const result = await onSaveContenu((contenuRef.current ?? {}) as Json);
     if (result.ok) {
       dirtyRef.current = false;
       setSaved(true);
@@ -94,32 +120,32 @@ export function PolitiqueClient({
     return false;
   }
 
-  // Sauvegarde automatique tant qu'on est en brouillon
+  // Sauvegarde automatique tant qu'on est en brouillon.
   useEffect(() => {
     if (!editable) return;
     const interval = setInterval(async () => {
       if (!dirtyRef.current) return;
-      const result = await savePolitiqueContenuAction((contenuRef.current ?? {}) as never);
+      const result = await onSaveContenu((contenuRef.current ?? {}) as Json);
       if (result.ok) {
         dirtyRef.current = false;
         setSaved(true);
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [editable]);
+  }, [editable, onSaveContenu]);
 
   async function save() {
     setPending(true);
-    if (await persist()) toast.success("Politique enregistrée.");
+    if (await persist()) toast.success(`${cap(labelDocument)} enregistrée.`);
     setPending(false);
   }
 
   async function publish() {
     setPending(true);
-    const result = await publishPolitiqueAction();
+    const result = await onPublish();
     setPending(false);
     if (result.ok) {
-      toast.success("Politique publiée. Version figée créée.");
+      toast.success(`${cap(labelDocument)} publiée. Version figée créée.`);
       router.refresh();
     } else {
       toast.error(result.error);
@@ -128,12 +154,11 @@ export function PolitiqueClient({
 
   async function transition(target: string, message: string) {
     setPending(true);
-    // Toujours sauvegarder le contenu en cours avant de changer de statut
     if (editable && dirtyRef.current && !(await persist())) {
       setPending(false);
       return;
     }
-    const result = await transitionPolitiqueStatutAction(target);
+    const result = await onTransition(target);
     setPending(false);
     if (result.ok) {
       toast.success(message);
@@ -171,7 +196,7 @@ export function PolitiqueClient({
             variant="outline"
             nativeButton={false}
             render={
-              <Link href="/print/politique" target="_blank">
+              <Link href={printHref} target="_blank">
                 Aperçu / PDF
               </Link>
             }
@@ -206,9 +231,11 @@ export function PolitiqueClient({
               </Button>
               <SignatureCapture
                 triggerLabel="Approuver et signer"
-                title="Approuver la politique qualité"
-                description="Signez avec votre mot de passe pour approuver ce document."
-                onSigned={() => transition("approuvee", "Politique approuvée et signée.")}
+                title={signatureTitle}
+                description={signatureDescription}
+                onSigned={() =>
+                  transition("approuvee", `${cap(labelDocument)} approuvée et signée.`)
+                }
               />
             </>
           ) : null}
@@ -229,18 +256,6 @@ export function PolitiqueClient({
         </div>
       </div>
 
-      {drafterName || approverName ? (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">
-          {drafterName ? <span>Rédigé par {drafterName}</span> : null}
-          {approverName ? (
-            <span>
-              Validé et signé par {approverName}
-              {approvedAt ? ` le ${new Date(approvedAt).toLocaleDateString("fr-FR")}` : ""}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
       {statut === "approuvee" ? (
         <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
           <span className="font-medium text-status-pa">Approuvée, non encore publiée.</span>{" "}
@@ -252,25 +267,32 @@ export function PolitiqueClient({
         </div>
       ) : null}
 
-      {editable ? (
-        <TiptapEditor key={statut} content={initialContenu} editable onChange={handleChange} />
-      ) : (
-        <>
-          <DocumentPaper
-            surtitre="Document maîtrisé"
-            titre="Politique qualité"
-            societe={societe}
-            meta={documentMeta}
-            className="border"
-          >
-            <TiptapEditor content={initialContenu} editable={false} bare />
-          </DocumentPaper>
-          <p className="text-muted-foreground text-xs">
-            La politique n'est modifiable qu'en statut « Brouillon ». Utilisez « Aperçu / PDF » pour
-            l'imprimer.
-          </p>
-        </>
-      )}
+      {/* Édition et lecture sur le même gabarit officiel (logo + charte client). */}
+      <DocumentPaper
+        surtitre={surtitre}
+        titre={titre}
+        societe={societe}
+        meta={documentMeta}
+        className="border"
+      >
+        <TiptapEditor
+          key={statut}
+          content={initialContenu}
+          editable={editable}
+          onChange={handleChange}
+          bare={!editable}
+        />
+      </DocumentPaper>
+
+      {!editable ? (
+        <p className="text-muted-foreground text-xs">
+          Modifiable uniquement en statut « Brouillon ». Utilisez « Aperçu / PDF » pour imprimer.
+        </p>
+      ) : null}
     </div>
   );
+}
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
