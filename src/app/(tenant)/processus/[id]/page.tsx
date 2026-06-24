@@ -202,13 +202,14 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         <TabsContent value="apercu" className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Fiche d'identité</CardTitle>
+              <CardTitle className="text-base">Présentation</CardTitle>
+              <p className="text-muted-foreground text-sm">
+                Synthèse opérationnelle. Le document complet et imprimable est dans l'onglet « Fiche
+                d'identité ».
+              </p>
             </CardHeader>
             <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <Field label="Description" value={processus.description} />
-              <Field label="Entrées" value={processus.entrees} />
-              <Field label="Sorties" value={processus.sorties} />
-              <Field label="Ressources associées" value={processus.ressources_associees} />
               <Field label="Dernière revue" value={formatDate(processus.date_derniere_revue)} />
               <Field label="Prochaine revue" value={formatDate(processus.date_prochaine_revue)} />
             </CardContent>

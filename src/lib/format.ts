@@ -20,3 +20,22 @@ export function todayISO(): string {
 export function dateOffsetISO(jours: number): string {
   return new Date(Date.now() + jours * 86_400_000).toISOString().slice(0, 10);
 }
+
+/**
+ * Nom lisible d'une personne pour les documents : « Prénom Nom » si renseigné,
+ * sinon déduit depuis l'e-mail (ex. « hugo.piovesan@… » devient « Hugo Piovesan »).
+ * On n'affiche jamais l'adresse e-mail brute sur un document partagé.
+ */
+export function nomPersonne(
+  fullName: string | null | undefined,
+  email: string | null | undefined,
+): string {
+  if (fullName?.trim()) return fullName.trim();
+  const local = (email ?? "").split("@")[0] ?? "";
+  if (!local) return "-";
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((mot) => mot.charAt(0).toUpperCase() + mot.slice(1))
+    .join(" ");
+}

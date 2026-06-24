@@ -295,21 +295,30 @@ export function FicheProcessus(data: FicheProcessusData) {
         <div className="grid grid-cols-3 overflow-hidden rounded-md border text-sm">
           {(
             [
-              ["Rédigé par", data.redacteur],
-              ["Vérifié par", data.verificateur],
-              [
-                "Approuvé par",
-                data.approbateur
-                  ? `${data.approbateur}${data.approuveeLe ? ` · ${formatDate(data.approuveeLe)}` : ""} · signé`
-                  : null,
-              ],
-            ] as [string, string | null][]
-          ).map(([label, value], i) => (
-            <div key={label} className={i > 0 ? "border-l" : ""}>
+              { label: "Rédigé par", nom: data.redacteur, date: null, signe: false },
+              { label: "Vérifié par", nom: data.verificateur, date: null, signe: false },
+              {
+                label: "Approuvé par",
+                nom: data.approbateur,
+                date: data.approuveeLe,
+                signe: Boolean(data.approbateur),
+              },
+            ] as { label: string; nom: string | null; date: string | null; signe: boolean }[]
+          ).map((c, i) => (
+            <div key={c.label} className={i > 0 ? "border-l" : ""}>
               <div className="px-3 py-1.5 font-semibold" style={HEAD}>
-                {label}
+                {c.label}
               </div>
-              <div className="min-h-16 px-3 py-2">{value ?? "-"}</div>
+              <div className="flex min-h-24 flex-col px-3 py-2">
+                <p className="font-medium">{c.nom?.trim() ? c.nom : "-"}</p>
+                {c.signe ? (
+                  <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
+                    Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
+                  </p>
+                ) : (
+                  <p className="mt-auto text-[#0b1120]/40 text-xs">Date et signature</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
