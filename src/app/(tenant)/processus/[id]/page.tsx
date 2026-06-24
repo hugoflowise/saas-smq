@@ -7,18 +7,20 @@ import { NcDialog } from "@/app/(tenant)/nc/nc-dialog";
 import { RoDialog } from "@/app/(tenant)/risques/ro-dialog";
 import { ObjectifDialog } from "@/app/(tenant)/strategie/objectifs/objectif-dialog";
 import { EmptyState } from "@/components/empty-state";
+import type { FicheProcessusData } from "@/components/fiche-processus";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
-import { formatDate } from "@/lib/format";
+import { formatDate, nomPersonne } from "@/lib/format";
 import { cibleAffichee, horsCible } from "@/lib/indicateurs";
 import { objectifProgress } from "@/lib/objectifs";
 import { canApprove, canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { FicheClient } from "./fiche-client";
+import { FicheVersionHistory } from "./fiche-version-history";
 
 const TYPE_LABELS: Record<string, string> = {
   pilotage: "Pilotage",
@@ -161,6 +163,51 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   // Fiche d'identité : données assemblées par le chargeur partagé (cf. impression).
   const fiche = await loadFicheProcessusData(tid, id);
 
+  // Historique des versions figées de la fiche (instantanés créés à la publication).
+  const { data: versionsRaw } = await supabase
+    .from("processus_fiche_versions")
+    .select("id, version, approved_at, snapshot, redige_par, soumis_par, approved_by")
+    .eq("processus_id", id)
+    .eq("tenant_id", tid)
+    .order("created_at", { ascending: false });
+  const vPersonIds = [
+    ...new Set(
+      (versionsRaw ?? [])
+        .flatMap((v) => [v.redige_par, v.soumis_par, v.approved_by])
+        .filter(Boolean) as string[],
+    ),
+  ];
+  const { data: vPersons } = vPersonIds.length
+    ? await supabase.from("profiles").select("id, full_name, email").in("id", vPersonIds)
+    : { data: [] };
+  const vNameById = new Map((vPersons ?? []).map((p) => [p.id, nomPersonne(p.full_name, p.email)]));
+  const ficheVersions = (versionsRaw ?? []).map((v) => ({
+    id: v.id,
+    version: v.version,
+    approvedAt: v.approved_at,
+    redacteur: v.redige_par ? (vNameById.get(v.redige_par) ?? null) : null,
+    verificateur: v.soumis_par ? (vNameById.get(v.soumis_par) ?? null) : null,
+    approbateur: v.approved_by ? (vNameById.get(v.approved_by) ?? null) : null,
+    snapshot: v.snapshot as FicheProcessusData | null,
+  }));
+  // Version publiée actuelle non encore instantanée (publiée avant l'historique) :
+  // on l'affiche depuis les données vivantes pour ne jamais « perdre » la version en vigueur.
+  if (
+    fiche?.statut === "publiee" &&
+    fiche.data.version &&
+    !ficheVersions.some((v) => v.version === fiche.data.version)
+  ) {
+    ficheVersions.unshift({
+      id: "courante",
+      version: fiche.data.version,
+      approvedAt: fiche.data.versionDate,
+      redacteur: fiche.data.redacteur,
+      verificateur: fiche.data.verificateur,
+      approbateur: fiche.data.approbateur,
+      snapshot: fiche.data,
+    });
+  }
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       <Link
@@ -190,17 +237,30 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="fiche">
+        <TabsContent value="fiche" className="flex flex-col gap-6">
           {fiche ? (
-            <FicheClient
-              data={fiche.data}
-              initial={fiche.initial}
-              users={fiche.users}
-              statut={fiche.statut}
-              canWrite={canWrite(ctx.role)}
-              canApprove={canApprove(ctx.role)}
-              printHref={`/print/processus-fiche/${id}`}
-            />
+            <>
+              <FicheClient
+                data={fiche.data}
+                initial={fiche.initial}
+                users={fiche.users}
+                statut={fiche.statut}
+                canWrite={canWrite(ctx.role)}
+                canApprove={canApprove(ctx.role)}
+                printHref={`/print/processus-fiche/${id}`}
+              />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Historique des versions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FicheVersionHistory
+                    versions={ficheVersions}
+                    pending={{ version: fiche.data.version ?? "", statut: fiche.statut }}
+                  />
+                </CardContent>
+              </Card>
+            </>
           ) : null}
         </TabsContent>
 
