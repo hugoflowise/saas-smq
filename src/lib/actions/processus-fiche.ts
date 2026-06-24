@@ -195,9 +195,14 @@ export async function transitionFicheAction(id: string, target: string): Promise
   };
 
   if (target === "en_revue") {
-    // Vérificateur = celui qui soumet à approbation.
     update.fiche_soumis_par = ctx.userId;
     update.fiche_soumis_le = new Date().toISOString();
+    // Filet de sécurité : si la fiche n'a pas encore de rédacteur (processus
+    // créé sans passer par l'éditeur), on l'attribue à celui qui la soumet.
+    if (!fiche.fiche_redige_par) {
+      update.fiche_redige_par = ctx.userId;
+      update.fiche_redige_le = new Date().toISOString();
+    }
   }
 
   if (target === "approuvee") {

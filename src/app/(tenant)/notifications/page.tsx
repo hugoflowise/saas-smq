@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
+import { loadNotifications } from "@/lib/notifications-view";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
@@ -15,20 +14,8 @@ function formatDate(iso: string) {
 }
 
 export default async function NotificationsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: notifications } = await supabase
-    .from("notifications")
-    .select("id, title, body, link, is_read, created_at")
-    .eq("recipient_user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  const items = notifications ?? [];
+  // Même logique que la cloche (vue simulée incluse).
+  const { notifications: items } = await loadNotifications(100);
 
   return (
     <div className="mx-auto w-full max-w-2xl">

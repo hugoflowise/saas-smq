@@ -1,9 +1,9 @@
-import type { NotificationItem } from "@/components/layout/notification-bell";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { LegalFooter } from "@/components/legal-footer";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
+import { loadNotifications } from "@/lib/notifications-view";
 import { canManageUsers, isReadOnly } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -54,50 +54,8 @@ export default async function TenantLayout({ children }: { children: React.React
     activeTenantName = tenant?.nom_societe ?? null;
   }
 
-  // Notifications. En vue simulée, l'admin voit celles adressées au rôle simulé
-  // dans le client actif (pour vérifier que les notifications fonctionnent) ;
-  // sinon, ses propres notifications.
-  const COLS = "id, title, body, link, is_read, created_at";
-  let notifications: NotificationItem[] = [];
-  let unreadCount = 0;
-  if (simulating && simulatedRole && activeTenantId) {
-    const admin = createAdminClient();
-    const { data: roleUsers } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("tenant_id", activeTenantId)
-      .eq("role", simulatedRole);
-    const ids = (roleUsers ?? []).map((u) => u.id);
-    if (ids.length > 0) {
-      const { data } = await admin
-        .from("notifications")
-        .select(COLS)
-        .in("recipient_user_id", ids)
-        .order("created_at", { ascending: false })
-        .limit(15);
-      notifications = data ?? [];
-      const { count } = await admin
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .in("recipient_user_id", ids)
-        .eq("is_read", false);
-      unreadCount = count ?? 0;
-    }
-  } else if (user) {
-    const { data } = await supabase
-      .from("notifications")
-      .select(COLS)
-      .eq("recipient_user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(15);
-    notifications = data ?? [];
-    const { count } = await supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("recipient_user_id", user.id)
-      .eq("is_read", false);
-    unreadCount = count ?? 0;
-  }
+  // Notifications (cloche) : logique partagée avec la page /notifications.
+  const { notifications, unreadCount } = await loadNotifications(15);
 
   return (
     <div className="flex h-screen overflow-hidden">
