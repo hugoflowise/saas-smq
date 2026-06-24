@@ -11,11 +11,14 @@ import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
 import { formatDate } from "@/lib/format";
 import { objectifProgress } from "@/lib/objectifs";
+import { canApprove, canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { EditProcessusDialog } from "./edit-processus-dialog";
+import { FicheClient } from "./fiche-client";
 
 const TYPE_LABELS: Record<string, string> = {
   pilotage: "Pilotage",
@@ -166,6 +169,9 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
     secondary: n.statut,
   }));
 
+  // Fiche d'identité : données assemblées par le chargeur partagé (cf. impression).
+  const fiche = await loadFicheProcessusData(tid, id);
+
   return (
     <div className="mx-auto w-full max-w-5xl">
       <Link
@@ -186,6 +192,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       <Tabs defaultValue="apercu">
         <TabsList>
           <TabsTrigger value="apercu">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="fiche">Fiche d'identité</TabsTrigger>
           <TabsTrigger value="objectifs">Objectifs ({objList.length})</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
           <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
@@ -254,6 +261,19 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               </div>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="fiche">
+          {fiche ? (
+            <FicheClient
+              data={fiche.data}
+              initial={fiche.initial}
+              canWrite={canWrite(ctx.role)}
+              canApprove={canApprove(ctx.role)}
+              isApproved={fiche.isApproved}
+              printHref={`/print/processus-fiche/${id}`}
+            />
+          ) : null}
         </TabsContent>
 
         <TabsContent value="objectifs" className="flex flex-col gap-3">

@@ -2080,11 +2080,21 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           entrees: string | null
+          fiche_approuvee_le: string | null
+          fiche_approuvee_par: string | null
+          fiche_note_revision: string | null
+          fiche_redacteur: string | null
+          fiche_signature: Json | null
+          fiche_verificateur: string | null
+          fiche_version: string | null
+          finalite: string | null
           id: string
           nom: string
           ordre_affichage: number
+          perimetre: string | null
           pilote_id: string | null
           propose: boolean
+          referentiels: string | null
           ressources_associees: string | null
           sorties: string | null
           tenant_id: string
@@ -2101,11 +2111,21 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           entrees?: string | null
+          fiche_approuvee_le?: string | null
+          fiche_approuvee_par?: string | null
+          fiche_note_revision?: string | null
+          fiche_redacteur?: string | null
+          fiche_signature?: Json | null
+          fiche_verificateur?: string | null
+          fiche_version?: string | null
+          finalite?: string | null
           id?: string
           nom: string
           ordre_affichage?: number
+          perimetre?: string | null
           pilote_id?: string | null
           propose?: boolean
+          referentiels?: string | null
           ressources_associees?: string | null
           sorties?: string | null
           tenant_id: string
@@ -2122,11 +2142,21 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           entrees?: string | null
+          fiche_approuvee_le?: string | null
+          fiche_approuvee_par?: string | null
+          fiche_note_revision?: string | null
+          fiche_redacteur?: string | null
+          fiche_signature?: Json | null
+          fiche_verificateur?: string | null
+          fiche_version?: string | null
+          finalite?: string | null
           id?: string
           nom?: string
           ordre_affichage?: number
+          perimetre?: string | null
           pilote_id?: string | null
           propose?: boolean
+          referentiels?: string | null
           ressources_associees?: string | null
           sorties?: string | null
           tenant_id?: string
@@ -2139,6 +2169,13 @@ export type Database = {
           {
             foreignKeyName: "processus_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_fiche_approuvee_par_fkey"
+            columns: ["fiche_approuvee_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2159,6 +2196,154 @@ export type Database = {
           },
           {
             foreignKeyName: "processus_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processus_activites: {
+        Row: {
+          activite: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          documents: string | null
+          id: string
+          ordre: number
+          processus_id: string
+          responsable: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          activite: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          documents?: string | null
+          id?: string
+          ordre?: number
+          processus_id: string
+          responsable?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          activite?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          documents?: string | null
+          id?: string
+          ordre?: number
+          processus_id?: string
+          responsable?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processus_activites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_activites_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_activites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_activites_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processus_interactions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          nature: string | null
+          ordre: number
+          partenaire: string
+          processus_id: string
+          sens: Database["public"]["Enums"]["interaction_sens"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          nature?: string | null
+          ordre?: number
+          partenaire: string
+          processus_id: string
+          sens?: Database["public"]["Enums"]["interaction_sens"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          nature?: string | null
+          ordre?: number
+          partenaire?: string
+          processus_id?: string
+          sens?: Database["public"]["Enums"]["interaction_sens"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processus_interactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_interactions_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_interactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_interactions_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -3178,6 +3363,7 @@ export type Database = {
         | "annuel"
       indicateur_source: "manuel" | "boondmanager" | "calcul"
       indicateur_type: "numeric" | "percentage" | "count" | "duration"
+      interaction_sens: "entrant" | "sortant"
       jalon_statut: "planifie" | "realise"
       jalon_type:
         | "audit_blanc"
@@ -3472,6 +3658,7 @@ export const Constants = {
       ],
       indicateur_source: ["manuel", "boondmanager", "calcul"],
       indicateur_type: ["numeric", "percentage", "count", "duration"],
+      interaction_sens: ["entrant", "sortant"],
       jalon_statut: ["planifie", "realise"],
       jalon_type: [
         "audit_blanc",

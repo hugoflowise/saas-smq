@@ -76,8 +76,9 @@ export function DocumentPaper({
   const surBande = texteContraste(charte);
   const items = meta ?? [];
 
-  // Les titres de section du corps (h1/h2/h3) reprennent la couleur de charte.
-  const style = { "--charte": charte } as CSSProperties;
+  // Variables de charte exposées au corps : couleur + texte contrasté, pour les
+  // titres de section et les en-têtes de tableaux des documents structurés.
+  const style = { "--charte": charte, "--charte-contrast": surBande } as CSSProperties;
 
   return (
     <article
