@@ -248,7 +248,7 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
   await notifyTenant(ctx.effectiveTenantId, {
     type: "approval_granted",
     title: "Procédure publiée",
-    body: `Une procédure a été publiée (version ${version}).`,
+    body: `La procédure « ${procedure.titre} » a été publiée (version ${version}).`,
     link: `/documentation/procedures/${id}`,
   });
 

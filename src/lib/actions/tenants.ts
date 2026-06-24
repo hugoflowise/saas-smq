@@ -107,7 +107,7 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
   if (lien?.properties?.action_link) {
     await sendEmail({
       to: data.dirigeantEmail,
-      subject: `Bienvenue sur Flowise Pilotage SMQ : ${data.nomSociete}`,
+      subject: `Bienvenue sur flowise. : ${data.nomSociete}`,
       html: inviteEmailHtml({
         societe: data.nomSociete,
         roleLabel: "Dirigeant",

@@ -62,7 +62,7 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Flowise · Pilotage SMQ</CardTitle>
+        <CardTitle className="text-2xl">flowise.</CardTitle>
         <CardDescription>
           {status === "sent"
             ? "Lien envoyé · consultez votre boîte mail."

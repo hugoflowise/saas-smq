@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
 
 export type Societe = {
@@ -78,7 +79,7 @@ export function DocumentPaper({
   surtitre?: string;
   titre: string;
   societe: Societe;
-  meta?: { label: string; value: string }[];
+  meta?: { label: string; value: string; href?: string }[];
   genereLe?: string;
   className?: string;
   /** Masque l'en-tête à l'impression (un en-tête répété est alors fourni autour). */
@@ -126,7 +127,15 @@ export function DocumentPaper({
                 >
                   {m.label}
                 </span>
-                <span className="px-2 py-1.5">{m.value}</span>
+                <span className="px-2 py-1.5">
+                  {m.href ? (
+                    <Link href={m.href} className="underline" style={{ color: charte }}>
+                      {m.value}
+                    </Link>
+                  ) : (
+                    m.value
+                  )}
+                </span>
               </div>
             ))}
           </div>
@@ -153,7 +162,15 @@ export function DocumentPaper({
               <dt className="text-xs uppercase tracking-wide" style={{ color: rgba(charte, 0.8) }}>
                 {m.label}
               </dt>
-              <dd className="font-medium">{m.value}</dd>
+              <dd className="font-medium">
+                {m.href ? (
+                  <Link href={m.href} className="underline" style={{ color: charte }}>
+                    {m.value}
+                  </Link>
+                ) : (
+                  m.value
+                )}
+              </dd>
             </div>
           ))}
         </dl>

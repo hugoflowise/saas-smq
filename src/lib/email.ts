@@ -13,12 +13,12 @@ import { Resend } from "resend";
  * Pour activer en production :
  * 1. Créer un compte sur https://resend.com et une clé API.
  * 2. Vérifier un domaine d'envoi (DNS), puis définir `RESEND_FROM`
- *    (ex. "Flowise Qualité <qualite@mondomaine.fr>").
+ *    (ex. "flowise. <qualite@send.flowise.fr>").
  * 3. Renseigner `RESEND_API_KEY` (et `NEXT_PUBLIC_APP_URL` pour les liens).
  */
 
 // Expéditeur. `onboarding@resend.dev` fonctionne sans domaine vérifié (tests).
-const FROM = process.env.RESEND_FROM ?? "Flowise Qualité <onboarding@resend.dev>";
+const FROM = process.env.RESEND_FROM ?? "flowise. <onboarding@resend.dev>";
 
 let client: Resend | null = null;
 function getClient(): Resend | null {
@@ -79,19 +79,19 @@ export function notificationEmailHtml(opts: {
       : `${base}${opts.link}`
     : null;
   const bouton = href
-    ? `<a href="${href}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Ouvrir dans Flowise</a>`
+    ? `<a href="${href}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Ouvrir dans l'application flowise.</a>`
     : "";
   const corps = opts.body
     ? `<p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">${opts.body}</p>`
     : "";
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
-    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;color:#ff6b5e;font-weight:700">flowise.</p>
     <h1 style="margin:0;font-size:18px;color:#0f172a">${opts.title}</h1>
     ${corps}
     ${bouton}
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Notification automatique · Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Notification automatique · flowise.</p>
 </div>`;
 }
 
@@ -107,13 +107,13 @@ export function inviteEmailHtml(opts: {
 }): string {
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
-    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;color:#ff6b5e;font-weight:700">flowise.</p>
     <h1 style="margin:0;font-size:18px;color:#0f172a">Vous êtes invité à rejoindre ${opts.societe}</h1>
     <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">Vous avez accès à l'espace qualité de ${opts.societe} en tant que <strong>${opts.roleLabel}</strong>. Cliquez ci-dessous pour définir votre mot de passe et vous connecter.</p>
     <a href="${opts.actionLink}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Définir mon mot de passe</a>
     <p style="margin:16px 0 0;color:#94a3b8;font-size:12px">Si vous n'attendiez pas cette invitation, ignorez cet e-mail.</p>
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Invitation · Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Invitation · flowise.</p>
 </div>`;
 }
 
@@ -124,13 +124,13 @@ export function inviteEmailHtml(opts: {
 export function resetEmailHtml(opts: { actionLink: string }): string {
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
-    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;color:#ff6b5e;font-weight:700">flowise.</p>
     <h1 style="margin:0;font-size:18px;color:#0f172a">Réinitialisation de votre mot de passe</h1>
     <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">Vous avez demandé à réinitialiser votre mot de passe. Cliquez ci-dessous pour en définir un nouveau. Ce lien est valable un temps limité.</p>
     <a href="${opts.actionLink}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Définir un nouveau mot de passe</a>
     <p style="margin:16px 0 0;color:#94a3b8;font-size:12px">Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.</p>
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Sécurité · Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Sécurité · flowise.</p>
 </div>`;
 }
 
@@ -179,12 +179,12 @@ export function digestEmailHtml(opts: {
 
   return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px">
   <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
-    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#ff6b5e;font-weight:700">Flowise Pilotage SMQ</p>
+    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;color:#ff6b5e;font-weight:700">flowise.</p>
     <h1 style="margin:0;font-size:18px;color:#0f172a">Vos échéances qualité</h1>
     <p style="margin:6px 0 0;color:#64748b;font-size:13px">Récapitulatif des points à traiter prochainement.</p>
     ${sectionsHtml}
     ${base ? `<a href="${base}/dashboard" style="display:inline-block;margin-top:20px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Ouvrir le tableau de bord</a>` : ""}
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Digest automatique · Flowise Pilotage SMQ</p>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">Digest automatique · flowise.</p>
 </div>`;
 }
