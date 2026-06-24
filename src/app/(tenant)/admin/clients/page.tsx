@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { nomPersonne } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { CreateTenantDialog } from "./create-tenant-dialog";
@@ -48,7 +49,7 @@ export default async function AdminClientsPage() {
     .order("full_name");
   const flowiseTeam = (equipeFlowise ?? []).map((m) => ({
     id: m.id,
-    nom: m.full_name?.trim() || m.email,
+    nom: nomPersonne(m.full_name, m.email),
   }));
 
   // Dirigeant de chaque tenant
