@@ -12,8 +12,6 @@ export type ProcedureSectionsData = {
   definitions: ProcDef[];
   referencesDoc: ProcRef[];
   referencesAppli: ProcRef[];
-  /** Logigramme (image SVG/data URL exportée depuis draw.io), optionnel. */
-  logigrammeSvg?: string | null;
 };
 
 const HEAD: React.CSSProperties = {
@@ -163,20 +161,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
         )}
       </Section>
 
-      {d.logigrammeSvg?.trim() ? (
-        <Section n={7} titre="Logigramme">
-          {/* biome-ignore lint/performance/noImgElement: logigramme exporté (SVG data URL), document imprimable */}
-          <img
-            src={d.logigrammeSvg}
-            alt="Logigramme de la procédure"
-            className="mx-auto max-h-[28rem] w-auto max-w-full"
-          />
-        </Section>
-      ) : null}
-
-      <h2 className="mt-7 mb-2 font-semibold text-base">
-        {d.logigrammeSvg?.trim() ? 8 : 7}. Contenu de la procédure
-      </h2>
+      <h2 className="mt-7 mb-2 font-semibold text-base">7. Contenu de la procédure</h2>
     </div>
   );
 }

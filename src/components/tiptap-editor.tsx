@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "@tiptap/extension-image";
 import { EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -7,14 +8,43 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  ImageIcon,
   Italic,
   List,
   ListOrdered,
   Redo2,
   Undo2,
+  Workflow,
 } from "lucide-react";
+import { useRef, useState } from "react";
+import { DrawioModal } from "@/components/drawio-modal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+/** Réduit une image importée (max 1200px de large) en data URL JPEG, pour limiter le poids. */
+function reduireImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const max = 1200;
+        const ratio = Math.min(1, max / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("canvas"));
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 type Props = {
   content: JSONContent | null;
@@ -63,8 +93,10 @@ function ToolbarButton({
 }
 
 export function TiptapEditor({ content, editable, onChange, bare = false }: Props) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [drawioOpen, setDrawioOpen] = useState(false);
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, Image.configure({ allowBase64: true, inline: false })],
     content: content ?? "",
     editable,
     immediatelyRender: false,
@@ -73,6 +105,18 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
   });
 
   if (!editor) return null;
+
+  async function onImageFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !editor) return;
+    try {
+      const src = await reduireImage(file);
+      editor.chain().focus().setImage({ src }).run();
+    } catch {
+      /* ignore */
+    }
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -127,15 +171,36 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
           >
             <ListOrdered className="size-4" />
           </ToolbarButton>
+          <ToolbarButton label="Image" onClick={() => fileInputRef.current?.click()}>
+            <ImageIcon className="size-4" />
+          </ToolbarButton>
+          <ToolbarButton label="Logigramme" onClick={() => setDrawioOpen(true)}>
+            <Workflow className="size-4" />
+          </ToolbarButton>
           <ToolbarButton label="Annuler" onClick={() => editor.chain().focus().undo().run()}>
             <Undo2 className="size-4" />
           </ToolbarButton>
           <ToolbarButton label="Rétablir" onClick={() => editor.chain().focus().redo().run()}>
             <Redo2 className="size-4" />
           </ToolbarButton>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={onImageFile}
+            className="hidden"
+          />
         </div>
       ) : null}
       <EditorContent editor={editor} className={bare ? BARE_CLASS : PROSE_CLASS} />
+      <DrawioModal
+        open={drawioOpen}
+        onSave={(_xml, svg) => {
+          if (svg) editor.chain().focus().setImage({ src: svg }).run();
+          setDrawioOpen(false);
+        }}
+        onClose={() => setDrawioOpen(false)}
+      />
     </div>
   );
 }
