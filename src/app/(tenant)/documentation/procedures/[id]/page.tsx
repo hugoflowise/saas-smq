@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/procedures";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { LogigrammeEditor } from "./logigramme-editor";
 import { ProcedureInfosEditor } from "./procedure-infos-editor";
 
 export default async function ProcedureDetailPage({
@@ -42,7 +43,7 @@ export default async function ProcedureDetailPage({
     supabase
       .from("procedures")
       .select(
-        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli, logigramme_xml, logigramme_svg",
       )
       .eq("id", id)
       .eq("tenant_id", tid)
@@ -134,6 +135,7 @@ export default async function ProcedureDetailPage({
     definitions,
     referencesDoc: refsDoc,
     referencesAppli: refsAppli,
+    logigrammeSvg: procedure.logigramme_svg,
   };
   const infosInitial = {
     id: procedure.id,
@@ -171,8 +173,16 @@ export default async function ProcedureDetailPage({
       <PageHeader title={procedure.titre} />
 
       {enBrouillon ? (
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col gap-6">
           <ProcedureInfosEditor initial={infosInitial} />
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <h3 className="mb-3 font-semibold text-sm">Logigramme</h3>
+            <LogigrammeEditor
+              id={procedure.id}
+              xml={procedure.logigramme_xml}
+              svg={procedure.logigramme_svg}
+            />
+          </div>
         </div>
       ) : null}
 

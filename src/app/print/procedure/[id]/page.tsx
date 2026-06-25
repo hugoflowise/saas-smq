@@ -27,7 +27,7 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
   const { data: procedure } = await supabase
     .from("procedures")
     .select(
-      "titre, contenu, version_actuelle_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+      "titre, contenu, version_actuelle_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli, logigramme_svg",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -73,6 +73,7 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
     definitions: unknown;
     references_doc: unknown;
     references_appli: unknown;
+    logigramme_svg: string | null;
   };
   const src = ((version?.sections_snapshot as unknown as SectionsSrc | null) ??
     procedure) as SectionsSrc;
@@ -110,6 +111,7 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         definitions={(src.definitions as unknown as ProcDef[] | null) ?? []}
         referencesDoc={(src.references_doc as unknown as ProcRef[] | null) ?? []}
         referencesAppli={(src.references_appli as unknown as ProcRef[] | null) ?? []}
+        logigrammeSvg={src.logigramme_svg}
       />
       <TiptapEditor content={contenu} editable={false} bare />
     </PrintShell>
