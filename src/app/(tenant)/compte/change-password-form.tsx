@@ -12,11 +12,13 @@ import { createClient } from "@/lib/supabase/client";
 const MIN_LONGUEUR = 8;
 
 /**
- * Formulaire de définition / changement de mot de passe de l'utilisateur connecté.
- * `redirectTo` : redirige après succès (utilisé sur /bienvenue où définir le mot
- * de passe débloque l'accès à l'app).
+ * Formulaire de définition / changement de mot de passe.
+ * `reloginAfter` (page /bienvenue, après invitation/réinitialisation) : une fois
+ * le mot de passe défini, on déconnecte et on renvoie vers la connexion pour que
+ * l'utilisateur se reconnecte avec son nouveau mot de passe (standard de sécurité).
+ * Sinon (page Mon compte, déjà connecté) : on reste connecté.
  */
-export function ChangePasswordForm({ redirectTo }: { redirectTo?: string }) {
+export function ChangePasswordForm({ reloginAfter = false }: { reloginAfter?: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
@@ -47,10 +49,15 @@ export function ChangePasswordForm({ redirectTo }: { redirectTo?: string }) {
       // Lève le drapeau « mot de passe à définir » qui bloque l'accès à l'app.
       await markPasswordSetAction();
       form.reset();
-      toast.success("Mot de passe mis à jour.");
-      if (redirectTo) {
-        router.push(redirectTo);
+
+      if (reloginAfter) {
+        // Standard de sécurité : on n'utilise pas la session ouverte par le lien
+        // e-mail comme session applicative ; on se reconnecte avec le nouveau mdp.
+        await supabase.auth.signOut();
+        router.push("/login?motdepasse=modifie");
         router.refresh();
+      } else {
+        toast.success("Mot de passe mis à jour.");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour.");
