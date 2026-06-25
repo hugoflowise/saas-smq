@@ -30,6 +30,7 @@ const baseSchema = {
   priorite: z.enum(["p1", "p2", "p3"]),
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
   processusConcerne: z.string().uuid().optional(),
+  revueId: z.string().uuid().optional(),
   datePrevue: z.string().optional(),
   indicateurEfficacite: z.string().trim().optional(),
   commentaires: z.string().trim().optional(),
@@ -93,6 +94,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
     priorite: d.priorite,
     statut: d.statut,
     processus_concerne: d.processusConcerne ?? null,
+    revue_id: d.revueId ?? null,
     date_prevue: d.datePrevue || null,
     indicateur_efficacite: d.indicateurEfficacite ?? null,
     commentaires: d.commentaires ?? null,
@@ -106,6 +108,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/actions");
+  if (d.revueId) revalidatePath(`/revues/direction/${d.revueId}`);
   return { ok: true };
 }
 

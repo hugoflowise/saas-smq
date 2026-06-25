@@ -38,6 +38,7 @@ export type Database = {
           reference: string
           reference_iso: string[] | null
           responsable_id: string | null
+          revue_id: string | null
           statut: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
           type: Database["public"]["Enums"]["action_type"]
@@ -68,6 +69,7 @@ export type Database = {
           reference: string
           reference_iso?: string[] | null
           responsable_id?: string | null
+          revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
           type?: Database["public"]["Enums"]["action_type"]
@@ -98,6 +100,7 @@ export type Database = {
           reference?: string
           reference_iso?: string[] | null
           responsable_id?: string | null
+          revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id?: string
           type?: Database["public"]["Enums"]["action_type"]
@@ -125,6 +128,13 @@ export type Database = {
             columns: ["responsable_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_revue_id_fkey"
+            columns: ["revue_id"]
+            isOneToOne: false
+            referencedRelation: "revues_direction"
             referencedColumns: ["id"]
           },
           {
@@ -2896,8 +2906,19 @@ export type Database = {
           date_realisation: string | null
           decisions: string | null
           deleted_at: string | null
+          donnees_capturees_le: string | null
+          donnees_performance: Json | null
+          entree_actions_anterieures: string | null
+          entree_efficacite_actions: string | null
+          entree_evolution_contexte: string | null
+          entree_opportunites: string | null
+          entree_performance_synthese: string | null
+          entree_ressources: string | null
           id: string
           ordre_du_jour: string | null
+          sortie_amelioration: string | null
+          sortie_changements: string | null
+          sortie_ressources: string | null
           statut: Database["public"]["Enums"]["revue_statut"]
           tenant_id: string
           updated_at: string
@@ -2912,8 +2933,19 @@ export type Database = {
           date_realisation?: string | null
           decisions?: string | null
           deleted_at?: string | null
+          donnees_capturees_le?: string | null
+          donnees_performance?: Json | null
+          entree_actions_anterieures?: string | null
+          entree_efficacite_actions?: string | null
+          entree_evolution_contexte?: string | null
+          entree_opportunites?: string | null
+          entree_performance_synthese?: string | null
+          entree_ressources?: string | null
           id?: string
           ordre_du_jour?: string | null
+          sortie_amelioration?: string | null
+          sortie_changements?: string | null
+          sortie_ressources?: string | null
           statut?: Database["public"]["Enums"]["revue_statut"]
           tenant_id: string
           updated_at?: string
@@ -2928,8 +2960,19 @@ export type Database = {
           date_realisation?: string | null
           decisions?: string | null
           deleted_at?: string | null
+          donnees_capturees_le?: string | null
+          donnees_performance?: Json | null
+          entree_actions_anterieures?: string | null
+          entree_efficacite_actions?: string | null
+          entree_evolution_contexte?: string | null
+          entree_opportunites?: string | null
+          entree_performance_synthese?: string | null
+          entree_ressources?: string | null
           id?: string
           ordre_du_jour?: string | null
+          sortie_amelioration?: string | null
+          sortie_changements?: string | null
+          sortie_ressources?: string | null
           statut?: Database["public"]["Enums"]["revue_statut"]
           tenant_id?: string
           updated_at?: string
