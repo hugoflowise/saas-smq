@@ -2916,6 +2916,8 @@ export type Database = {
           entree_ressources: string | null
           id: string
           ordre_du_jour: string | null
+          participants: Json
+          points_specifiques: string | null
           sortie_amelioration: string | null
           sortie_changements: string | null
           sortie_ressources: string | null
@@ -2943,6 +2945,8 @@ export type Database = {
           entree_ressources?: string | null
           id?: string
           ordre_du_jour?: string | null
+          participants?: Json
+          points_specifiques?: string | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null
@@ -2970,6 +2974,8 @@ export type Database = {
           entree_ressources?: string | null
           id?: string
           ordre_du_jour?: string | null
+          participants?: Json
+          points_specifiques?: string | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null

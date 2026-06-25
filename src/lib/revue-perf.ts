@@ -11,6 +11,8 @@ export type RevuePerformance = {
   conformiteIso: number | null;
   npsGlobal: number | null;
   satisfactionMoyenne: number | null;
+  eNps: number | null;
+  satisfactionCollaborateur: number | null;
   tauxObjectifs: number | null;
   objectifsTotal: number;
   objectifsAtteints: number;
@@ -28,6 +30,48 @@ export type RevuePerformance = {
 };
 
 const NC_OUVERTES = ["ouverte", "analysee", "action_definie"] as const;
+
+/** Cellules « label / valeur » du bloc performance, partagées écran + PDF. */
+export function revuePerfCells(perf: RevuePerformance): { label: string; value: string }[] {
+  // == null : tolère les anciens instantanés sans les nouveaux champs.
+  return [
+    { label: "Conformité ISO", value: perf.conformiteIso == null ? "-" : `${perf.conformiteIso}%` },
+    { label: "NPS client", value: perf.npsGlobal == null ? "-" : String(perf.npsGlobal) },
+    {
+      label: "Satisfaction client /10",
+      value: perf.satisfactionMoyenne == null ? "-" : String(perf.satisfactionMoyenne),
+    },
+    { label: "eNPS collaborateur", value: perf.eNps == null ? "-" : String(perf.eNps) },
+    {
+      label: "Satisfaction collab. /10",
+      value: perf.satisfactionCollaborateur == null ? "-" : String(perf.satisfactionCollaborateur),
+    },
+    {
+      label: "Objectifs atteints",
+      value:
+        perf.tauxObjectifs == null
+          ? "-"
+          : `${perf.tauxObjectifs}% (${perf.objectifsAtteints}/${perf.objectifsTotal})`,
+    },
+    {
+      label: "NC de l'année",
+      value: `${perf.ncTotalAnnee} (${perf.ncClotureesAnnee} clôturées)`,
+    },
+    { label: "NC ouvertes", value: String(perf.ncOuvertes) },
+    { label: "Réclamations ouvertes", value: String(perf.reclamationsOuvertes) },
+    { label: "Audits réalisés", value: `${perf.auditsRealisesAnnee}/${perf.auditsTotalAnnee}` },
+    { label: "Risques critiques", value: String(perf.roCritiques) },
+    {
+      label: "Indicateurs hors cible",
+      value: `${perf.indicateursHorsCible}/${perf.indicateursTotal}`,
+    },
+    {
+      label: "Fournisseurs (note moy.)",
+      value: perf.fournisseursNoteMoyenne == null ? "-" : `${perf.fournisseursNoteMoyenne}/5`,
+    },
+    { label: "Fournisseurs à réévaluer", value: String(perf.fournisseursAReevaluer) },
+  ];
+}
 
 /**
  * Calcule les KPIs de performance pour une année donnée.
@@ -57,6 +101,7 @@ export async function computeRevuePerformance(
     auditsRealisesRes,
     roCritiquesRes,
     fournisseursRes,
+    suivisRes,
   ] = await Promise.all([
     supabase.from("referentiel_iso").select("id", { count: "exact", head: true }),
     supabase.from("conformite_evaluation").select("cotation").eq("tenant_id", tenantId),
@@ -127,6 +172,11 @@ export async function computeRevuePerformance(
       .select("note_evaluation, prochaine_evaluation")
       .eq("tenant_id", tenantId)
       .is("deleted_at", null),
+    supabase
+      .from("suivis_consultant")
+      .select("nps, satisfaction_globale")
+      .eq("tenant_id", tenantId)
+      .is("deleted_at", null),
   ]);
 
   // Conformité ISO (% conforme + point fort)
@@ -184,10 +234,23 @@ export async function computeRevuePerformance(
     (f) => f.prochaine_evaluation !== null && (f.prochaine_evaluation as string) <= fin,
   ).length;
 
+  // Écoute collaborateur : eNPS + satisfaction (suivi consultant)
+  const suivis = suivisRes.data ?? [];
+  const { nps: eNps } = computeNps(suivis.map((s) => s.nps));
+  const satCollab = suivis
+    .map((s) => s.satisfaction_globale)
+    .filter((n): n is number => n !== null && n !== undefined);
+  const satisfactionCollaborateur =
+    satCollab.length > 0
+      ? Math.round((satCollab.reduce((a, b) => a + b, 0) / satCollab.length) * 10) / 10
+      : null;
+
   return {
     conformiteIso,
     npsGlobal: nps,
     satisfactionMoyenne,
+    eNps,
+    satisfactionCollaborateur,
     tauxObjectifs,
     objectifsTotal: objectifs.length,
     objectifsAtteints,
