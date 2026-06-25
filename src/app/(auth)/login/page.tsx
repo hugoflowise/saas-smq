@@ -1,10 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
@@ -62,7 +63,14 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">flowise.</CardTitle>
+        <Image
+          src="/logo.png"
+          alt="flowise"
+          width={500}
+          height={230}
+          priority
+          className="mx-auto mb-2 h-9 w-auto"
+        />
         <CardDescription>
           {status === "sent"
             ? "Lien envoyé · consultez votre boîte mail."
