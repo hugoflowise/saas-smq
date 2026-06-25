@@ -93,19 +93,19 @@ export async function loadFicheProcessusData(
       .order("ordre"),
     supabase
       .from("indicateurs")
-      .select("nom, cible, unite, sens, formule_calcul, frequence_mesure")
+      .select("id, nom, cible, unite, sens, formule_calcul, frequence_mesure")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("nom"),
     supabase
       .from("risques_opportunites")
-      .select("intitule, criticite, type")
+      .select("id, intitule, criticite, type")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("criticite", { ascending: false }),
     supabase
       .from("procedures")
-      .select("titre")
+      .select("id, titre")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("titre"),
@@ -185,6 +185,7 @@ export async function loadFicheProcessusData(
       client: it.client ?? "",
     })),
     indicateurs: (indicateursRes.data ?? []).map((ind) => ({
+      id: ind.id,
       nom: ind.nom,
       cible: cibleAffichee(ind.cible, ind.sens, ind.unite),
       formule: ind.formule_calcul,
@@ -197,8 +198,14 @@ export async function loadFicheProcessusData(
         reference: null,
         intitule: pr.titre,
         type: "Procédure",
+        href: `/documentation/procedures/${pr.id}`,
       })),
-      ...(docsRes.data ?? []).map((d) => ({ reference: d.code, intitule: d.titre, type: d.type })),
+      ...(docsRes.data ?? []).map((d) => ({
+        reference: d.code,
+        intitule: d.titre,
+        type: d.type,
+        href: null,
+      })),
     ],
     reference: p.fiche_reference,
     statut: p.fiche_statut,

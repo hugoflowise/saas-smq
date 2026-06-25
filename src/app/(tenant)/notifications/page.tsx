@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { loadNotifications } from "@/lib/notifications-view";
+import { NotificationLink } from "./notification-link";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
@@ -44,13 +44,9 @@ export default async function NotificationsPage() {
                 );
                 return (
                   <li key={n.id}>
-                    {n.link ? (
-                      <Link href={n.link} className="block hover:opacity-80">
-                        {content}
-                      </Link>
-                    ) : (
-                      content
-                    )}
+                    <NotificationLink id={n.id} link={n.link} isRead={n.is_read}>
+                      {content}
+                    </NotificationLink>
                   </li>
                 );
               })}
