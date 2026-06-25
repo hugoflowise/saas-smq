@@ -1,16 +1,18 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 import { ACTION_STATUT_LABELS } from "@/lib/labels";
-import { computeRevuePerformance, type RevuePerformance } from "@/lib/revue-perf";
+import { computeRevuePerformance, type RevuePerformance, revuePerfCells } from "@/lib/revue-perf";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RevueDialog } from "../revue-dialog";
 import { RevueActionForm } from "./revue-action-form";
 import { RevuePerformanceCapture } from "./revue-performance-capture";
+import type { RevueParticipant } from "./revue-structure-editor";
 import { RevueStructureEditor } from "./revue-structure-editor";
 
 const STATUT_LABELS: Record<string, string> = {
@@ -30,7 +32,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   const { data: revue } = await supabase
     .from("revues_direction")
     .select(
-      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources",
+      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, participants, points_specifiques",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -70,6 +72,10 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
         isoClause="ISO 9001 §9.3"
         help="Structurez les éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue. Les données de performance peuvent être pré-remplies depuis le pilotage."
       >
+        <Button variant="outline" className="gap-2" render={<Link href={`/print/revue/${id}`} />}>
+          <FileText className="size-4" />
+          Compte rendu (PDF)
+        </Button>
         <RevueDialog revue={revue} />
       </PageHeader>
 
@@ -99,6 +105,8 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
         <RevueStructureEditor
           initial={{
             id: revue.id,
+            participants: (revue.participants as RevueParticipant[]) ?? [],
+            pointsSpecifiques: revue.points_specifiques ?? "",
             entreeActionsAnterieures: revue.entree_actions_anterieures ?? "",
             entreeEvolutionContexte: revue.entree_evolution_contexte ?? "",
             entreePerformanceSynthese: revue.entree_performance_synthese ?? "",
@@ -150,47 +158,9 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
 }
 
 function PerformanceGrid({ perf }: { perf: RevuePerformance }) {
-  const cells: { label: string; value: string }[] = [
-    {
-      label: "Conformité ISO",
-      value: perf.conformiteIso === null ? "-" : `${perf.conformiteIso}%`,
-    },
-    { label: "NPS global", value: perf.npsGlobal === null ? "-" : String(perf.npsGlobal) },
-    {
-      label: "Satisfaction /10",
-      value: perf.satisfactionMoyenne === null ? "-" : String(perf.satisfactionMoyenne),
-    },
-    {
-      label: "Objectifs atteints",
-      value:
-        perf.tauxObjectifs === null
-          ? "-"
-          : `${perf.tauxObjectifs}% (${perf.objectifsAtteints}/${perf.objectifsTotal})`,
-    },
-    {
-      label: "NC de l'année",
-      value: `${perf.ncTotalAnnee} (${perf.ncClotureesAnnee} clôturées)`,
-    },
-    { label: "NC ouvertes", value: String(perf.ncOuvertes) },
-    { label: "Réclamations ouvertes", value: String(perf.reclamationsOuvertes) },
-    {
-      label: "Audits réalisés",
-      value: `${perf.auditsRealisesAnnee}/${perf.auditsTotalAnnee}`,
-    },
-    { label: "Risques critiques", value: String(perf.roCritiques) },
-    {
-      label: "Indicateurs hors cible",
-      value: `${perf.indicateursHorsCible}/${perf.indicateursTotal}`,
-    },
-    {
-      label: "Fournisseurs (note moy.)",
-      value: perf.fournisseursNoteMoyenne === null ? "-" : `${perf.fournisseursNoteMoyenne}/5`,
-    },
-    { label: "Fournisseurs à réévaluer", value: String(perf.fournisseursAReevaluer) },
-  ];
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {cells.map((c) => (
+      {revuePerfCells(perf).map((c) => (
         <div key={c.label} className="rounded-lg border bg-muted/30 px-3 py-2.5">
           <p className="font-semibold text-lg">{c.value}</p>
           <p className="mt-0.5 text-muted-foreground text-xs">{c.label}</p>

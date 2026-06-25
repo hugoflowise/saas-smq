@@ -340,6 +340,10 @@ export async function updateRevueAction(input: unknown): Promise<ActionResult> {
 // Éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue de direction.
 const revueStructure = z.object({
   id: z.string().uuid(),
+  participants: z
+    .array(z.object({ nom: z.string().trim(), fonction: z.string().trim() }))
+    .optional(),
+  pointsSpecifiques: z.string().trim().optional(),
   entreeActionsAnterieures: z.string().trim().optional(),
   entreeEvolutionContexte: z.string().trim().optional(),
   entreePerformanceSynthese: z.string().trim().optional(),
@@ -360,6 +364,8 @@ export async function saveRevueStructureAction(input: unknown): Promise<ActionRe
   const { error } = await c.supabase
     .from("revues_direction")
     .update({
+      participants: d.participants ?? [],
+      points_specifiques: d.pointsSpecifiques ?? null,
       entree_actions_anterieures: d.entreeActionsAnterieures ?? null,
       entree_evolution_contexte: d.entreeEvolutionContexte ?? null,
       entree_performance_synthese: d.entreePerformanceSynthese ?? null,
