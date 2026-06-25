@@ -2,11 +2,14 @@ import Link from "next/link";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
 import { formatDate } from "@/lib/format";
 
-/** Lien charté vers une fiche liée (rendu en texte simple à l'impression). */
+/**
+ * Lien vers une fiche liée : rendu comme le texte courant (couleur normale),
+ * simplement cliquable (souligné au survol). Texte simple si pas de lien.
+ */
 function Lien({ href, children }: { href: string | null; children: React.ReactNode }) {
   if (!href) return <>{children}</>;
   return (
-    <Link href={href} className="underline [color:var(--charte)]">
+    <Link href={href} className="text-inherit no-underline hover:underline">
       {children}
     </Link>
   );
@@ -41,6 +44,8 @@ export type FicheDocument = {
 export type FicheProcessusData = {
   societe: Societe;
   nom: string;
+  /** Intitulé long affiché dans la fiche (le nom court reste pour la cartographie). */
+  intituleLong?: string | null;
   typeLabel: string;
   piloteName: string | null;
   finalite: string | null;
@@ -120,8 +125,9 @@ export function FicheProcessus(data: FicheProcessusData) {
     { label: "Version / Date", value: versionValue },
   ];
 
+  const intitule = data.intituleLong?.trim() || data.nom;
   const carte: [string, string | null][] = [
-    ["Intitulé du processus", data.nom],
+    ["Intitulé du processus", intitule],
     ["Type de processus", data.typeLabel],
     ["Pilote du processus", data.piloteName],
     ["Finalité", data.finalite],
@@ -132,7 +138,7 @@ export function FicheProcessus(data: FicheProcessusData) {
   return (
     <DocumentPaper
       surtitre="Fiche d'identité du processus"
-      titre={data.nom}
+      titre={intitule}
       societe={data.societe}
       meta={meta}
       genereLe={data.genereLe}

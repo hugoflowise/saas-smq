@@ -2164,10 +2164,12 @@ export type Database = {
           fiche_version: string | null
           finalite: string | null
           id: string
+          intitule_long: string | null
           nom: string
           ordre_affichage: number
           perimetre: string | null
           pilote_id: string | null
+          pilote_nom: string | null
           propose: boolean
           referentiels: string | null
           ressources_associees: string | null
@@ -2207,10 +2209,12 @@ export type Database = {
           fiche_version?: string | null
           finalite?: string | null
           id?: string
+          intitule_long?: string | null
           nom: string
           ordre_affichage?: number
           perimetre?: string | null
           pilote_id?: string | null
+          pilote_nom?: string | null
           propose?: boolean
           referentiels?: string | null
           ressources_associees?: string | null
@@ -2250,10 +2254,12 @@ export type Database = {
           fiche_version?: string | null
           finalite?: string | null
           id?: string
+          intitule_long?: string | null
           nom?: string
           ordre_affichage?: number
           perimetre?: string | null
           pilote_id?: string | null
+          pilote_nom?: string | null
           propose?: boolean
           referentiels?: string | null
           ressources_associees?: string | null
