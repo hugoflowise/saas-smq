@@ -53,6 +53,8 @@ export function MaitriseDocument({
   signatureTitle,
   signatureDescription,
   beforeContent,
+  structuredEditor,
+  numberContentHeadingsFrom,
   onSaveContenu,
   onTransition,
   onPublish,
@@ -80,8 +82,12 @@ export function MaitriseDocument({
   labelDocument: string;
   signatureTitle: string;
   signatureDescription: string;
-  /** Rubriques structurées rendues dans le document, avant le contenu riche. */
+  /** Rubriques structurées rendues dans le document (lecture), avant le contenu riche. */
   beforeContent?: React.ReactNode;
+  /** Éditeur des rubriques structurées, affiché en mode édition (bascule « Modifier »). */
+  structuredEditor?: React.ReactNode;
+  /** Numérote automatiquement les titres (h1) du contenu à partir de ce numéro. */
+  numberContentHeadingsFrom?: number;
   onSaveContenu: (contenu: Json) => Promise<ActionResult>;
   onTransition: (target: string) => Promise<ActionResult>;
   onPublish: () => Promise<ActionResult>;
@@ -91,8 +97,12 @@ export function MaitriseDocument({
   const dirtyRef = useRef(false);
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [editing, setEditing] = useState(false);
 
-  const editable = statut === "brouillon" && canWrite;
+  // Documents structurés (procédures) : édition via bascule « Modifier ».
+  // Documents libres (politique) : édition directe en brouillon, sans bascule.
+  const usesToggle = Boolean(structuredEditor);
+  const editable = statut === "brouillon" && canWrite && (!usesToggle || editing);
   const isPublished = statut === "publiee";
   const nextVersion = `v${publishedCount + 1}`;
 
@@ -210,6 +220,24 @@ export function MaitriseDocument({
               </Link>
             }
           />
+          {usesToggle && statut === "brouillon" && canWrite && !editing ? (
+            <Button onClick={() => setEditing(true)}>Modifier</Button>
+          ) : null}
+          {usesToggle && editing ? (
+            <Button
+              disabled={pending}
+              onClick={async () => {
+                setPending(true);
+                await persist();
+                setPending(false);
+                setEditing(false);
+                router.refresh();
+              }}
+            >
+              Terminer
+            </Button>
+          ) : null}
+
           {editable ? (
             <>
               {saved ? (
@@ -221,7 +249,7 @@ export function MaitriseDocument({
             </>
           ) : null}
 
-          {statut === "brouillon" && canWrite ? (
+          {!editing && statut === "brouillon" && canWrite ? (
             <SignatureCapture
               triggerLabel="Soumettre à approbation"
               title={`Soumettre ${labelDocument} à approbation`}
@@ -294,6 +322,9 @@ export function MaitriseDocument({
         </div>
       ) : null}
 
+      {/* Mode édition (documents structurés) : éditeur des rubriques au-dessus du gabarit. */}
+      {usesToggle && editing ? <div className="mb-6">{structuredEditor}</div> : null}
+
       {/* Édition et lecture sur le même gabarit officiel (logo + charte client). */}
       <DocumentPaper
         surtitre={surtitre}
@@ -302,15 +333,24 @@ export function MaitriseDocument({
         meta={documentMeta}
         className="border"
       >
-        {beforeContent}
-        <TiptapEditor
-          key={statut}
-          content={initialContenu}
-          editable={editable}
-          onChange={handleChange}
-          bare={!editable}
-        />
-        {drafterName || approverName ? (
+        {editing ? null : beforeContent}
+        <div
+          className={numberContentHeadingsFrom ? "doc-chapitres" : undefined}
+          style={
+            numberContentHeadingsFrom
+              ? ({ counterReset: `chap ${numberContentHeadingsFrom - 1}` } as React.CSSProperties)
+              : undefined
+          }
+        >
+          <TiptapEditor
+            key={statut}
+            content={initialContenu}
+            editable={editable}
+            onChange={handleChange}
+            bare={!editable}
+          />
+        </div>
+        {!editing && (drafterName || approverName) ? (
           <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
             <Signataire
               label="Rédigé par"
@@ -331,7 +371,7 @@ export function MaitriseDocument({
         ) : null}
       </DocumentPaper>
 
-      {!editable ? (
+      {!editable && !usesToggle ? (
         <p className="text-muted-foreground text-xs">
           Modifiable uniquement en statut « Brouillon ». Utilisez « Aperçu / PDF » pour imprimer.
         </p>
