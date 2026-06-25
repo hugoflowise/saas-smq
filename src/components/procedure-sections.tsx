@@ -160,8 +160,6 @@ export function ProcedureSections(d: ProcedureSectionsData) {
           </table>
         )}
       </Section>
-
-      <h2 className="mt-7 mb-2 font-semibold text-base">7. Contenu de la procédure</h2>
     </div>
   );
 }

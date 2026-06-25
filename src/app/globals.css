@@ -178,3 +178,13 @@
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
 }
+/* Numérotation automatique des chapitres du corps d'une procédure, à la suite
+   des rubriques standard (counter-reset défini en inline sur le conteneur). */
+.doc-chapitres h1 {
+  counter-increment: chap;
+  font-size: 1rem;
+  margin-top: 1.75rem;
+}
+.doc-chapitres h1::before {
+  content: counter(chap) ". ";
+}

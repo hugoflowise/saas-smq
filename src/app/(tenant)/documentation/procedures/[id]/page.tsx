@@ -156,8 +156,6 @@ export default async function ProcedureDetailPage({
       designation: r.designation ?? "",
     })),
   };
-  const enBrouillon = procedure.statut === "brouillon" && canWrite;
-
   return (
     <div className="mx-auto w-full max-w-6xl">
       <Link
@@ -170,12 +168,6 @@ export default async function ProcedureDetailPage({
 
       <PageHeader title={procedure.titre} />
 
-      {enBrouillon ? (
-        <div className="mb-6">
-          <ProcedureInfosEditor initial={infosInitial} />
-        </div>
-      ) : null}
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">
           <MaitriseDocument
@@ -184,6 +176,8 @@ export default async function ProcedureDetailPage({
             societe={tenant as Societe}
             metaExtra={metaExtra}
             beforeContent={<ProcedureSections {...sectionsData} />}
+            structuredEditor={<ProcedureInfosEditor initial={infosInitial} />}
+            numberContentHeadingsFrom={7}
             initialContenu={(procedure.contenu ?? null) as JSONContent | null}
             statut={procedure.statut}
             currentVersion={current?.version ?? null}

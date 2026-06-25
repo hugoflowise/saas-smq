@@ -111,7 +111,9 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         referencesDoc={(src.references_doc as unknown as ProcRef[] | null) ?? []}
         referencesAppli={(src.references_appli as unknown as ProcRef[] | null) ?? []}
       />
-      <TiptapEditor content={contenu} editable={false} bare />
+      <div className="doc-chapitres" style={{ counterReset: "chap 6" }}>
+        <TiptapEditor content={contenu} editable={false} bare />
+      </div>
     </PrintShell>
   );
 }
