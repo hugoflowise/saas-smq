@@ -17,6 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "supabase db push",
+    "db:push:staging": "bash scripts/db-push.sh staging",
+    "db:push:prod": "bash scripts/db-push.sh prod",
     "db:diff": "supabase db diff",
     "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts"
   },
