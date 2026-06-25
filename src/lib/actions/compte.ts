@@ -68,3 +68,25 @@ export async function updateMaSignatureAction(image: unknown): Promise<ActionRes
   revalidatePath("/compte");
   return { ok: true };
 }
+
+/**
+ * Marque le mot de passe comme défini : lève le drapeau `must_set_password` qui
+ * bloquait l'accès à l'app. Appelé après une définition réussie du mot de passe
+ * (page /bienvenue). Sans effet si le drapeau était déjà à false.
+ */
+export async function markPasswordSetAction(): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Non authentifié." };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ must_set_password: false })
+    .eq("id", user.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

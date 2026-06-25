@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { LegalFooter } from "@/components/legal-footer";
@@ -18,9 +19,12 @@ export default async function TenantLayout({ children }: { children: React.React
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("email, role, tenant_id")
+    .select("email, role, tenant_id, must_set_password")
     .eq("id", user?.id ?? "")
     .maybeSingle();
+
+  // Accès bloqué tant que le mot de passe n'est pas défini (invitation / reset).
+  if (profile?.must_set_password) redirect("/bienvenue");
 
   const email = profile?.email ?? user?.email ?? "";
   const realRole = profile?.role ?? "-";

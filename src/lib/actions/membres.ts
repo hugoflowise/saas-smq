@@ -75,10 +75,16 @@ export async function inviteMembreAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: message };
   }
 
-  // Rattache le profil au client avec le rôle choisi.
+  // Rattache le profil au client avec le rôle choisi. `must_set_password` : le
+  // nouvel utilisateur doit définir son mot de passe avant d'accéder à l'app.
   const { error: profileError } = await c.admin
     .from("profiles")
-    .update({ tenant_id: c.tenantId, role, full_name: fullName ?? null })
+    .update({
+      tenant_id: c.tenantId,
+      role,
+      full_name: fullName ?? null,
+      must_set_password: true,
+    })
     .eq("id", data.user.id);
   if (profileError) return { ok: false, error: profileError.message };
 

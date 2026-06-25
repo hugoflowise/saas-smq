@@ -83,13 +83,15 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: `Création du compte dirigeant impossible : ${userError?.message}` };
   }
 
-  // 3) Rattachement du profil dirigeant au tenant
+  // 3) Rattachement du profil dirigeant au tenant. `must_set_password` : le
+  // dirigeant doit définir son mot de passe (lien de bienvenue) avant l'accès.
   const { error: profileError } = await admin
     .from("profiles")
     .update({
       tenant_id: tenant.id,
       role: "dirigeant",
       full_name: data.dirigeantNom ?? null,
+      must_set_password: true,
     })
     .eq("id", created.user.id);
 
