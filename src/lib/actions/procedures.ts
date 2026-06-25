@@ -164,43 +164,6 @@ export async function saveProcedureInfosAction(input: unknown): Promise<ActionRe
   return { ok: true };
 }
 
-const logigrammeSchema = z.object({
-  id: z.string().uuid(),
-  xml: z.string().optional(),
-  svg: z.string().optional(),
-});
-
-/** Enregistre (ou efface) le logigramme draw.io d'une procédure (brouillon). */
-export async function saveProcedureLogigrammeAction(input: unknown): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
-
-  const parsed = logigrammeSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "Logigramme invalide." };
-  const d = parsed.data;
-
-  const { supabase, procedure } = await loadProcedure(ctx.effectiveTenantId, d.id);
-  if (!procedure) return { ok: false, error: "Procédure introuvable." };
-  if (procedure.statut !== "brouillon") {
-    return { ok: false, error: "La procédure n'est modifiable qu'en brouillon." };
-  }
-
-  const { error } = await supabase
-    .from("procedures")
-    .update({
-      logigramme_xml: d.xml?.trim() ? d.xml : null,
-      logigramme_svg: d.svg?.trim() ? d.svg : null,
-      updated_by: ctx.userId,
-    })
-    .eq("id", d.id);
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath(`/documentation/procedures/${d.id}`);
-  return { ok: true };
-}
-
 export async function transitionProcedureStatutAction(
   id: string,
   target: string,
@@ -293,7 +256,7 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
   const { data: sections } = await supabase
     .from("procedures")
     .select(
-      "objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli, logigramme_svg",
+      "objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
     )
     .eq("id", id)
     .maybeSingle();
