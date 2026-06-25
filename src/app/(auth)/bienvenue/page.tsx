@@ -26,7 +26,7 @@ export default function BienvenuePage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChangePasswordForm redirectTo="/dashboard" />
+        <ChangePasswordForm reloginAfter />
       </CardContent>
     </Card>
   );

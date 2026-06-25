@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  // Bandeau de succès après définition du mot de passe (retour de /bienvenue).
+  const [motDePasseModifie, setMotDePasseModifie] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("motdepasse") === "modifie") {
+      setMotDePasseModifie(true);
+    }
+  }, []);
 
   async function handlePasswordLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,6 +86,11 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {motDePasseModifie ? (
+          <div className="mb-4 rounded-lg border border-status-conforme/40 bg-status-conforme/10 px-3 py-2 text-center text-sm text-status-conforme">
+            Mot de passe modifié. Connectez-vous avec votre nouveau mot de passe.
+          </div>
+        ) : null}
         {status === "sent" ? (
           <p className="text-center text-muted-foreground text-sm">
             Un lien de connexion a été envoyé à <strong>{email}</strong>.
