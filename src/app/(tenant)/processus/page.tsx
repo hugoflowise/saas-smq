@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { charteColors } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ProposeBadge } from "@/components/propose-badge";
@@ -13,9 +14,6 @@ const COLUMNS = [
   { type: "realisation" as const, label: "Processus de réalisation" },
   { type: "support" as const, label: "Processus support" },
 ];
-
-// Couleur des bandeaux de famille (rappel de la cartographie type).
-const BAND = "#6f8f9e";
 
 // Bandes latérales du diagramme : entrées (gauche) et sorties (droite).
 function SideBand({ label, side }: { label: string; side: "left" | "right" }) {
@@ -67,11 +65,17 @@ export default async function ProcessusPage() {
   }
 
   const supabase = await createClient();
-  const { data: processus } = await supabase
-    .from("processus")
-    .select("id, nom, type, description, date_prochaine_revue, propose, valide_le")
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("ordre_affichage", { ascending: true });
+  const [{ data: processus }, { data: tenant }] = await Promise.all([
+    supabase
+      .from("processus")
+      .select("id, nom, type, description, date_prochaine_revue, propose, valide_le")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .order("ordre_affichage", { ascending: true }),
+    supabase.from("tenants").select("couleur_charte").eq("id", ctx.effectiveTenantId).maybeSingle(),
+  ]);
+
+  // Bandeaux de famille à la couleur de charte du client (neutre par défaut).
+  const { charte, contrast } = charteColors(tenant?.couleur_charte);
 
   const items = processus ?? [];
   const aValider = items.filter((p) => p.propose && !p.valide_le).length;
@@ -125,8 +129,8 @@ export default async function ProcessusPage() {
               return (
                 <section key={col.type} className="overflow-hidden rounded-md border">
                   <div
-                    className="px-4 py-2 text-center font-semibold text-sm text-white uppercase tracking-wide"
-                    style={{ backgroundColor: BAND }}
+                    className="px-4 py-2 text-center font-semibold text-sm uppercase tracking-wide"
+                    style={{ backgroundColor: charte, color: contrast }}
                   >
                     {col.label}
                   </div>
