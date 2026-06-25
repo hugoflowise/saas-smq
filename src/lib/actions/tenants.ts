@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { setActiveTenantId } from "@/lib/active-tenant";
+import { callbackLinkFromProperties } from "@/lib/auth-links";
 import { inviteEmailHtml, sendEmail } from "@/lib/email";
 import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -104,14 +105,15 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     email: data.dirigeantEmail,
     options: { redirectTo: `${base}/auth/callback?next=/bienvenue` },
   });
-  if (lien?.properties?.action_link) {
+  const lienCallback = callbackLinkFromProperties(base, lien?.properties, "/bienvenue");
+  if (lienCallback) {
     await sendEmail({
       to: data.dirigeantEmail,
       subject: `Bienvenue sur flowise. : ${data.nomSociete}`,
       html: inviteEmailHtml({
         societe: data.nomSociete,
         roleLabel: "Dirigeant",
-        actionLink: lien.properties.action_link,
+        actionLink: lienCallback,
       }),
     });
   }

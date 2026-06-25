@@ -16,7 +16,7 @@ import {
   Undo2,
   Workflow,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DrawioModal } from "@/components/drawio-modal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -103,6 +103,13 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
     onUpdate: ({ editor }) => onChange?.(editor.getJSON()),
     editorProps: { attributes: { class: "ProseMirror" } },
   });
+
+  // `editable` peut changer après le montage (bascule « Modifier » sur un
+  // document maîtrisé) : l'instance de l'éditeur n'est pas recréée, il faut
+  // donc propager l'état modifiable manuellement.
+  useEffect(() => {
+    editor?.setEditable(editable);
+  }, [editor, editable]);
 
   if (!editor) return null;
 
