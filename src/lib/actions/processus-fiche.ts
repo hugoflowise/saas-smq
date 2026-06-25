@@ -16,8 +16,10 @@ type ProcessusUpdate = Database["public"]["Tables"]["processus"]["Update"];
 const ficheSchema = z.object({
   id: z.string().uuid(),
   nom: z.string().trim().min(2, "Nom requis."),
+  intituleLong: z.string().trim().optional(),
   type: z.enum(["pilotage", "realisation", "support"]),
   piloteId: z.string().uuid().optional().or(z.literal("")),
+  piloteNom: z.string().trim().optional(),
   dateDerniereRevue: z.string().optional(),
   dateProchaineRevue: z.string().optional(),
   finalite: z.string().trim().optional(),
@@ -80,8 +82,10 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
     .from("processus")
     .update({
       nom: d.nom,
+      intitule_long: d.intituleLong ?? null,
       type: d.type,
       pilote_id: d.piloteId ? d.piloteId : null,
+      pilote_nom: d.piloteNom ?? null,
       date_derniere_revue: d.dateDerniereRevue || null,
       date_prochaine_revue: d.dateProchaineRevue || null,
       finalite: d.finalite ?? null,

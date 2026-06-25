@@ -13,8 +13,10 @@ const TYPE_LABELS: Record<string, string> = {
 export type FicheInitialData = {
   id: string;
   nom: string;
+  intituleLong: string;
   type: string;
   piloteId: string;
+  piloteNom: string;
   dateDerniereRevue: string;
   dateProchaineRevue: string;
   finalite: string;
@@ -54,7 +56,7 @@ export async function loadFicheProcessusData(
   const { data: p } = await supabase
     .from("processus")
     .select(
-      "id, nom, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, finalite, perimetre, referentiels, fiche_statut, fiche_reference, fiche_version, fiche_redige_par, fiche_soumis_par, fiche_soumis_le, fiche_approuvee_par, fiche_approuvee_le, fiche_publiee_le",
+      "id, nom, intitule_long, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, pilote_nom, finalite, perimetre, referentiels, fiche_statut, fiche_reference, fiche_version, fiche_redige_par, fiche_soumis_par, fiche_soumis_le, fiche_approuvee_par, fiche_approuvee_le, fiche_publiee_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -161,11 +163,19 @@ export async function loadFicheProcessusData(
   const typeLabel = TYPE_LABELS[p.type] ?? p.type;
   const risques = risquesRes.data ?? [];
 
+  // Pilote affiché : nom libre (personne sans compte) prioritaire, sinon l'utilisateur lié.
+  const piloteName = p.pilote_nom?.trim()
+    ? p.pilote_nom
+    : p.pilote_id
+      ? (nameById.get(p.pilote_id) ?? null)
+      : null;
+
   const data: FicheProcessusData = {
     societe: tenantRes.data as Societe,
     nom: p.nom,
+    intituleLong: p.intitule_long,
     typeLabel,
-    piloteName: p.pilote_id ? (nameById.get(p.pilote_id) ?? null) : null,
+    piloteName,
     finalite: p.finalite,
     perimetre: p.perimetre,
     referentiels: p.referentiels,
@@ -227,8 +237,10 @@ export async function loadFicheProcessusData(
   const initial: FicheInitialData = {
     id: p.id,
     nom: p.nom,
+    intituleLong: p.intitule_long ?? "",
     type: p.type,
     piloteId: p.pilote_id ?? "",
+    piloteNom: p.pilote_nom ?? "",
     dateDerniereRevue: p.date_derniere_revue ?? "",
     dateProchaineRevue: p.date_prochaine_revue ?? "",
     finalite: p.finalite ?? "",

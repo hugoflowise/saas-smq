@@ -18,8 +18,10 @@ type Interaction = { fournisseur: string; nature: string; client: string };
 export type FicheEditorInitial = {
   id: string;
   nom: string;
+  intituleLong: string;
   type: string;
   piloteId: string;
+  piloteNom: string;
   dateDerniereRevue: string;
   dateProchaineRevue: string;
   finalite: string;
@@ -50,16 +52,26 @@ export function FicheEditor({
   const [pending, setPending] = useState(false);
   const [activites, setActivites] = useState<Activite[]>(initial.activites);
   const [interactions, setInteractions] = useState<Interaction[]>(initial.interactions);
+  // Pilote : un utilisateur de l'application, ou « Autre » = personne sans compte
+  // (nom saisi librement, sans accès ni e-mail). On démarre sur « Autre » si un
+  // nom libre est déjà renseigné.
+  const [piloteMode, setPiloteMode] = useState<string>(
+    initial.piloteNom.trim() ? "__autre__" : initial.piloteId,
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const f = new FormData(event.currentTarget);
     setPending(true);
+    // « Autre » → on enregistre un nom libre (sans compte) ; sinon un utilisateur lié.
+    const autre = piloteMode === "__autre__";
     const result = await saveFicheProcessusAction({
       id: initial.id,
       nom: f.get("nom"),
+      intituleLong: f.get("intituleLong") || undefined,
       type: f.get("type"),
-      piloteId: f.get("piloteId") || "",
+      piloteId: autre ? "" : piloteMode,
+      piloteNom: autre ? (f.get("piloteNom") as string) || undefined : undefined,
       dateDerniereRevue: f.get("dateDerniereRevue") || undefined,
       dateProchaineRevue: f.get("dateProchaineRevue") || undefined,
       finalite: f.get("finalite") || undefined,
@@ -100,7 +112,20 @@ export function FicheEditor({
             defaultValue={initial.reference}
             ligne
           />
-          <Champ name="nom" label="Intitulé du processus" defaultValue={initial.nom} ligne />
+          <Champ
+            name="nom"
+            label="Nom court (cartographie)"
+            hint="affiché dans la cartographie"
+            defaultValue={initial.nom}
+            ligne
+          />
+          <Champ
+            name="intituleLong"
+            label="Intitulé du processus (fiche)"
+            hint="ex. « Piloter la stratégie et la gouvernance »"
+            defaultValue={initial.intituleLong}
+            ligne
+          />
           <div className="flex flex-col gap-2">
             <Label htmlFor="type">Type de processus</Label>
             <select id="type" name="type" className={SELECT_CLASS} defaultValue={initial.type}>
@@ -110,12 +135,12 @@ export function FicheEditor({
             </select>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="piloteId">Pilote du processus</Label>
+            <Label htmlFor="piloteMode">Pilote du processus</Label>
             <select
-              id="piloteId"
-              name="piloteId"
+              id="piloteMode"
               className={SELECT_CLASS}
-              defaultValue={initial.piloteId}
+              value={piloteMode}
+              onChange={(e) => setPiloteMode(e.target.value)}
             >
               <option value="">Non défini</option>
               {users.map((u) => (
@@ -123,7 +148,15 @@ export function FicheEditor({
                   {u.nom}
                 </option>
               ))}
+              <option value="__autre__">Autre — personne sans compte…</option>
             </select>
+            {piloteMode === "__autre__" ? (
+              <Input
+                name="piloteNom"
+                placeholder="Nom du pilote (ex. Thomas Riou - Président)"
+                defaultValue={initial.piloteNom}
+              />
+            ) : null}
           </div>
           <Champ
             name="referentiels"
