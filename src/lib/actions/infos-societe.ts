@@ -57,3 +57,49 @@ export async function updateInfosSocieteAction(input: unknown): Promise<ActionRe
   revalidatePath("/parametres");
   return { ok: true };
 }
+
+/**
+ * Téléverse le logo de la société (réservé dirigeant/admin). Permet au client
+ * lui-même de gérer son logo, sans passer par un admin Flowise. Le logo apparaît
+ * sur les documents générés (politique, procédures, fiches…).
+ */
+export async function uploadLogoSocieteAction(formData: FormData): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (ctx.role !== "admin_flowise" && ctx.role !== "dirigeant") {
+    return { ok: false, error: "Droits insuffisants." };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Fichier manquant." };
+  }
+  if (!file.type.startsWith("image/")) {
+    return { ok: false, error: "Le logo doit être une image (PNG, JPG, SVG…)." };
+  }
+  if (file.size > 2_000_000) {
+    return { ok: false, error: "Image trop lourde (max 2 Mo)." };
+  }
+
+  const admin = createAdminClient();
+  const tenantId = ctx.effectiveTenantId;
+  const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+  const path = `${tenantId}/logo-${Date.now()}.${ext}`;
+  const bytes = await file.arrayBuffer();
+
+  const { error: uploadError } = await admin.storage
+    .from("tenant-assets")
+    .upload(path, bytes, { contentType: file.type, upsert: true });
+  if (uploadError) return { ok: false, error: `Téléversement impossible : ${uploadError.message}` };
+
+  const {
+    data: { publicUrl },
+  } = admin.storage.from("tenant-assets").getPublicUrl(path);
+
+  const { error } = await admin.from("tenants").update({ logo_url: publicUrl }).eq("id", tenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/parametres");
+  return { ok: true };
+}
