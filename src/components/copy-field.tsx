@@ -4,6 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
+/** Champ en lecture seule avec bouton « Copier » (lien public, jeton…). */
 export function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
 

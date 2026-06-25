@@ -1,7 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { CopyField } from "@/app/(tenant)/parametres/copy-field";
+import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { QrCode } from "@/components/qr-code";

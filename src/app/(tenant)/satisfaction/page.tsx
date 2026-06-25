@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
@@ -44,13 +46,22 @@ export default async function SatisfactionPage() {
   }
 
   const supabase = await createClient();
-  const { data: enquetes } = await supabase
-    .from("enquetes_satisfaction")
-    .select(
-      "id, client, date_reponse, note_recommandation, note_satisfaction, commentaire, est_reclamation, source",
-    )
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("date_reponse", { ascending: false });
+  const [{ data: enquetes }, { data: tenant }] = await Promise.all([
+    supabase
+      .from("enquetes_satisfaction")
+      .select(
+        "id, client, date_reponse, note_recommandation, note_satisfaction, commentaire, est_reclamation, source",
+      )
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .order("date_reponse", { ascending: false }),
+    supabase.from("tenants").select("survey_token").eq("id", ctx.effectiveTenantId).maybeSingle(),
+  ]);
+
+  // Lien public du questionnaire : à partager aux clients (e-mail, signature, QR).
+  const h = await headers();
+  const host = h.get("host") ?? "app.flowise.fr";
+  const proto = host.includes("localhost") ? "http" : "https";
+  const surveyUrl = `${proto}://${host}/enquete/${tenant?.survey_token ?? ""}`;
 
   const items = enquetes ?? [];
   const { nps } = computeNps(items.map((e) => e.note_recommandation));
@@ -107,6 +118,19 @@ export default async function SatisfactionPage() {
         <ExportButton rows={items} />
         <EnqueteDialog />
       </PageHeader>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Lien public du questionnaire</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <p className="text-muted-foreground text-sm">
+            Partagez ce lien à vos clients (e-mail, signature, QR code…). Chaque réponse alimente
+            automatiquement ce module, en temps réel · sans aucune licence.
+          </p>
+          <CopyField label="Lien public du questionnaire" value={surveyUrl} />
+        </CardContent>
+      </Card>
 
       {items.length === 0 ? (
         <EmptyState
