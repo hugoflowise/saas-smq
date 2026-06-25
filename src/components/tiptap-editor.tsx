@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "@tiptap/extension-image";
 import { EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DrawioModal } from "@/components/drawio-modal";
+import { ResizableImage } from "@/components/resizable-image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -96,7 +96,7 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [drawioOpen, setDrawioOpen] = useState(false);
   const editor = useEditor({
-    extensions: [StarterKit, Image.configure({ allowBase64: true, inline: false })],
+    extensions: [StarterKit, ResizableImage.configure({ allowBase64: true, inline: false })],
     content: content ?? "",
     editable,
     immediatelyRender: false,
@@ -202,8 +202,15 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
       <EditorContent editor={editor} className={bare ? BARE_CLASS : PROSE_CLASS} />
       <DrawioModal
         open={drawioOpen}
-        onSave={(_xml, svg) => {
-          if (svg) editor.chain().focus().setImage({ src: svg }).run();
+        onSave={(xml, svg) => {
+          // On insère l'image SVG ET le schéma draw.io (pour pouvoir le rouvrir).
+          if (svg) {
+            editor
+              .chain()
+              .focus()
+              .insertContent({ type: "image", attrs: { src: svg, drawioXml: xml } })
+              .run();
+          }
           setDrawioOpen(false);
         }}
         onClose={() => setDrawioOpen(false)}
