@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { callbackLinkFromProperties } from "@/lib/auth-links";
 import { inviteEmailHtml, sendEmail } from "@/lib/email";
 import { canManageUsers, ROLE_MEMBRE_LABELS } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -87,13 +88,14 @@ export async function inviteMembreAction(input: unknown): Promise<ActionResult> 
     .eq("id", c.tenantId)
     .maybeSingle();
 
+  const lien = callbackLinkFromProperties(base, data.properties, "/bienvenue") ?? base;
   await sendEmail({
     to: email,
     subject: `Invitation à rejoindre ${tenant?.nom_societe ?? "votre espace qualité"}`,
     html: inviteEmailHtml({
       societe: tenant?.nom_societe ?? "votre espace qualité",
       roleLabel: ROLE_MEMBRE_LABELS[role] ?? role,
-      actionLink: data.properties?.action_link ?? base,
+      actionLink: lien,
     }),
   });
 

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { callbackLinkFromProperties } from "@/lib/auth-links";
 import { resetEmailHtml, sendEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -28,11 +29,12 @@ export async function demanderResetMotDePasseAction(email: unknown): Promise<Act
     options: { redirectTo: `${base}/auth/callback?next=/bienvenue` },
   });
 
-  if (!error && data.properties?.action_link) {
+  const lien = callbackLinkFromProperties(base, data?.properties, "/bienvenue");
+  if (!error && lien) {
     await sendEmail({
       to: parsed.data,
-      subject: "Réinitialisation de votre mot de passe Flowise",
-      html: resetEmailHtml({ actionLink: data.properties.action_link }),
+      subject: "Réinitialisation de votre mot de passe",
+      html: resetEmailHtml({ actionLink: lien }),
     });
   }
 
