@@ -4,6 +4,7 @@ import { LegalFooter } from "@/components/legal-footer";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
 import { loadNotifications } from "@/lib/notifications-view";
+import { loadOnboarding } from "@/lib/onboarding";
 import { canManageUsers, isReadOnly } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -57,9 +58,16 @@ export default async function TenantLayout({ children }: { children: React.React
   // Notifications (cloche) : logique partagée avec la page /notifications.
   const { notifications, unreadCount } = await loadNotifications(15);
 
+  // « Mise en route » : masquée du menu une fois toutes les étapes terminées.
+  const showOnboarding = activeTenantId ? !(await loadOnboarding(activeTenantId)).complete : true;
+
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar isAdmin={isAdmin} canManageUsers={canManageUsers(role)} />
+      <Sidebar
+        isAdmin={isAdmin}
+        canManageUsers={canManageUsers(role)}
+        showOnboarding={showOnboarding}
+      />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           email={email}
@@ -68,6 +76,7 @@ export default async function TenantLayout({ children }: { children: React.React
           canSimulate={realIsAdmin}
           simulating={simulating}
           canManageUsers={canManageUsers(role)}
+          showOnboarding={showOnboarding}
           tenants={tenants}
           activeTenantId={activeTenantId}
           activeTenantName={activeTenantName}

@@ -31,6 +31,8 @@ type TopBarProps = {
   simulating: boolean;
   /** Peut gérer les utilisateurs (affiche l'entrée de menu dédiée). */
   canManageUsers: boolean;
+  /** Affiche l'entrée « Mise en route » (masquée une fois terminée). */
+  showOnboarding: boolean;
   tenants: { id: string; nom: string }[];
   activeTenantId: string | null;
   activeTenantName: string | null;
@@ -45,6 +47,7 @@ export function TopBar({
   canSimulate,
   simulating,
   canManageUsers,
+  showOnboarding,
   tenants,
   activeTenantId,
   activeTenantName,
@@ -87,6 +90,7 @@ export function TopBar({
               <NavLinks
                 isAdmin={isAdmin}
                 canManageUsers={canManageUsers}
+                showOnboarding={showOnboarding}
                 onNavigate={() => setMobileOpen(false)}
               />
             </div>
