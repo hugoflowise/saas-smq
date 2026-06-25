@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -73,14 +74,9 @@ export default async function RevuesDirectionPage() {
               {items.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell>
-                    <RevueDialog
-                      revue={r}
-                      trigger={
-                        <button type="button" className={ROW_NAME_BUTTON}>
-                          {r.annee}
-                        </button>
-                      }
-                    />
+                    <Link href={`/revues/direction/${r.id}`} className={ROW_NAME_BUTTON}>
+                      {r.annee}
+                    </Link>
                   </TableCell>
                   <TableCell>{formatDate(r.date_realisation)}</TableCell>
                   <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>

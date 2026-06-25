@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { computeRevuePerformance } from "@/lib/revue-perf";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -333,5 +334,76 @@ export async function updateRevueAction(input: unknown): Promise<ActionResult> {
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/revues/direction");
+  return { ok: true };
+}
+
+// Éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue de direction.
+const revueStructure = z.object({
+  id: z.string().uuid(),
+  entreeActionsAnterieures: z.string().trim().optional(),
+  entreeEvolutionContexte: z.string().trim().optional(),
+  entreePerformanceSynthese: z.string().trim().optional(),
+  entreeRessources: z.string().trim().optional(),
+  entreeEfficaciteActions: z.string().trim().optional(),
+  entreeOpportunites: z.string().trim().optional(),
+  sortieAmelioration: z.string().trim().optional(),
+  sortieChangements: z.string().trim().optional(),
+  sortieRessources: z.string().trim().optional(),
+});
+
+export async function saveRevueStructureAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = revueStructure.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+  const { error } = await c.supabase
+    .from("revues_direction")
+    .update({
+      entree_actions_anterieures: d.entreeActionsAnterieures ?? null,
+      entree_evolution_contexte: d.entreeEvolutionContexte ?? null,
+      entree_performance_synthese: d.entreePerformanceSynthese ?? null,
+      entree_ressources: d.entreeRessources ?? null,
+      entree_efficacite_actions: d.entreeEfficaciteActions ?? null,
+      entree_opportunites: d.entreeOpportunites ?? null,
+      sortie_amelioration: d.sortieAmelioration ?? null,
+      sortie_changements: d.sortieChangements ?? null,
+      sortie_ressources: d.sortieRessources ?? null,
+      updated_by: c.userId,
+    })
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${d.id}`);
+  return { ok: true };
+}
+
+/** Fige l'instantané des KPIs de performance du SMQ (§9.3.2 c) dans la revue. */
+export async function captureRevuePerformanceAction(id: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const revueId = z.string().uuid().safeParse(id);
+  if (!revueId.success) return { ok: false, error: "Revue invalide." };
+
+  const { data: revue, error: readErr } = await c.supabase
+    .from("revues_direction")
+    .select("annee")
+    .eq("id", revueId.data)
+    .eq("tenant_id", c.tenantId)
+    .single();
+  if (readErr || !revue) return { ok: false, error: readErr?.message ?? "Revue introuvable." };
+
+  const perf = await computeRevuePerformance(c.supabase, c.tenantId, revue.annee);
+  const { error } = await c.supabase
+    .from("revues_direction")
+    .update({
+      donnees_performance: perf,
+      donnees_capturees_le: new Date().toISOString(),
+      updated_by: c.userId,
+    })
+    .eq("id", revueId.data)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${revueId.data}`);
   return { ok: true };
 }
