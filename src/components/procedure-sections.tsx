@@ -166,7 +166,11 @@ export function ProcedureSections(d: ProcedureSectionsData) {
       {d.logigrammeSvg?.trim() ? (
         <Section n={7} titre="Logigramme">
           {/* biome-ignore lint/performance/noImgElement: logigramme exporté (SVG data URL), document imprimable */}
-          <img src={d.logigrammeSvg} alt="Logigramme de la procédure" className="max-w-full" />
+          <img
+            src={d.logigrammeSvg}
+            alt="Logigramme de la procédure"
+            className="mx-auto max-h-[28rem] w-auto max-w-full"
+          />
         </Section>
       ) : null}
 

@@ -1,5 +1,16 @@
+import Link from "next/link";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
 import { formatDate } from "@/lib/format";
+
+/** Lien charté vers une fiche liée (rendu en texte simple à l'impression). */
+function Lien({ href, children }: { href: string | null; children: React.ReactNode }) {
+  if (!href) return <>{children}</>;
+  return (
+    <Link href={href} className="underline [color:var(--charte)]">
+      {children}
+    </Link>
+  );
+}
 
 export type FicheActivite = {
   activite: string;
@@ -8,13 +19,24 @@ export type FicheActivite = {
 };
 export type FicheInteraction = { fournisseur: string; nature: string | null; client: string };
 export type FicheIndicateur = {
+  id: string;
   nom: string;
   cible: string;
   formule: string | null;
   frequence: string | null;
 };
-export type FicheRisque = { intitule: string; type: string; criticite: number | null };
-export type FicheDocument = { reference: string | null; intitule: string; type: string };
+export type FicheRisque = {
+  id: string;
+  intitule: string;
+  type: string;
+  criticite: number | null;
+};
+export type FicheDocument = {
+  reference: string | null;
+  intitule: string;
+  type: string;
+  href: string | null;
+};
 
 export type FicheProcessusData = {
   societe: Societe;
@@ -254,7 +276,9 @@ export function FicheProcessus(data: FicheProcessusData) {
             <tbody>
               {data.indicateurs.map((ind) => (
                 <tr key={ind.nom} className="border-b align-top">
-                  <td className="px-3 py-2">{ind.nom}</td>
+                  <td className="px-3 py-2">
+                    <Lien href={`/indicateurs/${ind.id}`}>{ind.nom}</Lien>
+                  </td>
                   <td className="whitespace-pre-wrap px-3 py-2">{ind.formule?.trim() || "-"}</td>
                   <td className="px-3 py-2">{ind.frequence ?? "-"}</td>
                   <td className="px-3 py-2">{ind.cible}</td>
@@ -279,14 +303,22 @@ export function FicheProcessus(data: FicheProcessusData) {
               {data.risques.length === 0 ? (
                 <li className="list-none text-[#0b1120]/50">-</li>
               ) : (
-                data.risques.map((r) => <li key={r.intitule}>{r.intitule}</li>)
+                data.risques.map((r) => (
+                  <li key={r.id}>
+                    <Lien href={`/risques/${r.id}`}>{r.intitule}</Lien>
+                  </li>
+                ))
               )}
             </ul>
             <ul className="list-disc space-y-0.5 border-t border-l px-3 py-2 pl-7 text-sm">
               {data.opportunites.length === 0 ? (
                 <li className="list-none text-[#0b1120]/50">-</li>
               ) : (
-                data.opportunites.map((o) => <li key={o.intitule}>{o.intitule}</li>)
+                data.opportunites.map((o) => (
+                  <li key={o.id}>
+                    <Lien href={`/risques/${o.id}`}>{o.intitule}</Lien>
+                  </li>
+                ))
               )}
             </ul>
           </div>
@@ -311,7 +343,9 @@ export function FicheProcessus(data: FicheProcessusData) {
                 // biome-ignore lint/suspicious/noArrayIndexKey: rendu statique
                 <tr key={`${doc.intitule}-${i}`} className="border-b align-top">
                   <td className="px-3 py-2">{doc.reference ?? "-"}</td>
-                  <td className="px-3 py-2">{doc.intitule}</td>
+                  <td className="px-3 py-2">
+                    <Lien href={doc.href}>{doc.intitule}</Lien>
+                  </td>
                   <td className="px-3 py-2">{doc.type}</td>
                 </tr>
               ))}

@@ -89,7 +89,11 @@ export function LogigrammeEditor({
     <div className="flex flex-col gap-3">
       {svg ? (
         // biome-ignore lint/performance/noImgElement: logigramme exporté (SVG data URL)
-        <img src={svg} alt="Logigramme" className="max-w-full rounded-md border bg-white p-2" />
+        <img
+          src={svg}
+          alt="Logigramme"
+          className="max-h-80 w-auto max-w-full rounded-md border bg-white p-2"
+        />
       ) : (
         <p className="text-muted-foreground text-sm">Aucun logigramme pour cette procédure.</p>
       )}
