@@ -1,23 +1,10 @@
-import { ArrowRight, CheckCircle2, Circle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Circle, PartyPopper } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
+import { loadOnboarding } from "@/lib/onboarding";
 import { getTenantContext } from "@/lib/tenant-context";
-
-// Une étape de mise en route. Aujourd'hui seules les étapes de type
-// « validation d'éléments préremplis » existent (plan d'actions, processus,
-// parties prenantes). À terme, d'autres modules viendront s'ajouter ici
-// (politique, contexte, objectifs, risques…) : la structure est prête.
-type Etape = {
-  cle: string;
-  titre: string;
-  description: string;
-  href: string;
-  aValider: number; // éléments préremplis non encore validés
-  total: number; // éléments préremplis au total
-};
 
 export default async function MiseEnRoutePage() {
   const ctx = await getTenantContext();
@@ -27,7 +14,7 @@ export default async function MiseEnRoutePage() {
       <div className="w-full">
         <PageHeader
           title="Mise en route"
-          description="Validez les éléments que nous avons préremplis pour vous."
+          description="Suivez les étapes pour configurer votre espace qualité."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -37,76 +24,36 @@ export default async function MiseEnRoutePage() {
     );
   }
 
-  const supabase = await createClient();
-  const tid = ctx.effectiveTenantId;
-
-  // Pour chaque module prérempli : total proposé + nombre restant à valider.
-  const compter = (table: "actions" | "processus" | "parties_interessees") =>
-    Promise.all([
-      supabase
-        .from(table)
-        .select("id", { count: "exact", head: true })
-        .eq("tenant_id", tid)
-        .eq("propose", true),
-      supabase
-        .from(table)
-        .select("id", { count: "exact", head: true })
-        .eq("tenant_id", tid)
-        .eq("propose", true)
-        .is("valide_le", null),
-    ]);
-
-  const [actions, processus, parties] = await Promise.all([
-    compter("actions"),
-    compter("processus"),
-    compter("parties_interessees"),
-  ]);
-
-  const etapes: Etape[] = [
-    {
-      cle: "parties",
-      titre: "Parties prenantes",
-      description: "Vérifiez les parties intéressées proposées, leur sphère et leur cotation.",
-      href: "/strategie/parties-prenantes",
-      total: parties[0].count ?? 0,
-      aValider: parties[1].count ?? 0,
-    },
-    {
-      cle: "processus",
-      titre: "Cartographie des processus",
-      description: "Adaptez la cartographie type à votre organisation réelle.",
-      href: "/processus",
-      total: processus[0].count ?? 0,
-      aValider: processus[1].count ?? 0,
-    },
-    {
-      cle: "actions",
-      titre: "Plan d'actions de démarrage",
-      description: "Passez en revue les actions de démarrage du SMQ proposées.",
-      href: "/actions",
-      total: actions[0].count ?? 0,
-      aValider: actions[1].count ?? 0,
-    },
-  ];
-
-  // N'affiche que les étapes qui ont effectivement des éléments préremplis.
-  const visibles = etapes.filter((e) => e.total > 0);
-  const terminees = visibles.filter((e) => e.aValider === 0).length;
-  const restantes = visibles.reduce((sum, e) => sum + e.aValider, 0);
-  const pct = visibles.length > 0 ? Math.round((terminees / visibles.length) * 100) : 100;
+  const { steps, done, total, prochaineCle, complete } = await loadOnboarding(
+    ctx.effectiveTenantId,
+  );
+  const pct = Math.round((done / total) * 100);
 
   return (
     <div className="mx-auto w-full max-w-3xl">
       <PageHeader
         title="Mise en route"
-        description="Nous avons prérempli votre espace avec des éléments types conseillés. Passez chacun en revue, puis validez, modifiez ou supprimez selon votre réalité."
+        description="Suivez ces étapes pour configurer votre espace qualité. Avancez à votre rythme, dans l'ordre proposé."
       />
 
-      {visibles.length === 0 ? (
-        <EmptyState
-          title="Rien à valider"
-          description="Aucun élément prérempli en attente. Votre espace est prêt."
-        />
+      {complete ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
+            <PartyPopper className="size-10 text-status-conforme" />
+            <p className="font-semibold text-lg">Votre espace est en ordre 🎉</p>
+            <p className="max-w-md text-muted-foreground text-sm">
+              Toutes les étapes de mise en route sont terminées. Ce module disparaît du menu : vous
+              pouvez piloter votre SMQ depuis le tableau de bord.
+            </p>
+            <Link
+              href="/dashboard"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm"
+            >
+              Aller au tableau de bord
+              <ArrowRight className="size-4" />
+            </Link>
+          </CardContent>
+        </Card>
       ) : (
         <div className="flex flex-col gap-4">
           {/* Progression globale */}
@@ -114,14 +61,9 @@ export default async function MiseEnRoutePage() {
             <CardContent className="py-5">
               <div className="mb-2 flex items-baseline justify-between">
                 <p className="font-semibold text-sm">
-                  {terminees}/{visibles.length} module{visibles.length > 1 ? "s" : ""} validé
-                  {terminees > 1 ? "s" : ""}
+                  {done}/{total} étape{done > 1 ? "s" : ""} terminée{done > 1 ? "s" : ""}
                 </p>
-                <p className="text-muted-foreground text-xs">
-                  {restantes > 0
-                    ? `${restantes} élément${restantes > 1 ? "s" : ""} à valider`
-                    : "Tout est validé 👍"}
-                </p>
+                <p className="text-muted-foreground text-xs">{pct}%</p>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
@@ -132,30 +74,43 @@ export default async function MiseEnRoutePage() {
             </CardContent>
           </Card>
 
-          {/* Liste des étapes */}
-          {visibles.map((e) => {
-            const fait = e.aValider === 0;
+          {/* Étapes ordonnées */}
+          {steps.map((e) => {
+            const prochaine = e.cle === prochaineCle;
             return (
               <Link key={e.cle} href={e.href}>
-                <Card className="transition-colors hover:border-primary/40">
+                <Card
+                  className={
+                    prochaine
+                      ? "border-primary/50 ring-1 ring-primary/20 transition-colors"
+                      : "transition-colors hover:border-primary/40"
+                  }
+                >
                   <CardContent className="flex items-center gap-4 py-4">
-                    {fait ? (
+                    {e.done ? (
                       <CheckCircle2 className="size-6 shrink-0 text-status-conforme" />
                     ) : (
-                      <Circle className="size-6 shrink-0 text-status-pa" />
+                      <Circle
+                        className={`size-6 shrink-0 ${prochaine ? "text-primary" : "text-status-pa"}`}
+                      />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium">{e.titre}</p>
-                        {fait ? (
-                          <span className="rounded-full bg-status-conforme/15 px-2 py-0.5 font-medium text-[10px] text-status-conforme">
-                            Validé
+                        {prochaine ? (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-[10px] text-primary">
+                            Commencez ici
                           </span>
-                        ) : (
-                          <span className="rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-[10px] text-status-pa">
-                            {e.aValider} à valider
-                          </span>
-                        )}
+                        ) : null}
+                        <span
+                          className={`rounded-full px-2 py-0.5 font-medium text-[10px] ${
+                            e.done
+                              ? "bg-status-conforme/15 text-status-conforme"
+                              : "bg-status-pa/15 text-status-pa"
+                          }`}
+                        >
+                          {e.hint}
+                        </span>
                       </div>
                       <p className="mt-0.5 text-muted-foreground text-sm">{e.description}</p>
                     </div>

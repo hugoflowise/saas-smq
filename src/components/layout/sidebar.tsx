@@ -4,9 +4,11 @@ import { NavLinks } from "./nav-links";
 export function Sidebar({
   isAdmin = false,
   canManageUsers = false,
+  showOnboarding = true,
 }: {
   isAdmin?: boolean;
   canManageUsers?: boolean;
+  showOnboarding?: boolean;
 }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r bg-card md:flex print:hidden">
@@ -21,7 +23,11 @@ export function Sidebar({
         />
       </div>
       <div className="flex-1 overflow-y-auto">
-        <NavLinks isAdmin={isAdmin} canManageUsers={canManageUsers} />
+        <NavLinks
+          isAdmin={isAdmin}
+          canManageUsers={canManageUsers}
+          showOnboarding={showOnboarding}
+        />
       </div>
     </aside>
   );
