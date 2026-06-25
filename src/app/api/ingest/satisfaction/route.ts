@@ -20,7 +20,7 @@ function token(request: Request): string | null {
   const header = request.headers.get("x-ingest-token");
   if (header) return header.trim();
   const url = new URL(request.url);
-  return url.searchParams.get("token");
+  return url.searchParams.get("token")?.trim() || null;
 }
 
 export async function POST(request: Request) {
