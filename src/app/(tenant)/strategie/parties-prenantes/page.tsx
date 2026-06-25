@@ -2,7 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ProposeBadge } from "@/components/propose-badge";
-import { ProposeBanner, ValiderButton } from "@/components/propose-controls";
+import { ProposeBanner, RefuserButton, ValiderButton } from "@/components/propose-controls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -166,7 +166,10 @@ export default async function PartiesPrenantesPage() {
                         </Link>
                         {estAValider(p) ? <ProposeBadge /> : null}
                         {estAValider(p) ? (
-                          <ValiderButton table="parties_interessees" id={p.id} />
+                          <>
+                            <RefuserButton table="parties_interessees" id={p.id} />
+                            <ValiderButton table="parties_interessees" id={p.id} />
+                          </>
                         ) : null}
                       </div>
                     </TableCell>

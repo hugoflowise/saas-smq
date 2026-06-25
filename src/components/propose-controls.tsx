@@ -1,11 +1,15 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { validerElementAction, validerToutAction } from "@/lib/actions/validation";
+import {
+  refuserElementAction,
+  validerElementAction,
+  validerToutAction,
+} from "@/lib/actions/validation";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 type TableProposee = "processus" | "actions" | "parties_interessees";
@@ -43,6 +47,44 @@ export function ValiderButton({ table, id }: { table: TableProposee; id: string 
     >
       <Check className="size-3.5" />
       Valider
+    </Button>
+  );
+}
+
+/** Bouton « Refuser » pour un élément prérempli (le supprime après confirmation). */
+export function RefuserButton({ table, id }: { table: TableProposee; id: string }) {
+  const router = useRouter();
+  const readOnly = useReadOnly();
+  const [pending, setPending] = useState(false);
+
+  async function refuser(e: React.MouseEvent) {
+    // Utile si le bouton est posé à l'intérieur d'un lien (cartes processus).
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Refuser et supprimer définitivement cet élément proposé ?")) return;
+    setPending(true);
+    const r = await refuserElementAction({ table, id });
+    setPending(false);
+    if (r.ok) {
+      toast.success("Élément supprimé.");
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
+
+  if (readOnly) return null;
+
+  return (
+    <Button
+      size="sm"
+      variant="ghost"
+      className="h-7 shrink-0 gap-1.5 px-2.5 text-muted-foreground text-xs hover:text-destructive"
+      disabled={pending}
+      onClick={refuser}
+    >
+      <X className="size-3.5" />
+      Refuser
     </Button>
   );
 }

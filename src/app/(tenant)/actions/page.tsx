@@ -2,7 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ProposeBadge } from "@/components/propose-badge";
-import { ProposeBanner, ValiderButton } from "@/components/propose-controls";
+import { ProposeBanner, RefuserButton, ValiderButton } from "@/components/propose-controls";
 import {
   Table,
   TableBody,
@@ -179,7 +179,10 @@ export default async function ActionsPage({
                       </Link>
                       {a.propose && !a.valide_le ? <ProposeBadge /> : null}
                       {a.propose && !a.valide_le ? (
-                        <ValiderButton table="actions" id={a.id} />
+                        <>
+                          <RefuserButton table="actions" id={a.id} />
+                          <ValiderButton table="actions" id={a.id} />
+                        </>
                       ) : null}
                     </div>
                   </TableCell>

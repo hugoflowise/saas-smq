@@ -38,6 +38,26 @@ export async function validerElementAction(input: unknown): Promise<ActionResult
   return { ok: true };
 }
 
+/**
+ * Refuse un élément prérempli : il est supprimé. Réservé aux éléments encore
+ * « proposés » et non validés (un élément validé se supprime par les écrans
+ * habituels, avec leurs garde-fous).
+ */
+export async function refuserElementAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = validerSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+
+  const error = await supprimerPropose(parsed.data.table, ctx.effectiveTenantId, parsed.data.id);
+  if (error) return { ok: false, error };
+
+  revalidatePath(TABLES_PROPOSEES[parsed.data.table]);
+  return { ok: true };
+}
+
 /** Valide d'un coup tous les éléments proposés non encore validés d'un module. */
 export async function validerToutAction(input: unknown): Promise<ActionResult> {
   const ctx = await getTenantContext();
@@ -83,4 +103,54 @@ async function marquerValide(
   let q = supabase.from("parties_interessees").update(patch).eq("tenant_id", tenantId);
   q = target.id ? q.eq("id", target.id) : q.eq("propose", true).is("valide_le", null);
   return (await q).error?.message ?? null;
+}
+
+/**
+ * Supprime un élément proposé non validé (refus). Aiguillage explicite par table
+ * pour conserver le typage du client Supabase. Le double filtre `propose=true` +
+ * `valide_le is null` empêche de supprimer un élément déjà validé par ce biais.
+ */
+async function supprimerPropose(
+  table: TableProposee,
+  tenantId: string,
+  id: string,
+): Promise<string | null> {
+  const supabase = await createClient();
+  if (table === "processus") {
+    return (
+      (
+        await supabase
+          .from("processus")
+          .delete()
+          .eq("tenant_id", tenantId)
+          .eq("id", id)
+          .eq("propose", true)
+          .is("valide_le", null)
+      ).error?.message ?? null
+    );
+  }
+  if (table === "actions") {
+    return (
+      (
+        await supabase
+          .from("actions")
+          .delete()
+          .eq("tenant_id", tenantId)
+          .eq("id", id)
+          .eq("propose", true)
+          .is("valide_le", null)
+      ).error?.message ?? null
+    );
+  }
+  return (
+    (
+      await supabase
+        .from("parties_interessees")
+        .delete()
+        .eq("tenant_id", tenantId)
+        .eq("id", id)
+        .eq("propose", true)
+        .is("valide_le", null)
+    ).error?.message ?? null
+  );
 }
