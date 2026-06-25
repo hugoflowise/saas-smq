@@ -76,9 +76,18 @@ export async function markNotificationReadAction(id: string): Promise<ActionResu
   if (!ctx) return { ok: false, error: "Non authentifié." };
 
   if (ctx.simulatedRole) {
-    const admin = createAdminClient();
-    const { error } = await admin.from("notifications").update({ is_read: true }).eq("id", id);
-    if (error) return { ok: false, error: error.message };
+    // Restreint aux destinataires du rôle simulé dans le client actif (et non
+    // à n'importe quelle notification par id) pour rester cohérent avec la vue.
+    const ids = await roleRecipientIds(ctx.simulatedRole);
+    if (ids.length > 0) {
+      const admin = createAdminClient();
+      const { error } = await admin
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("id", id)
+        .in("recipient_user_id", ids);
+      if (error) return { ok: false, error: error.message };
+    }
   } else {
     const { error } = await ctx.supabase
       .from("notifications")
