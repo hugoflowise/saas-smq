@@ -4,8 +4,10 @@ import { notFound, redirect } from "next/navigation";
 import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { deleteActionAction } from "@/lib/actions/plan-actions";
 import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import {
@@ -68,6 +70,12 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
 
       <PageHeader title={action.description_courte}>
         <ActionDialog processusOptions={processusOptions ?? []} action={action} />
+        <SupprimerButton
+          action={deleteActionAction}
+          id={action.id}
+          libelle="cette action"
+          redirectTo="/actions"
+        />
       </PageHeader>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">

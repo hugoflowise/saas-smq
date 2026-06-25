@@ -99,6 +99,7 @@ export default async function DocumentsPage({
         .from("processus")
         .select("id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .order("ordre_affichage"),
     ]);
 

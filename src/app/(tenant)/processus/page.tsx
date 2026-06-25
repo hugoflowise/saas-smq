@@ -70,6 +70,7 @@ export default async function ProcessusPage() {
       .from("processus")
       .select("id, nom, type, description, date_prochaine_revue, propose, valide_le")
       .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
       .order("ordre_affichage", { ascending: true }),
     supabase.from("tenants").select("couleur_charte").eq("id", ctx.effectiveTenantId).maybeSingle(),
   ]);

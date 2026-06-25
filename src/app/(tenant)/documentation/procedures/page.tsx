@@ -47,6 +47,7 @@ export default async function ProceduresPage() {
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
   const processusName = new Map((processus ?? []).map((p) => [p.id, p.nom]));
 
@@ -54,6 +55,7 @@ export default async function ProceduresPage() {
     .from("procedures")
     .select("id, titre, processus_id, reference_iso, statut")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("titre", { ascending: true });
 
   const items = procedures ?? [];

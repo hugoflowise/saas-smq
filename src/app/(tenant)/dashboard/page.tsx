@@ -90,6 +90,7 @@ export default async function DashboardPage() {
     .from("actions")
     .select("id, reference, description_courte, date_prevue")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .in("statut", ACTIONS_ACTIVES)
     .lt("date_prevue", today)
     .order("date_prevue", { ascending: true })
@@ -107,7 +108,8 @@ export default async function DashboardPage() {
   const { data: indicateurs } = await supabase
     .from("indicateurs")
     .select("id, cible, sens")
-    .eq("tenant_id", tid);
+    .eq("tenant_id", tid)
+    .is("deleted_at", null);
   const { data: valeurs } = await supabase
     .from("indicateurs_valeurs")
     .select("indicateur_id, valeur, date_mesure")
@@ -170,18 +172,21 @@ export default async function DashboardPage() {
       .from("parties_interessees")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("propose", true)
       .is("valide_le", null),
     supabase
       .from("processus")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("propose", true)
       .is("valide_le", null),
     supabase
       .from("actions")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("propose", true)
       .is("valide_le", null),
   ]);
@@ -216,6 +221,7 @@ export default async function DashboardPage() {
         .from("actions")
         .select("id, reference, description_courte, date_prevue")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .in("statut", ACTIONS_ACTIVES)
         .gte("date_prevue", today)
         .lte("date_prevue", horizon),

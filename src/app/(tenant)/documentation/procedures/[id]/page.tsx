@@ -7,8 +7,10 @@ import type { Societe } from "@/components/document-paper";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
 import { type ProcDef, ProcedureSections, type ProcRef } from "@/components/procedure-sections";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  deleteProcedureAction,
   publishProcedureAction,
   saveProcedureContenuAction,
   transitionProcedureStatutAction,
@@ -166,7 +168,14 @@ export default async function ProcedureDetailPage({
         {backLabel}
       </Link>
 
-      <PageHeader title={procedure.titre} />
+      <PageHeader title={procedure.titre}>
+        <SupprimerButton
+          action={deleteProcedureAction}
+          id={procedure.id}
+          libelle="cette procédure"
+          redirectTo="/documentation/procedures"
+        />
+      </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">

@@ -86,11 +86,16 @@ export default async function ModeAuditPage() {
       .from("parties_interessees")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid),
-    supabase.from("processus").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase
       .from("processus")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null),
+    supabase
+      .from("processus")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .not("date_prochaine_revue", "is", null)
       .lte("date_prochaine_revue", horizon60),
     supabase.from("politique_qualite").select("statut").eq("tenant_id", tid).maybeSingle(),
@@ -111,8 +116,13 @@ export default async function ModeAuditPage() {
       .from("procedures")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("statut", "publiee"),
-    supabase.from("indicateurs").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
+    supabase
+      .from("indicateurs")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null),
     supabase.from("reclamations").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase
       .from("reclamations")
@@ -143,6 +153,7 @@ export default async function ModeAuditPage() {
       .from("actions")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .in("statut", [...ACTIONS_ACTIVES])
       .lt("date_prevue", today),
   ]);

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
+import { canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -118,6 +119,24 @@ export async function addValeurAction(input: unknown): Promise<ActionResult> {
 
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/indicateurs/${d.indicateurId}`);
+  revalidatePath("/indicateurs");
+  return { ok: true };
+}
+
+/** Met un indicateur à la corbeille (soft-delete, réversible). */
+export async function deleteIndicateurAction(id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("indicateurs")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+
   revalidatePath("/indicateurs");
   return { ok: true };
 }

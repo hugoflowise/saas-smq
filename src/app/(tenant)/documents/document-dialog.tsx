@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
   confirmDocumentUploadAction,
   createDocumentMaitriseAction,
   createDocumentUploadUrlAction,
+  deleteDocumentMaitriseAction,
   removeDocumentFichierAction,
   updateDocumentMaitriseAction,
 } from "@/lib/actions/documents-maitrise";
@@ -62,6 +63,23 @@ export function DocumentDialog({
   const [file, setFile] = useState<File | null>(null);
   const [fichierNom, setFichierNom] = useState(document?.fichier_nom ?? null);
   const readOnly = useReadOnly();
+
+  async function handleDelete() {
+    if (!document) return;
+    if (!confirm(`Supprimer le document « ${document.titre} » ? Il sera mis à la corbeille.`)) {
+      return;
+    }
+    setPending(true);
+    const r = await deleteDocumentMaitriseAction(document.id);
+    setPending(false);
+    if (r.ok) {
+      toast.success("Document supprimé.");
+      setOpen(false);
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -332,9 +350,23 @@ export function DocumentDialog({
             </p>
           </div>
 
-          <Button type="submit" disabled={pending} className="mt-1">
-            {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Ajouter"}
-          </Button>
+          <div className="mt-1 flex items-center gap-2">
+            <Button type="submit" disabled={pending}>
+              {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Ajouter"}
+            </Button>
+            {isEdit && document ? (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={pending}
+                onClick={handleDelete}
+                className="gap-1.5 text-muted-foreground text-sm hover:text-destructive"
+              >
+                <Trash2 className="size-4" />
+                Supprimer le document
+              </Button>
+            ) : null}
+          </div>
         </form>
       </DialogContent>
     </Dialog>

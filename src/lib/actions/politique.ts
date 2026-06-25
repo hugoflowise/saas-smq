@@ -196,3 +196,35 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
   revalidatePath("/strategie/politique");
   return { ok: true };
 }
+
+/**
+ * Réinitialise la politique qualité : efface le contenu et repart d'un brouillon
+ * vide. La politique étant un document unique par client (contrainte d'unicité),
+ * on ne supprime pas la ligne — on la vide, ce qui permet de recommencer.
+ * Le paramètre `_id` n'est pas utilisé (signature commune au bouton Supprimer).
+ */
+export async function resetPolitiqueAction(_id?: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
+
+  const { supabase, politique } = await loadPolitique(ctx.effectiveTenantId);
+  if (!politique) return { ok: true }; // déjà vide
+
+  const reset: PolitiqueUpdate = {
+    contenu: null,
+    statut: "brouillon",
+    version_actuelle_id: null,
+    approved_by: null,
+    approved_at: null,
+    signature_data: null,
+    updated_by: ctx.userId,
+  };
+  const { error } = await supabase.from("politique_qualite").update(reset).eq("id", politique.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/strategie/politique");
+  revalidatePath("/documents");
+  return { ok: true };
+}

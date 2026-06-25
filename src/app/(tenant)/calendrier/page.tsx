@@ -43,6 +43,7 @@ export default async function CalendrierPage() {
         .from("actions")
         .select("id, reference, description_courte, date_prevue")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .in("statut", ["a_faire", "en_cours", "bloquee"] as ("a_faire" | "en_cours" | "bloquee")[])
         .not("date_prevue", "is", null),
       supabase

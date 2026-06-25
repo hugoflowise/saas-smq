@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { KpiChart } from "@/components/kpi-chart";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteIndicateurAction } from "@/lib/actions/indicateurs";
 import { formatDate } from "@/lib/format";
 import { cibleAffichee, FREQUENCE_LABELS } from "@/lib/indicateurs";
 import { createClient } from "@/lib/supabase/server";
@@ -81,6 +83,12 @@ export default async function IndicateurDetailPage({
 
       <PageHeader title={ind.nom} description={ind.description ?? undefined}>
         <IndicateurDialog indicateur={ind} processusOptions={processusOptions ?? []} />
+        <SupprimerButton
+          action={deleteIndicateurAction}
+          id={ind.id}
+          libelle="cet indicateur"
+          redirectTo="/indicateurs"
+        />
       </PageHeader>
 
       <Card className="mb-6">
