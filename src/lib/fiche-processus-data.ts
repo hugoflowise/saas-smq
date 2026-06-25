@@ -63,15 +63,7 @@ export async function loadFicheProcessusData(
     .maybeSingle();
   if (!p) return null;
 
-  const [
-    tenantRes,
-    activitesRes,
-    interactionsRes,
-    indicateursRes,
-    risquesRes,
-    proceduresRes,
-    docsRes,
-  ] = await Promise.all([
+  const [tenantRes, activitesRes, interactionsRes, indicateursRes, risquesRes] = await Promise.all([
     supabase
       .from("tenants")
       .select(
@@ -105,19 +97,6 @@ export async function loadFicheProcessusData(
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .order("criticite", { ascending: false }),
-    supabase
-      .from("procedures")
-      .select("id, titre")
-      .eq("tenant_id", tid)
-      .eq("processus_id", id)
-      .order("titre"),
-    supabase
-      .from("documents_maitrise")
-      .select("code, titre, type")
-      .eq("processus_id", id)
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .order("titre"),
   ]);
 
   const personIds = [
@@ -203,20 +182,6 @@ export async function loadFicheProcessusData(
     })),
     risques: risques.filter((r) => r.type === "risque"),
     opportunites: risques.filter((r) => r.type !== "risque"),
-    documents: [
-      ...(proceduresRes.data ?? []).map((pr) => ({
-        reference: null,
-        intitule: pr.titre,
-        type: "Procédure",
-        href: `/documentation/procedures/${pr.id}`,
-      })),
-      ...(docsRes.data ?? []).map((d) => ({
-        reference: d.code,
-        intitule: d.titre,
-        type: d.type,
-        href: null,
-      })),
-    ],
     reference: p.fiche_reference,
     statut: p.fiche_statut,
     version: p.fiche_version,

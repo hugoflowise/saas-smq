@@ -1758,6 +1758,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          code: string | null
           contenu: Json | null
           created_at: string
           created_by: string | null
@@ -1774,6 +1775,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          code?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
@@ -1790,6 +1792,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          code?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
@@ -1906,6 +1909,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          code: string | null
           contenu: Json | null
           created_at: string
           created_by: string | null
@@ -1943,6 +1947,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          code?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
@@ -1980,6 +1985,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          code?: string | null
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
