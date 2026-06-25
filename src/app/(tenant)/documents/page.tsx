@@ -77,12 +77,14 @@ export default async function DocumentsPage({
     await Promise.all([
       supabase
         .from("politique_qualite")
-        .select("statut, version_actuelle_id, approved_by, approved_at")
+        .select("code, statut, version_actuelle_id, approved_by, approved_at")
         .eq("tenant_id", tid)
         .maybeSingle(),
       supabase
         .from("procedures")
-        .select("id, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id")
+        .select(
+          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id",
+        )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
         .order("titre"),
@@ -93,7 +95,11 @@ export default async function DocumentsPage({
         )
         .eq("tenant_id", tid)
         .order("code", { nullsFirst: false }),
-      supabase.from("processus").select("id, nom").eq("tenant_id", tid),
+      supabase
+        .from("processus")
+        .select("id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le")
+        .eq("tenant_id", tid)
+        .order("ordre_affichage"),
     ]);
 
   const processusList = (processus ?? []).map((p) => ({ id: p.id, nom: p.nom }));
@@ -132,7 +138,7 @@ export default async function DocumentsPage({
   if (politique) {
     rows.push({
       key: "politique",
-      code: "POL",
+      code: politique.code ?? "POL",
       titre: "Politique qualité",
       typeToken: "politique",
       typeLabel: "Politique",
@@ -153,7 +159,7 @@ export default async function DocumentsPage({
   for (const p of procedures ?? []) {
     rows.push({
       key: `proc-${p.id}`,
-      code: null,
+      code: p.code ?? null,
       titre: p.titre,
       typeToken: "procedure",
       typeLabel: "Procédure",
@@ -165,6 +171,27 @@ export default async function DocumentsPage({
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
       processusId: p.processus_id,
       href: `/documentation/procedures/${p.id}?from=/documents`,
+      registre: null,
+    });
+  }
+
+  // Fiches d'identité de processus : documents natifs (générés dans l'app), listés
+  // automatiquement dans la matrice avec leur code (processus.fiche_reference).
+  for (const p of processus ?? []) {
+    rows.push({
+      key: `fiche-${p.id}`,
+      code: p.fiche_reference,
+      titre: `Fiche d'identité — ${p.nom}`,
+      typeToken: "fiche",
+      typeLabel: "Fiche d'identité",
+      version: p.fiche_version,
+      statut: statutDocumentNatif(p.fiche_statut),
+      approbateur: null,
+      dateApprobation: null,
+      revisionPrevue: null,
+      processusNom: p.nom,
+      processusId: p.id,
+      href: `/processus/${p.id}?from=/documents`,
       registre: null,
     });
   }
@@ -330,6 +357,13 @@ export default async function DocumentsPage({
                     <TableCell>
                       {r.registre?.fichier_nom ? (
                         <FichierLink id={r.registre.id} nom={r.registre.fichier_nom} />
+                      ) : r.registre && r.statut === "en_vigueur" ? (
+                        <span
+                          className="font-medium text-status-pa text-xs"
+                          title="Document en vigueur sans pièce jointe : joignez le fichier de référence."
+                        >
+                          Fichier à joindre
+                        </span>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}

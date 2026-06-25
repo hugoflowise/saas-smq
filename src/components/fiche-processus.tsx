@@ -34,13 +34,6 @@ export type FicheRisque = {
   type: string;
   criticite: number | null;
 };
-export type FicheDocument = {
-  reference: string | null;
-  intitule: string;
-  type: string;
-  href: string | null;
-};
-
 export type FicheProcessusData = {
   societe: Societe;
   nom: string;
@@ -59,7 +52,6 @@ export type FicheProcessusData = {
   indicateurs: FicheIndicateur[];
   risques: FicheRisque[];
   opportunites: FicheRisque[];
-  documents: FicheDocument[];
   reference: string | null;
   statut: string;
   version: string | null;
@@ -331,33 +323,12 @@ export function FicheProcessus(data: FicheProcessusData) {
         </div>
       </Section>
 
-      {/* 8. Documents associés */}
+      {/* 8. Documents associés — renvoi vers la liste maîtresse (source unique) */}
       <Section titre="8. Documents associés">
-        {data.documents.length === 0 ? (
-          <p className="text-[#0b1120]/50 text-sm">-</p>
-        ) : (
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr style={HEAD}>
-                <th className="px-3 py-1.5 text-left font-semibold">Référence</th>
-                <th className="px-3 py-1.5 text-left font-semibold">Intitulé du document</th>
-                <th className="px-3 py-1.5 text-left font-semibold">Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.documents.map((doc, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: rendu statique
-                <tr key={`${doc.intitule}-${i}`} className="border-b align-top">
-                  <td className="px-3 py-2">{doc.reference ?? "-"}</td>
-                  <td className="px-3 py-2">
-                    <Lien href={doc.href}>{doc.intitule}</Lien>
-                  </td>
-                  <td className="px-3 py-2">{doc.type}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <p className="text-sm">
+          La liste exhaustive des documents associés au processus est tenue à jour dans la{" "}
+          <Lien href="/documents">liste maîtresse des documents (EN_SMQ_001)</Lien>.
+        </p>
       </Section>
 
       {/* 9. Historique et validation */}
