@@ -1918,6 +1918,8 @@ export type Database = {
           glossaire_sigles: string | null
           glossaire_symboles: string | null
           id: string
+          logigramme_svg: string | null
+          logigramme_xml: string | null
           note_revision: string | null
           objet: string | null
           pilote_id: string | null
@@ -1953,6 +1955,8 @@ export type Database = {
           glossaire_sigles?: string | null
           glossaire_symboles?: string | null
           id?: string
+          logigramme_svg?: string | null
+          logigramme_xml?: string | null
           note_revision?: string | null
           objet?: string | null
           pilote_id?: string | null
@@ -1988,6 +1992,8 @@ export type Database = {
           glossaire_sigles?: string | null
           glossaire_symboles?: string | null
           id?: string
+          logigramme_svg?: string | null
+          logigramme_xml?: string | null
           note_revision?: string | null
           objet?: string | null
           pilote_id?: string | null
