@@ -2567,6 +2567,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_seen: string | null
+          must_set_password: boolean
           notification_preferences: Json
           role: Database["public"]["Enums"]["user_role"]
           signature_image: string | null
@@ -2580,6 +2581,7 @@ export type Database = {
           full_name?: string | null
           id: string
           last_seen?: string | null
+          must_set_password?: boolean
           notification_preferences?: Json
           role?: Database["public"]["Enums"]["user_role"]
           signature_image?: string | null
@@ -2593,6 +2595,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_seen?: string | null
+          must_set_password?: boolean
           notification_preferences?: Json
           role?: Database["public"]["Enums"]["user_role"]
           signature_image?: string | null

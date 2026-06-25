@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ChangePasswordForm } from "@/app/(tenant)/compte/change-password-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -22,16 +21,12 @@ export default function BienvenuePage() {
         />
         <CardTitle className="text-xl">Définir votre mot de passe</CardTitle>
         <CardDescription>
-          Choisissez un mot de passe pour accéder à votre espace qualité.
+          Choisissez un mot de passe pour accéder à votre espace qualité. Cette étape est
+          obligatoire pour sécuriser votre compte.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <ChangePasswordForm />
-        <div className="border-t pt-4 text-center">
-          <Link href="/dashboard" className="text-primary text-sm hover:underline">
-            Accéder à mon espace qualité →
-          </Link>
-        </div>
+      <CardContent>
+        <ChangePasswordForm redirectTo="/dashboard" />
       </CardContent>
     </Card>
   );

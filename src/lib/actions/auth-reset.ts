@@ -31,6 +31,10 @@ export async function demanderResetMotDePasseAction(email: unknown): Promise<Act
 
   const lien = callbackLinkFromProperties(base, data?.properties, "/bienvenue");
   if (!error && lien) {
+    // Tant que le nouveau mot de passe n'est pas défini, l'accès à l'app est bloqué.
+    if (data?.user?.id) {
+      await admin.from("profiles").update({ must_set_password: true }).eq("id", data.user.id);
+    }
     await sendEmail({
       to: parsed.data,
       subject: "Réinitialisation de votre mot de passe",
