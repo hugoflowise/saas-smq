@@ -9,9 +9,11 @@ import { ObjectifDialog } from "@/app/(tenant)/strategie/objectifs/objectif-dial
 import { EmptyState } from "@/components/empty-state";
 import type { FicheProcessusData } from "@/components/fiche-processus";
 import { PageHeader } from "@/components/page-header";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { deleteProcessusAction } from "@/lib/actions/processus";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
 import { formatDate, nomPersonne } from "@/lib/format";
 import { cibleAffichee, horsCible } from "@/lib/indicateurs";
@@ -71,6 +73,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
     .select("id, nom, type, date_derniere_revue, date_prochaine_revue")
     .eq("id", id)
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (!processus) notFound();
@@ -81,12 +84,14 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .select("id, titre, statut")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
+      .is("deleted_at", null)
       .order("titre"),
     supabase
       .from("indicateurs")
       .select("id, nom, unite, cible, sens")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
+      .is("deleted_at", null)
       .order("nom"),
     supabase
       .from("risques_opportunites")
@@ -109,7 +114,12 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .eq("processus_id", id)
       .is("deleted_at", null)
       .order("created_at"),
-    supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("ordre_affichage"),
   ]);
 
   const indList = indicateurs.data ?? [];
@@ -218,7 +228,14 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
         Processus
       </Link>
 
-      <PageHeader title={processus.nom} />
+      <PageHeader title={processus.nom}>
+        <SupprimerButton
+          action={deleteProcessusAction}
+          id={processus.id}
+          libelle="ce processus"
+          redirectTo="/processus"
+        />
+      </PageHeader>
       <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <Badge variant="secondary">{TYPE_LABELS[processus.type] ?? processus.type}</Badge>
         <span className="text-muted-foreground text-sm">

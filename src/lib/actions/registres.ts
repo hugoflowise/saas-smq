@@ -155,6 +155,20 @@ export async function updateVeilleAction(input: unknown): Promise<ActionResult> 
   return { ok: true };
 }
 
+/** Met une veille réglementaire à la corbeille (soft-delete, réversible). */
+export async function deleteVeilleAction(id: string): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const { error } = await c.supabase
+    .from("veille_reglementaire")
+    .update({ deleted_at: new Date().toISOString(), updated_by: c.userId })
+    .eq("id", id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/veille");
+  return { ok: true };
+}
+
 // ----------------------------------------------------------------- Objectifs
 const objBase = {
   intitule: z.string().trim().min(2, "Intitulé requis."),

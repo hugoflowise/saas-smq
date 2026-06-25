@@ -62,6 +62,7 @@ export async function collectEcheances(
       .from("actions")
       .select("id, reference, description_courte, date_prevue")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .in("statut", ACTIONS_ACTIVES)
       .lt("date_prevue", today)
       .order("date_prevue", { ascending: true }),
@@ -90,6 +91,7 @@ export async function collectEcheances(
       .from("actions")
       .select("id, reference, description_courte, date_prevue")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .in("statut", ACTIONS_ACTIVES)
       .gte("date_prevue", today)
       .lte("date_prevue", horizon),

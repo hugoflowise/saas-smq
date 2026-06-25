@@ -5,9 +5,11 @@ import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   publishPolitiqueAction,
+  resetPolitiqueAction,
   savePolitiqueContenuAction,
   transitionPolitiqueStatutAction,
 } from "@/lib/actions/politique";
@@ -115,7 +117,17 @@ export default async function PolitiquePage({
         description="Document maîtrisé définissant les engagements qualité de la direction."
         isoClause="ISO 9001 §5.2"
         help="La direction établit et tient à jour une politique qualité adaptée à la finalité de l'organisme. Elle sert de cadre aux objectifs qualité, est communiquée à tous et tenue à disposition des parties intéressées."
-      />
+      >
+        {politique && canWrite ? (
+          <SupprimerButton
+            action={resetPolitiqueAction}
+            id="politique"
+            label="Réinitialiser la politique"
+            successText="Politique réinitialisée."
+            confirmText="Réinitialiser la politique qualité ? Le contenu sera effacé et repassé en brouillon."
+          />
+        ) : null}
+      </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">

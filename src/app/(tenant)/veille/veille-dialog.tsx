@@ -1,6 +1,8 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createVeilleAction, updateVeilleAction } from "@/lib/actions/registres";
+import {
+  createVeilleAction,
+  deleteVeilleAction,
+  updateVeilleAction,
+} from "@/lib/actions/registres";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
@@ -37,9 +43,25 @@ export function VeilleDialog({
   veille?: VeilleRow;
   trigger?: React.ReactElement;
 }) {
+  const router = useRouter();
   const isEdit = Boolean(veille);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+
+  async function handleDelete() {
+    if (!veille) return;
+    if (!confirm(`Supprimer le texte « ${veille.intitule} » ? Il sera mis à la corbeille.`)) {
+      return;
+    }
+    const r = await deleteVeilleAction(veille.id);
+    if (r.ok) {
+      toast.success("Texte supprimé.");
+      setOpen(false);
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -174,9 +196,23 @@ export function VeilleDialog({
               placeholder="https://www.legifrance.gouv.fr/…"
             />
           </div>
-          <Button type="submit" disabled={pending} className="mt-1">
-            {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
-          </Button>
+          <div className="mt-1 flex items-center gap-2">
+            <Button type="submit" disabled={pending}>
+              {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
+            </Button>
+            {isEdit && veille ? (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={pending}
+                onClick={handleDelete}
+                className="gap-1.5 text-muted-foreground text-sm hover:text-destructive"
+              >
+                <Trash2 className="size-4" />
+                Supprimer
+              </Button>
+            ) : null}
+          </div>
         </form>
       </DialogContent>
     </Dialog>

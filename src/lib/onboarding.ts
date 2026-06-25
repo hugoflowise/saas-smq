@@ -34,6 +34,7 @@ export async function loadOnboarding(tid: string): Promise<Onboarding> {
       .from(table)
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("propose", true)
       .is("valide_le", null);
 
@@ -51,11 +52,16 @@ export async function loadOnboarding(tid: string): Promise<Onboarding> {
     restantsAValider("parties_interessees"),
     restantsAValider("processus"),
     restantsAValider("actions"),
-    supabase.from("processus").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase
       .from("processus")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null),
+    supabase
+      .from("processus")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .is("finalite", null),
     supabase
       .from("politique_qualite")

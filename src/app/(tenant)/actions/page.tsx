@@ -56,6 +56,7 @@ export default async function ActionsPage({
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
 
   let query = supabase
@@ -63,7 +64,8 @@ export default async function ActionsPage({
     .select(
       "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires, cotation, propose, valide_le",
     )
-    .eq("tenant_id", ctx.effectiveTenantId);
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null);
 
   if (statut)
     query = query.eq(

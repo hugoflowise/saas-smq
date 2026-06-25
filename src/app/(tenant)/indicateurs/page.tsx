@@ -34,12 +34,14 @@ export default async function IndicateursPage() {
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
 
   const { data: indicateurs } = await supabase
     .from("indicateurs")
     .select("id, nom, unite, cible, sens, frequence_mesure")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("nom", { ascending: true });
 
   // Dernière valeur de chaque indicateur
