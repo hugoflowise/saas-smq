@@ -19,7 +19,11 @@ type Destinataire = {
  * - et un **e-mail** aux destinataires qui ne l'ont pas désactivé, si Resend
  *   est configuré (best-effort, non bloquant).
  */
-async function dispatch(destinataires: Destinataire[], notif: Notif): Promise<void> {
+async function dispatch(
+  destinataires: Destinataire[],
+  notif: Notif,
+  options?: { inAppOnly?: boolean },
+): Promise<void> {
   if (destinataires.length === 0) return;
   const admin = createAdminClient();
 
@@ -34,7 +38,7 @@ async function dispatch(destinataires: Destinataire[], notif: Notif): Promise<vo
     })),
   );
 
-  if (!emailConfigured()) return;
+  if (options?.inAppOnly || !emailConfigured()) return;
   const emails = destinataires
     .filter((p) => p.email && wantsEmail(p.notification_preferences))
     .map((p) => p.email as string);
@@ -69,6 +73,7 @@ export async function notifyRole(tenantId: string, roles: string[], notif: Notif
 export async function notifyUsers(
   userIds: (string | null | undefined)[],
   notif: Notif,
+  options?: { inAppOnly?: boolean },
 ): Promise<void> {
   const ids = [...new Set(userIds.filter(Boolean) as string[])];
   if (ids.length === 0) return;
@@ -77,5 +82,5 @@ export async function notifyUsers(
     .from("profiles")
     .select("id, email, tenant_id, notification_preferences")
     .in("id", ids);
-  await dispatch(data ?? [], notif);
+  await dispatch(data ?? [], notif, options);
 }

@@ -3809,6 +3809,7 @@ export type Database = {
         | "boond_sync_error"
         | "policy_review_due"
         | "mention"
+        | "retour_update"
       objectif_sens: "hausse" | "baisse"
       objectif_statut: "actif" | "atteint" | "abandonne"
       pi_influence: "faible" | "moyen" | "fort"
@@ -4109,6 +4110,7 @@ export const Constants = {
         "boond_sync_error",
         "policy_review_due",
         "mention",
+        "retour_update",
       ],
       objectif_sens: ["hausse", "baisse"],
       objectif_statut: ["actif", "atteint", "abandonne"],
