@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/politique";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionLettre } from "@/lib/versions";
 import { VersionHistory } from "./version-history";
 
 export default async function PolitiquePage({
@@ -172,7 +173,7 @@ export default async function PolitiquePage({
                 versions={versions}
                 pending={
                   politique && politique.statut !== "publiee"
-                    ? { version: `v${versions.length + 1}`, statut: politique.statut }
+                    ? { version: versionLettre(versions.length), statut: politique.statut }
                     : null
                 }
               />

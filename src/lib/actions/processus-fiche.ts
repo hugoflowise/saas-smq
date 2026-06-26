@@ -10,6 +10,7 @@ import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionLettre } from "@/lib/versions";
 
 type ProcessusUpdate = Database["public"]["Tables"]["processus"]["Update"];
 
@@ -284,7 +285,7 @@ export async function publishFicheAction(id: string): Promise<ActionResult> {
     .from("processus_fiche_versions")
     .select("id", { count: "exact", head: true })
     .eq("processus_id", id);
-  const version = String.fromCharCode(65 + (count ?? 0));
+  const version = versionLettre(count ?? 0);
   const publishedAt = new Date().toISOString();
 
   // Instantané complet de la fiche au moment de la publication.
