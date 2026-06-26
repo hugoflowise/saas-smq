@@ -740,6 +740,7 @@ export type Database = {
           date_approbation: string | null
           date_revision_prevue: string | null
           deleted_at: string | null
+          duree_conservation: string | null
           emplacement: string | null
           fichier_nom: string | null
           fichier_path: string | null
@@ -764,6 +765,7 @@ export type Database = {
           date_approbation?: string | null
           date_revision_prevue?: string | null
           deleted_at?: string | null
+          duree_conservation?: string | null
           emplacement?: string | null
           fichier_nom?: string | null
           fichier_path?: string | null
@@ -788,6 +790,7 @@ export type Database = {
           date_approbation?: string | null
           date_revision_prevue?: string | null
           deleted_at?: string | null
+          duree_conservation?: string | null
           emplacement?: string | null
           fichier_nom?: string | null
           fichier_path?: string | null
@@ -1849,6 +1852,7 @@ export type Database = {
           contenu: Json | null
           created_at: string
           created_by: string | null
+          date_revision_prevue: string | null
           id: string
           signature_data: Json | null
           soumis_le: string | null
@@ -1866,6 +1870,7 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          date_revision_prevue?: string | null
           id?: string
           signature_data?: Json | null
           soumis_le?: string | null
@@ -1883,6 +1888,7 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          date_revision_prevue?: string | null
           id?: string
           signature_data?: Json | null
           soumis_le?: string | null
@@ -2000,6 +2006,7 @@ export type Database = {
           contenu: Json | null
           created_at: string
           created_by: string | null
+          date_revision_prevue: string | null
           definitions: Json
           deleted_at: string | null
           description_courte: string | null
@@ -2038,6 +2045,7 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          date_revision_prevue?: string | null
           definitions?: Json
           deleted_at?: string | null
           description_courte?: string | null
@@ -2076,6 +2084,7 @@ export type Database = {
           contenu?: Json | null
           created_at?: string
           created_by?: string | null
+          date_revision_prevue?: string | null
           definitions?: Json
           deleted_at?: string | null
           description_courte?: string | null

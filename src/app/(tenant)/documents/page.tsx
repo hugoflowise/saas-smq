@@ -19,7 +19,7 @@ import {
   DOC_STATUT_LABELS,
   statutDocumentNatif,
 } from "@/lib/documents";
-import { formatDate, todayISO } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -27,6 +27,7 @@ import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
 import { DocumentsFilters } from "./documents-filters";
 import { FichierLink } from "./fichier-link";
+import { DocDureeCell, DocRevisionCell, type RevisionSource } from "./inline-cells";
 
 const REVISION_ALERTE_JOURS = 60;
 
@@ -41,6 +42,10 @@ type MatriceRow = {
   approbateur: string | null;
   dateApprobation: string | null;
   revisionPrevue: string | null;
+  revisionSource: RevisionSource;
+  revisionId: string;
+  dureeConservation: string | null;
+  derniereMaj: string | null;
   processusNom: string | null;
   processusId: string | null;
   href: string | null;
@@ -71,19 +76,20 @@ export default async function DocumentsPage({
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const today = todayISO();
 
   const [{ data: politique }, { data: procedures }, { data: registre }, { data: processus }] =
     await Promise.all([
       supabase
         .from("politique_qualite")
-        .select("code, statut, version_actuelle_id, approved_by, approved_at")
+        .select(
+          "id, code, statut, version_actuelle_id, approved_by, approved_at, date_revision_prevue, updated_at",
+        )
         .eq("tenant_id", tid)
         .maybeSingle(),
       supabase
         .from("procedures")
         .select(
-          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id",
+          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id, date_revision_prevue, updated_at",
         )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -91,13 +97,15 @@ export default async function DocumentsPage({
       supabase
         .from("documents_maitrise")
         .select(
-          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, processus_id, emplacement, commentaire, fichier_nom",
+          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, duree_conservation, processus_id, emplacement, commentaire, fichier_nom, updated_at",
         )
         .eq("tenant_id", tid)
         .order("code", { nullsFirst: false }),
       supabase
         .from("processus")
-        .select("id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le")
+        .select(
+          "id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le, date_prochaine_revue, updated_at",
+        )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
         .order("ordre_affichage"),
@@ -149,7 +157,11 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(politique.statut),
       approbateur: politique.approved_by ? (nameById.get(politique.approved_by) ?? null) : null,
       dateApprobation: politique.approved_at,
-      revisionPrevue: null,
+      revisionPrevue: politique.date_revision_prevue,
+      revisionSource: "politique",
+      revisionId: politique.id,
+      dureeConservation: null,
+      derniereMaj: politique.updated_at,
       processusNom: "Direction",
       processusId: null,
       href: "/strategie/politique?from=/documents",
@@ -168,7 +180,11 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(p.statut),
       approbateur: p.approved_by ? (nameById.get(p.approved_by) ?? null) : null,
       dateApprobation: p.approved_at,
-      revisionPrevue: null,
+      revisionPrevue: p.date_revision_prevue,
+      revisionSource: "procedure",
+      revisionId: p.id,
+      dureeConservation: null,
+      derniereMaj: p.updated_at,
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
       processusId: p.processus_id,
       href: `/documentation/procedures/${p.id}?from=/documents`,
@@ -189,7 +205,11 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(p.fiche_statut),
       approbateur: null,
       dateApprobation: null,
-      revisionPrevue: null,
+      revisionPrevue: p.date_prochaine_revue,
+      revisionSource: "processus",
+      revisionId: p.id,
+      dureeConservation: null,
+      derniereMaj: p.updated_at,
       processusNom: p.nom,
       processusId: p.id,
       href: `/processus/${p.id}?from=/documents`,
@@ -209,6 +229,10 @@ export default async function DocumentsPage({
       approbateur: d.approbateur,
       dateApprobation: d.date_approbation,
       revisionPrevue: d.date_revision_prevue,
+      revisionSource: "registre",
+      revisionId: d.id,
+      dureeConservation: d.duree_conservation,
+      derniereMaj: d.updated_at,
       processusNom: d.processus_id ? (processusNom.get(d.processus_id) ?? null) : null,
       processusId: d.processus_id,
       href: null,
@@ -276,102 +300,97 @@ export default async function DocumentsPage({
               <TableRow>
                 <TableHead className="w-24">Code</TableHead>
                 <TableHead>Document</TableHead>
-                <TableHead className="w-36">Type</TableHead>
                 <TableHead className="w-20">Version</TableHead>
                 <TableHead className="w-28">Statut</TableHead>
                 <TableHead className="w-40">Approbateur</TableHead>
                 <TableHead className="w-32">Révision prévue</TableHead>
+                <TableHead className="w-32">Durée de stockage</TableHead>
+                <TableHead className="w-32">Dernière mise à jour</TableHead>
                 <TableHead className="w-40">Fichier</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
                     Aucun document ne correspond aux filtres.
                   </TableCell>
                 </TableRow>
               ) : null}
-              {visibleRows.map((r) => {
-                const enRetard = r.revisionPrevue && r.revisionPrevue < today;
-                const bientot = r.revisionPrevue && !enRetard && r.revisionPrevue <= alerteDate;
-                return (
-                  <TableRow key={r.key}>
-                    <TableCell className="font-medium text-muted-foreground text-sm">
-                      {r.code ?? "-"}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {r.href ? (
-                        <Link href={r.href} className="hover:text-primary hover:underline">
-                          {r.titre}
-                        </Link>
-                      ) : r.registre ? (
-                        <DocumentDialog
-                          document={r.registre}
-                          processus={processusList}
-                          trigger={
-                            <button type="button" className={ROW_NAME_BUTTON}>
-                              {r.titre}
-                            </button>
-                          }
-                        />
-                      ) : (
-                        r.titre
-                      )}
-                      {r.processusNom ? (
-                        <span className="block text-xs text-muted-foreground">
-                          <ProcessusLink id={r.processusId} nom={r.processusNom} />
-                        </span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{r.typeLabel}</TableCell>
-                    <TableCell className="text-sm">{r.version ?? "-"}</TableCell>
-                    <TableCell>
-                      <span className={`${BADGE_BASE} ${DOC_STATUT_CLASS[r.statut] ?? "bg-muted"}`}>
-                        {DOC_STATUT_LABELS[r.statut] ?? r.statut}
+              {visibleRows.map((r) => (
+                <TableRow key={r.key}>
+                  <TableCell className="font-medium text-muted-foreground text-sm">
+                    {r.code ?? "-"}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {r.href ? (
+                      <Link href={r.href} className="hover:text-primary hover:underline">
+                        {r.titre}
+                      </Link>
+                    ) : r.registre ? (
+                      <DocumentDialog
+                        document={r.registre}
+                        processus={processusList}
+                        trigger={
+                          <button type="button" className={ROW_NAME_BUTTON}>
+                            {r.titre}
+                          </button>
+                        }
+                      />
+                    ) : (
+                      r.titre
+                    )}
+                    {r.processusNom ? (
+                      <span className="block text-xs text-muted-foreground">
+                        <ProcessusLink id={r.processusId} nom={r.processusNom} />
                       </span>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {r.approbateur ?? "-"}
-                      {r.dateApprobation ? (
-                        <span className="block text-xs">le {formatDate(r.dateApprobation)}</span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {r.revisionPrevue ? (
-                        <span
-                          className={
-                            enRetard
-                              ? "font-medium text-status-nc-mineure"
-                              : bientot
-                                ? "font-medium text-status-pa"
-                                : "text-muted-foreground"
-                          }
-                        >
-                          {formatDate(r.revisionPrevue)}
-                          {enRetard ? " · en retard" : bientot ? " · bientôt" : ""}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {r.registre?.fichier_nom ? (
-                        <FichierLink id={r.registre.id} nom={r.registre.fichier_nom} />
-                      ) : r.registre && r.statut === "en_vigueur" ? (
-                        <span
-                          className="font-medium text-status-pa text-xs"
-                          title="Document en vigueur sans pièce jointe : joignez le fichier de référence."
-                        >
-                          Fichier à joindre
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-sm">{r.version ?? "-"}</TableCell>
+                  <TableCell>
+                    <span className={`${BADGE_BASE} ${DOC_STATUT_CLASS[r.statut] ?? "bg-muted"}`}>
+                      {DOC_STATUT_LABELS[r.statut] ?? r.statut}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {r.approbateur ?? "-"}
+                    {r.dateApprobation ? (
+                      <span className="block text-xs">le {formatDate(r.dateApprobation)}</span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <DocRevisionCell
+                      source={r.revisionSource}
+                      id={r.revisionId}
+                      value={r.revisionPrevue}
+                    />
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {r.registre ? (
+                      <DocDureeCell id={r.registre.id} value={r.dureeConservation} />
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {r.derniereMaj ? formatDate(r.derniereMaj) : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {r.registre?.fichier_nom ? (
+                      <FichierLink id={r.registre.id} nom={r.registre.fichier_nom} />
+                    ) : r.registre && r.statut === "en_vigueur" ? (
+                      <span
+                        className="font-medium text-status-pa text-xs"
+                        title="Document en vigueur sans pièce jointe : joignez le fichier de référence."
+                      >
+                        Fichier à joindre
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

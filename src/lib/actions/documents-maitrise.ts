@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -27,6 +28,7 @@ const base = {
   approbateur: z.string().trim().optional(),
   dateApprobation: z.string().optional(),
   dateRevisionPrevue: z.string().optional(),
+  dureeConservation: z.string().trim().optional(),
   processusId: z.string().uuid().optional(),
   emplacement: z.string().trim().optional(),
   commentaire: z.string().trim().optional(),
@@ -45,6 +47,7 @@ function payload(d: z.infer<typeof createSchema>) {
     approbateur: d.approbateur ?? null,
     date_approbation: d.dateApprobation || null,
     date_revision_prevue: d.dateRevisionPrevue || null,
+    duree_conservation: d.dureeConservation ?? null,
     processus_id: d.processusId ?? null,
     emplacement: d.emplacement ?? null,
     commentaire: d.commentaire ?? null,
@@ -191,6 +194,95 @@ export async function updateDocumentMaitriseAction(input: unknown): Promise<Acti
     .update({ ...payload(parsed.data), updated_by: ctx.userId })
     .eq("id", parsed.data.id)
     .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
+// Édition inline depuis la liste maîtresse : on ne patche qu'un champ à la fois
+// (révision prévue, durée de stockage) sans rouvrir tout le dialogue.
+const quickSchema = z.object({
+  id: z.string().uuid(),
+  dateRevisionPrevue: z.string().optional(),
+  dureeConservation: z.string().optional(),
+});
+
+export async function quickUpdateDocumentMaitriseAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const parsed = quickSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  // On ne met à jour que les champs réellement fournis (« vide » = effacement).
+  const patch: Database["public"]["Tables"]["documents_maitrise"]["Update"] = {
+    updated_by: ctx.userId,
+  };
+  if (d.dateRevisionPrevue !== undefined) patch.date_revision_prevue = d.dateRevisionPrevue || null;
+  if (d.dureeConservation !== undefined) patch.duree_conservation = d.dureeConservation || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("documents_maitrise")
+    .update(patch)
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
+// Révision prévue éditable depuis la liste maîtresse, quelle que soit la source.
+// La colonne diffère : date_prochaine_revue pour les fiches de processus,
+// date_revision_prevue pour les autres documents.
+const revisionSchema = z.object({
+  source: z.enum(["politique", "procedure", "processus", "registre"]),
+  id: z.string().uuid(),
+  date: z.string().optional(),
+});
+
+export async function quickUpdateRevisionAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const parsed = revisionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const { source, id, date } = parsed.data;
+  const value = date || null;
+  const by = ctx.userId;
+  const supabase = await createClient();
+  const tid = ctx.effectiveTenantId;
+
+  let error: { message: string } | null = null;
+  if (source === "politique") {
+    ({ error } = await supabase
+      .from("politique_qualite")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else if (source === "procedure") {
+    ({ error } = await supabase
+      .from("procedures")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else if (source === "processus") {
+    ({ error } = await supabase
+      .from("processus")
+      .update({ date_prochaine_revue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else {
+    ({ error } = await supabase
+      .from("documents_maitrise")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  }
   if (error) return { ok: false, error: error.message };
   revalidatePath("/documents");
   return { ok: true };
