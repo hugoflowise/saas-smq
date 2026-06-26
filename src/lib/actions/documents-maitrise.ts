@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -192,6 +193,41 @@ export async function updateDocumentMaitriseAction(input: unknown): Promise<Acti
     .from("documents_maitrise")
     .update({ ...payload(parsed.data), updated_by: ctx.userId })
     .eq("id", parsed.data.id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
+// Édition inline depuis la liste maîtresse : on ne patche qu'un champ à la fois
+// (révision prévue, durée de stockage) sans rouvrir tout le dialogue.
+const quickSchema = z.object({
+  id: z.string().uuid(),
+  dateRevisionPrevue: z.string().optional(),
+  dureeConservation: z.string().optional(),
+});
+
+export async function quickUpdateDocumentMaitriseAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const parsed = quickSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  // On ne met à jour que les champs réellement fournis (« vide » = effacement).
+  const patch: Database["public"]["Tables"]["documents_maitrise"]["Update"] = {
+    updated_by: ctx.userId,
+  };
+  if (d.dateRevisionPrevue !== undefined) patch.date_revision_prevue = d.dateRevisionPrevue || null;
+  if (d.dureeConservation !== undefined) patch.duree_conservation = d.dureeConservation || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("documents_maitrise")
+    .update(patch)
+    .eq("id", d.id)
     .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/documents");
