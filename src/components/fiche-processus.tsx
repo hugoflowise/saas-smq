@@ -121,7 +121,7 @@ export function FicheProcessus(data: FicheProcessusData) {
   const carte: [string, string | null][] = [
     ["Intitulé du processus", intitule],
     ["Type de processus", data.typeLabel],
-    ["Pilote du processus", data.piloteName],
+    ["Pilote(s) du processus", data.piloteName],
     ["Finalité", data.finalite],
     ["Périmètre", data.perimetre],
     ["Référentiels applicables", data.referentiels],

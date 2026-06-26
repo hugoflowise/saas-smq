@@ -15,8 +15,7 @@ export type FicheInitialData = {
   nom: string;
   intituleLong: string;
   type: string;
-  piloteId: string;
-  piloteNom: string;
+  pilotes: { piloteId: string; piloteNom: string }[];
   dateDerniereRevue: string;
   dateProchaineRevue: string;
   finalite: string;
@@ -63,46 +62,55 @@ export async function loadFicheProcessusData(
     .maybeSingle();
   if (!p) return null;
 
-  const [tenantRes, activitesRes, interactionsRes, indicateursRes, risquesRes] = await Promise.all([
-    supabase
-      .from("tenants")
-      .select(
-        "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte, responsable_flowise_id",
-      )
-      .eq("id", tid)
-      .maybeSingle(),
-    supabase
-      .from("processus_activites")
-      .select("activite, responsable, documents")
-      .eq("processus_id", id)
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .order("ordre"),
-    supabase
-      .from("processus_interactions")
-      .select("fournisseur, nature, client")
-      .eq("processus_id", id)
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .order("ordre"),
-    supabase
-      .from("indicateurs")
-      .select("id, nom, cible, unite, sens, formule_calcul, frequence_mesure")
-      .eq("tenant_id", tid)
-      .eq("processus_id", id)
-      .is("deleted_at", null)
-      .order("nom"),
-    supabase
-      .from("risques_opportunites")
-      .select("id, intitule, criticite, type")
-      .eq("tenant_id", tid)
-      .eq("processus_id", id)
-      .is("deleted_at", null)
-      .order("criticite", { ascending: false }),
-  ]);
+  const [tenantRes, activitesRes, interactionsRes, indicateursRes, risquesRes, pilotesRes] =
+    await Promise.all([
+      supabase
+        .from("tenants")
+        .select(
+          "nom_societe, logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, couleur_charte, responsable_flowise_id",
+        )
+        .eq("id", tid)
+        .maybeSingle(),
+      supabase
+        .from("processus_activites")
+        .select("activite, responsable, documents")
+        .eq("processus_id", id)
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .order("ordre"),
+      supabase
+        .from("processus_interactions")
+        .select("fournisseur, nature, client")
+        .eq("processus_id", id)
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .order("ordre"),
+      supabase
+        .from("indicateurs")
+        .select("id, nom, cible, unite, sens, formule_calcul, frequence_mesure")
+        .eq("tenant_id", tid)
+        .eq("processus_id", id)
+        .is("deleted_at", null)
+        .order("nom"),
+      supabase
+        .from("risques_opportunites")
+        .select("id, intitule, criticite, type")
+        .eq("tenant_id", tid)
+        .eq("processus_id", id)
+        .is("deleted_at", null)
+        .order("criticite", { ascending: false }),
+      supabase
+        .from("processus_pilotes")
+        .select("pilote_id, pilote_nom, ordre")
+        .eq("tenant_id", tid)
+        .eq("processus_id", id)
+        .is("deleted_at", null)
+        .order("ordre"),
+    ]);
+  const pilotesRows = pilotesRes.data ?? [];
 
   const personIds = [
-    p.pilote_id,
+    ...pilotesRows.map((r) => r.pilote_id),
     p.fiche_redige_par,
     p.fiche_soumis_par,
     p.fiche_approuvee_par,
@@ -144,12 +152,13 @@ export async function loadFicheProcessusData(
   const typeLabel = TYPE_LABELS[p.type] ?? p.type;
   const risques = risquesRes.data ?? [];
 
-  // Pilote affiché : nom libre (personne sans compte) prioritaire, sinon l'utilisateur lié.
-  const piloteName = p.pilote_nom?.trim()
-    ? p.pilote_nom
-    : p.pilote_id
-      ? (nameById.get(p.pilote_id) ?? null)
-      : null;
+  // Pilotes affichés : un ou plusieurs, nom libre prioritaire sinon l'utilisateur lié.
+  const piloteNoms = pilotesRows
+    .map((r) =>
+      r.pilote_nom?.trim() ? r.pilote_nom : r.pilote_id ? nameById.get(r.pilote_id) : null,
+    )
+    .filter(Boolean) as string[];
+  const piloteName = piloteNoms.length ? piloteNoms.join(", ") : null;
 
   const data: FicheProcessusData = {
     societe: tenantRes.data as Societe,
@@ -206,8 +215,10 @@ export async function loadFicheProcessusData(
     nom: p.nom,
     intituleLong: p.intitule_long ?? "",
     type: p.type,
-    piloteId: p.pilote_id ?? "",
-    piloteNom: p.pilote_nom ?? "",
+    pilotes: pilotesRows.map((r) => ({
+      piloteId: r.pilote_id ?? "",
+      piloteNom: r.pilote_nom ?? "",
+    })),
     dateDerniereRevue: p.date_derniere_revue ?? "",
     dateProchaineRevue: p.date_prochaine_revue ?? "",
     finalite: p.finalite ?? "",

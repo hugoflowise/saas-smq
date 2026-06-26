@@ -2652,6 +2652,84 @@ export type Database = {
           },
         ]
       }
+      processus_pilotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          ordre: number
+          pilote_id: string | null
+          pilote_nom: string | null
+          processus_id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          ordre?: number
+          pilote_id?: string | null
+          pilote_nom?: string | null
+          processus_id: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          ordre?: number
+          pilote_id?: string | null
+          pilote_nom?: string | null
+          processus_id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processus_pilotes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_pilotes_pilote_id_fkey"
+            columns: ["pilote_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_pilotes_processus_id_fkey"
+            columns: ["processus_id"]
+            isOneToOne: false
+            referencedRelation: "processus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_pilotes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processus_pilotes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
