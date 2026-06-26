@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { canWrite } from "@/lib/permissions";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const roQuickSchema = z.object({
   id: z.string().uuid(),
@@ -117,21 +117,12 @@ export async function updateRoAction(input: unknown): Promise<ActionResult> {
 
 /** Met un risque/opportunité à la corbeille (soft-delete, réversible). */
 export async function deleteRoAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("risques_opportunites")
-    .update({ deleted_at: new Date().toISOString(), updated_by: ctx.userId })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath("/risques");
-  revalidatePath("/processus");
-  return { ok: true };
+  const r = await softDeleteRow("risques_opportunites", id);
+  if (r.ok) {
+    revalidatePath("/risques");
+    revalidatePath("/processus");
+  }
+  return r;
 }
 
 // ------------------------------------------ Actions de traitement (R&O -> actions)

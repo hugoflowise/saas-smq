@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const base = {
   categorie: z.string().trim().min(1),
@@ -55,18 +56,9 @@ export async function updateModeleAction(input: unknown): Promise<ActionResult> 
 }
 
 export async function deleteModeleAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("communication_modeles")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/communications");
-  return { ok: true };
+  const r = await softDeleteRow("communication_modeles", id);
+  if (r.ok) revalidatePath("/communications");
+  return r;
 }
 
 /** Journalise une communication envoyée (traçabilité ISO §7.4). */

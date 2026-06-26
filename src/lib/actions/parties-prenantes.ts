@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 async function tenantWrite() {
   const ctx = await getTenantContext();
@@ -67,16 +68,9 @@ export async function updatePartieAction(input: unknown): Promise<ActionResult> 
 }
 
 export async function deletePartieAction(id: string): Promise<ActionResult> {
-  const c = await tenantWrite();
-  if (!c) return { ok: false, error: "Aucun client actif." };
-  const { error } = await c.supabase
-    .from("parties_interessees")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", c.tenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/strategie/parties-prenantes");
-  return { ok: true };
+  const r = await softDeleteRow("parties_interessees", id);
+  if (r.ok) revalidatePath("/strategie/parties-prenantes");
+  return r;
 }
 
 // ----------------------------------------------------------------- Attente
@@ -139,14 +133,7 @@ export async function updateAttenteAction(input: unknown): Promise<ActionResult>
 }
 
 export async function deleteAttenteAction(id: string, partieId: string): Promise<ActionResult> {
-  const c = await tenantWrite();
-  if (!c) return { ok: false, error: "Aucun client actif." };
-  const { error } = await c.supabase
-    .from("pi_attentes")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", c.tenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath(`/strategie/parties-prenantes/${partieId}`);
-  return { ok: true };
+  const r = await softDeleteRow("pi_attentes", id);
+  if (r.ok) revalidatePath(`/strategie/parties-prenantes/${partieId}`);
+  return r;
 }
