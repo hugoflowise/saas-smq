@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const createSchema = z.object({
   titre: z.string().trim().min(2, "Titre requis."),
@@ -34,16 +35,7 @@ export async function createEvenementAction(input: unknown): Promise<ActionResul
 }
 
 export async function deleteEvenementAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("evenements_qualite")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/calendrier");
-  return { ok: true };
+  const r = await softDeleteRow("evenements_qualite", id);
+  if (r.ok) revalidatePath("/calendrier");
+  return r;
 }

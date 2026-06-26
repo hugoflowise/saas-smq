@@ -6,6 +6,7 @@ import type { ActionResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const base = {
   client: z.string().trim().optional(),
@@ -68,16 +69,7 @@ export async function updateEnqueteAction(input: unknown): Promise<ActionResult>
 }
 
 export async function deleteEnqueteAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("enquetes_satisfaction")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/satisfaction");
-  return { ok: true };
+  const r = await softDeleteRow("enquetes_satisfaction", id);
+  if (r.ok) revalidatePath("/satisfaction");
+  return r;
 }

@@ -9,6 +9,7 @@ import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 type ProcedureUpdate = Database["public"]["Tables"]["procedures"]["Update"];
 
@@ -301,20 +302,10 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
 
 /** Met une procédure à la corbeille (soft-delete, réversible). */
 export async function deleteProcedureAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
-  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("procedures")
-    .update({ deleted_at: new Date().toISOString(), updated_by: ctx.userId })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath("/documentation/procedures");
-  revalidatePath("/documents");
-  return { ok: true };
+  const r = await softDeleteRow("procedures", id);
+  if (r.ok) {
+    revalidatePath("/documentation/procedures");
+    revalidatePath("/documents");
+  }
+  return r;
 }
