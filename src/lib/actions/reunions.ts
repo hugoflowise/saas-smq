@@ -6,6 +6,7 @@ import type { ActionResult } from "@/lib/actions/types";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 async function tenantWrite() {
   const ctx = await getTenantContext();
@@ -85,16 +86,9 @@ export async function updateReunionAction(input: unknown): Promise<ActionResult>
 }
 
 export async function deleteReunionAction(id: string): Promise<ActionResult> {
-  const c = await tenantWrite();
-  if (!c) return { ok: false, error: "Aucun client actif." };
-  const { error } = await c.supabase
-    .from("reunions")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", c.tenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/reunions");
-  return { ok: true };
+  const r = await softDeleteRow("reunions", id);
+  if (r.ok) revalidatePath("/reunions");
+  return r;
 }
 
 const actionSchema = z.object({

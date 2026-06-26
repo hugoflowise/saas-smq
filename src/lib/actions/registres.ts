@@ -7,6 +7,7 @@ import { todayISO } from "@/lib/format";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 async function tenantWrite() {
   const ctx = await getTenantContext();
@@ -157,16 +158,9 @@ export async function updateVeilleAction(input: unknown): Promise<ActionResult> 
 
 /** Met une veille réglementaire à la corbeille (soft-delete, réversible). */
 export async function deleteVeilleAction(id: string): Promise<ActionResult> {
-  const c = await tenantWrite();
-  if (!c) return { ok: false, error: "Aucun client actif." };
-  const { error } = await c.supabase
-    .from("veille_reglementaire")
-    .update({ deleted_at: new Date().toISOString(), updated_by: c.userId })
-    .eq("id", id)
-    .eq("tenant_id", c.tenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/veille");
-  return { ok: true };
+  const r = await softDeleteRow("veille_reglementaire", id);
+  if (r.ok) revalidatePath("/veille");
+  return r;
 }
 
 // ----------------------------------------------------------------- Objectifs

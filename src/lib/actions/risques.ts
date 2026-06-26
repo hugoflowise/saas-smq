@@ -6,6 +6,7 @@ import type { ActionResult } from "@/lib/actions/types";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const roQuickSchema = z.object({
   id: z.string().uuid(),
@@ -112,6 +113,16 @@ export async function updateRoAction(input: unknown): Promise<ActionResult> {
   revalidatePath("/risques");
   revalidatePath(`/risques/${parsed.data.id}`);
   return { ok: true };
+}
+
+/** Met un risque/opportunité à la corbeille (soft-delete, réversible). */
+export async function deleteRoAction(id: string): Promise<ActionResult> {
+  const r = await softDeleteRow("risques_opportunites", id);
+  if (r.ok) {
+    revalidatePath("/risques");
+    revalidatePath("/processus");
+  }
+  return r;
 }
 
 // ------------------------------------------ Actions de traitement (R&O -> actions)

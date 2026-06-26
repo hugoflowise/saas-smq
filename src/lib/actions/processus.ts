@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const createProcessusSchema = z.object({
   nom: z.string().trim().min(2, "Nom requis."),
@@ -87,19 +87,10 @@ export async function updateProcessusAction(input: unknown): Promise<ActionResul
 
 /** Met un processus à la corbeille (soft-delete, réversible). */
 export async function deleteProcessusAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("processus")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-
-  revalidatePath("/processus");
-  revalidatePath("/documents");
-  return { ok: true };
+  const r = await softDeleteRow("processus", id);
+  if (r.ok) {
+    revalidatePath("/processus");
+    revalidatePath("/documents");
+  }
+  return r;
 }

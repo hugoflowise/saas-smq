@@ -5,12 +5,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { ActionResult } from "@/lib/actions/types";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 /**
- * Bouton de suppression réutilisable. Met l'élément à la corbeille (soft-delete,
- * réversible) après confirmation. Masqué pour les rôles en lecture seule
+ * Bouton de suppression réutilisable. Ouvre une confirmation intégrée à l'app
+ * (pas la boîte de dialogue native du navigateur) puis met l'élément à la
+ * corbeille (soft-delete, réversible). Masqué pour les rôles en lecture seule
  * (auditeur). L'action serveur reçoit l'identifiant et renvoie un `ActionResult`.
  */
 export function SupprimerButton({
@@ -40,18 +51,17 @@ export function SupprimerButton({
 }) {
   const router = useRouter();
   const readOnly = useReadOnly();
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
   if (readOnly) return null;
 
-  async function onClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!confirm(confirmText ?? `Supprimer ${libelle} ? Il sera mis à la corbeille.`)) return;
+  async function onConfirm() {
     setPending(true);
     const r = await action(id);
     setPending(false);
     if (r.ok) {
+      setOpen(false);
       toast.success(successText);
       if (redirectTo) router.push(redirectTo);
       router.refresh();
@@ -61,22 +71,40 @@ export function SupprimerButton({
   }
 
   return (
-    <Button
-      type="button"
-      size={iconOnly ? "icon" : "sm"}
-      variant={variant}
-      disabled={pending}
-      onClick={onClick}
-      aria-label={iconOnly ? label : undefined}
-      className={
-        className ??
-        (iconOnly
-          ? "size-8 shrink-0 text-muted-foreground hover:text-destructive"
-          : "h-8 shrink-0 gap-1.5 text-muted-foreground text-xs hover:text-destructive")
-      }
-    >
-      <Trash2 className="size-3.5" />
-      {iconOnly ? null : label}
-    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            size={iconOnly ? "icon" : "sm"}
+            variant={variant}
+            aria-label={iconOnly ? label : undefined}
+            className={
+              className ??
+              (iconOnly
+                ? "size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                : "h-8 shrink-0 gap-1.5 text-muted-foreground text-xs hover:text-destructive")
+            }
+          >
+            <Trash2 className="size-3.5" />
+            {iconOnly ? null : label}
+          </Button>
+        }
+      />
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Confirmer la suppression</DialogTitle>
+          <DialogDescription>
+            {confirmText ?? `Supprimer ${libelle} ? Il sera mis à la corbeille.`}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Annuler</Button>} />
+          <Button variant="destructive" disabled={pending} onClick={onConfirm}>
+            {pending ? "Suppression…" : "Supprimer"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

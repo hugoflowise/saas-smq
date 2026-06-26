@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { softDeleteRow } from "./soft-delete";
 
 const MAX_TAILLE = 10 * 1024 * 1024; // 10 Mo
 
@@ -196,16 +197,7 @@ export async function updateDocumentMaitriseAction(input: unknown): Promise<Acti
 }
 
 export async function deleteDocumentMaitriseAction(id: string): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("documents_maitrise")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
-  revalidatePath("/documents");
-  return { ok: true };
+  const r = await softDeleteRow("documents_maitrise", id);
+  if (r.ok) revalidatePath("/documents");
+  return r;
 }
