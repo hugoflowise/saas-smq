@@ -7,6 +7,7 @@ import { todayISO } from "@/lib/format";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { nextActionReference } from "./plan-actions";
 
 type NcUpdate = Database["public"]["Tables"]["non_conformites"]["Update"];
 
@@ -21,7 +22,21 @@ const base = {
   processusConcerne: z.string().uuid().optional(),
 };
 
-const createSchema = z.object(base);
+// Champs de l'action corrective liée, saisis dans le formulaire de NC
+// (facultatifs : on retombe sur des valeurs déduites du sujet si vide).
+const ncActionSchema = z.object({
+  descriptionCourte: z.string().trim().optional(),
+  descriptionDetail: z.string().trim().optional(),
+  type: z.enum(["preventive", "corrective"]).optional(),
+  priorite: z.enum(["p1", "p2", "p3"]).optional(),
+  datePrevue: z.string().optional(),
+});
+
+const createSchema = z.object({
+  ...base,
+  creerAction: z.boolean().optional(),
+  action: ncActionSchema.optional(),
+});
 const updateSchema = z.object({ id: z.string().uuid(), ...base });
 
 async function nextReference(
@@ -54,21 +69,61 @@ export async function createNcAction(input: unknown): Promise<ActionResult> {
   const supabase = await createClient();
   const reference = await nextReference(supabase, ctx.effectiveTenantId);
 
-  const { error } = await supabase.from("non_conformites").insert({
-    tenant_id: ctx.effectiveTenantId,
-    reference,
-    intitule: d.intitule,
-    description: d.description ?? null,
-    date_constat: d.dateConstat || todayISO(),
-    origine: d.origine,
-    gravite: d.gravite,
-    type: d.type,
-    statut: d.statut,
-    processus_concerne: d.processusConcerne ?? null,
-    created_by: ctx.userId,
-  });
+  const { data: nc, error } = await supabase
+    .from("non_conformites")
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      reference,
+      intitule: d.intitule,
+      description: d.description ?? null,
+      date_constat: d.dateConstat || todayISO(),
+      origine: d.origine,
+      gravite: d.gravite,
+      type: d.type,
+      statut: d.statut,
+      processus_concerne: d.processusConcerne ?? null,
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
 
-  if (error) return { ok: false, error: error.message };
+  if (error || !nc) return { ok: false, error: error?.message ?? "Création impossible." };
+
+  // Action corrective liée dans le plan d'actions (case cochée par défaut côté
+  // formulaire). Les champs sont saisis dans le formulaire de NC ; à défaut, on
+  // déduit l'intitulé/priorité du sujet (intitulé + gravité). Le processus de la
+  // NC est repris automatiquement.
+  if (d.creerAction) {
+    const a = d.action ?? {};
+    const actRef = await nextActionReference(supabase, ctx.effectiveTenantId);
+    const { data: act, error: actErr } = await supabase
+      .from("actions")
+      .insert({
+        tenant_id: ctx.effectiveTenantId,
+        reference: actRef,
+        description_courte: a.descriptionCourte?.trim() || `NC : ${d.intitule}`,
+        description_detail: a.descriptionDetail ?? d.description ?? null,
+        origine: "nc",
+        type: a.type ?? "corrective",
+        priorite:
+          a.priorite ?? (d.gravite === "critique" ? "p1" : d.gravite === "majeure" ? "p2" : "p3"),
+        statut: "a_faire",
+        date_prevue: a.datePrevue || null,
+        processus_concerne: d.processusConcerne ?? null,
+        created_by: ctx.userId,
+      })
+      .select("id")
+      .single();
+    if (actErr) return { ok: false, error: actErr.message };
+    if (act) {
+      await supabase.from("nc_actions").insert({
+        tenant_id: ctx.effectiveTenantId,
+        nc_id: nc.id,
+        action_id: act.id,
+      });
+    }
+    revalidatePath("/actions");
+  }
 
   revalidatePath("/nc");
   return { ok: true };
