@@ -185,9 +185,9 @@ insert into public.suivis_consultant (tenant_id, nom, client, poste, satisfactio
 
 -- 20) Documents maîtrisés
 insert into public.documents_maitrise (tenant_id, code, titre, type, version, statut, date_revision_prevue, processus_id) values
- (${q(T)}, 'MAN-001', 'Manuel qualité', 'manuel', '1.0', 'en_vigueur', current_date + 200, ${q(P[0])}),
- (${q(T)}, 'ENR-001', 'Trame de compte rendu de mission', 'formulaire', '2.1', 'en_vigueur', current_date + 30, ${q(P[2])}),
- (${q(T)}, 'INS-001', 'Instruction sécurité postes', 'instruction', '1.0', 'en_vigueur', current_date - 10, ${q(P[5])});
+ (${q(T)}, 'MAN-001', 'Manuel qualité', 'manuel', 'A', 'en_vigueur', current_date + 200, ${q(P[0])}),
+ (${q(T)}, 'ENR-001', 'Trame de compte rendu de mission', 'formulaire', 'B', 'en_vigueur', current_date + 30, ${q(P[2])}),
+ (${q(T)}, 'INS-001', 'Instruction sécurité postes', 'instruction', 'A', 'en_vigueur', current_date - 10, ${q(P[5])});
 
 -- 21) Procédure
 insert into public.procedures (tenant_id, code, titre, processus_id, statut, objet, domaine_application) values
