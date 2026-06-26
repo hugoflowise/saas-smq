@@ -45,7 +45,6 @@ const ficheSchema = z.object({
       z.object({
         activite: z.string().trim().min(1),
         responsable: z.string().trim().optional(),
-        documents: z.string().trim().optional(),
       }),
     )
     .default([]),
@@ -146,7 +145,6 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
         ordre: i,
         activite: a.activite,
         responsable: a.responsable ?? null,
-        documents: a.documents ?? null,
         created_by: ctx.userId,
       })),
     );
