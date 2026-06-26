@@ -28,6 +28,9 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
   const dragRef = useRef<{ dx: number; dy: number; sx: number; sy: number } | null>(null);
   const movedRef = useRef(false);
   const elRef = useRef<HTMLDivElement | HTMLButtonElement | null>(null);
+  // Position réellement affichée (peut différer de `pos` quand le panneau ouvert
+  // est clampé à l'écran) : sert de base au glissement pour éviter tout saut.
+  const renderPosRef = useRef<Pos | null>(null);
 
   // Restaure position + état réduit (préférences UI locales au navigateur). Un
   // seul effet : sinon le « défaut » et le « restauré » se concurrencent au
@@ -52,10 +55,11 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
   }, []);
 
   function onPointerDown(e: React.PointerEvent) {
-    if (!pos) return;
+    const base = renderPosRef.current ?? pos;
+    if (!base) return;
     dragRef.current = {
-      dx: e.clientX - pos.x,
-      dy: e.clientY - pos.y,
+      dx: e.clientX - base.x,
+      dy: e.clientY - base.y,
       sx: e.clientX,
       sy: e.clientY,
     };
@@ -141,6 +145,7 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
 
   // Réduit : une simple pastille déplaçable avec le nombre de tâches restantes.
   if (minimized) {
+    renderPosRef.current = { x: pos.x, y: pos.y };
     return (
       <button
         type="button"
@@ -165,12 +170,21 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
     );
   }
 
+  // Le panneau ouvert (288 px) est plus large que la pastille : on garde la
+  // position mémorisée intacte (pour que la pastille revienne au bord), mais on
+  // la clampe uniquement à l'affichage pour que le panneau ne sorte pas de l'écran.
+  const vw = typeof window !== "undefined" ? window.innerWidth : pos.x + WIDTH + 8;
+  const vh = typeof window !== "undefined" ? window.innerHeight : pos.y + 60;
+  const panelX = Math.max(8, Math.min(pos.x, vw - WIDTH - 8));
+  const panelY = Math.max(8, Math.min(pos.y, vh - 60));
+  renderPosRef.current = { x: panelX, y: panelY };
+
   return (
     <div
       ref={(el) => {
         elRef.current = el;
       }}
-      style={{ left: pos.x, top: pos.y, width: WIDTH }}
+      style={{ left: panelX, top: panelY, width: WIDTH }}
       className="fixed z-50 flex max-h-[60vh] flex-col overflow-hidden rounded-2xl border bg-card shadow-xl print:hidden"
     >
       {/* En-tête : déplacement (glisser) + réduction (clic simple). Le repli est
