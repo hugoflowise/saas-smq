@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { setActiveTenantId } from "@/lib/active-tenant";
+import { getActiveTenantId, setActiveTenantId } from "@/lib/active-tenant";
 import { callbackLinkFromProperties } from "@/lib/auth-links";
 import { inviteEmailHtml, sendEmail } from "@/lib/email";
 import { todayISO } from "@/lib/format";
@@ -39,7 +39,8 @@ const createTenantSchema = z.object({
   dirigeantNom: z.string().trim().optional(),
   formule: z.enum(["Essentiel", "Tandem", "Premium"]),
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
-  secteur: z.enum(["SI", "ESN", "AT", "autre"]).optional(),
+  secteur: z.enum(["SI", "ESN", "autre"]).optional(),
+  bureauEtudes: z.boolean().optional(),
 });
 
 export async function createTenantAction(input: unknown): Promise<ActionResult> {
@@ -61,6 +62,7 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
       formule: data.formule,
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
+      bureau_etudes: data.bureauEtudes ?? false,
       date_souscription: todayISO(),
     })
     .select("id")
@@ -188,7 +190,8 @@ const updateTenantSchema = z.object({
   tenantId: z.string().uuid(),
   nomSociete: z.string().trim().min(2, "Nom de société requis."),
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
-  secteur: z.enum(["SI", "ESN", "AT", "autre"]).optional(),
+  secteur: z.enum(["SI", "ESN", "autre"]).optional(),
+  bureauEtudes: z.boolean().optional(),
   dirigeantId: z.string().uuid().optional(),
   dirigeantNom: z.string().trim().optional(),
   responsableFlowiseId: z.string().uuid().optional().or(z.literal("")),
@@ -211,6 +214,7 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
       nom_societe: data.nomSociete,
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
+      bureau_etudes: data.bureauEtudes ?? false,
       responsable_flowise_id: data.responsableFlowiseId ? data.responsableFlowiseId : null,
     })
     .eq("id", data.tenantId);
@@ -275,6 +279,63 @@ export async function switchTenantAction(tenantId: string): Promise<ActionResult
   if (!auth.ok) return auth;
 
   await setActiveTenantId(tenantId);
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+const deleteTenantSchema = z.object({
+  tenantId: z.string().uuid(),
+  confirmNom: z.string().trim(),
+});
+
+/**
+ * Suppression réversible d'un client (soft-delete). Sécurité : le nom de la
+ * société doit être ressaisi à l'identique. Les données sont conservées, le
+ * client est simplement masqué (admin + sélecteur de tenant).
+ */
+export async function deleteTenantAction(input: unknown): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const parsed = deleteTenantSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const { tenantId, confirmNom } = parsed.data;
+
+  const admin = createAdminClient();
+  const { data: tenant } = await admin
+    .from("tenants")
+    .select("nom_societe")
+    .eq("id", tenantId)
+    .maybeSingle();
+  if (!tenant) return { ok: false, error: "Client introuvable." };
+  if (confirmNom !== tenant.nom_societe) {
+    return { ok: false, error: "Le nom saisi ne correspond pas au nom de la société." };
+  }
+
+  const { error } = await admin
+    .from("tenants")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", tenantId);
+  if (error) return { ok: false, error: error.message };
+
+  // Si c'était le client actif de l'admin, on le désélectionne.
+  if ((await getActiveTenantId()) === tenantId) await setActiveTenantId("");
+
+  revalidatePath("/admin/clients");
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/** Restaure un client depuis la corbeille. */
+export async function restoreTenantAction(tenantId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("tenants").update({ deleted_at: null }).eq("id", tenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/clients");
   revalidatePath("/", "layout");
   return { ok: true };
 }

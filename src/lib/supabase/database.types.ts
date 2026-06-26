@@ -3380,10 +3380,12 @@ export type Database = {
           adresse: string | null
           boond_account_id: string | null
           boond_oauth_token: string | null
+          bureau_etudes: boolean
           code_postal: string | null
           couleur_charte: string | null
           created_at: string
           date_souscription: string | null
+          deleted_at: string | null
           effectif_tranche:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
@@ -3408,10 +3410,12 @@ export type Database = {
           adresse?: string | null
           boond_account_id?: string | null
           boond_oauth_token?: string | null
+          bureau_etudes?: boolean
           code_postal?: string | null
           couleur_charte?: string | null
           created_at?: string
           date_souscription?: string | null
+          deleted_at?: string | null
           effectif_tranche?:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
@@ -3436,10 +3440,12 @@ export type Database = {
           adresse?: string | null
           boond_account_id?: string | null
           boond_oauth_token?: string | null
+          bureau_etudes?: boolean
           code_postal?: string | null
           couleur_charte?: string | null
           created_at?: string
           date_souscription?: string | null
+          deleted_at?: string | null
           effectif_tranche?:
             | Database["public"]["Enums"]["effectif_tranche"]
             | null
