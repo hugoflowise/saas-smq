@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { quickUpdateDocumentMaitriseAction } from "@/lib/actions/documents-maitrise";
+import {
+  quickUpdateDocumentMaitriseAction,
+  quickUpdateRevisionAction,
+} from "@/lib/actions/documents-maitrise";
 import { formatDate, todayISO } from "@/lib/format";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 
@@ -10,8 +13,18 @@ const REVISION_ALERTE_JOURS = 60;
 const CONTROL =
   "h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
 
-/** Date de révision prévue éditable directement dans la liste maîtresse. */
-export function DocRevisionCell({ id, value }: { id: string; value: string | null }) {
+export type RevisionSource = "politique" | "procedure" | "processus" | "registre";
+
+/** Date de révision prévue éditable directement dans la liste maîtresse (toutes sources). */
+export function DocRevisionCell({
+  source,
+  id,
+  value,
+}: {
+  source: RevisionSource;
+  id: string;
+  value: string | null;
+}) {
   const [val, setVal] = useState(value ?? "");
   const [pending, startTransition] = useTransition();
   const readOnly = useReadOnly();
@@ -19,7 +32,7 @@ export function DocRevisionCell({ id, value }: { id: string; value: string | nul
   function save(next: string) {
     setVal(next);
     startTransition(async () => {
-      const r = await quickUpdateDocumentMaitriseAction({ id, dateRevisionPrevue: next });
+      const r = await quickUpdateRevisionAction({ source, id, date: next });
       if (!r.ok) {
         toast.error(r.error);
         setVal(value ?? "");
