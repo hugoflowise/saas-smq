@@ -89,7 +89,9 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("titre"),
     supabase
       .from("indicateurs")
-      .select("id, nom, unite, cible, sens")
+      .select(
+        "id, nom, description, processus_id, type, unite, cible, sens, formule_calcul, frequence_mesure",
+      )
       .eq("tenant_id", tid)
       .eq("processus_id", id)
       .is("deleted_at", null)
@@ -265,6 +267,9 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                   canWrite={canWrite(ctx.role)}
                   canApprove={canApprove(ctx.role)}
                   printHref={`/print/processus-fiche/${id}`}
+                  indicateurs={indList}
+                  risques={roRows}
+                  processusOptions={processusOptions}
                 />
               </div>
               <aside className="lg:sticky lg:top-4 lg:self-start">

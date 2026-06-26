@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { IndicateurRow } from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
+import type { RoRow } from "@/app/(tenant)/risques/ro-dialog";
 import { FicheProcessus, type FicheProcessusData } from "@/components/fiche-processus";
 import { SignatureCapture } from "@/components/signature-capture";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +31,9 @@ export function FicheClient({
   canWrite,
   canApprove,
   printHref,
+  indicateurs,
+  risques,
+  processusOptions,
 }: {
   data: FicheProcessusData;
   initial: FicheEditorInitial;
@@ -37,6 +42,9 @@ export function FicheClient({
   canWrite: boolean;
   canApprove: boolean;
   printHref: string;
+  indicateurs: IndicateurRow[];
+  risques: RoRow[];
+  processusOptions: { id: string; nom: string }[];
 }) {
   const router = useRouter();
   const readOnly = useReadOnly();
@@ -58,7 +66,16 @@ export function FicheClient({
   }
 
   if (editing && editable) {
-    return <FicheEditor initial={initial} users={users} onDone={() => setEditing(false)} />;
+    return (
+      <FicheEditor
+        initial={initial}
+        users={users}
+        indicateurs={indicateurs}
+        risques={risques}
+        processusOptions={processusOptions}
+        onDone={() => setEditing(false)}
+      />
+    );
   }
 
   return (

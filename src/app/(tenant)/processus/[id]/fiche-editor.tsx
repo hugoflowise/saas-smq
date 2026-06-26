@@ -4,11 +4,19 @@ import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  IndicateurDialog,
+  type IndicateurRow,
+} from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
+import { RoDialog, type RoRow } from "@/app/(tenant)/risques/ro-dialog";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { deleteIndicateurAction } from "@/lib/actions/indicateurs";
 import { saveFicheProcessusAction } from "@/lib/actions/processus-fiche";
+import { deleteRoAction } from "@/lib/actions/risques";
 import type { FicheUser } from "@/lib/fiche-processus-data";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -46,10 +54,16 @@ export type FicheEditorInitial = {
 export function FicheEditor({
   initial,
   users,
+  indicateurs,
+  risques,
+  processusOptions,
   onDone,
 }: {
   initial: FicheEditorInitial;
   users: FicheUser[];
+  indicateurs: IndicateurRow[];
+  risques: RoRow[];
+  processusOptions: { id: string; nom: string }[];
   onDone: () => void;
 }) {
   const router = useRouter();
@@ -103,238 +117,334 @@ export function FicheEditor({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm"
-    >
-      {/* 1. Carte d'identité */}
-      <Bloc titre="Carte d'identité du processus">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Champ
-            name="reference"
-            label="Référence du document"
-            defaultValue={initial.reference}
-            ligne
-          />
-          <Champ
-            name="nom"
-            label="Nom court (cartographie)"
-            hint="affiché dans la cartographie"
-            defaultValue={initial.nom}
-            ligne
-          />
-          <Champ
-            name="intituleLong"
-            label="Intitulé du processus (fiche)"
-            hint="ex. « Piloter la stratégie et la gouvernance »"
-            defaultValue={initial.intituleLong}
-            ligne
-          />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type">Type de processus</Label>
-            <select id="type" name="type" className={SELECT_CLASS} defaultValue={initial.type}>
-              <option value="pilotage">Pilotage</option>
-              <option value="realisation">Réalisation</option>
-              <option value="support">Support</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="piloteMode">Pilote du processus</Label>
-            <select
-              id="piloteMode"
-              className={SELECT_CLASS}
-              value={piloteMode}
-              onChange={(e) => setPiloteMode(e.target.value)}
-            >
-              <option value="">Non défini</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.nom}
-                </option>
-              ))}
-              <option value="__autre__">Autre — personne sans compte…</option>
-            </select>
-            {piloteMode === "__autre__" ? (
+    <div className="flex flex-col gap-6">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm"
+      >
+        {/* 1. Carte d'identité */}
+        <Bloc titre="Carte d'identité du processus">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Champ
+              name="reference"
+              label="Référence du document"
+              defaultValue={initial.reference}
+              ligne
+            />
+            <Champ
+              name="nom"
+              label="Nom court (cartographie)"
+              hint="affiché dans la cartographie"
+              defaultValue={initial.nom}
+              ligne
+            />
+            <Champ
+              name="intituleLong"
+              label="Intitulé du processus (fiche)"
+              hint="ex. « Piloter la stratégie et la gouvernance »"
+              defaultValue={initial.intituleLong}
+              ligne
+            />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="type">Type de processus</Label>
+              <select id="type" name="type" className={SELECT_CLASS} defaultValue={initial.type}>
+                <option value="pilotage">Pilotage</option>
+                <option value="realisation">Réalisation</option>
+                <option value="support">Support</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="piloteMode">Pilote du processus</Label>
+              <select
+                id="piloteMode"
+                className={SELECT_CLASS}
+                value={piloteMode}
+                onChange={(e) => setPiloteMode(e.target.value)}
+              >
+                <option value="">Non défini</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nom}
+                  </option>
+                ))}
+                <option value="__autre__">Autre — personne sans compte…</option>
+              </select>
+              {piloteMode === "__autre__" ? (
+                <Input
+                  name="piloteNom"
+                  placeholder="Nom du pilote (ex. Thomas Riou - Président)"
+                  defaultValue={initial.piloteNom}
+                />
+              ) : null}
+            </div>
+            <Champ
+              name="referentiels"
+              label="Référentiels applicables"
+              defaultValue={initial.referentiels}
+            />
+            <Champ name="finalite" label="Finalité" defaultValue={initial.finalite} />
+            <Champ name="perimetre" label="Périmètre" defaultValue={initial.perimetre} />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dateDerniereRevue">Dernière revue</Label>
               <Input
-                name="piloteNom"
-                placeholder="Nom du pilote (ex. Thomas Riou - Président)"
-                defaultValue={initial.piloteNom}
+                id="dateDerniereRevue"
+                name="dateDerniereRevue"
+                type="date"
+                defaultValue={initial.dateDerniereRevue}
               />
-            ) : null}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dateProchaineRevue">Prochaine revue</Label>
+              <Input
+                id="dateProchaineRevue"
+                name="dateProchaineRevue"
+                type="date"
+                defaultValue={initial.dateProchaineRevue}
+              />
+            </div>
           </div>
-          <Champ
-            name="referentiels"
-            label="Référentiels applicables"
-            defaultValue={initial.referentiels}
-          />
-          <Champ name="finalite" label="Finalité" defaultValue={initial.finalite} />
-          <Champ name="perimetre" label="Périmètre" defaultValue={initial.perimetre} />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="dateDerniereRevue">Dernière revue</Label>
-            <Input
-              id="dateDerniereRevue"
-              name="dateDerniereRevue"
-              type="date"
-              defaultValue={initial.dateDerniereRevue}
+        </Bloc>
+
+        {/* 2. Données d'entrée et de sortie (alignées côte à côte) */}
+        <Bloc titre="Données d'entrée et de sortie">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Champ
+              name="entrees"
+              label="Données d'entrée"
+              hint="une par ligne"
+              defaultValue={initial.entrees}
+            />
+            <Champ
+              name="sorties"
+              label="Données de sortie"
+              hint="une par ligne"
+              defaultValue={initial.sorties}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="dateProchaineRevue">Prochaine revue</Label>
-            <Input
-              id="dateProchaineRevue"
-              name="dateProchaineRevue"
-              type="date"
-              defaultValue={initial.dateProchaineRevue}
+        </Bloc>
+
+        {/* 5. Ressources nécessaires, par type */}
+        <Bloc titre="Ressources nécessaires">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Champ
+              name="ressourcesHumaines"
+              label="Humaines"
+              defaultValue={initial.ressourcesHumaines}
+            />
+            <Champ
+              name="ressourcesMaterielles"
+              label="Matérielles"
+              defaultValue={initial.ressourcesMaterielles}
+            />
+            <Champ
+              name="ressourcesLogicielles"
+              label="Logicielles / SI"
+              defaultValue={initial.ressourcesLogicielles}
+            />
+            <Champ
+              name="ressourcesFinancieres"
+              label="Financières"
+              defaultValue={initial.ressourcesFinancieres}
+            />
+            <Champ
+              name="ressourcesDocumentaires"
+              label="Documentaires"
+              defaultValue={initial.ressourcesDocumentaires}
             />
           </div>
+        </Bloc>
+
+        {/* 4. Description des activités */}
+        <Liste
+          titre="Description des activités"
+          ajout={() =>
+            setActivites((a) => [...a, { activite: "", responsable: "", documents: "" }])
+          }
+        >
+          {activites.map((a, i) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+              key={`act-${i}`}
+              className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+            >
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Activité"
+                value={a.activite}
+                onChange={(e) => majActivite(setActivites, i, "activite", e.target.value)}
+              />
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Responsable"
+                value={a.responsable}
+                onChange={(e) => majActivite(setActivites, i, "responsable", e.target.value)}
+              />
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Documents / outils"
+                value={a.documents}
+                onChange={(e) => majActivite(setActivites, i, "documents", e.target.value)}
+              />
+              <SupprBtn onClick={() => setActivites((arr) => arr.filter((_, j) => j !== i))} />
+            </div>
+          ))}
+        </Liste>
+
+        {/* 3. Interactions : 3 colonnes (fournisseur / nature / client) comme la fiche de référence */}
+        <Liste
+          titre="Interactions avec les autres processus"
+          ajout={() => setInteractions((a) => [...a, { fournisseur: "", nature: "", client: "" }])}
+        >
+          {interactions.length > 0 ? (
+            <div className="hidden gap-2 px-1 text-muted-foreground text-xs sm:grid sm:grid-cols-[1fr_1fr_1fr_auto]">
+              <span>Processus fournisseur</span>
+              <span>Nature de l'interaction</span>
+              <span>Processus client</span>
+              <span />
+            </div>
+          ) : null}
+          {interactions.map((it, i) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+              key={`int-${i}`}
+              className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+            >
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Processus fournisseur"
+                value={it.fournisseur}
+                onChange={(e) => majInteraction(setInteractions, i, "fournisseur", e.target.value)}
+              />
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Nature de l'interaction"
+                value={it.nature}
+                onChange={(e) => majInteraction(setInteractions, i, "nature", e.target.value)}
+              />
+              <Textarea
+                rows={1}
+                className={LIGNE_CLASS}
+                placeholder="Processus client"
+                value={it.client}
+                onChange={(e) => majInteraction(setInteractions, i, "client", e.target.value)}
+              />
+              <SupprBtn onClick={() => setInteractions((arr) => arr.filter((_, j) => j !== i))} />
+            </div>
+          ))}
+        </Liste>
+
+        <p className="text-muted-foreground text-xs">
+          Rédacteur, vérificateur, approbateur et version se renseignent automatiquement au fil du
+          cycle de vie (soumission, approbation, publication).
+        </p>
+
+        <div className="flex gap-2">
+          <Button type="submit" disabled={pending}>
+            {pending ? "Enregistrement…" : "Enregistrer la fiche"}
+          </Button>
+          <Button type="button" variant="outline" onClick={onDone} disabled={pending}>
+            Annuler
+          </Button>
         </div>
-      </Bloc>
+      </form>
 
-      {/* 2. Données d'entrée et de sortie (alignées côte à côte) */}
-      <Bloc titre="Données d'entrée et de sortie">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Champ
-            name="entrees"
-            label="Données d'entrée"
-            hint="une par ligne"
-            defaultValue={initial.entrees}
-          />
-          <Champ
-            name="sorties"
-            label="Données de sortie"
-            hint="une par ligne"
-            defaultValue={initial.sorties}
-          />
-        </div>
-      </Bloc>
+      {/* Indicateurs et R&O : édités directement ici (chaque ajout/modif est
+          enregistré immédiatement, indépendamment du bouton « Enregistrer la fiche »). */}
+      <div className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm">
+        <SectionLiee
+          titre="Indicateurs de performance"
+          vide="Aucun indicateur rattaché à ce processus."
+          ajout={
+            <IndicateurDialog processusOptions={processusOptions} presetProcessusId={initial.id} />
+          }
+        >
+          {indicateurs.map((ind) => (
+            <li key={ind.id} className="flex items-center justify-between gap-3 py-2">
+              <span className="min-w-0 truncate font-medium text-sm">{ind.nom}</span>
+              <div className="flex shrink-0 items-center gap-1">
+                <IndicateurDialog indicateur={ind} processusOptions={processusOptions} />
+                <SupprimerButton
+                  action={deleteIndicateurAction}
+                  id={ind.id}
+                  libelle="cet indicateur"
+                  successText="Indicateur supprimé."
+                  iconOnly
+                />
+              </div>
+            </li>
+          ))}
+        </SectionLiee>
 
-      {/* 5. Ressources nécessaires, par type */}
-      <Bloc titre="Ressources nécessaires">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Champ
-            name="ressourcesHumaines"
-            label="Humaines"
-            defaultValue={initial.ressourcesHumaines}
-          />
-          <Champ
-            name="ressourcesMaterielles"
-            label="Matérielles"
-            defaultValue={initial.ressourcesMaterielles}
-          />
-          <Champ
-            name="ressourcesLogicielles"
-            label="Logicielles / SI"
-            defaultValue={initial.ressourcesLogicielles}
-          />
-          <Champ
-            name="ressourcesFinancieres"
-            label="Financières"
-            defaultValue={initial.ressourcesFinancieres}
-          />
-          <Champ
-            name="ressourcesDocumentaires"
-            label="Documentaires"
-            defaultValue={initial.ressourcesDocumentaires}
-          />
-        </div>
-      </Bloc>
-
-      {/* 4. Description des activités */}
-      <Liste
-        titre="Description des activités"
-        ajout={() => setActivites((a) => [...a, { activite: "", responsable: "", documents: "" }])}
-      >
-        {activites.map((a, i) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
-            key={`act-${i}`}
-            className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
-          >
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Activité"
-              value={a.activite}
-              onChange={(e) => majActivite(setActivites, i, "activite", e.target.value)}
-            />
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Responsable"
-              value={a.responsable}
-              onChange={(e) => majActivite(setActivites, i, "responsable", e.target.value)}
-            />
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Documents / outils"
-              value={a.documents}
-              onChange={(e) => majActivite(setActivites, i, "documents", e.target.value)}
-            />
-            <SupprBtn onClick={() => setActivites((arr) => arr.filter((_, j) => j !== i))} />
-          </div>
-        ))}
-      </Liste>
-
-      {/* 3. Interactions : 3 colonnes (fournisseur / nature / client) comme la fiche de référence */}
-      <Liste
-        titre="Interactions avec les autres processus"
-        ajout={() => setInteractions((a) => [...a, { fournisseur: "", nature: "", client: "" }])}
-      >
-        {interactions.length > 0 ? (
-          <div className="hidden gap-2 px-1 text-muted-foreground text-xs sm:grid sm:grid-cols-[1fr_1fr_1fr_auto]">
-            <span>Processus fournisseur</span>
-            <span>Nature de l'interaction</span>
-            <span>Processus client</span>
-            <span />
-          </div>
-        ) : null}
-        {interactions.map((it, i) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
-            key={`int-${i}`}
-            className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
-          >
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Processus fournisseur"
-              value={it.fournisseur}
-              onChange={(e) => majInteraction(setInteractions, i, "fournisseur", e.target.value)}
-            />
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Nature de l'interaction"
-              value={it.nature}
-              onChange={(e) => majInteraction(setInteractions, i, "nature", e.target.value)}
-            />
-            <Textarea
-              rows={1}
-              className={LIGNE_CLASS}
-              placeholder="Processus client"
-              value={it.client}
-              onChange={(e) => majInteraction(setInteractions, i, "client", e.target.value)}
-            />
-            <SupprBtn onClick={() => setInteractions((arr) => arr.filter((_, j) => j !== i))} />
-          </div>
-        ))}
-      </Liste>
-
-      <p className="text-muted-foreground text-xs">
-        Rédacteur, vérificateur, approbateur et version se renseignent automatiquement au fil du
-        cycle de vie (soumission, approbation, publication).
-      </p>
-
-      <div className="flex gap-2">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer la fiche"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onDone} disabled={pending}>
-          Annuler
-        </Button>
+        <SectionLiee
+          titre="Risques et opportunités"
+          vide="Aucun risque ni opportunité rattaché à ce processus."
+          ajout={<RoDialog processusOptions={processusOptions} presetProcessusId={initial.id} />}
+        >
+          {risques.map((ro) => (
+            <li key={ro.id} className="flex items-center justify-between gap-3 py-2">
+              <span className="flex min-w-0 items-center gap-2">
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 font-medium text-xs ${
+                    ro.type === "opportunite"
+                      ? "bg-status-conforme/15 text-status-conforme"
+                      : "bg-status-nc-mineure/15 text-status-nc-mineure"
+                  }`}
+                >
+                  {ro.type === "opportunite" ? "Opportunité" : "Risque"}
+                </span>
+                <span className="min-w-0 truncate font-medium text-sm">{ro.intitule}</span>
+              </span>
+              <div className="flex shrink-0 items-center gap-1">
+                <RoDialog ro={ro} processusOptions={processusOptions} />
+                <SupprimerButton
+                  action={deleteRoAction}
+                  id={ro.id}
+                  libelle="cet élément"
+                  successText="Élément supprimé."
+                  iconOnly
+                />
+              </div>
+            </li>
+          ))}
+        </SectionLiee>
       </div>
-    </form>
+    </div>
+  );
+}
+
+/**
+ * Section d'éléments liés (indicateurs, R&O) éditables en direct depuis la fiche.
+ * En-tête avec titre + déclencheur d'ajout (dialogue), puis liste ou message vide.
+ */
+function SectionLiee({
+  titre,
+  vide,
+  ajout,
+  children,
+}: {
+  titre: string;
+  vide: string;
+  ajout: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const isEmpty = Array.isArray(children) && children.length === 0;
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between border-b pb-1.5">
+        <h3 className="font-semibold text-sm">{titre}</h3>
+        {ajout}
+      </div>
+      {isEmpty ? (
+        <p className="text-muted-foreground text-sm">{vide}</p>
+      ) : (
+        <ul className="flex flex-col divide-y">{children}</ul>
+      )}
+    </section>
   );
 }
 
