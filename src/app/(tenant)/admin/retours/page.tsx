@@ -49,7 +49,7 @@ export default async function AdminRetoursPage() {
   const { data: retoursData } = await admin
     .from("retours")
     .select(
-      "id, tenant_id, type, titre, description, page_url, statut, note_admin, created_at, created_by",
+      "id, numero, tenant_id, type, titre, description, page_url, statut, note_admin, created_at, created_by",
     )
     .order("created_at", { ascending: false });
   // Tri stable : on garde l'ordre chronologique (récent → ancien) à l'intérieur de
@@ -108,6 +108,7 @@ export default async function AdminRetoursPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-14">N°</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Objet</TableHead>
                   <TableHead>Auteur</TableHead>
@@ -126,6 +127,9 @@ export default async function AdminRetoursPage() {
                   const clos = r.statut === "traite" || r.statut === "rejete";
                   return (
                     <TableRow key={r.id} className={clos ? "opacity-55" : undefined}>
+                      <TableCell className="font-mono text-muted-foreground text-sm">
+                        #{r.numero}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
                           {RETOUR_TYPE_LABELS[r.type]}
@@ -162,6 +166,7 @@ export default async function AdminRetoursPage() {
                         <RetourDialog
                           retour={{
                             id: r.id,
+                            numero: r.numero,
                             type: RETOUR_TYPE_LABELS[r.type],
                             titre: r.titre,
                             description: r.description,

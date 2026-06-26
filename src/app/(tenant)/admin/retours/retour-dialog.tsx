@@ -20,6 +20,7 @@ import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Retour = {
   id: string;
+  numero: number;
   type: string;
   titre: string;
   description: string | null;
@@ -67,7 +68,9 @@ export function RetourDialog({ retour }: { retour: Retour }) {
       />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{retour.titre}</DialogTitle>
+          <DialogTitle>
+            <span className="font-mono text-muted-foreground">#{retour.numero}</span> {retour.titre}
+          </DialogTitle>
           <DialogDescription>
             {retour.type} · {retour.auteur}
             {retour.auteurEmail ? ` (${retour.auteurEmail})` : ""}
