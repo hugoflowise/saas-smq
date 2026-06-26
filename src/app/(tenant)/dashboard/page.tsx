@@ -517,7 +517,7 @@ export default async function DashboardPage() {
             )}
             <div className="mt-3">
               <Link href="/documents" className="text-primary text-sm hover:underline">
-                Voir la matrice documentaire →
+                Voir la liste maîtresse des documents →
               </Link>
             </div>
           </CardContent>
