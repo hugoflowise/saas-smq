@@ -20,6 +20,7 @@ import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Retour = {
   id: string;
+  numero: number;
   type: string;
   titre: string;
   description: string | null;
@@ -32,7 +33,14 @@ type Retour = {
   date: string;
 };
 
-export function RetourDialog({ retour }: { retour: Retour }) {
+export function RetourDialog({
+  retour,
+  trigger,
+}: {
+  retour: Retour;
+  /** Déclencheur personnalisé (ex. la ligne entière, cliquable). Par défaut : bouton « Traiter ». */
+  trigger?: React.ReactElement;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -60,14 +68,18 @@ export function RetourDialog({ retour }: { retour: Retour }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="outline" size="sm">
-            Traiter
-          </Button>
+          trigger ?? (
+            <Button variant="outline" size="sm">
+              Traiter
+            </Button>
+          )
         }
       />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{retour.titre}</DialogTitle>
+          <DialogTitle>
+            <span className="font-mono text-muted-foreground">#{retour.numero}</span> {retour.titre}
+          </DialogTitle>
           <DialogDescription>
             {retour.type} · {retour.auteur}
             {retour.auteurEmail ? ` (${retour.auteurEmail})` : ""}
