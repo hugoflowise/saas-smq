@@ -36,6 +36,7 @@ export type DocumentRow = {
   titre: string;
   type: string;
   version: string | null;
+  duree_conservation: string | null;
   statut: string;
   redacteur: string | null;
   approbateur: string | null;
@@ -109,6 +110,7 @@ export function DocumentDialog({
       approbateur: f.get("approbateur") || undefined,
       dateApprobation: f.get("dateApprobation") || undefined,
       dateRevisionPrevue: f.get("dateRevisionPrevue") || undefined,
+      dureeConservation: f.get("dureeConservation") || undefined,
       processusId: f.get("processusId") || undefined,
       emplacement: f.get("emplacement") || undefined,
       commentaire: f.get("commentaire") || undefined,
@@ -295,6 +297,15 @@ export function DocumentDialog({
                 name="dateRevisionPrevue"
                 type="date"
                 defaultValue={document?.date_revision_prevue ?? ""}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dureeConservation">Durée de stockage</Label>
+              <Input
+                id="dureeConservation"
+                name="dureeConservation"
+                defaultValue={document?.duree_conservation ?? ""}
+                placeholder="ex. 3 ans, 5 ans, illimitée"
               />
             </div>
           </div>

@@ -740,6 +740,7 @@ export type Database = {
           date_approbation: string | null
           date_revision_prevue: string | null
           deleted_at: string | null
+          duree_conservation: string | null
           emplacement: string | null
           fichier_nom: string | null
           fichier_path: string | null
@@ -764,6 +765,7 @@ export type Database = {
           date_approbation?: string | null
           date_revision_prevue?: string | null
           deleted_at?: string | null
+          duree_conservation?: string | null
           emplacement?: string | null
           fichier_nom?: string | null
           fichier_path?: string | null
@@ -788,6 +790,7 @@ export type Database = {
           date_approbation?: string | null
           date_revision_prevue?: string | null
           deleted_at?: string | null
+          duree_conservation?: string | null
           emplacement?: string | null
           fichier_nom?: string | null
           fichier_path?: string | null

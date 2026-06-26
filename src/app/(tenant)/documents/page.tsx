@@ -41,6 +41,8 @@ type MatriceRow = {
   approbateur: string | null;
   dateApprobation: string | null;
   revisionPrevue: string | null;
+  dureeConservation: string | null;
+  derniereMaj: string | null;
   processusNom: string | null;
   processusId: string | null;
   href: string | null;
@@ -77,13 +79,13 @@ export default async function DocumentsPage({
     await Promise.all([
       supabase
         .from("politique_qualite")
-        .select("code, statut, version_actuelle_id, approved_by, approved_at")
+        .select("code, statut, version_actuelle_id, approved_by, approved_at, updated_at")
         .eq("tenant_id", tid)
         .maybeSingle(),
       supabase
         .from("procedures")
         .select(
-          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id",
+          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id, updated_at",
         )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -91,13 +93,15 @@ export default async function DocumentsPage({
       supabase
         .from("documents_maitrise")
         .select(
-          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, processus_id, emplacement, commentaire, fichier_nom",
+          "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, duree_conservation, processus_id, emplacement, commentaire, fichier_nom, updated_at",
         )
         .eq("tenant_id", tid)
         .order("code", { nullsFirst: false }),
       supabase
         .from("processus")
-        .select("id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le")
+        .select(
+          "id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le, updated_at",
+        )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
         .order("ordre_affichage"),
@@ -150,6 +154,8 @@ export default async function DocumentsPage({
       approbateur: politique.approved_by ? (nameById.get(politique.approved_by) ?? null) : null,
       dateApprobation: politique.approved_at,
       revisionPrevue: null,
+      dureeConservation: null,
+      derniereMaj: politique.updated_at,
       processusNom: "Direction",
       processusId: null,
       href: "/strategie/politique?from=/documents",
@@ -169,6 +175,8 @@ export default async function DocumentsPage({
       approbateur: p.approved_by ? (nameById.get(p.approved_by) ?? null) : null,
       dateApprobation: p.approved_at,
       revisionPrevue: null,
+      dureeConservation: null,
+      derniereMaj: p.updated_at,
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
       processusId: p.processus_id,
       href: `/documentation/procedures/${p.id}?from=/documents`,
@@ -190,6 +198,8 @@ export default async function DocumentsPage({
       approbateur: null,
       dateApprobation: null,
       revisionPrevue: null,
+      dureeConservation: null,
+      derniereMaj: p.updated_at,
       processusNom: p.nom,
       processusId: p.id,
       href: `/processus/${p.id}?from=/documents`,
@@ -209,6 +219,8 @@ export default async function DocumentsPage({
       approbateur: d.approbateur,
       dateApprobation: d.date_approbation,
       revisionPrevue: d.date_revision_prevue,
+      dureeConservation: d.duree_conservation,
+      derniereMaj: d.updated_at,
       processusNom: d.processus_id ? (processusNom.get(d.processus_id) ?? null) : null,
       processusId: d.processus_id,
       href: null,
@@ -276,18 +288,19 @@ export default async function DocumentsPage({
               <TableRow>
                 <TableHead className="w-24">Code</TableHead>
                 <TableHead>Document</TableHead>
-                <TableHead className="w-36">Type</TableHead>
                 <TableHead className="w-20">Version</TableHead>
                 <TableHead className="w-28">Statut</TableHead>
                 <TableHead className="w-40">Approbateur</TableHead>
                 <TableHead className="w-32">Révision prévue</TableHead>
+                <TableHead className="w-32">Durée de stockage</TableHead>
+                <TableHead className="w-32">Dernière mise à jour</TableHead>
                 <TableHead className="w-40">Fichier</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {visibleRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
                     Aucun document ne correspond aux filtres.
                   </TableCell>
                 </TableRow>
@@ -324,7 +337,6 @@ export default async function DocumentsPage({
                         </span>
                       ) : null}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{r.typeLabel}</TableCell>
                     <TableCell className="text-sm">{r.version ?? "-"}</TableCell>
                     <TableCell>
                       <span className={`${BADGE_BASE} ${DOC_STATUT_CLASS[r.statut] ?? "bg-muted"}`}>
@@ -354,6 +366,12 @@ export default async function DocumentsPage({
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {r.dureeConservation ?? "-"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {r.derniereMaj ? formatDate(r.derniereMaj) : "-"}
                     </TableCell>
                     <TableCell>
                       {r.registre?.fichier_nom ? (
