@@ -1,4 +1,4 @@
-/** Libellés et helpers de la matrice documentaire (R13). */
+/** Libellés et helpers de la liste maîtresse des documents (R13). */
 
 export const DOC_MAITRISE_TYPE_LABELS: Record<string, string> = {
   manuel: "Manuel",
@@ -10,7 +10,7 @@ export const DOC_MAITRISE_TYPE_LABELS: Record<string, string> = {
   autre: "Autre",
 };
 
-/** Statut unifié affiché dans la matrice (sources natives + registre). */
+/** Statut unifié affiché dans la liste maîtresse (sources natives + registre). */
 export const DOC_STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
   en_revue: "En revue",

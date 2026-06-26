@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { DocumentDialog, type DocumentRow } from "@/app/(tenant)/documents/document-dialog";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -12,17 +12,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BADGE_BASE } from "@/lib/badges";
+import { DOC_STATUT_CLASS, DOC_STATUT_LABELS, statutDocumentNatif } from "@/lib/documents";
 import { DOCUMENTATION_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { CreateProcedureDialog } from "./create-procedure-dialog";
 
-const STATUT_LABELS: Record<string, string> = {
-  brouillon: "Brouillon",
-  en_revue: "En revue",
-  approuvee: "Approuvée",
-  publiee: "Publiée",
-  archivee: "Archivée",
+// Une procédure de la liste : soit native (rédigée dans l'app), soit issue du
+// registre (documents_maitrise typé « procédure »). Les deux sont listées ici
+// pour que l'onglet reflète exactement la liste maîtresse.
+type LigneProcedure = {
+  key: string;
+  titre: string;
+  processusId: string | null;
+  processusNom: string | null;
+  isoRef: string;
+  statut: string;
+  href: string | null;
+  registre: DocumentRow | null;
 };
 
 export default async function ProceduresPage() {
@@ -51,14 +60,44 @@ export default async function ProceduresPage() {
     .order("ordre_affichage", { ascending: true });
   const processusName = new Map((processus ?? []).map((p) => [p.id, p.nom]));
 
-  const { data: procedures } = await supabase
-    .from("procedures")
-    .select("id, titre, processus_id, reference_iso, statut")
-    .eq("tenant_id", tid)
-    .is("deleted_at", null)
-    .order("titre", { ascending: true });
+  const [{ data: procedures }, { data: registre }] = await Promise.all([
+    supabase
+      .from("procedures")
+      .select("id, titre, processus_id, reference_iso, statut")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("titre", { ascending: true }),
+    // Procédures saisies dans le registre (liste maîtresse) : même type « procédure ».
+    supabase
+      .from("documents_maitrise")
+      .select(
+        "id, code, titre, type, version, statut, redacteur, approbateur, date_approbation, date_revision_prevue, processus_id, emplacement, commentaire, fichier_nom",
+      )
+      .eq("tenant_id", tid)
+      .eq("type", "procedure"),
+  ]);
 
-  const items = procedures ?? [];
+  const natives: LigneProcedure[] = (procedures ?? []).map((p) => ({
+    key: `proc-${p.id}`,
+    titre: p.titre,
+    processusId: p.processus_id,
+    processusNom: p.processus_id ? (processusName.get(p.processus_id) ?? null) : null,
+    isoRef: p.reference_iso?.length ? p.reference_iso.join(", ") : "-",
+    statut: statutDocumentNatif(p.statut),
+    href: `/documentation/procedures/${p.id}`,
+    registre: null,
+  }));
+  const duRegistre: LigneProcedure[] = (registre ?? []).map((d) => ({
+    key: `reg-${d.id}`,
+    titre: d.titre,
+    processusId: d.processus_id,
+    processusNom: d.processus_id ? (processusName.get(d.processus_id) ?? null) : null,
+    isoRef: "-",
+    statut: d.statut,
+    href: null,
+    registre: d as DocumentRow,
+  }));
+  const items = [...natives, ...duRegistre].sort((a, b) => a.titre.localeCompare(b.titre, "fr"));
 
   return (
     <div className="mx-auto w-full max-w-5xl">
@@ -90,26 +129,34 @@ export default async function ProceduresPage() {
             </TableHeader>
             <TableBody>
               {items.map((p) => (
-                <TableRow key={p.id}>
+                <TableRow key={p.key}>
                   <TableCell className="font-medium">
-                    <Link
-                      href={`/documentation/procedures/${p.id}`}
-                      className="hover:text-primary hover:underline"
-                    >
-                      {p.titre}
-                    </Link>
+                    {p.href ? (
+                      <Link href={p.href} className="hover:text-primary hover:underline">
+                        {p.titre}
+                      </Link>
+                    ) : p.registre ? (
+                      <DocumentDialog
+                        document={p.registre}
+                        processus={processus ?? []}
+                        trigger={
+                          <button type="button" className={ROW_NAME_BUTTON}>
+                            {p.titre}
+                          </button>
+                        }
+                      />
+                    ) : (
+                      p.titre
+                    )}
                   </TableCell>
                   <TableCell>
-                    <ProcessusLink
-                      id={p.processus_id}
-                      nom={p.processus_id ? (processusName.get(p.processus_id) ?? null) : null}
-                    />
+                    <ProcessusLink id={p.processusId} nom={p.processusNom} />
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    {p.reference_iso?.length ? p.reference_iso.join(", ") : "-"}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{p.isoRef}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{STATUT_LABELS[p.statut] ?? p.statut}</Badge>
+                    <span className={`${BADGE_BASE} ${DOC_STATUT_CLASS[p.statut] ?? "bg-muted"}`}>
+                      {DOC_STATUT_LABELS[p.statut] ?? p.statut}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}
