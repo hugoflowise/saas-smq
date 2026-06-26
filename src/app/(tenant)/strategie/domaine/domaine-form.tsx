@@ -1,0 +1,261 @@
+"use client";
+
+import { BadgeCheck, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { saveDomaineAction, validerDomaineAction } from "@/lib/actions/domaine";
+import { formatDate } from "@/lib/format";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
+
+export type Exclusion = { clause: string; intitule: string; justification: string };
+
+type Initial = {
+  perimetre: string;
+  sites: string;
+  exclusions: Exclusion[];
+  dateEtablissement: string;
+  prochaineRevue: string;
+};
+
+// Exclusions fréquentes pour une activité de service (à valider par le client).
+const EXCLUSIONS_TYPES: Exclusion[] = [
+  { clause: "8.3", intitule: "Conception et développement", justification: "" },
+  { clause: "7.1.5", intitule: "Ressources de surveillance et de mesure", justification: "" },
+  { clause: "8.6", intitule: "Libération des produits et services", justification: "" },
+];
+
+export function DomaineForm({
+  exists,
+  initial,
+  valideLe,
+  validateurNom,
+}: {
+  exists: boolean;
+  initial: Initial;
+  valideLe: string | null;
+  validateurNom: string | null;
+}) {
+  const router = useRouter();
+  const readOnly = useReadOnly();
+  const [perimetre, setPerimetre] = useState(initial.perimetre);
+  const [sites, setSites] = useState(initial.sites);
+  const [exclusions, setExclusions] = useState<Exclusion[]>(initial.exclusions);
+  const [dateEtablissement, setDateEtablissement] = useState(initial.dateEtablissement);
+  const [prochaineRevue, setProchaineRevue] = useState(initial.prochaineRevue);
+  const [pending, setPending] = useState(false);
+
+  const setExcl = (i: number, key: keyof Exclusion, value: string) =>
+    setExclusions((arr) => arr.map((e, j) => (j === i ? { ...e, [key]: value } : e)));
+
+  async function save() {
+    setPending(true);
+    const result = await saveDomaineAction({
+      perimetre,
+      sites,
+      exclusions: exclusions.filter(
+        (e) => e.clause.trim() || e.intitule.trim() || e.justification.trim(),
+      ),
+      dateEtablissement,
+      prochaineRevue,
+    });
+    setPending(false);
+    if (result.ok) {
+      toast.success("Domaine d'application enregistré.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  async function toggleValidation(valider: boolean) {
+    setPending(true);
+    const result = await validerDomaineAction(valider);
+    setPending(false);
+    if (result.ok) {
+      toast.success(valider ? "Domaine validé." : "Validation retirée.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+      {/* Bandeau de validation */}
+      {valideLe ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-status-conforme/40 bg-status-conforme/10 px-4 py-3">
+          <p className="flex items-center gap-2 text-sm text-status-conforme">
+            <BadgeCheck className="size-4" />
+            Domaine d'application validé le {formatDate(valideLe)}
+            {validateurNom ? ` par ${validateurNom}` : ""}.
+          </p>
+          {!readOnly && (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={pending}
+              onClick={() => toggleValidation(false)}
+            >
+              Retirer la validation
+            </Button>
+          )}
+        </div>
+      ) : null}
+
+      <section className="flex flex-col gap-2">
+        <Label htmlFor="perimetre">Énoncé du domaine d'application</Label>
+        <p className="text-muted-foreground text-xs">
+          Activités, produits et services couverts par le SMQ.
+        </p>
+        <Textarea
+          id="perimetre"
+          rows={4}
+          value={perimetre}
+          placeholder="Ex. : prestations de conseil et d'audit en management de la qualité pour les secteurs industriels et tertiaires."
+          onChange={(e) => setPerimetre(e.target.value)}
+          disabled={readOnly}
+        />
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <Label htmlFor="sites">Sites et implantations concernés</Label>
+        <Textarea
+          id="sites"
+          rows={2}
+          value={sites}
+          placeholder="Ex. : siège social de Lyon et interventions sur sites clients en France."
+          onChange={(e) => setSites(e.target.value)}
+          disabled={readOnly}
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="font-semibold text-sm">Exigences non applicables (exclusions)</h2>
+            <p className="text-muted-foreground text-xs">
+              Toute exclusion doit être justifiée et ne pas affecter la conformité des prestations.
+            </p>
+          </div>
+          {!readOnly && (
+            <div className="flex gap-2">
+              {exclusions.length === 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setExclusions(EXCLUSIONS_TYPES.map((e) => ({ ...e })))}
+                >
+                  Proposer les exclusions types (service)
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() =>
+                  setExclusions((a) => [...a, { clause: "", intitule: "", justification: "" }])
+                }
+              >
+                <Plus className="size-3.5" />
+                Ajouter
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {exclusions.length === 0 ? (
+          <p className="rounded-lg border border-dashed px-4 py-3 text-muted-foreground text-sm">
+            Aucune exclusion. Pour une activité de service, les §8.3 (conception), §7.1.5
+            (métrologie) et §8.6 (libération) sont fréquemment exclus.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {exclusions.map((e, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+              <div key={i} className="rounded-lg border bg-card p-3">
+                <div className="grid grid-cols-[90px_1fr_auto] gap-2">
+                  <Input
+                    placeholder="§"
+                    value={e.clause}
+                    onChange={(ev) => setExcl(i, "clause", ev.target.value)}
+                    disabled={readOnly}
+                  />
+                  <Input
+                    placeholder="Intitulé de l'exigence"
+                    value={e.intitule}
+                    onChange={(ev) => setExcl(i, "intitule", ev.target.value)}
+                    disabled={readOnly}
+                  />
+                  {!readOnly && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Retirer l'exclusion"
+                      onClick={() => setExclusions((arr) => arr.filter((_, j) => j !== i))}
+                    >
+                      <Trash2 className="size-4 text-status-nc-mineure" />
+                    </Button>
+                  )}
+                </div>
+                <Textarea
+                  className="mt-2"
+                  rows={2}
+                  placeholder="Justification de l'exclusion"
+                  value={e.justification}
+                  onChange={(ev) => setExcl(i, "justification", ev.target.value)}
+                  disabled={readOnly}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="dateEtablissement">Date d'établissement</Label>
+          <Input
+            id="dateEtablissement"
+            type="date"
+            className="w-44"
+            value={dateEtablissement}
+            onChange={(e) => setDateEtablissement(e.target.value)}
+            disabled={readOnly}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="prochaineRevue">Prochaine revue</Label>
+          <Input
+            id="prochaineRevue"
+            type="date"
+            className="w-44"
+            value={prochaineRevue}
+            onChange={(e) => setProchaineRevue(e.target.value)}
+            disabled={readOnly}
+          />
+        </div>
+        {!readOnly && (
+          <div className="flex gap-2">
+            <Button onClick={save} disabled={pending}>
+              {pending ? "Enregistrement…" : "Enregistrer"}
+            </Button>
+            {exists && !valideLe && (
+              <Button variant="outline" disabled={pending} onClick={() => toggleValidation(true)}>
+                <BadgeCheck className="size-4" />
+                Valider le domaine
+              </Button>
+            )}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}

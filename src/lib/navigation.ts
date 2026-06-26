@@ -60,6 +60,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Politique qualité", href: "/strategie/politique", icon: ScrollText },
       { label: "Contexte", href: "/strategie/contexte", icon: Activity },
+      { label: "Domaine d'application", href: "/strategie/domaine", icon: Milestone },
       { label: "Parties prenantes", href: "/strategie/parties-prenantes", icon: Users },
       { label: "Risques & opportunités", href: "/risques", icon: ShieldCheck },
     ],
