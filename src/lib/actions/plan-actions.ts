@@ -25,6 +25,9 @@ const baseSchema = {
     "reclamation",
     "amelioration_continue",
     "reunion",
+    "dysfonctionnement",
+    "incident",
+    "accident",
   ]),
   type: z.enum(["preventive", "corrective"]),
   priorite: z.enum(["p1", "p2", "p3"]),
@@ -54,7 +57,7 @@ const createSchema = z.object(baseSchema);
 const updateSchema = z.object({ id: z.string().uuid(), ...baseSchema });
 
 /** Génère une référence ACT-AAAA-NNN par tenant et par année. */
-async function nextReference(
+export async function nextActionReference(
   supabase: Awaited<ReturnType<typeof createClient>>,
   tenantId: string,
 ): Promise<string> {
@@ -82,7 +85,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
   const d = parsed.data;
 
   const supabase = await createClient();
-  const reference = await nextReference(supabase, ctx.effectiveTenantId);
+  const reference = await nextActionReference(supabase, ctx.effectiveTenantId);
 
   const { error } = await supabase.from("actions").insert({
     tenant_id: ctx.effectiveTenantId,

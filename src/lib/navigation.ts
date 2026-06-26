@@ -79,7 +79,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Plan d'actions", href: "/actions", icon: ListChecks },
       { label: "Non-conformités", href: "/nc", icon: AlertTriangle },
-      { label: "Réclamations", href: "/reclamations", icon: MessageSquareWarning },
+      { label: "Remontées", href: "/reclamations", icon: MessageSquareWarning },
     ],
   },
   {

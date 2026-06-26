@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -9,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
+import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
@@ -29,7 +31,10 @@ export default async function ReclamationsPage() {
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
-        <PageHeader title="Réclamations" description="Plaintes et réclamations clients." />
+        <PageHeader
+          title="Remontées"
+          description="Réclamations, dysfonctionnements, incidents et accidents."
+        />
         <EmptyState
           title="Aucun client sélectionné"
           description="Choisissez un client dans le sélecteur en haut."
@@ -41,7 +46,9 @@ export default async function ReclamationsPage() {
   const supabase = await createClient();
   const { data: reclamations } = await supabase
     .from("reclamations")
-    .select("id, objet, client, date_reception, canal, gravite, description, traitement, statut")
+    .select(
+      "id, type, objet, client, date_reception, canal, gravite, description, traitement, statut",
+    )
     .eq("tenant_id", ctx.effectiveTenantId)
     .order("date_reception", { ascending: false });
 
@@ -50,24 +57,25 @@ export default async function ReclamationsPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Réclamations"
-        description="Plaintes et réclamations clients."
-        isoClause="ISO 9001 §9.1.2"
-        help="Les réclamations (y compris les arrêts prématurés de mission) reflètent la satisfaction client : tracez-les, analysez les causes et déclenchez des actions dans le plan d'actions."
+        title="Remontées"
+        description="Réclamations, dysfonctionnements, incidents et accidents."
+        isoClause="ISO 9001 §9.1.2 · §10.2"
+        help="Tracez toutes les remontées (réclamation client, dysfonctionnement, incident, accident), analysez les causes et déclenchez des actions dans le plan d'actions. Cochez « Créer une action liée » à l'enregistrement pour ouvrir automatiquement l'action de traitement."
       >
         <ReclamationDialog />
       </PageHeader>
 
       {items.length === 0 ? (
         <EmptyState
-          title="Aucune réclamation"
-          description="Enregistrez une réclamation client pour la suivre jusqu'à sa clôture."
+          title="Aucune remontée"
+          description="Enregistrez une remontée (réclamation, dysfonctionnement, incident, accident) pour la suivre jusqu'à sa clôture."
         />
       ) : (
         <div className="rounded-2xl border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-40">Type</TableHead>
                 <TableHead>Objet</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Canal</TableHead>
@@ -79,6 +87,11 @@ export default async function ReclamationsPage() {
             <TableBody>
               {items.map((r) => (
                 <TableRow key={r.id}>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {REMONTEE_TYPE_LABELS[r.type] ?? r.type}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <ReclamationDialog
                       reclamation={r}

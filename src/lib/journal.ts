@@ -22,7 +22,7 @@ export const AUDIT_ENTITY: Record<string, { label: string; href: string | null }
   procedures: { label: "Procédure", href: "/documentation/procedures" },
   actions: { label: "Action", href: "/actions" },
   non_conformites: { label: "Non-conformité", href: "/nc" },
-  reclamations: { label: "Réclamation", href: "/reclamations" },
+  reclamations: { label: "Remontée", href: "/reclamations" },
   risques_opportunites: { label: "Risque / Opportunité", href: "/risques" },
   objectifs_qualite: { label: "Objectif qualité", href: "/strategie/objectifs" },
   audits_internes: { label: "Audit", href: "/audits" },
