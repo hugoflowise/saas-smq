@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateTenantDialog } from "./create-tenant-dialog";
 import { DeleteTenantDialog } from "./delete-tenant-dialog";
 import { EditTenantDialog } from "./edit-tenant-dialog";
+import { ManageDirigeantsDialog } from "./manage-dirigeants-dialog";
 import { RestoreTenantButton } from "./restore-tenant-button";
 
 function secteurLabel(s: string | null): string {
@@ -69,17 +70,25 @@ export default async function AdminClientsPage() {
     nom: nomPersonne(m.full_name, m.email),
   }));
 
-  // Dirigeant de chaque tenant
+  // Dirigeants de chaque tenant (plusieurs possibles)
   const tenantIds = (tenants ?? []).map((t) => t.id);
   const { data: dirigeants } = await admin
     .from("profiles")
     .select("id, full_name, email, tenant_id")
     .eq("role", "dirigeant")
-    .in("tenant_id", tenantIds.length > 0 ? tenantIds : ["00000000-0000-0000-0000-000000000000"]);
+    .in("tenant_id", tenantIds.length > 0 ? tenantIds : ["00000000-0000-0000-0000-000000000000"])
+    .order("full_name");
 
-  const dirigeantByTenant = new Map(
-    (dirigeants ?? []).filter((d) => d.tenant_id).map((d) => [d.tenant_id as string, d]),
-  );
+  const dirigeantsByTenant = new Map<
+    string,
+    { id: string; full_name: string | null; email: string }[]
+  >();
+  for (const d of dirigeants ?? []) {
+    if (!d.tenant_id) continue;
+    const list = dirigeantsByTenant.get(d.tenant_id) ?? [];
+    list.push({ id: d.id, full_name: d.full_name, email: d.email });
+    dirigeantsByTenant.set(d.tenant_id, list);
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl">
@@ -102,15 +111,19 @@ export default async function AdminClientsPage() {
             </TableHeader>
             <TableBody>
               {tenants.map((t) => {
-                const dirigeant = dirigeantByTenant.get(t.id) ?? null;
+                const tenantDirigeants = dirigeantsByTenant.get(t.id) ?? [];
                 return (
                   <TableRow key={t.id}>
                     <TableCell className="font-medium">{t.nom_societe}</TableCell>
                     <TableCell>
-                      {dirigeant ? (
-                        <span className="flex flex-col">
-                          <span>{dirigeant.full_name ?? "-"}</span>
-                          <span className="text-muted-foreground text-xs">{dirigeant.email}</span>
+                      {tenantDirigeants.length > 0 ? (
+                        <span className="flex flex-col gap-1">
+                          {tenantDirigeants.map((d) => (
+                            <span key={d.id} className="flex flex-col">
+                              <span>{d.full_name ?? "-"}</span>
+                              <span className="text-muted-foreground text-xs">{d.email}</span>
+                            </span>
+                          ))}
                         </span>
                       ) : (
                         "-"
@@ -132,6 +145,11 @@ export default async function AdminClientsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
+                        <ManageDirigeantsDialog
+                          tenantId={t.id}
+                          nomSociete={t.nom_societe}
+                          dirigeants={tenantDirigeants}
+                        />
                         <EditTenantDialog
                           flowiseTeam={flowiseTeam}
                           tenant={{
@@ -143,15 +161,6 @@ export default async function AdminClientsPage() {
                             logo_url: t.logo_url,
                             responsable_flowise_id: t.responsable_flowise_id,
                           }}
-                          dirigeant={
-                            dirigeant
-                              ? {
-                                  id: dirigeant.id,
-                                  full_name: dirigeant.full_name,
-                                  email: dirigeant.email,
-                                }
-                              : null
-                          }
                         />
                         <DeleteTenantDialog tenantId={t.id} nomSociete={t.nom_societe} />
                       </div>

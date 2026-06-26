@@ -30,6 +30,17 @@ export const ACTION_ORIGINE_LABELS = {
   reclamation: "Réclamation",
   amelioration_continue: "Amélioration continue",
   reunion: "Réunion QHSE",
+  dysfonctionnement: "Dysfonctionnement",
+  incident: "Incident",
+  accident: "Accident",
+} as const;
+
+/** Types de remontée (module Remontées, ex-Réclamations). */
+export const REMONTEE_TYPE_LABELS = {
+  reclamation: "Réclamation",
+  dysfonctionnement: "Dysfonctionnement",
+  incident: "Incident",
+  accident: "Accident",
 } as const;
 
 export const ACTION_STATUTS = Object.keys(
