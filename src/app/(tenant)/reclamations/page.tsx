@@ -44,15 +44,24 @@ export default async function ReclamationsPage() {
   }
 
   const supabase = await createClient();
-  const { data: reclamations } = await supabase
-    .from("reclamations")
-    .select(
-      "id, type, objet, client, date_reception, canal, gravite, description, traitement, statut",
-    )
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .order("date_reception", { ascending: false });
+  const [{ data: reclamations }, { data: processus }] = await Promise.all([
+    supabase
+      .from("reclamations")
+      .select(
+        "id, type, objet, client, date_reception, canal, gravite, description, traitement, statut",
+      )
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .order("date_reception", { ascending: false }),
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("nom"),
+  ]);
 
   const items = reclamations ?? [];
+  const processusOptions = processus ?? [];
 
   return (
     <div className="w-full">
@@ -62,7 +71,7 @@ export default async function ReclamationsPage() {
         isoClause="ISO 9001 §9.1.2 · §10.2"
         help="Tracez toutes les remontées (réclamation client, dysfonctionnement, incident, accident), analysez les causes et déclenchez des actions dans le plan d'actions. Cochez « Créer une action liée » à l'enregistrement pour ouvrir automatiquement l'action de traitement."
       >
-        <ReclamationDialog />
+        <ReclamationDialog processusOptions={processusOptions} />
       </PageHeader>
 
       {items.length === 0 ? (
