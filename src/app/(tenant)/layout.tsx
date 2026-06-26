@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/topbar";
 import { LegalFooter } from "@/components/legal-footer";
+import { TodoWidget } from "@/components/todo-widget";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
 import { loadNotifications } from "@/lib/notifications-view";
@@ -9,6 +10,7 @@ import { loadOnboarding } from "@/lib/onboarding";
 import { canManageUsers, isReadOnly } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { loadTodosPerso } from "@/lib/todos";
 import { getSimulatedRole } from "@/lib/view-as-cookie";
 
 export default async function TenantLayout({ children }: { children: React.ReactNode }) {
@@ -66,6 +68,9 @@ export default async function TenantLayout({ children }: { children: React.React
   // « Mise en route » : masquée du menu une fois toutes les étapes terminées.
   const showOnboarding = activeTenantId ? !(await loadOnboarding(activeTenantId)).complete : true;
 
+  // Pense-bête personnel (par utilisateur, indépendant du client actif).
+  const todos = await loadTodosPerso();
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
@@ -101,6 +106,7 @@ export default async function TenantLayout({ children }: { children: React.React
           </div>
         </main>
       </div>
+      <TodoWidget initialTodos={todos} />
     </div>
   );
 }
