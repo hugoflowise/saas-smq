@@ -60,7 +60,7 @@ export function VersionHistory({
       <ul className="flex flex-col gap-2">
         {pendingItem}
         <li className="text-muted-foreground text-sm">
-          Aucune version publiée pour l'instant. La première publication créera la version v1.
+          Aucune version publiée pour l'instant. La première publication créera la version A.
         </li>
       </ul>
     );

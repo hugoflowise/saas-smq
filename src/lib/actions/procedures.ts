@@ -9,6 +9,7 @@ import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionLettre } from "@/lib/versions";
 import { softDeleteRow } from "./soft-delete";
 
 type ProcedureUpdate = Database["public"]["Tables"]["procedures"]["Update"];
@@ -251,7 +252,7 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
     .from("procedures_versions")
     .select("id", { count: "exact", head: true })
     .eq("procedure_id", id);
-  const version = `v${(count ?? 0) + 1}`;
+  const version = versionLettre(count ?? 0);
 
   // Rubriques structurées figées dans l'instantané de version (phase 2).
   const { data: sections } = await supabase

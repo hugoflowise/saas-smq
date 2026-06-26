@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/actions/types";
 import type { Json } from "@/lib/supabase/database.types";
+import { versionLettre } from "@/lib/versions";
 
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
@@ -104,7 +105,7 @@ export function MaitriseDocument({
   const usesToggle = Boolean(structuredEditor);
   const editable = statut === "brouillon" && canWrite && (!usesToggle || editing);
   const isPublished = statut === "publiee";
-  const nextVersion = `v${publishedCount + 1}`;
+  const nextVersion = versionLettre(publishedCount);
 
   const documentMeta = [
     { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
