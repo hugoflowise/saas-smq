@@ -2875,6 +2875,63 @@ export type Database = {
           },
         ]
       }
+      retours: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          note_admin: string | null
+          page_url: string | null
+          statut: Database["public"]["Enums"]["retour_statut"]
+          tenant_id: string | null
+          titre: string
+          type: Database["public"]["Enums"]["retour_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          note_admin?: string | null
+          page_url?: string | null
+          statut?: Database["public"]["Enums"]["retour_statut"]
+          tenant_id?: string | null
+          titre: string
+          type?: Database["public"]["Enums"]["retour_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          note_admin?: string | null
+          page_url?: string | null
+          statut?: Database["public"]["Enums"]["retour_statut"]
+          tenant_id?: string | null
+          titre?: string
+          type?: Database["public"]["Enums"]["retour_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retours_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retours_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reunions: {
         Row: {
           animateur: string | null
@@ -3776,6 +3833,8 @@ export type Database = {
       reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
       reunion_statut: "planifiee" | "terminee"
       reunion_type: "comite_qhse" | "reunion_echange" | "revue" | "autre"
+      retour_statut: "nouveau" | "en_cours" | "traite" | "rejete"
+      retour_type: "bug" | "amelioration" | "remarque"
       revue_statut: "planifiee" | "realisee" | "cloturee"
       ro_statut: "identifie" | "en_traitement" | "maitrise" | "cloture"
       ro_type: "risque" | "opportunite"
@@ -4070,6 +4129,8 @@ export const Constants = {
       reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
       reunion_statut: ["planifiee", "terminee"],
       reunion_type: ["comite_qhse", "reunion_echange", "revue", "autre"],
+      retour_statut: ["nouveau", "en_cours", "traite", "rejete"],
+      retour_type: ["bug", "amelioration", "remarque"],
       revue_statut: ["planifiee", "realisee", "cloturee"],
       ro_statut: ["identifie", "en_traitement", "maitrise", "cloture"],
       ro_type: ["risque", "opportunite"],
