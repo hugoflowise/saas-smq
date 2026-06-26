@@ -51,15 +51,15 @@ export function FeedbackButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="ghost" size="sm" className="gap-2" aria-label="Faire un retour">
+          <Button variant="ghost" size="sm" className="gap-2" aria-label="Signaler ou suggérer">
             <MessageSquarePlus className="size-4" />
-            <span className="hidden lg:inline">Faire un retour</span>
+            <span className="hidden lg:inline">Signaler / Suggérer</span>
           </Button>
         }
       />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Faire un retour</DialogTitle>
+          <DialogTitle>Signaler ou suggérer</DialogTitle>
           <DialogDescription>
             Signalez un bug, une remarque ou une idée d'amélioration. L'équipe Flowise les examine.
           </DialogDescription>
