@@ -30,15 +30,11 @@ type Tenant = {
   responsable_flowise_id: string | null;
 };
 
-type Dirigeant = { id: string; full_name: string | null; email: string } | null;
-
 export function EditTenantDialog({
   tenant,
-  dirigeant,
   flowiseTeam,
 }: {
   tenant: Tenant;
-  dirigeant: Dirigeant;
   flowiseTeam: { id: string; nom: string }[];
 }) {
   const router = useRouter();
@@ -71,8 +67,6 @@ export function EditTenantDialog({
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
           bureauEtudes: form.get("bureauEtudes") === "on",
-          dirigeantId: dirigeant?.id,
-          dirigeantNom: form.get("dirigeantNom") || undefined,
           responsableFlowiseId: form.get("responsableFlowiseId") || "",
         }),
       success: "Client mis à jour.",
@@ -123,19 +117,6 @@ export function EditTenantDialog({
             <Label htmlFor="nomSociete">Nom de la société</Label>
             <Input id="nomSociete" name="nomSociete" required defaultValue={tenant.nom_societe} />
           </div>
-
-          {dirigeant ? (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="dirigeantNom">Nom du dirigeant</Label>
-              <Input
-                id="dirigeantNom"
-                name="dirigeantNom"
-                defaultValue={dirigeant.full_name ?? ""}
-                placeholder="Jean Dupont"
-              />
-              <p className="text-muted-foreground text-xs">{dirigeant.email}</p>
-            </div>
-          ) : null}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="responsableFlowiseId">Responsable Qualité Flowise</Label>

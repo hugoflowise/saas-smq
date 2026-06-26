@@ -192,8 +192,6 @@ const updateTenantSchema = z.object({
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
-  dirigeantId: z.string().uuid().optional(),
-  dirigeantNom: z.string().trim().optional(),
   responsableFlowiseId: z.string().uuid().optional().or(z.literal("")),
 });
 
@@ -223,15 +221,186 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: `Mise à jour du client impossible : ${tenantError.message}` };
   }
 
-  if (data.dirigeantId) {
-    const { error: profileError } = await admin
-      .from("profiles")
-      .update({ full_name: data.dirigeantNom ?? null })
-      .eq("id", data.dirigeantId);
-    if (profileError) {
-      return { ok: false, error: `Mise à jour du dirigeant impossible : ${profileError.message}` };
-    }
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+// ------------------------------------------------------------------ Dirigeants
+// Un client peut avoir plusieurs dirigeants (profils rôle « dirigeant » rattachés
+// au tenant). Gestion réservée à l'admin Flowise depuis la fiche client.
+
+const addDirigeantSchema = z.object({
+  tenantId: z.string().uuid(),
+  email: z.string().trim().toLowerCase().email("E-mail du dirigeant invalide."),
+  nom: z.string().trim().optional(),
+});
+
+/** Ajoute un dirigeant au client : crée le compte, le rattache, envoie le lien de bienvenue. */
+export async function addDirigeantAction(input: unknown): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const parsed = addDirigeantSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
+  const { tenantId, email, nom } = parsed.data;
+  const admin = createAdminClient();
+
+  // Déjà rattaché à un client ?
+  const { data: existant } = await admin
+    .from("profiles")
+    .select("id, tenant_id")
+    .eq("email", email)
+    .maybeSingle();
+  if (existant?.tenant_id === tenantId) {
+    return { ok: false, error: "Cette personne fait déjà partie de ce client." };
+  }
+  if (existant?.tenant_id && existant.tenant_id !== tenantId) {
+    return { ok: false, error: "Cet e-mail est déjà rattaché à une autre organisation." };
+  }
+
+  const { data: created, error: userError } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { full_name: nom ?? null },
+  });
+  if (userError || !created.user) {
+    const message = userError?.message?.includes("registered")
+      ? "Un compte existe déjà avec cet e-mail."
+      : (userError?.message ?? "Création du compte impossible.");
+    return { ok: false, error: message };
+  }
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({
+      tenant_id: tenantId,
+      role: "dirigeant",
+      full_name: nom ?? null,
+      must_set_password: true,
+    })
+    .eq("id", created.user.id);
+  if (profileError) {
+    return { ok: false, error: `Rattachement du dirigeant impossible : ${profileError.message}` };
+  }
+
+  // Lien de bienvenue (best-effort).
+  const { data: tenant } = await admin
+    .from("tenants")
+    .select("nom_societe")
+    .eq("id", tenantId)
+    .maybeSingle();
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const { data: lien } = await admin.auth.admin.generateLink({
+    type: "recovery",
+    email,
+    options: { redirectTo: `${base}/auth/callback?next=/bienvenue` },
+  });
+  const lienCallback = callbackLinkFromProperties(base, lien?.properties, "/bienvenue");
+  if (lienCallback) {
+    await sendEmail({
+      to: email,
+      subject: `Bienvenue sur flowise. : ${tenant?.nom_societe ?? ""}`,
+      html: inviteEmailHtml({
+        societe: tenant?.nom_societe ?? "votre espace qualité",
+        roleLabel: "Dirigeant",
+        actionLink: lienCallback,
+      }),
+    });
+  }
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+const updateDirigeantSchema = z.object({
+  tenantId: z.string().uuid(),
+  dirigeantId: z.string().uuid(),
+  nom: z.string().trim().optional(),
+  email: z.string().trim().toLowerCase().email("E-mail du dirigeant invalide."),
+});
+
+/** Met à jour le nom et/ou l'adresse e-mail d'un dirigeant. */
+export async function updateDirigeantAction(input: unknown): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const parsed = updateDirigeantSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const { tenantId, dirigeantId, nom, email } = parsed.data;
+  const admin = createAdminClient();
+
+  const { data: prof } = await admin
+    .from("profiles")
+    .select("id, email, tenant_id")
+    .eq("id", dirigeantId)
+    .maybeSingle();
+  if (!prof || prof.tenant_id !== tenantId) {
+    return { ok: false, error: "Dirigeant introuvable pour ce client." };
+  }
+
+  // Changement d'e-mail (auth) si modifié.
+  if (email !== prof.email) {
+    const { data: autre } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .neq("id", dirigeantId)
+      .maybeSingle();
+    if (autre) return { ok: false, error: "Cet e-mail est déjà utilisé par un autre compte." };
+
+    const { error: authErr } = await admin.auth.admin.updateUserById(dirigeantId, {
+      email,
+      email_confirm: true,
+    });
+    if (authErr) return { ok: false, error: `Changement d'e-mail impossible : ${authErr.message}` };
+  }
+
+  const { error } = await admin
+    .from("profiles")
+    .update({ full_name: nom ?? null, email })
+    .eq("id", dirigeantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/clients");
+  return { ok: true };
+}
+
+const removeDirigeantSchema = z.object({
+  tenantId: z.string().uuid(),
+  dirigeantId: z.string().uuid(),
+});
+
+/** Retire l'accès d'un dirigeant (réversible : le compte est conservé, détaché du client). */
+export async function removeDirigeantAction(input: unknown): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+
+  const parsed = removeDirigeantSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const { tenantId, dirigeantId } = parsed.data;
+  const admin = createAdminClient();
+
+  // On ne retire pas le dernier dirigeant (le client doit en garder au moins un).
+  const { count } = await admin
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .eq("role", "dirigeant");
+  if ((count ?? 0) <= 1) {
+    return { ok: false, error: "Impossible de retirer le dernier dirigeant du client." };
+  }
+
+  const { error } = await admin
+    .from("profiles")
+    .update({ tenant_id: null })
+    .eq("id", dirigeantId)
+    .eq("tenant_id", tenantId)
+    .eq("role", "dirigeant");
+  if (error) return { ok: false, error: error.message };
 
   revalidatePath("/admin/clients");
   return { ok: true };
