@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { IndicateurRow } from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
 import type { RoRow } from "@/app/(tenant)/risques/ro-dialog";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { FicheProcessus, type FicheProcessusData } from "@/components/fiche-processus";
 import { SignatureCapture } from "@/components/signature-capture";
 import { Badge } from "@/components/ui/badge";
@@ -97,15 +97,7 @@ export function FicheClient({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={
-              <Link href={printHref} target="_blank">
-                Aperçu / PDF
-              </Link>
-            }
-          />
+          <DownloadPdfButton printHref={printHref} />
           {editable ? <Button onClick={() => setEditing(true)}>Modifier la fiche</Button> : null}
 
           {statut === "brouillon" && canWrite && !readOnly ? (
