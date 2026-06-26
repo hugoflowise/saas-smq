@@ -67,14 +67,14 @@ export default async function AdminRetoursPage() {
   return (
     <div className="mx-auto w-full max-w-5xl">
       <PageHeader
-        title="Retours"
+        title="Signalements & suggestions"
         description="Bugs, remarques et demandes d'évolution remontés par les utilisateurs."
       />
 
       {retours.length === 0 ? (
         <EmptyState
           title="Aucun retour"
-          description="Les retours envoyés depuis l'app (bouton « Faire un retour ») apparaîtront ici."
+          description="Les retours envoyés depuis l'app (bouton « Signaler / Suggérer ») apparaîtront ici."
         />
       ) : (
         <>
@@ -124,6 +124,11 @@ export default async function AdminRetoursPage() {
                       </TableCell>
                       <TableCell>
                         <span className="block">{auteurNom}</span>
+                        {author?.email && author.full_name ? (
+                          <span className="block text-muted-foreground text-xs">
+                            {author.email}
+                          </span>
+                        ) : null}
                         {clientNom ? (
                           <span className="block text-muted-foreground text-xs">{clientNom}</span>
                         ) : null}
@@ -147,6 +152,7 @@ export default async function AdminRetoursPage() {
                             statut: r.statut,
                             noteAdmin: r.note_admin,
                             auteur: auteurNom,
+                            auteurEmail: author?.email ?? null,
                             client: clientNom,
                             date: formatDate(r.created_at),
                           }}

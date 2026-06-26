@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { notifyUsers } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -60,11 +61,34 @@ export async function updateRetourAction(input: unknown): Promise<ActionResult> 
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
   const d = parsed.data;
 
+  // État courant (pour ne notifier que sur un vrai changement de statut)
+  const { data: avant } = await supabase
+    .from("retours")
+    .select("statut, titre, created_by")
+    .eq("id", d.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("retours")
     .update({ statut: d.statut, note_admin: d.noteAdmin || null })
     .eq("id", d.id);
   if (error) return { ok: false, error: error.message };
+
+  // Notification in-app (pas d'e-mail) à l'auteur quand on passe en cours / traité.
+  const statutChange = avant && avant.statut !== d.statut;
+  const aNotifier = d.statut === "en_cours" || d.statut === "traite";
+  if (statutChange && aNotifier && avant?.created_by) {
+    const titre =
+      d.statut === "traite"
+        ? "Votre signalement a été traité"
+        : "Votre signalement est en cours de traitement";
+    await notifyUsers(
+      [avant.created_by],
+      { type: "retour_update", title: titre, body: avant.titre },
+      { inAppOnly: true },
+    );
+  }
+
   revalidatePath("/admin/retours");
   return { ok: true };
 }

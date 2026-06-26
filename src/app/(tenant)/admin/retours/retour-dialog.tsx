@@ -27,6 +27,7 @@ type Retour = {
   statut: keyof typeof RETOUR_STATUT_LABELS;
   noteAdmin: string | null;
   auteur: string;
+  auteurEmail: string | null;
   client: string | null;
   date: string;
 };
@@ -69,7 +70,8 @@ export function RetourDialog({ retour }: { retour: Retour }) {
           <DialogTitle>{retour.titre}</DialogTitle>
           <DialogDescription>
             {retour.type} · {retour.auteur}
-            {retour.client ? ` (${retour.client})` : ""} · {retour.date}
+            {retour.auteurEmail ? ` (${retour.auteurEmail})` : ""}
+            {retour.client ? ` · ${retour.client}` : ""} · {retour.date}
           </DialogDescription>
         </DialogHeader>
 

@@ -118,6 +118,6 @@ export const ADMIN_NAV_SECTION: NavSection = {
   title: "Admin Flowise",
   items: [
     { label: "Clients", href: "/admin/clients", icon: Building2 },
-    { label: "Retours", href: "/admin/retours", icon: Inbox },
+    { label: "Signalements & suggestions", href: "/admin/retours", icon: Inbox },
   ],
 };
