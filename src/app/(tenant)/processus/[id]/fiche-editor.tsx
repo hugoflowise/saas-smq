@@ -20,7 +20,7 @@ import { deleteRoAction } from "@/lib/actions/risques";
 import type { FicheUser } from "@/lib/fiche-processus-data";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
-type Activite = { activite: string; responsable: string; documents: string };
+type Activite = { activite: string; responsable: string };
 type Interaction = { fournisseur: string; nature: string; client: string };
 // Ligne de pilote : « mode » = id d'un utilisateur, ou « __autre__ » pour un nom libre.
 type PiloteLigne = { mode: string; nom: string };
@@ -291,15 +291,13 @@ export function FicheEditor({
         {/* 4. Description des activités */}
         <Liste
           titre="Description des activités"
-          ajout={() =>
-            setActivites((a) => [...a, { activite: "", responsable: "", documents: "" }])
-          }
+          ajout={() => setActivites((a) => [...a, { activite: "", responsable: "" }])}
         >
           {activites.map((a, i) => (
             <div
               // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
               key={`act-${i}`}
-              className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+              className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_auto]"
             >
               <Textarea
                 rows={1}
@@ -314,13 +312,6 @@ export function FicheEditor({
                 placeholder="Responsable"
                 value={a.responsable}
                 onChange={(e) => majActivite(setActivites, i, "responsable", e.target.value)}
-              />
-              <Textarea
-                rows={1}
-                className={LIGNE_CLASS}
-                placeholder="Documents / outils"
-                value={a.documents}
-                onChange={(e) => majActivite(setActivites, i, "documents", e.target.value)}
               />
               <SupprBtn onClick={() => setActivites((arr) => arr.filter((_, j) => j !== i))} />
             </div>

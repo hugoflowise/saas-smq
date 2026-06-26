@@ -29,7 +29,7 @@ export type FicheInitialData = {
   ressourcesFinancieres: string;
   ressourcesDocumentaires: string;
   reference: string;
-  activites: { activite: string; responsable: string; documents: string }[];
+  activites: { activite: string; responsable: string }[];
   interactions: { fournisseur: string; nature: string; client: string }[];
 };
 
@@ -73,7 +73,7 @@ export async function loadFicheProcessusData(
         .maybeSingle(),
       supabase
         .from("processus_activites")
-        .select("activite, responsable, documents")
+        .select("activite, responsable")
         .eq("processus_id", id)
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -235,7 +235,6 @@ export async function loadFicheProcessusData(
     activites: (activitesRes.data ?? []).map((a) => ({
       activite: a.activite,
       responsable: a.responsable ?? "",
-      documents: a.documents ?? "",
     })),
     interactions: (interactionsRes.data ?? []).map((it) => ({
       fournisseur: it.fournisseur ?? "",

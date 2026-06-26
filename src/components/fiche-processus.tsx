@@ -18,7 +18,6 @@ function Lien({ href, children }: { href: string | null; children: React.ReactNo
 export type FicheActivite = {
   activite: string;
   responsable: string | null;
-  documents: string | null;
 };
 export type FicheInteraction = { fournisseur: string; nature: string | null; client: string };
 export type FicheIndicateur = {
@@ -214,7 +213,6 @@ export function FicheProcessus(data: FicheProcessusData) {
                 <th className="w-10 px-3 py-1.5 text-left font-semibold">N°</th>
                 <th className="px-3 py-1.5 text-left font-semibold">Activité</th>
                 <th className="px-3 py-1.5 text-left font-semibold">Responsable</th>
-                <th className="px-3 py-1.5 text-left font-semibold">Documents / outils</th>
               </tr>
             </thead>
             <tbody>
@@ -224,7 +222,6 @@ export function FicheProcessus(data: FicheProcessusData) {
                   <td className="px-3 py-2">{i + 1}</td>
                   <td className="px-3 py-2">{a.activite}</td>
                   <td className="px-3 py-2">{a.responsable ?? "-"}</td>
-                  <td className="px-3 py-2">{a.documents ?? "-"}</td>
                 </tr>
               ))}
             </tbody>
