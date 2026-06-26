@@ -27,7 +27,7 @@ import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { DocumentDialog, type DocumentRow } from "./document-dialog";
 import { DocumentsFilters } from "./documents-filters";
 import { FichierLink } from "./fichier-link";
-import { DocDureeCell, DocRevisionCell } from "./inline-cells";
+import { DocDureeCell, DocRevisionCell, type RevisionSource } from "./inline-cells";
 
 const REVISION_ALERTE_JOURS = 60;
 
@@ -42,6 +42,8 @@ type MatriceRow = {
   approbateur: string | null;
   dateApprobation: string | null;
   revisionPrevue: string | null;
+  revisionSource: RevisionSource;
+  revisionId: string;
   dureeConservation: string | null;
   derniereMaj: string | null;
   processusNom: string | null;
@@ -79,13 +81,15 @@ export default async function DocumentsPage({
     await Promise.all([
       supabase
         .from("politique_qualite")
-        .select("code, statut, version_actuelle_id, approved_by, approved_at, updated_at")
+        .select(
+          "id, code, statut, version_actuelle_id, approved_by, approved_at, date_revision_prevue, updated_at",
+        )
         .eq("tenant_id", tid)
         .maybeSingle(),
       supabase
         .from("procedures")
         .select(
-          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id, updated_at",
+          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id, date_revision_prevue, updated_at",
         )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -100,7 +104,7 @@ export default async function DocumentsPage({
       supabase
         .from("processus")
         .select(
-          "id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le, updated_at",
+          "id, nom, type, fiche_reference, fiche_statut, fiche_version, fiche_publiee_le, date_prochaine_revue, updated_at",
         )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -153,7 +157,9 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(politique.statut),
       approbateur: politique.approved_by ? (nameById.get(politique.approved_by) ?? null) : null,
       dateApprobation: politique.approved_at,
-      revisionPrevue: null,
+      revisionPrevue: politique.date_revision_prevue,
+      revisionSource: "politique",
+      revisionId: politique.id,
       dureeConservation: null,
       derniereMaj: politique.updated_at,
       processusNom: "Direction",
@@ -174,7 +180,9 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(p.statut),
       approbateur: p.approved_by ? (nameById.get(p.approved_by) ?? null) : null,
       dateApprobation: p.approved_at,
-      revisionPrevue: null,
+      revisionPrevue: p.date_revision_prevue,
+      revisionSource: "procedure",
+      revisionId: p.id,
       dureeConservation: null,
       derniereMaj: p.updated_at,
       processusNom: p.processus_id ? (processusNom.get(p.processus_id) ?? null) : null,
@@ -197,7 +205,9 @@ export default async function DocumentsPage({
       statut: statutDocumentNatif(p.fiche_statut),
       approbateur: null,
       dateApprobation: null,
-      revisionPrevue: null,
+      revisionPrevue: p.date_prochaine_revue,
+      revisionSource: "processus",
+      revisionId: p.id,
       dureeConservation: null,
       derniereMaj: p.updated_at,
       processusNom: p.nom,
@@ -219,6 +229,8 @@ export default async function DocumentsPage({
       approbateur: d.approbateur,
       dateApprobation: d.date_approbation,
       revisionPrevue: d.date_revision_prevue,
+      revisionSource: "registre",
+      revisionId: d.id,
       dureeConservation: d.duree_conservation,
       derniereMaj: d.updated_at,
       processusNom: d.processus_id ? (processusNom.get(d.processus_id) ?? null) : null,
@@ -347,11 +359,11 @@ export default async function DocumentsPage({
                     ) : null}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {r.registre ? (
-                      <DocRevisionCell id={r.registre.id} value={r.revisionPrevue} />
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
+                    <DocRevisionCell
+                      source={r.revisionSource}
+                      id={r.revisionId}
+                      value={r.revisionPrevue}
+                    />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {r.registre ? (

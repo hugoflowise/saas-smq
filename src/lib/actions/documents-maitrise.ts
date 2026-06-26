@@ -234,6 +234,60 @@ export async function quickUpdateDocumentMaitriseAction(input: unknown): Promise
   return { ok: true };
 }
 
+// Révision prévue éditable depuis la liste maîtresse, quelle que soit la source.
+// La colonne diffère : date_prochaine_revue pour les fiches de processus,
+// date_revision_prevue pour les autres documents.
+const revisionSchema = z.object({
+  source: z.enum(["politique", "procedure", "processus", "registre"]),
+  id: z.string().uuid(),
+  date: z.string().optional(),
+});
+
+export async function quickUpdateRevisionAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const parsed = revisionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const { source, id, date } = parsed.data;
+  const value = date || null;
+  const by = ctx.userId;
+  const supabase = await createClient();
+  const tid = ctx.effectiveTenantId;
+
+  let error: { message: string } | null = null;
+  if (source === "politique") {
+    ({ error } = await supabase
+      .from("politique_qualite")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else if (source === "procedure") {
+    ({ error } = await supabase
+      .from("procedures")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else if (source === "processus") {
+    ({ error } = await supabase
+      .from("processus")
+      .update({ date_prochaine_revue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  } else {
+    ({ error } = await supabase
+      .from("documents_maitrise")
+      .update({ date_revision_prevue: value, updated_by: by })
+      .eq("id", id)
+      .eq("tenant_id", tid));
+  }
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
 export async function deleteDocumentMaitriseAction(id: string): Promise<ActionResult> {
   const r = await softDeleteRow("documents_maitrise", id);
   if (r.ok) revalidatePath("/documents");
