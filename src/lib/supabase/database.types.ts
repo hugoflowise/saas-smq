@@ -2792,6 +2792,41 @@ export type Database = {
           },
         ]
       }
+      todos_perso: {
+        Row: {
+          created_at: string
+          done: boolean
+          done_at: string | null
+          id: string
+          texte: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          texte: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          texte?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_perso_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reclamations: {
         Row: {
           action_id: string | null
