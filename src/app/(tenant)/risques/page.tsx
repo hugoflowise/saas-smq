@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { StatTiles } from "@/components/stat-tiles";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -11,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteRoAction } from "@/lib/actions/risques";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -64,6 +66,7 @@ export default async function RisquesPage() {
       "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, gravite_residuelle, probabilite_residuelle, criticite_residuelle, traitement_prevu, statut, date_revue",
     )
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("criticite", { ascending: false });
 
   const items = ros ?? [];
@@ -175,6 +178,7 @@ export default async function RisquesPage() {
                 <TableHead>Résiduelle</TableHead>
                 <TableHead>Revue</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -231,6 +235,14 @@ export default async function RisquesPage() {
                     </TableCell>
                     <TableCell>
                       <RoStatutCell id={r.id} value={r.statut} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <SupprimerButton
+                        action={deleteRoAction}
+                        id={r.id}
+                        libelle={r.type === "risque" ? "ce risque" : "cette opportunité"}
+                        iconOnly
+                      />
                     </TableCell>
                   </TableRow>
                 );
