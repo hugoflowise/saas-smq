@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, GripVertical, ListTodo, Plus, X } from "lucide-react";
+import { Check, ListTodo, Minus, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addTodoAction, deleteTodoAction, toggleTodoAction } from "@/lib/actions/todos";
@@ -23,7 +23,11 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
   const [minimized, setMinimized] = useState(false);
   const [pos, setPos] = useState<Pos | null>(null);
   const [, startTransition] = useTransition();
-  const dragRef = useRef<{ dx: number; dy: number } | null>(null);
+  // Déplacement : on mémorise le décalage curseur↔élément + le point de départ
+  // pour distinguer un vrai glissement d'un simple clic.
+  const dragRef = useRef<{ dx: number; dy: number; sx: number; sy: number } | null>(null);
+  const movedRef = useRef(false);
+  const elRef = useRef<HTMLDivElement | HTMLButtonElement | null>(null);
 
   // Restaure position + état réduit (préférences UI locales au navigateur).
   useEffect(() => {
@@ -53,19 +57,34 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
 
   function onPointerDown(e: React.PointerEvent) {
     if (!pos) return;
-    dragRef.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y };
+    dragRef.current = {
+      dx: e.clientX - pos.x,
+      dy: e.clientY - pos.y,
+      sx: e.clientX,
+      sy: e.clientY,
+    };
+    movedRef.current = false;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
     if (!dragRef.current) return;
-    const maxX = window.innerWidth - WIDTH - 8;
+    if (
+      Math.abs(e.clientX - dragRef.current.sx) > 4 ||
+      Math.abs(e.clientY - dragRef.current.sy) > 4
+    ) {
+      movedRef.current = true;
+    }
+    // Largeur réelle de l'élément (panneau ouvert ou pastille réduite) : permet
+    // de coller la pastille tout à droite sans la limiter à la largeur ouverte.
+    const w = elRef.current?.offsetWidth ?? WIDTH;
+    const maxX = window.innerWidth - w - 8;
     const maxY = window.innerHeight - 60;
     const x = Math.min(Math.max(8, e.clientX - dragRef.current.dx), Math.max(8, maxX));
     const y = Math.min(Math.max(8, e.clientY - dragRef.current.dy), Math.max(8, maxY));
     setPos({ x, y });
   }
   function onPointerUp(e: React.PointerEvent) {
-    if (dragRef.current && pos) savePos(pos);
+    if (dragRef.current && pos && movedRef.current) savePos(pos);
     dragRef.current = null;
     (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
   }
@@ -129,13 +148,18 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
     return (
       <button
         type="button"
-        onClick={() => setMin(false)}
+        ref={(el) => {
+          elRef.current = el;
+        }}
+        onClick={() => {
+          if (!movedRef.current) setMin(false);
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         style={{ left: pos.x, top: pos.y }}
-        className="fixed z-50 flex items-center gap-2 rounded-full border bg-primary px-4 py-2.5 text-primary-foreground shadow-lg print:hidden"
-        aria-label="Ouvrir le pense-bête"
+        className="fixed z-50 flex touch-none items-center gap-2 rounded-full border bg-primary px-4 py-2.5 text-primary-foreground shadow-lg print:hidden"
+        aria-label="Ouvrir la ToDo"
       >
         <ListTodo className="size-4" />
         {restantes > 0 ? (
@@ -147,29 +171,30 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
 
   return (
     <div
+      ref={(el) => {
+        elRef.current = el;
+      }}
       style={{ left: pos.x, top: pos.y, width: WIDTH }}
       className="fixed z-50 flex max-h-[60vh] flex-col overflow-hidden rounded-2xl border bg-card shadow-xl print:hidden"
     >
-      {/* En-tête : poignée de déplacement + réduction */}
+      {/* En-tête : déplacement (glisser) + réduction (clic simple). Le repli est
+          déclenché au relâchement si l'utilisateur n'a pas glissé. */}
       <div
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        className="flex cursor-grab items-center gap-2 border-b bg-muted/40 px-3 py-2 active:cursor-grabbing"
+        onPointerUp={(e) => {
+          onPointerUp(e);
+          if (!movedRef.current) setMin(true);
+        }}
+        className="flex cursor-grab touch-none items-center gap-2 border-b bg-muted/40 px-3 py-2 active:cursor-grabbing"
       >
-        <GripVertical className="size-4 text-muted-foreground" />
         <span className="flex items-center gap-1.5 font-semibold text-sm">
-          <ListTodo className="size-4" /> Pense-bête
+          <ListTodo className="size-4" /> ToDo
         </span>
         <span className="ml-auto text-muted-foreground text-xs tabular-nums">{restantes}</span>
-        <button
-          type="button"
-          onClick={() => setMin(true)}
-          className="rounded-md p-1 text-muted-foreground hover:bg-muted"
-          aria-label="Réduire"
-        >
-          <X className="size-4" />
-        </button>
+        <span className="rounded-md p-1 text-muted-foreground" aria-hidden="true">
+          <Minus className="size-4" />
+        </span>
       </div>
 
       {/* Saisie */}
