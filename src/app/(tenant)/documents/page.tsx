@@ -58,8 +58,8 @@ export default async function DocumentsPage({
     return (
       <div className="w-full">
         <PageHeader
-          title="Documents"
-          description="Matrice documentaire : liste maîtrisée de tous les documents qualité."
+          title="Liste maîtresse des documents"
+          description="Tous les documents du système qualité, à jour."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -245,8 +245,8 @@ export default async function DocumentsPage({
     <div className="w-full">
       <ModuleTabs tabs={DOCUMENTATION_TABS} />
       <PageHeader
-        title="Documents"
-        description="Matrice documentaire : liste maîtrisée de tous les documents du système qualité."
+        title="Liste maîtresse des documents"
+        description="Tous les documents du système qualité, à jour."
         isoClause="ISO 9001 §7.5"
         help="Tenez à jour la liste de vos informations documentées : codification, version en vigueur, statut, qui approuve, et date de révision prévue. La politique et les procédures rédigées dans l'application y figurent automatiquement ; ajoutez ici vos autres documents (manuel, instructions, enregistrements, documents externes)."
       >
