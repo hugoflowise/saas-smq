@@ -2435,7 +2435,6 @@ export type Database = {
           created_at: string
           created_by: string | null
           deleted_at: string | null
-          documents: string | null
           id: string
           ordre: number
           processus_id: string
@@ -2449,7 +2448,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
-          documents?: string | null
           id?: string
           ordre?: number
           processus_id: string
@@ -2463,7 +2461,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
-          documents?: string | null
           id?: string
           ordre?: number
           processus_id?: string
