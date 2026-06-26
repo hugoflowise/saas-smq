@@ -104,3 +104,17 @@ export const SECTEUR_LABELS = {
 
 // Secteurs proposés à la saisie (création / modification d'un client).
 export const SECTEUR_OPTIONS = ["SI", "ESN", "autre"] as const;
+
+// Retours utilisateurs (bugs / remarques / demandes d'évolution).
+export const RETOUR_TYPE_LABELS = {
+  bug: "Bug / anomalie",
+  amelioration: "Demande d'évolution",
+  remarque: "Remarque",
+} as const;
+
+export const RETOUR_STATUT_LABELS = {
+  nouveau: "Nouveau",
+  en_cours: "En cours",
+  traite: "Traité",
+  rejete: "Rejeté",
+} as const;

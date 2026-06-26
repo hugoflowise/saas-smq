@@ -10,6 +10,7 @@ import {
   FolderTree,
   Gauge,
   History,
+  Inbox,
   LayoutDashboard,
   ListChecks,
   Megaphone,
@@ -115,5 +116,8 @@ export const NAV_ITEMS_GESTION_UTILISATEURS = ["/utilisateurs"];
 /** Section réservée à l'admin Flowise (affichée uniquement pour ce rôle). */
 export const ADMIN_NAV_SECTION: NavSection = {
   title: "Admin Flowise",
-  items: [{ label: "Clients", href: "/admin/clients", icon: Building2 }],
+  items: [
+    { label: "Clients", href: "/admin/clients", icon: Building2 },
+    { label: "Retours", href: "/admin/retours", icon: Inbox },
+  ],
 };
