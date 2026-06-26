@@ -33,7 +33,14 @@ type Retour = {
   date: string;
 };
 
-export function RetourDialog({ retour }: { retour: Retour }) {
+export function RetourDialog({
+  retour,
+  trigger,
+}: {
+  retour: Retour;
+  /** Déclencheur personnalisé (ex. la ligne entière, cliquable). Par défaut : bouton « Traiter ». */
+  trigger?: React.ReactElement;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -61,9 +68,11 @@ export function RetourDialog({ retour }: { retour: Retour }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="outline" size="sm">
-            Traiter
-          </Button>
+          trigger ?? (
+            <Button variant="outline" size="sm">
+              Traiter
+            </Button>
+          )
         }
       />
       <DialogContent className="sm:max-w-lg">

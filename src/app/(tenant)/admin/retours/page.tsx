@@ -114,7 +114,6 @@ export default async function AdminRetoursPage() {
                   <TableHead>Auteur</TableHead>
                   <TableHead>Date &amp; heure</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead className="w-24 text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -126,61 +125,66 @@ export default async function AdminRetoursPage() {
                   // ressortir les sujets encore à traiter.
                   const clos = r.statut === "traite" || r.statut === "rejete";
                   return (
-                    <TableRow key={r.id} className={clos ? "opacity-55" : undefined}>
-                      <TableCell className="font-mono text-muted-foreground text-sm">
-                        #{r.numero}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {RETOUR_TYPE_LABELS[r.type]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        <span className="block truncate font-medium">{r.titre}</span>
-                        {r.page_url ? (
-                          <span className="block truncate font-mono text-muted-foreground text-xs">
-                            {r.page_url}
-                          </span>
-                        ) : null}
-                      </TableCell>
-                      <TableCell>
-                        <span className="block">{auteurNom}</span>
-                        {author?.email && author.full_name ? (
-                          <span className="block text-muted-foreground text-xs">
-                            {author.email}
-                          </span>
-                        ) : null}
-                        {clientNom ? (
-                          <span className="block text-muted-foreground text-xs">{clientNom}</span>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground text-sm">
-                        {formatDateTime(r.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={STATUT_BADGE[r.statut] ?? "bg-secondary"}>
-                          {RETOUR_STATUT_LABELS[r.statut]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <RetourDialog
-                          retour={{
-                            id: r.id,
-                            numero: r.numero,
-                            type: RETOUR_TYPE_LABELS[r.type],
-                            titre: r.titre,
-                            description: r.description,
-                            pageUrl: r.page_url,
-                            statut: r.statut,
-                            noteAdmin: r.note_admin,
-                            auteur: auteurNom,
-                            auteurEmail: author?.email ?? null,
-                            client: clientNom,
-                            date: formatDateTime(r.created_at),
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
+                    <RetourDialog
+                      key={r.id}
+                      retour={{
+                        id: r.id,
+                        numero: r.numero,
+                        type: RETOUR_TYPE_LABELS[r.type],
+                        titre: r.titre,
+                        description: r.description,
+                        pageUrl: r.page_url,
+                        statut: r.statut,
+                        noteAdmin: r.note_admin,
+                        auteur: auteurNom,
+                        auteurEmail: author?.email ?? null,
+                        client: clientNom,
+                        date: formatDateTime(r.created_at),
+                      }}
+                      trigger={
+                        <TableRow
+                          className={`cursor-pointer hover:bg-muted/40 ${clos ? "opacity-55" : ""}`}
+                        >
+                          <TableCell className="font-mono text-muted-foreground text-sm">
+                            #{r.numero}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {RETOUR_TYPE_LABELS[r.type]}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            <span className="block truncate font-medium">{r.titre}</span>
+                            {r.page_url ? (
+                              <span className="block truncate font-mono text-muted-foreground text-xs">
+                                {r.page_url}
+                              </span>
+                            ) : null}
+                          </TableCell>
+                          <TableCell>
+                            <span className="block">{auteurNom}</span>
+                            {author?.email && author.full_name ? (
+                              <span className="block text-muted-foreground text-xs">
+                                {author.email}
+                              </span>
+                            ) : null}
+                            {clientNom ? (
+                              <span className="block text-muted-foreground text-xs">
+                                {clientNom}
+                              </span>
+                            ) : null}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-muted-foreground text-sm">
+                            {formatDateTime(r.created_at)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={STATUT_BADGE[r.statut] ?? "bg-secondary"}>
+                              {RETOUR_STATUT_LABELS[r.statut]}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      }
+                    />
                   );
                 })}
               </TableBody>
