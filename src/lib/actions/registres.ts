@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
+import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { nextActionReference } from "./plan-actions";
 import { softDeleteRow } from "./soft-delete";
 
 async function tenantWrite() {
@@ -16,8 +18,9 @@ async function tenantWrite() {
   return { supabase, tenantId: ctx.effectiveTenantId, userId: ctx.userId };
 }
 
-// ---------------------------------------------------------------- Réclamations
+// ------------------------------------------------------------------ Remontées
 const recBase = {
+  type: z.enum(["reclamation", "dysfonctionnement", "incident", "accident"]),
   objet: z.string().trim().min(2, "Objet requis."),
   client: z.string().trim().optional(),
   dateReception: z.string().optional(),
@@ -27,11 +30,13 @@ const recBase = {
   traitement: z.string().trim().optional(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]),
 };
-const recCreate = z.object(recBase);
+// À la création seulement : générer (ou non) une action liée dans le plan.
+const recCreate = z.object({ ...recBase, creerAction: z.boolean().optional() });
 const recUpdate = z.object({ id: z.string().uuid(), ...recBase });
 
 function recPayload(d: z.infer<typeof recCreate>) {
   return {
+    type: d.type,
     objet: d.objet,
     client: d.client ?? null,
     date_reception: d.dateReception || todayISO(),
@@ -48,10 +53,44 @@ export async function createReclamationAction(input: unknown): Promise<ActionRes
   if (!c) return { ok: false, error: "Sélectionnez d'abord un client." };
   const parsed = recCreate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
-  const { error } = await c.supabase
+  const d = parsed.data;
+
+  const { data: rec, error } = await c.supabase
     .from("reclamations")
-    .insert({ tenant_id: c.tenantId, ...recPayload(parsed.data), created_by: c.userId });
-  if (error) return { ok: false, error: error.message };
+    .insert({ tenant_id: c.tenantId, ...recPayload(d), created_by: c.userId })
+    .select("id")
+    .single();
+  if (error || !rec) return { ok: false, error: error?.message ?? "Création impossible." };
+
+  // Action liée dans le plan d'actions (case cochée par défaut côté formulaire).
+  if (d.creerAction) {
+    const reference = await nextActionReference(c.supabase, c.tenantId);
+    const { data: act, error: actErr } = await c.supabase
+      .from("actions")
+      .insert({
+        tenant_id: c.tenantId,
+        reference,
+        description_courte: `${REMONTEE_TYPE_LABELS[d.type]} : ${d.objet}`,
+        description_detail: d.description ?? null,
+        origine: d.type,
+        type: "corrective",
+        priorite: d.gravite === "critique" ? "p1" : d.gravite === "majeure" ? "p2" : "p3",
+        statut: "a_faire",
+        created_by: c.userId,
+      })
+      .select("id")
+      .single();
+    if (actErr) return { ok: false, error: actErr.message };
+    if (act) {
+      await c.supabase
+        .from("reclamations")
+        .update({ action_id: act.id })
+        .eq("id", rec.id)
+        .eq("tenant_id", c.tenantId);
+    }
+    revalidatePath("/actions");
+  }
+
   revalidatePath("/reclamations");
   return { ok: true };
 }

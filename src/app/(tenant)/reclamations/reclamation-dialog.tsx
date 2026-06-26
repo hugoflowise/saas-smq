@@ -19,6 +19,7 @@ import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ReclamationRow = {
   id: string;
+  type: string;
   objet: string;
   client: string | null;
   date_reception: string;
@@ -44,6 +45,7 @@ export function ReclamationDialog({
     submit(event, {
       action: (f) => {
         const data = {
+          type: f.get("type"),
           objet: f.get("objet"),
           client: f.get("client") || undefined,
           dateReception: f.get("dateReception") || undefined,
@@ -55,9 +57,9 @@ export function ReclamationDialog({
         };
         return isEdit
           ? updateReclamationAction({ id: reclamation?.id, ...data })
-          : createReclamationAction(data);
+          : createReclamationAction({ ...data, creerAction: f.get("creerAction") === "on" });
       },
-      success: isEdit ? "Réclamation mise à jour." : "Réclamation enregistrée.",
+      success: isEdit ? "Remontée mise à jour." : "Remontée enregistrée.",
     });
   }
 
@@ -76,18 +78,34 @@ export function ReclamationDialog({
               </Button>
             ))
           ) : (
-            <Button>Nouvelle réclamation</Button>
+            <Button>Nouvelle remontée</Button>
           )
         }
       />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifier la réclamation" : "Nouvelle réclamation"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Modifier la remontée" : "Nouvelle remontée"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="objet">Objet</Label>
-            <Input id="objet" name="objet" required defaultValue={reclamation?.objet ?? ""} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="type">Type de remontée</Label>
+              <select
+                id="type"
+                name="type"
+                className={SELECT_CLASS}
+                defaultValue={reclamation?.type ?? "reclamation"}
+              >
+                <option value="reclamation">Réclamation</option>
+                <option value="dysfonctionnement">Dysfonctionnement</option>
+                <option value="incident">Incident</option>
+                <option value="accident">Accident</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="objet">Objet</Label>
+              <Input id="objet" name="objet" required defaultValue={reclamation?.objet ?? ""} />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">
@@ -165,6 +183,17 @@ export function ReclamationDialog({
               defaultValue={reclamation?.traitement ?? ""}
             />
           </div>
+          {!isEdit ? (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="creerAction"
+                defaultChecked
+                className="size-4 rounded border-input"
+              />
+              Créer une action liée dans le plan d'actions
+            </label>
+          ) : null}
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
           </Button>
