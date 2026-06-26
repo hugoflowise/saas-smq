@@ -40,10 +40,12 @@ export async function softDeleteRow(table: SoftDeletableTable, id: string): Prom
   if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
   if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
 
+  // updated_by : tracé pour la main courante (le trigger d'audit s'en sert comme
+  // auteur, auth.uid() étant null en service-role).
   const admin = createAdminClient();
   const { error } = await admin
     .from(table)
-    .update({ deleted_at: new Date().toISOString() })
+    .update({ deleted_at: new Date().toISOString(), updated_by: ctx.userId })
     .eq("id", id)
     .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };

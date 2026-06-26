@@ -985,6 +985,7 @@ export type Database = {
           tenant_id: string
           titre: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
@@ -996,6 +997,7 @@ export type Database = {
           tenant_id: string
           titre: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
@@ -1007,11 +1009,19 @@ export type Database = {
           tenant_id?: string
           titre?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "evenements_qualite_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evenements_qualite_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
