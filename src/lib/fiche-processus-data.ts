@@ -90,12 +90,14 @@ export async function loadFicheProcessusData(
       .select("id, nom, cible, unite, sens, formule_calcul, frequence_mesure")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
+      .is("deleted_at", null)
       .order("nom"),
     supabase
       .from("risques_opportunites")
       .select("id, intitule, criticite, type")
       .eq("tenant_id", tid)
       .eq("processus_id", id)
+      .is("deleted_at", null)
       .order("criticite", { ascending: false }),
   ]);
 

@@ -5,6 +5,7 @@ import { CreateProcedureDialog } from "@/app/(tenant)/documentation/procedures/c
 import { CreateIndicateurDialog } from "@/app/(tenant)/indicateurs/create-indicateur-dialog";
 import { NcDialog } from "@/app/(tenant)/nc/nc-dialog";
 import { RoDialog } from "@/app/(tenant)/risques/ro-dialog";
+import { RoTabList } from "@/app/(tenant)/risques/ro-tab-list";
 import { ObjectifDialog } from "@/app/(tenant)/strategie/objectifs/objectif-dialog";
 import { EmptyState } from "@/components/empty-state";
 import type { FicheProcessusData } from "@/components/fiche-processus";
@@ -95,9 +96,12 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("nom"),
     supabase
       .from("risques_opportunites")
-      .select("id, intitule, criticite, type")
+      .select(
+        "id, intitule, type, processus_id, cause, consequence, gravite, probabilite, criticite, gravite_residuelle, probabilite_residuelle, traitement_prevu, statut, date_revue",
+      )
       .eq("tenant_id", tid)
       .eq("processus_id", id)
+      .is("deleted_at", null)
       .order("criticite", { ascending: false }),
     supabase
       .from("non_conformites")
@@ -157,12 +161,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
     primary: p.titre,
     secondary: p.statut,
   }));
-  const roItems: RelatedItem[] = (risques.data ?? []).map((r) => ({
-    id: r.id,
-    href: "/risques",
-    primary: r.intitule,
-    secondary: `${r.type === "risque" ? "Risque" : "Opportunité"} · criticité ${r.criticite}`,
-  }));
+  const roRows = risques.data ?? [];
   const ncItems: RelatedItem[] = (ncs.data ?? []).map((n) => ({
     id: n.id,
     href: `/nc/${n.id}${from}`,
@@ -250,7 +249,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           <TabsTrigger value="indicateurs">Indicateurs ({indList.length})</TabsTrigger>
           <TabsTrigger value="objectifs">Objectifs ({objList.length})</TabsTrigger>
           <TabsTrigger value="procedures">Procédures ({procItems.length})</TabsTrigger>
-          <TabsTrigger value="risques">R&O ({roItems.length})</TabsTrigger>
+          <TabsTrigger value="risques">R&O ({roRows.length})</TabsTrigger>
           <TabsTrigger value="nc">NC liées ({ncItems.length})</TabsTrigger>
         </TabsList>
 
@@ -423,10 +422,14 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           <div className="flex justify-end">
             <RoDialog processusOptions={processusOptions} presetProcessusId={id} />
           </div>
-          <RelatedList
-            items={roItems}
-            empty="Aucun risque ni opportunité rattaché à ce processus."
-          />
+          {roRows.length === 0 ? (
+            <EmptyState
+              title="Aucun risque ni opportunité"
+              description="Aucun risque ni opportunité rattaché à ce processus."
+            />
+          ) : (
+            <RoTabList rows={roRows} processusOptions={processusOptions} />
+          )}
         </TabsContent>
         <TabsContent value="nc" className="flex flex-col gap-3">
           <div className="flex justify-end">

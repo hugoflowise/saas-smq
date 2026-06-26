@@ -37,10 +37,13 @@ export function RoDialog({
   processusOptions,
   ro,
   presetProcessusId,
+  trigger,
 }: {
   processusOptions: { id: string; nom: string }[];
   ro?: RoRow;
   presetProcessusId?: string;
+  /** Déclencheur personnalisé (ex. l'intitulé cliquable). Par défaut : crayon (édition) ou bouton « Nouveau ». */
+  trigger?: React.ReactElement;
 }) {
   const isEdit = Boolean(ro);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -76,13 +79,14 @@ export function RoDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          isEdit ? (
+          trigger ??
+          (isEdit ? (
             <Button variant="ghost" size="icon" aria-label="Modifier">
               <Pencil className="size-4" />
             </Button>
           ) : (
             <Button>Nouveau risque / opportunité</Button>
-          )
+          ))
         }
       />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">

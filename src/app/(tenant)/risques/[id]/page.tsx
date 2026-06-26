@@ -50,6 +50,7 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
     )
     .eq("id", id)
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (!ro) notFound();
