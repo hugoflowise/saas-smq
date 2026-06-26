@@ -12,10 +12,14 @@ import puppeteer, { type Browser } from "puppeteer-core";
  */
 export async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL) {
+    // Désactive le mode graphique (WebGL) : inutile pour un PDF et plus léger
+    // en mémoire sur le runtime serverless.
+    chromium.setGraphicsMode = false;
     return puppeteer.launch({
       args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: chromium.headless,
     });
   }
 

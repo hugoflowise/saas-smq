@@ -71,8 +71,14 @@ export async function GET(
     });
   } catch (error) {
     console.error("Génération PDF échouée:", error);
+    // DIAGNOSTIC TEMPORAIRE : message d'erreur réel exposé dans la réponse pour
+    // débogage (lisible via l'onglet Réseau). À retirer une fois résolu.
     return NextResponse.json(
-      { ok: false, error: "Génération du PDF impossible." },
+      {
+        ok: false,
+        error: "Génération du PDF impossible.",
+        detail: String((error as Error)?.stack ?? error),
+      },
       { status: 500 },
     );
   } finally {
