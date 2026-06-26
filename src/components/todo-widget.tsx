@@ -29,23 +29,19 @@ export function TodoWidget({ initialTodos }: { initialTodos: TodoPerso[] }) {
   const movedRef = useRef(false);
   const elRef = useRef<HTMLDivElement | HTMLButtonElement | null>(null);
 
-  // Restaure position + état réduit (préférences UI locales au navigateur).
+  // Restaure position + état réduit (préférences UI locales au navigateur). Un
+  // seul effet : sinon le « défaut » et le « restauré » se concurrencent au
+  // montage et la position mémorisée est écrasée à chaque actualisation.
   useEffect(() => {
+    const defaut = { x: window.innerWidth - WIDTH - 24, y: window.innerHeight - 420 };
     try {
       const raw = localStorage.getItem(POS_KEY);
-      if (raw) setPos(JSON.parse(raw));
+      setPos(raw ? JSON.parse(raw) : defaut);
       setMinimized(localStorage.getItem(MIN_KEY) === "1");
     } catch {
-      // ignore (localStorage indisponible)
+      setPos(defaut);
     }
   }, []);
-
-  // Position par défaut : coin bas-droit, si rien de mémorisé.
-  useEffect(() => {
-    if (pos === null && typeof window !== "undefined") {
-      setPos({ x: window.innerWidth - WIDTH - 24, y: window.innerHeight - 420 });
-    }
-  }, [pos]);
 
   const savePos = useCallback((p: Pos) => {
     try {
