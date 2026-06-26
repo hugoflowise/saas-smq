@@ -1,8 +1,8 @@
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
@@ -57,10 +57,7 @@ export default async function ReunionDetailPage({ params }: { params: Promise<{ 
       </Link>
 
       <PageHeader title={reunion.titre} description="Préparation, tenue en séance et compte rendu.">
-        <Button variant="outline" className="gap-2" render={<Link href={`/print/reunion/${id}`} />}>
-          <FileText className="size-4" />
-          Compte rendu (PDF)
-        </Button>
+        <DownloadPdfButton printHref={`/print/reunion/${id}`} label="Compte rendu (PDF)" />
       </PageHeader>
 
       <Card className="mb-6">

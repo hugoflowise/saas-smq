@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Chromium headless (génération PDF) : ces paquets embarquent des binaires et
+  // ne doivent pas être bundlés par Next, sinon le build casse / le binaire est
+  // introuvable au runtime.
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
 };
 
 export default nextConfig;

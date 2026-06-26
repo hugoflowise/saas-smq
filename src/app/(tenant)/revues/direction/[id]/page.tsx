@@ -1,8 +1,8 @@
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 import { ACTION_STATUT_LABELS } from "@/lib/labels";
@@ -72,10 +72,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
         isoClause="ISO 9001 §9.3"
         help="Structurez les éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue. Les données de performance peuvent être pré-remplies depuis le pilotage."
       >
-        <Button variant="outline" className="gap-2" render={<Link href={`/print/revue/${id}`} />}>
-          <FileText className="size-4" />
-          Compte rendu (PDF)
-        </Button>
+        <DownloadPdfButton printHref={`/print/revue/${id}`} label="Compte rendu (PDF)" />
         <RevueDialog revue={revue} />
       </PageHeader>
 

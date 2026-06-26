@@ -1,8 +1,7 @@
-import { FileText } from "lucide-react";
 import Link from "next/link";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -115,15 +114,11 @@ export default async function ReunionsPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Compte rendu PDF"
-                        title="Compte rendu (PDF)"
-                        render={<Link href={`/print/reunion/${r.id}`} target="_blank" />}
-                      >
-                        <FileText className="size-4" />
-                      </Button>
+                      <DownloadPdfButton
+                        printHref={`/print/reunion/${r.id}`}
+                        label="Compte rendu (PDF)"
+                        iconOnly
+                      />
                     </TableCell>
                   </TableRow>
                 );
