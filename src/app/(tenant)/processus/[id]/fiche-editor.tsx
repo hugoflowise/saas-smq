@@ -15,6 +15,10 @@ import { SELECT_CLASS } from "@/lib/ui-classes";
 type Activite = { activite: string; responsable: string; documents: string };
 type Interaction = { fournisseur: string; nature: string; client: string };
 
+// Champ de ligne (activités, interactions) : démarre à la hauteur d'un Input
+// puis s'agrandit tout seul avec le contenu (field-sizing-content sur Textarea).
+const LIGNE_CLASS = "min-h-8 resize-none py-1 leading-snug";
+
 export type FicheEditorInitial = {
   id: string;
   nom: string;
@@ -241,19 +245,28 @@ export function FicheEditor({
         ajout={() => setActivites((a) => [...a, { activite: "", responsable: "", documents: "" }])}
       >
         {activites.map((a, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
-          <div key={`act-${i}`} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-            <Input
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+            key={`act-${i}`}
+            className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+          >
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Activité"
               value={a.activite}
               onChange={(e) => majActivite(setActivites, i, "activite", e.target.value)}
             />
-            <Input
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Responsable"
               value={a.responsable}
               onChange={(e) => majActivite(setActivites, i, "responsable", e.target.value)}
             />
-            <Input
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Documents / outils"
               value={a.documents}
               onChange={(e) => majActivite(setActivites, i, "documents", e.target.value)}
@@ -277,19 +290,28 @@ export function FicheEditor({
           </div>
         ) : null}
         {interactions.map((it, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
-          <div key={`int-${i}`} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-            <Input
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+            key={`int-${i}`}
+            className="grid grid-cols-1 items-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+          >
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Processus fournisseur"
               value={it.fournisseur}
               onChange={(e) => majInteraction(setInteractions, i, "fournisseur", e.target.value)}
             />
-            <Input
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Nature de l'interaction"
               value={it.nature}
               onChange={(e) => majInteraction(setInteractions, i, "nature", e.target.value)}
             />
-            <Input
+            <Textarea
+              rows={1}
+              className={LIGNE_CLASS}
               placeholder="Processus client"
               value={it.client}
               onChange={(e) => majInteraction(setInteractions, i, "client", e.target.value)}
