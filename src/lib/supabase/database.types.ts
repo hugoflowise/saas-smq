@@ -2892,6 +2892,7 @@ export type Database = {
           description: string | null
           id: string
           note_admin: string | null
+          numero: number
           page_url: string | null
           statut: Database["public"]["Enums"]["retour_statut"]
           tenant_id: string | null
@@ -2905,6 +2906,7 @@ export type Database = {
           description?: string | null
           id?: string
           note_admin?: string | null
+          numero?: number
           page_url?: string | null
           statut?: Database["public"]["Enums"]["retour_statut"]
           tenant_id?: string | null
@@ -2918,6 +2920,7 @@ export type Database = {
           description?: string | null
           id?: string
           note_admin?: string | null
+          numero?: number
           page_url?: string | null
           statut?: Database["public"]["Enums"]["retour_statut"]
           tenant_id?: string | null
