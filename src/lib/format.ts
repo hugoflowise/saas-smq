@@ -5,6 +5,14 @@ export function formatDate(d: string | null | undefined): string {
   return d ? new Date(d).toLocaleDateString("fr-FR") : "-";
 }
 
+/** Date + heure « jj/mm/aaaa à hh:mm ». Renvoie « - » si la valeur est absente. */
+export function formatDateTime(d: string | null | undefined): string {
+  if (!d) return "-";
+  const date = new Date(d);
+  const heure = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  return `${date.toLocaleDateString("fr-FR")} à ${heure}`;
+}
+
 /**
  * Date du jour au format ISO court (AAAA-MM-JJ).
  * Pratique pour comparer aux colonnes `date` de Postgres (même format).

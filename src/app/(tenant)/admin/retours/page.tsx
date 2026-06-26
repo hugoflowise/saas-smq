@@ -10,17 +10,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDate, nomPersonne } from "@/lib/format";
+import { formatDateTime, nomPersonne } from "@/lib/format";
 import { RETOUR_STATUT_LABELS, RETOUR_TYPE_LABELS } from "@/lib/labels";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { RetourDialog } from "./retour-dialog";
 
-const STATUT_VARIANT: Record<string, "secondary" | "outline"> = {
-  nouveau: "secondary",
-  en_cours: "secondary",
-  traite: "outline",
-  rejete: "outline",
+// Couleur du statut : les sujets à traiter ressortent (ambre / bleu),
+// les traités passent au vert et les rejetés en gris discret.
+const STATUT_BADGE: Record<string, string> = {
+  nouveau: "bg-status-pa/15 text-status-pa",
+  en_cours: "bg-primary/10 text-primary",
+  traite: "bg-status-conforme/15 text-status-conforme",
+  rejete: "bg-muted text-muted-foreground",
+};
+
+// Ordre d'affichage : à traiter en premier, traités/rejetés relégués en bas.
+const STATUT_ORDRE: Record<string, number> = {
+  nouveau: 0,
+  en_cours: 1,
+  traite: 2,
+  rejete: 3,
 };
 
 export default async function AdminRetoursPage() {
@@ -42,7 +52,11 @@ export default async function AdminRetoursPage() {
       "id, tenant_id, type, titre, description, page_url, statut, note_admin, created_at, created_by",
     )
     .order("created_at", { ascending: false });
-  const retours = retoursData ?? [];
+  // Tri stable : on garde l'ordre chronologique (récent → ancien) à l'intérieur de
+  // chaque statut, mais on remonte les statuts « à traiter » en haut du tableau.
+  const retours = (retoursData ?? [])
+    .slice()
+    .sort((a, b) => (STATUT_ORDRE[a.statut] ?? 9) - (STATUT_ORDRE[b.statut] ?? 9));
 
   // Auteurs + sociétés (pour le contexte)
   const authorIds = [...new Set(retours.map((r) => r.created_by).filter(Boolean) as string[])];
@@ -97,7 +111,7 @@ export default async function AdminRetoursPage() {
                   <TableHead>Type</TableHead>
                   <TableHead>Objet</TableHead>
                   <TableHead>Auteur</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date &amp; heure</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="w-24 text-right">Action</TableHead>
                 </TableRow>
@@ -107,8 +121,11 @@ export default async function AdminRetoursPage() {
                   const author = r.created_by ? authorById.get(r.created_by) : null;
                   const auteurNom = author ? nomPersonne(author.full_name, author.email) : "—";
                   const clientNom = r.tenant_id ? (tenantById.get(r.tenant_id) ?? null) : null;
+                  // Les retours clos (traité / rejeté) sont atténués pour faire
+                  // ressortir les sujets encore à traiter.
+                  const clos = r.statut === "traite" || r.statut === "rejete";
                   return (
-                    <TableRow key={r.id}>
+                    <TableRow key={r.id} className={clos ? "opacity-55" : undefined}>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
                           {RETOUR_TYPE_LABELS[r.type]}
@@ -133,11 +150,11 @@ export default async function AdminRetoursPage() {
                           <span className="block text-muted-foreground text-xs">{clientNom}</span>
                         ) : null}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(r.created_at)}
+                      <TableCell className="whitespace-nowrap text-muted-foreground text-sm">
+                        {formatDateTime(r.created_at)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={STATUT_VARIANT[r.statut] ?? "secondary"}>
+                        <Badge className={STATUT_BADGE[r.statut] ?? "bg-secondary"}>
                           {RETOUR_STATUT_LABELS[r.statut]}
                         </Badge>
                       </TableCell>
@@ -154,7 +171,7 @@ export default async function AdminRetoursPage() {
                             auteur: auteurNom,
                             auteurEmail: author?.email ?? null,
                             client: clientNom,
-                            date: formatDate(r.created_at),
+                            date: formatDateTime(r.created_at),
                           }}
                         />
                       </TableCell>
