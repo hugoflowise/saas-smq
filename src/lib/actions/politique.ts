@@ -8,6 +8,7 @@ import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionLettre } from "@/lib/versions";
 
 type PolitiqueUpdate = Database["public"]["Tables"]["politique_qualite"]["Update"];
 
@@ -159,7 +160,7 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
     .from("politique_qualite_versions")
     .select("id", { count: "exact", head: true })
     .eq("politique_id", politique.id);
-  const version = `v${(count ?? 0) + 1}`;
+  const version = versionLettre(count ?? 0);
 
   const { data: created, error: versionError } = await supabase
     .from("politique_qualite_versions")

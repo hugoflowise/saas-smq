@@ -247,8 +247,8 @@ export function DocumentDialog({
               <Input
                 id="version"
                 name="version"
-                defaultValue={document?.version ?? ""}
-                placeholder="V1"
+                defaultValue={document?.version ?? "A"}
+                placeholder="A"
               />
             </div>
             <div className="flex flex-col gap-2">
