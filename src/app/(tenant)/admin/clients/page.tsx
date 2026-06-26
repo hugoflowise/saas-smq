@@ -11,10 +11,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { nomPersonne } from "@/lib/format";
+import { SECTEUR_LABELS } from "@/lib/labels";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { CreateTenantDialog } from "./create-tenant-dialog";
+import { DeleteTenantDialog } from "./delete-tenant-dialog";
 import { EditTenantDialog } from "./edit-tenant-dialog";
+import { RestoreTenantButton } from "./restore-tenant-button";
+
+function secteurLabel(s: string | null): string {
+  if (!s) return "-";
+  return SECTEUR_LABELS[s as keyof typeof SECTEUR_LABELS] ?? s;
+}
 
 export default async function AdminClientsPage() {
   const supabase = await createClient();
@@ -37,9 +45,18 @@ export default async function AdminClientsPage() {
   const { data: tenants } = await admin
     .from("tenants")
     .select(
-      "id, nom_societe, formule, statut, effectif_tranche, secteur, logo_url, responsable_flowise_id, created_at",
+      "id, nom_societe, formule, statut, effectif_tranche, secteur, bureau_etudes, logo_url, responsable_flowise_id, created_at",
     )
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
+
+  // Corbeille : clients supprimés (réversible)
+  const { data: deletedTenants } = await admin
+    .from("tenants")
+    .select("id, nom_societe, secteur, deleted_at")
+    .not("deleted_at", "is", null)
+    .order("deleted_at", { ascending: false });
+  const corbeille = deletedTenants ?? [];
 
   // Équipe Flowise (admin Flowise) : candidats au rôle de Responsable Qualité.
   const { data: equipeFlowise } = await admin
@@ -80,7 +97,7 @@ export default async function AdminClientsPage() {
                 <TableHead>Effectif</TableHead>
                 <TableHead>Secteur</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
+                <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -100,31 +117,44 @@ export default async function AdminClientsPage() {
                       )}
                     </TableCell>
                     <TableCell>{t.effectif_tranche ?? "-"}</TableCell>
-                    <TableCell>{t.secteur ?? "-"}</TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-1.5">
+                        {secteurLabel(t.secteur)}
+                        {t.bureau_etudes ? (
+                          <Badge variant="outline" className="text-xs">
+                            BE
+                          </Badge>
+                        ) : null}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary">{t.statut}</Badge>
                     </TableCell>
                     <TableCell>
-                      <EditTenantDialog
-                        flowiseTeam={flowiseTeam}
-                        tenant={{
-                          id: t.id,
-                          nom_societe: t.nom_societe,
-                          effectif_tranche: t.effectif_tranche,
-                          secteur: t.secteur,
-                          logo_url: t.logo_url,
-                          responsable_flowise_id: t.responsable_flowise_id,
-                        }}
-                        dirigeant={
-                          dirigeant
-                            ? {
-                                id: dirigeant.id,
-                                full_name: dirigeant.full_name,
-                                email: dirigeant.email,
-                              }
-                            : null
-                        }
-                      />
+                      <div className="flex items-center justify-end gap-1">
+                        <EditTenantDialog
+                          flowiseTeam={flowiseTeam}
+                          tenant={{
+                            id: t.id,
+                            nom_societe: t.nom_societe,
+                            effectif_tranche: t.effectif_tranche,
+                            secteur: t.secteur,
+                            bureau_etudes: t.bureau_etudes,
+                            logo_url: t.logo_url,
+                            responsable_flowise_id: t.responsable_flowise_id,
+                          }}
+                          dirigeant={
+                            dirigeant
+                              ? {
+                                  id: dirigeant.id,
+                                  full_name: dirigeant.full_name,
+                                  email: dirigeant.email,
+                                }
+                              : null
+                          }
+                        />
+                        <DeleteTenantDialog tenantId={t.id} nomSociete={t.nom_societe} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -138,6 +168,31 @@ export default async function AdminClientsPage() {
           description="Créez votre première société cliente pour commencer."
         />
       )}
+
+      {corbeille.length > 0 ? (
+        <section className="mt-8">
+          <h2 className="mb-2 font-semibold text-muted-foreground text-sm">
+            Corbeille ({corbeille.length})
+          </h2>
+          <div className="rounded-2xl border bg-card">
+            <Table>
+              <TableBody>
+                {corbeille.map((t) => (
+                  <TableRow key={t.id}>
+                    <TableCell className="font-medium">{t.nom_societe}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {secteurLabel(t.secteur)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <RestoreTenantButton tenantId={t.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

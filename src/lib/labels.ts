@@ -91,3 +91,16 @@ export const ROLE_LABELS = {
   manager: "Manager",
   auditeur: "Auditeur (lecture seule)",
 } as const;
+
+// Secteur d'activité du client. « AT » (assistance technique) est un héritage
+// conservé pour l'affichage mais n'est plus proposé à la saisie (toutes les
+// sociétés d'ingénierie / ESN font de l'AT — ce n'est pas un secteur).
+export const SECTEUR_LABELS = {
+  SI: "Société d'ingénierie",
+  ESN: "ESN",
+  AT: "Assistance technique",
+  autre: "Autre",
+} as const;
+
+// Secteurs proposés à la saisie (création / modification d'un client).
+export const SECTEUR_OPTIONS = ["SI", "ESN", "autre"] as const;

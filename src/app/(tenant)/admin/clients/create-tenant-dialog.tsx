@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createTenantAction } from "@/lib/actions/tenants";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateTenantDialog() {
@@ -28,6 +29,7 @@ export function CreateTenantDialog() {
           formule: form.get("formule"),
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
+          bureauEtudes: form.get("bureauEtudes") === "on",
         }),
       success: "Client créé. Le dirigeant peut se connecter via son e-mail.",
     });
@@ -85,14 +87,20 @@ export function CreateTenantDialog() {
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="secteur">Secteur</Label>
-              <select id="secteur" name="secteur" className={SELECT_CLASS} defaultValue="ESN">
-                <option value="SI">SI</option>
-                <option value="ESN">ESN</option>
-                <option value="AT">AT</option>
-                <option value="autre">Autre</option>
+              <select id="secteur" name="secteur" className={SELECT_CLASS} defaultValue="SI">
+                {SECTEUR_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {SECTEUR_LABELS[s]}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="bureauEtudes" className="size-4" />
+            Activité bureau d'études / conception (§8.3)
+          </label>
 
           <Button type="submit" disabled={pending} className="mt-2">
             {pending ? "Création…" : "Créer le client"}
