@@ -30,8 +30,22 @@ const recBase = {
   traitement: z.string().trim().optional(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]),
 };
+// Champs de l'action liée, saisis directement dans le formulaire de remontée
+// (tout est facultatif : on retombe sur des valeurs déduites du sujet si vide).
+const recActionSchema = z.object({
+  descriptionCourte: z.string().trim().optional(),
+  descriptionDetail: z.string().trim().optional(),
+  type: z.enum(["preventive", "corrective"]).optional(),
+  priorite: z.enum(["p1", "p2", "p3"]).optional(),
+  datePrevue: z.string().optional(),
+  processusConcerne: z.string().uuid().optional(),
+});
 // À la création seulement : générer (ou non) une action liée dans le plan.
-const recCreate = z.object({ ...recBase, creerAction: z.boolean().optional() });
+const recCreate = z.object({
+  ...recBase,
+  creerAction: z.boolean().optional(),
+  action: recActionSchema.optional(),
+});
 const recUpdate = z.object({ id: z.string().uuid(), ...recBase });
 
 function recPayload(d: z.infer<typeof recCreate>) {
@@ -63,19 +77,26 @@ export async function createReclamationAction(input: unknown): Promise<ActionRes
   if (error || !rec) return { ok: false, error: error?.message ?? "Création impossible." };
 
   // Action liée dans le plan d'actions (case cochée par défaut côté formulaire).
+  // Les champs sont saisis dans le formulaire de remontée ; à défaut, on déduit
+  // l'intitulé/priorité du sujet (objet + gravité).
   if (d.creerAction) {
+    const a = d.action ?? {};
     const reference = await nextActionReference(c.supabase, c.tenantId);
     const { data: act, error: actErr } = await c.supabase
       .from("actions")
       .insert({
         tenant_id: c.tenantId,
         reference,
-        description_courte: `${REMONTEE_TYPE_LABELS[d.type]} : ${d.objet}`,
-        description_detail: d.description ?? null,
+        description_courte:
+          a.descriptionCourte?.trim() || `${REMONTEE_TYPE_LABELS[d.type]} : ${d.objet}`,
+        description_detail: a.descriptionDetail ?? d.description ?? null,
         origine: d.type,
-        type: "corrective",
-        priorite: d.gravite === "critique" ? "p1" : d.gravite === "majeure" ? "p2" : "p3",
+        type: a.type ?? "corrective",
+        priorite:
+          a.priorite ?? (d.gravite === "critique" ? "p1" : d.gravite === "majeure" ? "p2" : "p3"),
         statut: "a_faire",
+        date_prevue: a.datePrevue || null,
+        processus_concerne: a.processusConcerne ?? null,
         created_by: c.userId,
       })
       .select("id")

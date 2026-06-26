@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createReclamationAction, updateReclamationAction } from "@/lib/actions/registres";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { ACTION_PRIORITE_LABELS, ACTION_TYPE_LABELS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ReclamationRow = {
@@ -33,13 +35,17 @@ export type ReclamationRow = {
 export function ReclamationDialog({
   reclamation,
   trigger,
+  processusOptions = [],
 }: {
   reclamation?: ReclamationRow;
   trigger?: React.ReactElement;
+  processusOptions?: { id: string; nom: string }[];
 }) {
   const isEdit = Boolean(reclamation);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+  // À la création : la case « créer une action » révèle les champs de l'action.
+  const [creerAction, setCreerAction] = useState(true);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -55,9 +61,22 @@ export function ReclamationDialog({
           traitement: f.get("traitement") || undefined,
           statut: f.get("statut"),
         };
-        return isEdit
-          ? updateReclamationAction({ id: reclamation?.id, ...data })
-          : createReclamationAction({ ...data, creerAction: f.get("creerAction") === "on" });
+        if (isEdit) return updateReclamationAction({ id: reclamation?.id, ...data });
+        const withAction = f.get("creerAction") === "on";
+        return createReclamationAction({
+          ...data,
+          creerAction: withAction,
+          action: withAction
+            ? {
+                descriptionCourte: f.get("actionDescriptionCourte") || undefined,
+                descriptionDetail: f.get("actionDescriptionDetail") || undefined,
+                type: f.get("actionType") || undefined,
+                priorite: f.get("actionPriorite") || undefined,
+                datePrevue: f.get("actionDatePrevue") || undefined,
+                processusConcerne: f.get("actionProcessus") || undefined,
+              }
+            : undefined,
+        });
       },
       success: isEdit ? "Remontée mise à jour." : "Remontée enregistrée.",
     });
@@ -184,15 +203,92 @@ export function ReclamationDialog({
             />
           </div>
           {!isEdit ? (
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="creerAction"
-                defaultChecked
-                className="size-4 rounded border-input"
-              />
-              Créer une action liée dans le plan d'actions
-            </label>
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-3">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  name="creerAction"
+                  checked={creerAction}
+                  onChange={(e) => setCreerAction(e.target.checked)}
+                  className="size-4 rounded border-input"
+                />
+                Créer une action liée dans le plan d'actions
+              </label>
+              {creerAction ? (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="actionDescriptionCourte">Intitulé de l'action</Label>
+                    <Input
+                      id="actionDescriptionCourte"
+                      name="actionDescriptionCourte"
+                      placeholder="Repris de l'objet de la remontée si laissé vide"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="actionType">Type d'action</Label>
+                      <select
+                        id="actionType"
+                        name="actionType"
+                        className={SELECT_CLASS}
+                        defaultValue="corrective"
+                      >
+                        {Object.entries(ACTION_TYPE_LABELS).map(([v, l]) => (
+                          <option key={v} value={v}>
+                            {l}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="actionPriorite">Priorité</Label>
+                      <select
+                        id="actionPriorite"
+                        name="actionPriorite"
+                        className={SELECT_CLASS}
+                        defaultValue=""
+                      >
+                        <option value="">Selon la gravité</option>
+                        {Object.entries(ACTION_PRIORITE_LABELS).map(([v, l]) => (
+                          <option key={v} value={v}>
+                            {l}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="actionDatePrevue">Échéance</Label>
+                      <Input id="actionDatePrevue" name="actionDatePrevue" type="date" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="actionProcessus">Processus concerné</Label>
+                      <select
+                        id="actionProcessus"
+                        name="actionProcessus"
+                        className={SELECT_CLASS}
+                        defaultValue=""
+                      >
+                        <option value="">-</option>
+                        {processusOptions.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nom}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="actionDescriptionDetail">Détail / action à mener</Label>
+                    <Textarea
+                      id="actionDescriptionDetail"
+                      name="actionDescriptionDetail"
+                      rows={2}
+                      placeholder="Reprend la description de la remontée si laissé vide"
+                    />
+                  </div>
+                </>
+              ) : null}
+            </div>
           ) : null}
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
