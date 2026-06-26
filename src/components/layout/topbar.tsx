@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
+import { FeedbackButton } from "./feedback-button";
 import { NavLinks } from "./nav-links";
 import { NotificationBell, type NotificationItem } from "./notification-bell";
 import { TenantSwitcher } from "./tenant-switcher";
@@ -112,6 +113,7 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-1">
+        <FeedbackButton />
         <NotificationBell notifications={notifications} unreadCount={unreadCount} />
 
         <DropdownMenu>
