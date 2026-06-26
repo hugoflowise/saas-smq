@@ -22,6 +22,8 @@ import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Activite = { activite: string; responsable: string; documents: string };
 type Interaction = { fournisseur: string; nature: string; client: string };
+// Ligne de pilote : « mode » = id d'un utilisateur, ou « __autre__ » pour un nom libre.
+type PiloteLigne = { mode: string; nom: string };
 
 // Champ de ligne (activités, interactions) : démarre à la hauteur d'un Input
 // puis s'agrandit tout seul avec le contenu (field-sizing-content sur Textarea).
@@ -32,8 +34,7 @@ export type FicheEditorInitial = {
   nom: string;
   intituleLong: string;
   type: string;
-  piloteId: string;
-  piloteNom: string;
+  pilotes: { piloteId: string; piloteNom: string }[];
   dateDerniereRevue: string;
   dateProchaineRevue: string;
   finalite: string;
@@ -70,26 +71,30 @@ export function FicheEditor({
   const [pending, setPending] = useState(false);
   const [activites, setActivites] = useState<Activite[]>(initial.activites);
   const [interactions, setInteractions] = useState<Interaction[]>(initial.interactions);
-  // Pilote : un utilisateur de l'application, ou « Autre » = personne sans compte
-  // (nom saisi librement, sans accès ni e-mail). On démarre sur « Autre » si un
-  // nom libre est déjà renseigné.
-  const [piloteMode, setPiloteMode] = useState<string>(
-    initial.piloteNom.trim() ? "__autre__" : initial.piloteId,
+  // Pilotes : un ou plusieurs, chacun un utilisateur de l'application ou « Autre »
+  // (personne sans compte, nom saisi librement). On démarre sur « Autre » si un
+  // nom libre est déjà renseigné pour la ligne.
+  const [pilotes, setPilotes] = useState<PiloteLigne[]>(
+    initial.pilotes.map((p) => ({
+      mode: p.piloteNom.trim() ? "__autre__" : p.piloteId,
+      nom: p.piloteNom,
+    })),
   );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const f = new FormData(event.currentTarget);
     setPending(true);
-    // « Autre » → on enregistre un nom libre (sans compte) ; sinon un utilisateur lié.
-    const autre = piloteMode === "__autre__";
+    // Chaque ligne « Autre » → nom libre (sans compte) ; sinon un utilisateur lié.
+    const pilotesPayload = pilotes
+      .map((pl) => (pl.mode === "__autre__" ? { piloteNom: pl.nom.trim() } : { piloteId: pl.mode }))
+      .filter((pl) => ("piloteId" in pl ? pl.piloteId : pl.piloteNom));
     const result = await saveFicheProcessusAction({
       id: initial.id,
       nom: f.get("nom"),
       intituleLong: f.get("intituleLong") || undefined,
       type: f.get("type"),
-      piloteId: autre ? "" : piloteMode,
-      piloteNom: autre ? (f.get("piloteNom") as string) || undefined : undefined,
+      pilotes: pilotesPayload,
       dateDerniereRevue: f.get("dateDerniereRevue") || undefined,
       dateProchaineRevue: f.get("dateProchaineRevue") || undefined,
       finalite: f.get("finalite") || undefined,
@@ -153,29 +158,58 @@ export function FicheEditor({
                 <option value="support">Support</option>
               </select>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="piloteMode">Pilote du processus</Label>
-              <select
-                id="piloteMode"
-                className={SELECT_CLASS}
-                value={piloteMode}
-                onChange={(e) => setPiloteMode(e.target.value)}
-              >
-                <option value="">Non défini</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nom}
-                  </option>
-                ))}
-                <option value="__autre__">Autre — personne sans compte…</option>
-              </select>
-              {piloteMode === "__autre__" ? (
-                <Input
-                  name="piloteNom"
-                  placeholder="Nom du pilote (ex. Thomas Riou - Président)"
-                  defaultValue={initial.piloteNom}
-                />
-              ) : null}
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <Label>Pilotes du processus</Label>
+              <div className="flex flex-col gap-2">
+                {pilotes.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">Aucun pilote désigné.</p>
+                ) : (
+                  pilotes.map((pl, i) => (
+                    <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: lignes locales éditables
+                      key={`pil-${i}`}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-start"
+                    >
+                      <select
+                        className={`${SELECT_CLASS} sm:flex-1`}
+                        value={pl.mode}
+                        onChange={(e) => majPilote(setPilotes, i, "mode", e.target.value)}
+                      >
+                        <option value="">Non défini</option>
+                        {users.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.nom}
+                          </option>
+                        ))}
+                        <option value="__autre__">Autre — personne sans compte…</option>
+                      </select>
+                      {pl.mode === "__autre__" ? (
+                        <Input
+                          className="sm:flex-1"
+                          placeholder="Nom du pilote (ex. Thomas Riou - Président)"
+                          value={pl.nom}
+                          onChange={(e) => majPilote(setPilotes, i, "nom", e.target.value)}
+                        />
+                      ) : null}
+                      <SupprBtn
+                        onClick={() => setPilotes((arr) => arr.filter((_, j) => j !== i))}
+                      />
+                    </div>
+                  ))
+                )}
+                <div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => setPilotes((a) => [...a, { mode: "", nom: "" }])}
+                  >
+                    <Plus className="size-3.5" />
+                    Ajouter un pilote
+                  </Button>
+                </div>
+              </div>
             </div>
             <Champ
               name="referentiels"
@@ -535,4 +569,13 @@ function majInteraction(
   value: string,
 ) {
   set((arr) => arr.map((it, j) => (j === index ? { ...it, [key]: value } : it)));
+}
+
+function majPilote(
+  set: React.Dispatch<React.SetStateAction<PiloteLigne[]>>,
+  index: number,
+  key: keyof PiloteLigne,
+  value: string,
+) {
+  set((arr) => arr.map((pl, j) => (j === index ? { ...pl, [key]: value } : pl)));
 }

@@ -18,8 +18,14 @@ const ficheSchema = z.object({
   nom: z.string().trim().min(2, "Nom requis."),
   intituleLong: z.string().trim().optional(),
   type: z.enum(["pilotage", "realisation", "support"]),
-  piloteId: z.string().uuid().optional().or(z.literal("")),
-  piloteNom: z.string().trim().optional(),
+  pilotes: z
+    .array(
+      z.object({
+        piloteId: z.string().uuid().optional().or(z.literal("")),
+        piloteNom: z.string().trim().optional(),
+      }),
+    )
+    .default([]),
   dateDerniereRevue: z.string().optional(),
   dateProchaineRevue: z.string().optional(),
   finalite: z.string().trim().optional(),
@@ -84,8 +90,6 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
       nom: d.nom,
       intitule_long: d.intituleLong ?? null,
       type: d.type,
-      pilote_id: d.piloteId ? d.piloteId : null,
-      pilote_nom: d.piloteNom ?? null,
       date_derniere_revue: d.dateDerniereRevue || null,
       date_prochaine_revue: d.dateProchaineRevue || null,
       finalite: d.finalite ?? null,
@@ -108,7 +112,30 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
     .eq("tenant_id", tid);
   if (upErr) return { ok: false, error: upErr.message };
 
-  // Remplacement complet des lignes filles (activités, interactions).
+  // Remplacement complet des lignes filles (pilotes, activités, interactions).
+  await supabase.from("processus_pilotes").delete().eq("processus_id", d.id).eq("tenant_id", tid);
+  // On ne garde que les lignes désignant un utilisateur ou un nom libre.
+  const pilotes = d.pilotes
+    .map((pl) => ({
+      piloteId: pl.piloteId?.trim() ? pl.piloteId.trim() : null,
+      piloteNom: pl.piloteNom?.trim() ? pl.piloteNom.trim() : null,
+    }))
+    .filter((pl) => pl.piloteId || pl.piloteNom);
+  if (pilotes.length > 0) {
+    const { error } = await supabase.from("processus_pilotes").insert(
+      pilotes.map((pl, i) => ({
+        tenant_id: tid,
+        processus_id: d.id,
+        ordre: i,
+        // Nom libre prioritaire : si renseigné, on n'enregistre pas d'utilisateur lié.
+        pilote_id: pl.piloteNom ? null : pl.piloteId,
+        pilote_nom: pl.piloteNom,
+        created_by: ctx.userId,
+      })),
+    );
+    if (error) return { ok: false, error: error.message };
+  }
+
   await supabase.from("processus_activites").delete().eq("processus_id", d.id).eq("tenant_id", tid);
   if (d.activites.length > 0) {
     const { error } = await supabase.from("processus_activites").insert(
