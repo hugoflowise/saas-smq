@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateTenantAction, uploadTenantLogoAction } from "@/lib/actions/tenants";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Tenant = {
@@ -24,6 +25,7 @@ type Tenant = {
   nom_societe: string;
   effectif_tranche: string | null;
   secteur: string | null;
+  bureau_etudes: boolean;
   logo_url: string | null;
   responsable_flowise_id: string | null;
 };
@@ -68,6 +70,7 @@ export function EditTenantDialog({
           nomSociete: form.get("nomSociete"),
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
+          bureauEtudes: form.get("bureauEtudes") === "on",
           dirigeantId: dirigeant?.id,
           dirigeantNom: form.get("dirigeantNom") || undefined,
           responsableFlowiseId: form.get("responsableFlowiseId") || "",
@@ -176,15 +179,33 @@ export function EditTenantDialog({
                 id="secteur"
                 name="secteur"
                 className={SELECT_CLASS}
-                defaultValue={tenant.secteur ?? "ESN"}
+                defaultValue={tenant.secteur ?? "SI"}
               >
-                <option value="SI">SI</option>
-                <option value="ESN">ESN</option>
-                <option value="AT">AT</option>
-                <option value="autre">Autre</option>
+                {SECTEUR_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {SECTEUR_LABELS[s]}
+                  </option>
+                ))}
+                {/* Valeur héritée (ex. AT) conservée tant qu'elle n'est pas modifiée. */}
+                {tenant.secteur && !SECTEUR_OPTIONS.includes(tenant.secteur as never) ? (
+                  <option value={tenant.secteur}>
+                    {SECTEUR_LABELS[tenant.secteur as keyof typeof SECTEUR_LABELS] ??
+                      tenant.secteur}
+                  </option>
+                ) : null}
               </select>
             </div>
           </div>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="bureauEtudes"
+              className="size-4"
+              defaultChecked={tenant.bureau_etudes}
+            />
+            Activité bureau d'études / conception (§8.3)
+          </label>
 
           <Button type="submit" disabled={pending} className="mt-2">
             {pending ? "Enregistrement…" : "Enregistrer"}

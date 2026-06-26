@@ -45,6 +45,7 @@ export default async function TenantLayout({ children }: { children: React.React
     const { data } = await admin
       .from("tenants")
       .select("id, nom_societe")
+      .is("deleted_at", null)
       .order("nom_societe", { ascending: true });
     tenants = (data ?? []).map((t) => ({ id: t.id, nom: t.nom_societe }));
     activeTenantId = await getActiveTenantId();
