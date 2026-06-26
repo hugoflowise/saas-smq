@@ -834,6 +834,73 @@ export type Database = {
           },
         ]
       }
+      domaine_application: {
+        Row: {
+          created_at: string
+          date_etablissement: string | null
+          exclusions: Json
+          id: string
+          perimetre: string | null
+          prochaine_revue: string | null
+          sites: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          valide_le: string | null
+          valide_par: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_etablissement?: string | null
+          exclusions?: Json
+          id?: string
+          perimetre?: string | null
+          prochaine_revue?: string | null
+          sites?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_etablissement?: string | null
+          exclusions?: Json
+          id?: string
+          perimetre?: string | null
+          prochaine_revue?: string | null
+          sites?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domaine_application_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domaine_application_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domaine_application_valide_par_fkey"
+            columns: ["valide_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enquetes_satisfaction: {
         Row: {
           client: string | null
