@@ -443,7 +443,7 @@ function ReferenceEditor({
 }
 
 /** Cellule de signature (rédacteur / approbateur) avec image et horodatage. */
-function Signataire({
+export function Signataire({
   label,
   nom,
   image,

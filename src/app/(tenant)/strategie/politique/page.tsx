@@ -92,6 +92,7 @@ export default async function PolitiquePage({
     version: v.version,
     approvedAt: v.approved_at,
     approverName: v.approved_by ? (nameById.get(v.approved_by) ?? null) : null,
+    approverSignature: v.approved_by ? (signatureById.get(v.approved_by) ?? null) : null,
     snapshot: (v.contenu_snapshot ?? null) as JSONContent | null,
   }));
 
@@ -181,6 +182,12 @@ export default async function PolitiquePage({
                     ? { version: versionLettre(versions.length), statut: politique.statut }
                     : null
                 }
+                document={{
+                  surtitre: "Document maîtrisé",
+                  titre: "Politique qualité",
+                  societe: tenant as Societe,
+                  reference: politique?.code ?? null,
+                }}
               />
             </CardContent>
           </Card>
