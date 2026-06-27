@@ -59,6 +59,14 @@ export async function GET(
       // Respecte les `@page { size; margin }` définis par chaque page /print
       // → mise en page strictement identique à l'aperçu.
       preferCSSPageSize: true,
+      // Numéro de page « X/Y » en bas à droite (le footer se loge dans la marge
+      // basse définie par le `@page` de la page /print). En-tête vide pour ne
+      // pas réafficher la date/URL par défaut du moteur.
+      displayHeaderFooter: true,
+      headerTemplate: "<span></span>",
+      footerTemplate: `<div style="width:100%;font-size:8px;color:#9ca3af;padding:0 14mm;text-align:right;">
+        <span class="pageNumber"></span>/<span class="totalPages"></span>
+      </div>`,
     });
 
     const filename = `${slug.join("-")}.pdf`;
@@ -71,14 +79,8 @@ export async function GET(
     });
   } catch (error) {
     console.error("Génération PDF échouée:", error);
-    // DIAGNOSTIC TEMPORAIRE : message d'erreur réel exposé dans la réponse pour
-    // débogage (lisible via l'onglet Réseau). À retirer une fois résolu.
     return NextResponse.json(
-      {
-        ok: false,
-        error: "Génération du PDF impossible.",
-        detail: String((error as Error)?.stack ?? error),
-      },
+      { ok: false, error: "Génération du PDF impossible." },
       { status: 500 },
     );
   } finally {
