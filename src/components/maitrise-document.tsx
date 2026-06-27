@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
@@ -212,15 +213,7 @@ export function MaitriseDocument({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={
-              <Link href={printHref} target="_blank">
-                Aperçu / PDF
-              </Link>
-            }
-          />
+          <DownloadPdfButton printHref={printHref} />
           {usesToggle && statut === "brouillon" && canWrite && !editing ? (
             <Button onClick={() => setEditing(true)}>Modifier</Button>
           ) : null}
@@ -374,7 +367,7 @@ export function MaitriseDocument({
 
       {!editable && !usesToggle ? (
         <p className="text-muted-foreground text-xs">
-          Modifiable uniquement en statut « Brouillon ». Utilisez « Aperçu / PDF » pour imprimer.
+          Modifiable uniquement en statut « Brouillon ». Utilisez « Télécharger PDF » pour exporter.
         </p>
       ) : null}
     </div>
