@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   publishPolitiqueAction,
   resetPolitiqueAction,
+  savePolitiqueCodeAction,
   savePolitiqueContenuAction,
   transitionPolitiqueStatutAction,
 } from "@/lib/actions/politique";
@@ -55,7 +56,9 @@ export default async function PolitiquePage({
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le")
+    .select(
+      "code, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le",
+    )
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -136,6 +139,8 @@ export default async function PolitiquePage({
             surtitre="Document maîtrisé"
             titre="Politique qualité"
             societe={tenant as Societe}
+            reference={politique?.code ?? null}
+            onSaveReference={savePolitiqueCodeAction}
             initialContenu={(politique?.contenu ?? null) as JSONContent | null}
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}

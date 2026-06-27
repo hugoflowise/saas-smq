@@ -1,7 +1,6 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +10,7 @@ import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/lib/actions/types";
 import type { Json } from "@/lib/supabase/database.types";
 import { versionLettre } from "@/lib/versions";
@@ -36,6 +36,8 @@ export function MaitriseDocument({
   surtitre,
   titre,
   societe,
+  reference,
+  onSaveReference,
   metaExtra,
   initialContenu,
   statut,
@@ -64,6 +66,13 @@ export function MaitriseDocument({
   surtitre: string;
   titre: string;
   societe: Societe;
+  /**
+   * Code documentaire (ex. « DG_SMQ_004 »). Si la prop est fournie (même null),
+   * une ligne « Référence » est affichée en tête de l'en-tête du document.
+   */
+  reference?: string | null;
+  /** Si fourni (et droits d'écriture), permet d'éditer la référence en ligne. */
+  onSaveReference?: (code: string) => Promise<ActionResult>;
   /** Métadonnées spécifiques au document (ex. Processus, Réf. ISO). */
   metaExtra?: { label: string; value: string; href?: string }[];
   initialContenu: JSONContent | null;
@@ -109,6 +118,8 @@ export function MaitriseDocument({
   const nextVersion = versionLettre(publishedCount);
 
   const documentMeta = [
+    // « Référence » en tête (l'en-tête du gabarit n'affiche que les 3 premières).
+    ...(reference !== undefined ? [{ label: "Référence", value: reference?.trim() || "-" }] : []),
     { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
     {
       label: "Version",
@@ -316,6 +327,11 @@ export function MaitriseDocument({
         </div>
       ) : null}
 
+      {/* Code documentaire éditable (ex. DG_SMQ_004), réservé aux rédacteurs. */}
+      {onSaveReference && canWrite ? (
+        <ReferenceEditor initial={reference ?? null} onSave={onSaveReference} />
+      ) : null}
+
       {/* Mode édition (documents structurés) : éditeur des rubriques au-dessus du gabarit. */}
       {usesToggle && editing ? <div className="mb-6">{structuredEditor}</div> : null}
 
@@ -376,6 +392,54 @@ export function MaitriseDocument({
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Saisie en ligne du code documentaire (enregistrement à la perte de focus). */
+function ReferenceEditor({
+  initial,
+  onSave,
+}: {
+  initial: string | null;
+  onSave: (code: string) => Promise<ActionResult>;
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState(initial ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function commit() {
+    const v = value.trim();
+    if (v === (initial ?? "")) return;
+    setSaving(true);
+    const result = await onSave(v);
+    setSaving(false);
+    if (result.ok) {
+      toast.success("Référence enregistrée.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+      setValue(initial ?? "");
+    }
+  }
+
+  return (
+    <div className="mb-4 flex items-center gap-2">
+      <label htmlFor="doc-reference" className="font-medium text-muted-foreground text-sm">
+        Référence du document
+      </label>
+      <Input
+        id="doc-reference"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        placeholder="ex. DG_SMQ_004"
+        disabled={saving}
+        className="h-8 w-44"
+      />
+    </div>
+  );
 }
 
 /** Cellule de signature (rédacteur / approbateur) avec image et horodatage. */

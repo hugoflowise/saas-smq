@@ -24,7 +24,7 @@ export default async function PolitiquePrintPage() {
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("contenu, statut, version_actuelle_id")
+    .select("code, contenu, statut, version_actuelle_id")
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -49,14 +49,19 @@ export default async function PolitiquePrintPage() {
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? politique?.contenu ?? null) as JSONContent | null;
 
+  const reference = politique?.code?.trim() || "-";
   const meta = isPublished
     ? [
+        { label: "Référence", value: reference },
         { label: "Version", value: version?.version ?? "-" },
         { label: "Approuvée le", value: formatDate(version?.approved_at ?? null) },
         { label: "Signataire", value: approverName ?? "-" },
         { label: "Statut", value: "Publiée" },
       ]
-    : [{ label: "Statut", value: "Brouillon (non publié)" }];
+    : [
+        { label: "Référence", value: reference },
+        { label: "Statut", value: "Brouillon (non publié)" },
+      ];
 
   return (
     <PrintShell
