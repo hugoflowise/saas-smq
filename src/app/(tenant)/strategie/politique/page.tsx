@@ -57,24 +57,26 @@ export default async function PolitiquePage({
   const { data: politique } = await supabase
     .from("politique_qualite")
     .select(
-      "code, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le",
+      "code, contenu, statut, version_actuelle_id, created_by, soumis_par, approved_by, approved_at, soumis_le",
     )
     .eq("tenant_id", tid)
     .maybeSingle();
 
   const { data: rawVersions } = await supabase
     .from("politique_qualite_versions")
-    .select("id, version, approved_at, approved_by, contenu_snapshot, created_at")
+    .select(
+      "id, version, approved_at, approved_by, redige_par, redige_le, contenu_snapshot, created_at",
+    )
     .eq("tenant_id", tid)
     .order("created_at", { ascending: false });
 
-  // Noms des intervenants (rédacteur + approbateurs)
+  // Noms des intervenants (rédacteur = qui a soumis, + approbateurs)
   const personIds = [
     ...new Set(
       [
-        politique?.created_by,
+        politique?.soumis_par,
         politique?.approved_by,
-        ...(rawVersions ?? []).map((v) => v.approved_by),
+        ...(rawVersions ?? []).flatMap((v) => [v.approved_by, v.redige_par]),
       ].filter(Boolean),
     ),
   ] as string[];
@@ -93,6 +95,9 @@ export default async function PolitiquePage({
     approvedAt: v.approved_at,
     approverName: v.approved_by ? (nameById.get(v.approved_by) ?? null) : null,
     approverSignature: v.approved_by ? (signatureById.get(v.approved_by) ?? null) : null,
+    redacteur: v.redige_par ? (nameById.get(v.redige_par) ?? null) : null,
+    redacteurSignature: v.redige_par ? (signatureById.get(v.redige_par) ?? null) : null,
+    redacteurSignedAt: v.redige_le ?? null,
     snapshot: (v.contenu_snapshot ?? null) as JSONContent | null,
   }));
 
@@ -100,7 +105,9 @@ export default async function PolitiquePage({
 
   const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
   const canWrite = isApprover || ctx.role === "manager";
-  const drafterName = politique?.created_by ? (nameById.get(politique.created_by) ?? null) : null;
+  // Rédacteur du document = la personne qui a soumis la version (signature de
+  // soumission), pas le créateur initial de la ligne.
+  const drafterName = politique?.soumis_par ? (nameById.get(politique.soumis_par) ?? null) : null;
   const approverName = politique?.approved_by
     ? (nameById.get(politique.approved_by) ?? null)
     : null;
@@ -151,7 +158,7 @@ export default async function PolitiquePage({
             canApprove={isApprover}
             drafterName={drafterName}
             drafterSignature={
-              politique?.created_by ? (signatureById.get(politique.created_by) ?? null) : null
+              politique?.soumis_par ? (signatureById.get(politique.soumis_par) ?? null) : null
             }
             drafterSignedAt={politique?.soumis_le ?? null}
             approverName={approverName}
