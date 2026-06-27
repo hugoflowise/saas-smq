@@ -396,6 +396,48 @@ export type Database = {
           },
         ]
       }
+      cartographie_versions: {
+        Row: {
+          created_at: string
+          id: string
+          published_by: string | null
+          snapshot: Json | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cartographie_versions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cartographie_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communication_modeles: {
         Row: {
           categorie: string
