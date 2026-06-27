@@ -1988,6 +1988,8 @@ export type Database = {
           id: string
           pdf_url: string | null
           politique_id: string
+          redige_le: string | null
+          redige_par: string | null
           signature_data: Json | null
           tenant_id: string
           version: string
@@ -2000,6 +2002,8 @@ export type Database = {
           id?: string
           pdf_url?: string | null
           politique_id: string
+          redige_le?: string | null
+          redige_par?: string | null
           signature_data?: Json | null
           tenant_id: string
           version: string
@@ -2012,6 +2016,8 @@ export type Database = {
           id?: string
           pdf_url?: string | null
           politique_id?: string
+          redige_le?: string | null
+          redige_par?: string | null
           signature_data?: Json | null
           tenant_id?: string
           version?: string
@@ -2029,6 +2035,13 @@ export type Database = {
             columns: ["politique_id"]
             isOneToOne: false
             referencedRelation: "politique_qualite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_redige_par_fkey"
+            columns: ["redige_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {

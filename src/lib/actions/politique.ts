@@ -34,7 +34,9 @@ async function loadPolitique(tenantId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("politique_qualite")
-    .select("id, statut, contenu, created_by, approved_by, approved_at, signature_data")
+    .select(
+      "id, statut, contenu, created_by, soumis_par, soumis_le, approved_by, approved_at, signature_data",
+    )
     .eq("tenant_id", tenantId)
     .maybeSingle();
   return { supabase, politique: data };
@@ -201,6 +203,8 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
       politique_id: politique.id,
       version,
       contenu_snapshot: politique.contenu,
+      redige_par: politique.soumis_par,
+      redige_le: politique.soumis_le,
       approved_by: politique.approved_by,
       approved_at: politique.approved_at,
       signature_data: politique.signature_data,

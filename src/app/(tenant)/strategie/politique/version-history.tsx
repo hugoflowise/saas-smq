@@ -24,6 +24,8 @@ export type VersionItem = {
   snapshot: JSONContent | null;
   /** Circuit de révision (procédures) · optionnel. */
   redacteur?: string | null;
+  redacteurSignature?: string | null;
+  redacteurSignedAt?: string | null;
   verificateur?: string | null;
   noteRevision?: string | null;
 };
@@ -144,14 +146,22 @@ export function VersionHistory({
                   className="border"
                 >
                   <TiptapEditor content={v.snapshot} editable={false} bare />
-                  {v.approverName ? (
-                    <div className="mt-8 grid grid-cols-1 overflow-hidden rounded-md border text-sm">
+                  {v.redacteur || v.approverName ? (
+                    <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
+                      <Signataire
+                        label="Rédigé par"
+                        nom={v.redacteur ?? null}
+                        image={v.redacteurSignature ?? null}
+                        date={v.redacteurSignedAt ?? null}
+                        signe={Boolean(v.redacteur)}
+                      />
                       <Signataire
                         label="Approuvé par"
                         nom={v.approverName}
                         image={v.approverSignature ?? null}
                         date={v.approvedAt}
-                        signe
+                        signe={Boolean(v.approverName)}
+                        border
                       />
                     </div>
                   ) : null}
