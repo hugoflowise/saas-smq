@@ -1903,6 +1903,9 @@ export type Database = {
           tenant_id: string
           updated_at: string
           updated_by: string | null
+          verification_data: Json | null
+          verifie_le: string | null
+          verifie_par: string | null
           version_actuelle_id: string | null
         }
         Insert: {
@@ -1921,6 +1924,9 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Update: {
@@ -1939,6 +1945,9 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Relationships: [
@@ -1977,6 +1986,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "politique_qualite_verifie_par_fkey"
+            columns: ["verifie_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       politique_qualite_versions: {
@@ -1992,6 +2008,8 @@ export type Database = {
           redige_par: string | null
           signature_data: Json | null
           tenant_id: string
+          verifie_le: string | null
+          verifie_par: string | null
           version: string
         }
         Insert: {
@@ -2006,6 +2024,8 @@ export type Database = {
           redige_par?: string | null
           signature_data?: Json | null
           tenant_id: string
+          verifie_le?: string | null
+          verifie_par?: string | null
           version: string
         }
         Update: {
@@ -2020,6 +2040,8 @@ export type Database = {
           redige_par?: string | null
           signature_data?: Json | null
           tenant_id?: string
+          verifie_le?: string | null
+          verifie_par?: string | null
           version?: string
         }
         Relationships: [
@@ -2040,6 +2062,13 @@ export type Database = {
           {
             foreignKeyName: "politique_qualite_versions_redige_par_fkey"
             columns: ["redige_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_verifie_par_fkey"
+            columns: ["verifie_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -3947,6 +3976,7 @@ export type Database = {
       document_statut:
         | "brouillon"
         | "en_revue"
+        | "en_approbation"
         | "approuvee"
         | "publiee"
         | "archivee"
@@ -4246,6 +4276,7 @@ export const Constants = {
       document_statut: [
         "brouillon",
         "en_revue",
+        "en_approbation",
         "approuvee",
         "publiee",
         "archivee",

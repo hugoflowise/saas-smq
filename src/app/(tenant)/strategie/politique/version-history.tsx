@@ -22,11 +22,13 @@ export type VersionItem = {
   approverName: string | null;
   approverSignature?: string | null;
   snapshot: JSONContent | null;
-  /** Circuit de révision (procédures) · optionnel. */
+  /** Circuit de révision · optionnel. */
   redacteur?: string | null;
   redacteurSignature?: string | null;
   redacteurSignedAt?: string | null;
   verificateur?: string | null;
+  verificateurSignature?: string | null;
+  verificateurSignedAt?: string | null;
   noteRevision?: string | null;
 };
 
@@ -36,11 +38,14 @@ export type VersionDocumentChrome = {
   titre: string;
   societe: Societe;
   reference?: string | null;
+  /** Affiche la cellule « Vérifié par » (circuit à 3 rôles). */
+  withVerification?: boolean;
 };
 
 const STATUT_EN_COURS_LABEL: Record<string, string> = {
   brouillon: "Brouillon",
-  en_revue: "En revue",
+  en_revue: "En vérification",
+  en_approbation: "En approbation",
   approuvee: "Approuvée, en attente de publication",
 };
 
@@ -146,8 +151,12 @@ export function VersionHistory({
                   className="border"
                 >
                   <TiptapEditor content={v.snapshot} editable={false} bare />
-                  {v.redacteur || v.approverName ? (
-                    <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
+                  {v.redacteur || v.verificateur || v.approverName ? (
+                    <div
+                      className={`mt-8 grid overflow-hidden rounded-md border text-sm ${
+                        document.withVerification ? "grid-cols-3" : "grid-cols-2"
+                      }`}
+                    >
                       <Signataire
                         label="Rédigé par"
                         nom={v.redacteur ?? null}
@@ -155,6 +164,16 @@ export function VersionHistory({
                         date={v.redacteurSignedAt ?? null}
                         signe={Boolean(v.redacteur)}
                       />
+                      {document.withVerification ? (
+                        <Signataire
+                          label="Vérifié par"
+                          nom={v.verificateur ?? null}
+                          image={v.verificateurSignature ?? null}
+                          date={v.verificateurSignedAt ?? null}
+                          signe={Boolean(v.verificateur)}
+                          border
+                        />
+                      ) : null}
                       <Signataire
                         label="Approuvé par"
                         nom={v.approverName}

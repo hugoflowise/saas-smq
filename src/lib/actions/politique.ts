@@ -21,11 +21,16 @@ function permissions(role: string) {
   return { approver: canApprove(role), writer: canWrite(role) };
 }
 
-/** Transitions de statut autorisées (hors publication, gérée à part). */
+/**
+ * Transitions de statut autorisées (hors publication, gérée à part).
+ * Circuit à 3 rôles : brouillon → en_revue (vérification) → en_approbation
+ * (approbation) → approuvee, avec renvoi possible en brouillon à chaque étape.
+ */
 const TRANSITIONS: Record<string, string[]> = {
   brouillon: ["en_revue"],
-  en_revue: ["brouillon", "approuvee"],
-  approuvee: ["en_revue"],
+  en_revue: ["en_approbation", "brouillon"],
+  en_approbation: ["approuvee", "brouillon"],
+  approuvee: ["brouillon"],
   publiee: ["brouillon"], // démarre une nouvelle version
   archivee: [],
 };
@@ -35,7 +40,7 @@ async function loadPolitique(tenantId: string) {
   const { data } = await supabase
     .from("politique_qualite")
     .select(
-      "id, statut, contenu, created_by, soumis_par, soumis_le, approved_by, approved_at, signature_data",
+      "id, statut, contenu, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, signature_data",
     )
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -114,34 +119,60 @@ export async function transitionPolitiqueStatutAction(target: string): Promise<A
     return { ok: false, error: "Transition de statut non autorisée." };
   }
 
-  // Depuis "en revue" (approuver / demander des modifs) => approbateur ;
-  // sinon (soumettre, nouvelle version) => rédacteur
+  // Droits selon l'étape franchie :
+  // - vérifier (en_revue → en_approbation) : rédacteur/vérificateur (writer)
+  // - approuver (en_approbation → approuvee) : approbateur (dirigeant)
+  // - soumettre / renvoyer / nouvelle version : writer
   const perms = permissions(ctx.role);
-  const allowed = politique.statut === "en_revue" ? perms.approver : perms.writer;
+  const isApprouver = politique.statut === "en_approbation" && target === "approuvee";
+  const allowed = isApprouver ? perms.approver : perms.writer;
   if (!allowed) return { ok: false, error: "Droits insuffisants pour cette action." };
 
+  // Séparation des tâches : l'approbateur ne peut être ni le rédacteur (qui a
+  // soumis) ni le vérificateur.
+  if (isApprouver) {
+    if (ctx.userId === politique.soumis_par) {
+      return { ok: false, error: "L'approbateur doit être différent du rédacteur." };
+    }
+    if (ctx.userId === politique.verifie_par) {
+      return { ok: false, error: "L'approbateur doit être différent du vérificateur." };
+    }
+  }
+
+  const now = new Date().toISOString();
   const update: PolitiqueUpdate = {
     statut: target as PolitiqueUpdate["statut"],
     updated_by: ctx.userId,
   };
 
-  // Soumission signée : le rédacteur signe au moment de soumettre à approbation.
-  if (target === "en_revue") {
-    update.soumis_par = ctx.userId;
-    update.soumis_le = new Date().toISOString();
-  }
-
-  // Approbation = signature électronique (CDC §8.3)
-  if (target === "approuvee") {
+  const signature = async () => {
     const h = await headers();
-    update.approved_by = ctx.userId;
-    update.approved_at = new Date().toISOString();
-    update.signature_data = {
+    return {
       user_id: ctx.userId,
-      signed_at: new Date().toISOString(),
+      signed_at: now,
       ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
       user_agent: h.get("user-agent") ?? null,
     } satisfies Json;
+  };
+
+  // Soumission signée : le rédacteur signe au moment de soumettre à vérification.
+  if (target === "en_revue") {
+    update.soumis_par = ctx.userId;
+    update.soumis_le = now;
+  }
+
+  // Vérification signée (CDC §8.3).
+  if (politique.statut === "en_revue" && target === "en_approbation") {
+    update.verifie_par = ctx.userId;
+    update.verifie_le = now;
+    update.verification_data = await signature();
+  }
+
+  // Approbation = signature électronique de la direction (CDC §8.3).
+  if (isApprouver) {
+    update.approved_by = ctx.userId;
+    update.approved_at = now;
+    update.signature_data = await signature();
   }
 
   const { error } = await supabase.from("politique_qualite").update(update).eq("id", politique.id);
@@ -151,21 +182,30 @@ export async function transitionPolitiqueStatutAction(target: string): Promise<A
   // Notification ciblée sur la personne qui doit agir à l'étape suivante.
   const lien = "/strategie/politique";
   if (target === "en_revue") {
+    // Soumise → en attente de vérification (rédacteurs/vérificateurs).
+    await notifyRole(ctx.effectiveTenantId, ["manager", "dirigeant"], {
+      type: "approval_request",
+      title: "Politique qualité à vérifier",
+      body: "La politique qualité est en attente de vérification.",
+      link: lien,
+    });
+  } else if (target === "en_approbation") {
+    // Vérifiée → en attente d'approbation (direction).
     await notifyRole(ctx.effectiveTenantId, ["dirigeant"], {
       type: "approval_request",
       title: "Politique qualité à approuver",
-      body: "La politique qualité est en attente de votre approbation.",
+      body: "La politique qualité a été vérifiée et attend votre approbation.",
       link: lien,
     });
   } else if (target === "approuvee") {
-    await notifyUsers([politique.created_by], {
+    await notifyUsers([politique.soumis_par], {
       type: "approval_granted",
       title: "Politique qualité approuvée",
       body: "La politique qualité a été approuvée et signée.",
       link: lien,
     });
-  } else if (politique.statut === "en_revue" && target === "brouillon") {
-    await notifyUsers([politique.created_by], {
+  } else if (target === "brouillon" && politique.statut !== "publiee") {
+    await notifyUsers([politique.soumis_par], {
       type: "mention",
       title: "Modifications demandées",
       body: "Des modifications sont demandées sur la politique qualité.",
@@ -205,6 +245,8 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
       contenu_snapshot: politique.contenu,
       redige_par: politique.soumis_par,
       redige_le: politique.soumis_le,
+      verifie_par: politique.verifie_par,
+      verifie_le: politique.verifie_le,
       approved_by: politique.approved_by,
       approved_at: politique.approved_at,
       signature_data: politique.signature_data,
