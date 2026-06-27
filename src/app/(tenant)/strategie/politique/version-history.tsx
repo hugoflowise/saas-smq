@@ -2,6 +2,8 @@
 
 import type { JSONContent } from "@tiptap/react";
 import { useState } from "react";
+import { DocumentPaper, type Societe } from "@/components/document-paper";
+import { Signataire } from "@/components/maitrise-document";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +20,20 @@ export type VersionItem = {
   version: string;
   approvedAt: string | null;
   approverName: string | null;
+  approverSignature?: string | null;
   snapshot: JSONContent | null;
   /** Circuit de révision (procédures) · optionnel. */
   redacteur?: string | null;
   verificateur?: string | null;
   noteRevision?: string | null;
+};
+
+/** Gabarit officiel pour afficher un instantané dans son document mis en forme. */
+export type VersionDocumentChrome = {
+  surtitre: string;
+  titre: string;
+  societe: Societe;
+  reference?: string | null;
 };
 
 const STATUT_EN_COURS_LABEL: Record<string, string> = {
@@ -34,10 +45,16 @@ const STATUT_EN_COURS_LABEL: Record<string, string> = {
 export function VersionHistory({
   versions,
   pending,
+  document,
 }: {
   versions: VersionItem[];
   /** Version de travail non encore publiée (brouillon / en revue / approuvée). */
   pending?: { version: string; statut: string } | null;
+  /**
+   * Si fourni, l'aperçu « Voir » rend l'instantané dans le gabarit officiel
+   * (en-tête charté, tableau d'identité, signature) plutôt que le contenu brut.
+   */
+  document?: VersionDocumentChrome;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -111,7 +128,37 @@ export function VersionHistory({
                   Politique qualité · {v.version} ({formatDate(v.approvedAt)})
                 </DialogTitle>
               </DialogHeader>
-              <TiptapEditor content={v.snapshot} editable={false} />
+              {document ? (
+                <DocumentPaper
+                  surtitre={document.surtitre}
+                  titre={document.titre}
+                  societe={document.societe}
+                  meta={[
+                    ...(document.reference !== undefined
+                      ? [{ label: "Référence", value: document.reference?.trim() || "-" }]
+                      : []),
+                    { label: "Version", value: v.version },
+                    { label: "Approuvée le", value: formatDate(v.approvedAt) },
+                    ...(v.approverName ? [{ label: "Signataire", value: v.approverName }] : []),
+                  ]}
+                  className="border"
+                >
+                  <TiptapEditor content={v.snapshot} editable={false} bare />
+                  {v.approverName ? (
+                    <div className="mt-8 grid grid-cols-1 overflow-hidden rounded-md border text-sm">
+                      <Signataire
+                        label="Approuvé par"
+                        nom={v.approverName}
+                        image={v.approverSignature ?? null}
+                        date={v.approvedAt}
+                        signe
+                      />
+                    </div>
+                  ) : null}
+                </DocumentPaper>
+              ) : (
+                <TiptapEditor content={v.snapshot} editable={false} />
+              )}
             </DialogContent>
           </Dialog>
         </li>
