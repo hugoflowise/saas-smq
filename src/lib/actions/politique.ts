@@ -68,6 +68,38 @@ export async function savePolitiqueContenuAction(contenu: Json): Promise<ActionR
   return { ok: true };
 }
 
+/**
+ * Enregistre le code documentaire de la politique (ex. « DG_SMQ_004 »).
+ * Métadonnée d'identification : modifiable par un rédacteur quel que soit le
+ * statut. Crée la ligne si elle n'existe pas encore.
+ */
+export async function savePolitiqueCodeAction(code: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
+
+  const value = code.trim() || null;
+  const { supabase, politique } = await loadPolitique(ctx.effectiveTenantId);
+
+  const { error } = politique
+    ? await supabase
+        .from("politique_qualite")
+        .update({ code: value, updated_by: ctx.userId } satisfies PolitiqueUpdate)
+        .eq("id", politique.id)
+    : await supabase.from("politique_qualite").insert({
+        tenant_id: ctx.effectiveTenantId,
+        code: value,
+        created_by: ctx.userId,
+      });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/strategie/politique");
+  revalidatePath("/print/politique");
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
 export async function transitionPolitiqueStatutAction(target: string): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
