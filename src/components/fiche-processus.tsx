@@ -350,52 +350,68 @@ export function FicheProcessus(data: FicheProcessusData) {
             </tr>
           </tbody>
         </table>
-        <div className="grid grid-cols-2 overflow-hidden rounded-md border text-sm">
-          {(
-            [
-              {
-                label: "Rédigé par",
-                nom: data.redacteur,
-                date: data.redacteurSigneLe ?? null,
-                signe: Boolean(data.redacteurSigneLe),
-                image: data.signatureRedacteur ?? null,
-              },
-              {
-                label: "Approuvé par",
-                nom: data.approbateur,
-                date: data.approuveeLe,
-                signe: Boolean(data.approbateur),
-                image: data.signatureApprobateur ?? null,
-              },
-            ] as {
-              label: string;
-              nom: string | null;
-              date: string | null;
-              signe: boolean;
-              image: string | null;
-            }[]
-          ).map((c, i) => (
-            <div key={c.label} className={i > 0 ? "border-l" : ""}>
-              <div className="px-3 py-1.5 font-semibold" style={HEAD}>
-                {c.label}
+        {/*
+          Les signatures ne reflètent que le cycle en cours : un brouillon
+          (nouvelle version) ne montre jamais l'approbation de la précédente.
+          Rédacteur visible une fois soumis (et nommé) ; approbateur une fois
+          approuvé/publié (et nommé).
+        */}
+        {data.statut !== "brouillon" ? (
+          <div className="grid grid-cols-2 overflow-hidden rounded-md border text-sm">
+            {(() => {
+              const showRedacteur = Boolean(data.redacteur) && Boolean(data.redacteurSigneLe);
+              const showApprobateur =
+                (data.statut === "approuvee" || data.statut === "publiee") &&
+                Boolean(data.approbateur);
+              return [
+                {
+                  label: "Rédigé par",
+                  nom: showRedacteur ? data.redacteur : null,
+                  date: showRedacteur ? (data.redacteurSigneLe ?? null) : null,
+                  signe: showRedacteur,
+                  image: showRedacteur ? (data.signatureRedacteur ?? null) : null,
+                },
+                {
+                  label: "Approuvé par",
+                  nom: showApprobateur ? data.approbateur : null,
+                  date: showApprobateur ? data.approuveeLe : null,
+                  signe: showApprobateur,
+                  image: showApprobateur ? (data.signatureApprobateur ?? null) : null,
+                },
+              ] as {
+                label: string;
+                nom: string | null;
+                date: string | null;
+                signe: boolean;
+                image: string | null;
+              }[];
+            })().map((c, i) => (
+              <div key={c.label} className={i > 0 ? "border-l" : ""}>
+                <div className="px-3 py-1.5 font-semibold" style={HEAD}>
+                  {c.label}
+                </div>
+                <div className="flex min-h-24 flex-col px-3 py-2">
+                  <p className="font-medium">{c.nom?.trim() ? c.nom : "-"}</p>
+                  {c.signe && c.image ? (
+                    // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
+                    <img
+                      src={c.image}
+                      alt="Signature"
+                      className="mt-1 h-12 w-auto object-contain"
+                    />
+                  ) : null}
+                  {c.signe ? (
+                    <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
+                      Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
+                    </p>
+                  ) : c.label === "Approuvé par" ? (
+                    <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
+                  ) : null}
+                </div>
               </div>
-              <div className="flex min-h-24 flex-col px-3 py-2">
-                <p className="font-medium">{c.nom?.trim() ? c.nom : "-"}</p>
-                {c.signe && c.image ? (
-                  // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
-                  <img src={c.image} alt="Signature" className="mt-1 h-12 w-auto object-contain" />
-                ) : null}
-                {c.signe ? (
-                  <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
-                    Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
-                  </p>
-                ) : c.label === "Approuvé par" ? (
-                  <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null}
       </Section>
     </DocumentPaper>
   );

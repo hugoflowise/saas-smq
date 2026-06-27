@@ -117,6 +117,16 @@ export function MaitriseDocument({
   const isPublished = statut === "publiee";
   const nextVersion = versionLettre(publishedCount);
 
+  // Les signatures/approbations ne reflètent QUE le cycle en cours : un brouillon
+  // (nouvelle version) ne doit jamais afficher l'approbation de la version
+  // précédente. Le rédacteur n'apparaît qu'une fois soumis (et nommé) ;
+  // l'approbateur qu'une fois approuvé/publié (et nommé).
+  const showDrafter = statut !== "brouillon" && Boolean(drafterName) && Boolean(drafterSignedAt);
+  const showApprover = (statut === "approuvee" || isPublished) && Boolean(approverName);
+  // La grille de signature apparaît dès la soumission (en revue), avec
+  // l'approbation « en attente » tant qu'elle n'est pas accordée.
+  const showSignatures = statut !== "brouillon";
+
   const documentMeta = [
     // « Référence » en tête (l'en-tête du gabarit n'affiche que les 3 premières).
     ...(reference !== undefined ? [{ label: "Référence", value: reference?.trim() || "-" }] : []),
@@ -125,13 +135,13 @@ export function MaitriseDocument({
       label: "Version",
       value: isPublished && currentVersion ? currentVersion : `${nextVersion} (projet)`,
     },
-    ...(approverName
+    ...(showApprover
       ? [
           { label: "Approuvé le", value: fmt(approvedAt ?? currentVersionDate) },
-          { label: "Signataire", value: approverName },
+          { label: "Signataire", value: approverName as string },
         ]
       : []),
-    ...(drafterName ? [{ label: "Rédacteur", value: drafterName }] : []),
+    ...(showDrafter ? [{ label: "Rédacteur", value: drafterName as string }] : []),
     ...(metaExtra ?? []),
   ];
 
@@ -360,21 +370,21 @@ export function MaitriseDocument({
             bare={!editable}
           />
         </div>
-        {!editing && (drafterName || approverName) ? (
+        {!editing && showSignatures ? (
           <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
             <Signataire
               label="Rédigé par"
-              nom={drafterName}
-              image={drafterSignature ?? null}
-              date={drafterSignedAt ?? null}
-              signe={Boolean(drafterSignedAt)}
+              nom={showDrafter ? drafterName : null}
+              image={showDrafter ? (drafterSignature ?? null) : null}
+              date={showDrafter ? (drafterSignedAt ?? null) : null}
+              signe={showDrafter}
             />
             <Signataire
               label="Approuvé par"
-              nom={approverName}
-              image={approverSignature ?? null}
-              date={approvedAt ?? null}
-              signe={Boolean(approverName)}
+              nom={showApprover ? approverName : null}
+              image={showApprover ? (approverSignature ?? null) : null}
+              date={showApprover ? (approvedAt ?? null) : null}
+              signe={showApprover}
               border
             />
           </div>
