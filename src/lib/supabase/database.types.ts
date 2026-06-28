@@ -3693,6 +3693,7 @@ export type Database = {
           boond_account_id: string | null
           boond_oauth_token: string | null
           bureau_etudes: boolean
+          cartographie_reference: string | null
           code_postal: string | null
           couleur_charte: string | null
           created_at: string
@@ -3723,6 +3724,7 @@ export type Database = {
           boond_account_id?: string | null
           boond_oauth_token?: string | null
           bureau_etudes?: boolean
+          cartographie_reference?: string | null
           code_postal?: string | null
           couleur_charte?: string | null
           created_at?: string
@@ -3753,6 +3755,7 @@ export type Database = {
           boond_account_id?: string | null
           boond_oauth_token?: string | null
           bureau_etudes?: boolean
+          cartographie_reference?: string | null
           code_postal?: string | null
           couleur_charte?: string | null
           created_at?: string

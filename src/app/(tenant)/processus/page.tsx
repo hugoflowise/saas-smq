@@ -7,6 +7,7 @@ import { ProposeBanner, RefuserButton, ValiderButton } from "@/components/propos
 import { dateOffsetISO, formatDate, nomPersonne, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { CartographieReference } from "./cartographie-reference";
 import type { CartographieSnapshot } from "./cartographie-snapshot";
 import {
   CartographieVersionHistory,
@@ -78,7 +79,11 @@ export default async function ProcessusPage() {
       .eq("tenant_id", ctx.effectiveTenantId)
       .is("deleted_at", null)
       .order("ordre_affichage", { ascending: true }),
-    supabase.from("tenants").select("couleur_charte").eq("id", ctx.effectiveTenantId).maybeSingle(),
+    supabase
+      .from("tenants")
+      .select("couleur_charte, cartographie_reference")
+      .eq("id", ctx.effectiveTenantId)
+      .maybeSingle(),
   ]);
 
   // Bandeaux de famille à la couleur de charte du client (neutre par défaut).
@@ -136,16 +141,22 @@ export default async function ProcessusPage() {
         <CreateProcessusDialog />
       </PageHeader>
 
-      {/* Version courante + date de mise à jour de la cartographie. */}
-      <div className="-mt-2 mb-4 text-muted-foreground text-sm">
+      {/* Référence documentaire + version courante + date de mise à jour. */}
+      <div className="-mt-2 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-sm">
+        <CartographieReference initial={tenant?.cartographie_reference ?? null} />
         {current ? (
           <>
-            Version <span className="font-medium text-foreground">{current.version}</span> · mise à
-            jour le {formatDate(current.publishedAt)}
-            {current.publisher ? ` par ${current.publisher}` : ""}
+            <span className="text-muted-foreground/50">·</span>
+            <span>
+              Version <span className="font-medium text-foreground">{current.version}</span> · mise
+              à jour le {formatDate(current.publishedAt)}
+              {current.publisher ? ` par ${current.publisher}` : ""}
+            </span>
           </>
         ) : (
-          "Aucune version publiée. Utilisez « Publier une version » pour figer l'état actuel."
+          <span>
+            Aucune version publiée. Utilisez « Publier une version » pour figer l'état actuel.
+          </span>
         )}
       </div>
 
