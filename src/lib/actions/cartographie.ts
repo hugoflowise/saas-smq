@@ -7,7 +7,25 @@ import { canWrite } from "@/lib/permissions";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { versionLettre } from "@/lib/versions";
+import { versionIndex, versionLettre } from "@/lib/versions";
+
+/** Enregistre la référence documentaire de la cartographie (codification client). */
+export async function saveCartographieReferenceAction(code: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tenants")
+    .update({ cartographie_reference: code.trim() || null })
+    .eq("id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/processus");
+  return { ok: true };
+}
 
 /**
  * Fige une nouvelle version de la cartographie des processus : instantané des
@@ -32,7 +50,11 @@ export async function publishCartographieVersionAction(): Promise<ActionResult> 
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("ordre_affichage", { ascending: true }),
-    supabase.from("tenants").select("couleur_charte").eq("id", tid).maybeSingle(),
+    supabase
+      .from("tenants")
+      .select("couleur_charte, cartographie_reference")
+      .eq("id", tid)
+      .maybeSingle(),
   ]);
 
   if (!processus || processus.length === 0) {
@@ -41,6 +63,7 @@ export async function publishCartographieVersionAction(): Promise<ActionResult> 
 
   const snapshot: CartographieSnapshot = {
     charte: tenant?.couleur_charte ?? null,
+    reference: tenant?.cartographie_reference ?? null,
     processus: processus.map((p) => ({
       nom: p.nom,
       type: p.type,
@@ -48,12 +71,17 @@ export async function publishCartographieVersionAction(): Promise<ActionResult> 
     })),
   };
 
-  // Version = lettre suivante d'après le nombre de versions déjà figées.
-  const { count } = await supabase
+  // Version = lettre suivant la plus haute déjà attribuée (et non un compteur) :
+  // ainsi une suppression de version ne provoque pas de collision de lettre.
+  const { data: existantes } = await supabase
     .from("cartographie_versions")
-    .select("id", { count: "exact", head: true })
+    .select("version")
     .eq("tenant_id", tid);
-  const version = versionLettre(count ?? 0);
+  const maxIndex = (existantes ?? []).reduce(
+    (max, v) => Math.max(max, versionIndex(v.version)),
+    -1,
+  );
+  const version = versionLettre(maxIndex + 1);
 
   const { error } = await supabase.from("cartographie_versions").insert({
     tenant_id: tid,
@@ -64,6 +92,29 @@ export async function publishCartographieVersionAction(): Promise<ActionResult> 
   if (error) {
     return { ok: false, error: `Publication de la version impossible : ${error.message}` };
   }
+
+  revalidatePath("/processus");
+  return { ok: true };
+}
+
+/**
+ * Supprime une version figée de la cartographie (créée par erreur). Suppression
+ * définitive : un instantané erroné n'a pas vocation à rester dans l'historique.
+ * Les lettres déjà attribuées aux autres versions ne changent pas.
+ */
+export async function deleteCartographieVersionAction(id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("cartographie_versions")
+    .delete()
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: `Suppression impossible : ${error.message}` };
 
   revalidatePath("/processus");
   return { ok: true };

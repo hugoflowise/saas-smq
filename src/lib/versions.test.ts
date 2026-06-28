@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { versionLettre } from "./versions";
+import { versionIndex, versionLettre } from "./versions";
 
 describe("versionLettre", () => {
   it("attribue A à la première version (index 0)", () => {
@@ -13,5 +13,13 @@ describe("versionLettre", () => {
     expect(versionLettre(27)).toBe("AB");
     expect(versionLettre(51)).toBe("AZ");
     expect(versionLettre(52)).toBe("BA");
+  });
+});
+
+describe("versionIndex", () => {
+  it("est l'inverse de versionLettre", () => {
+    for (const i of [0, 1, 25, 26, 27, 51, 52, 700]) {
+      expect(versionIndex(versionLettre(i))).toBe(i);
+    }
   });
 });

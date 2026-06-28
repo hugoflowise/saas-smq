@@ -1,15 +1,23 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { deleteCartographieVersionAction } from "@/lib/actions/cartographie";
 import { formatDate } from "@/lib/format";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { type CartographieSnapshot, CartographieSnapshotView } from "./cartographie-snapshot";
 
 export type CartographieVersionItem = {
@@ -23,6 +31,7 @@ export type CartographieVersionItem = {
 /** Historique des versions figées de la cartographie (même logique que les autres documents). */
 export function CartographieVersionHistory({ versions }: { versions: CartographieVersionItem[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const readOnly = useReadOnly();
 
   return (
     <ul className="flex flex-col gap-2">
@@ -48,30 +57,86 @@ export function CartographieVersionHistory({ versions }: { versions: Cartographi
               ) : null}
             </span>
 
-            <Dialog open={openId === v.id} onOpenChange={(o) => setOpenId(o ? v.id : null)}>
-              <DialogTrigger
-                render={
-                  <Button variant="ghost" size="sm">
-                    Voir
-                  </Button>
-                }
-              />
-              <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-5xl">
-                <DialogHeader>
-                  <DialogTitle>
-                    Cartographie · version {v.version} ({formatDate(v.publishedAt)})
-                  </DialogTitle>
-                </DialogHeader>
-                {v.snapshot ? (
-                  <CartographieSnapshotView snapshot={v.snapshot} />
-                ) : (
-                  <p className="text-muted-foreground text-sm">Instantané indisponible.</p>
-                )}
-              </DialogContent>
-            </Dialog>
+            <div className="flex shrink-0 items-center gap-1">
+              <Dialog open={openId === v.id} onOpenChange={(o) => setOpenId(o ? v.id : null)}>
+                <DialogTrigger
+                  render={
+                    <Button variant="ghost" size="sm">
+                      Voir
+                    </Button>
+                  }
+                />
+                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-5xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      Cartographie · version {v.version} ({formatDate(v.publishedAt)})
+                    </DialogTitle>
+                  </DialogHeader>
+                  {v.snapshot ? (
+                    <CartographieSnapshotView snapshot={v.snapshot} />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">Instantané indisponible.</p>
+                  )}
+                </DialogContent>
+              </Dialog>
+
+              {readOnly ? null : <SupprimerVersionButton version={v} />}
+            </div>
           </li>
         ))
       )}
     </ul>
+  );
+}
+
+/** Suppression définitive d'une version figée par erreur (confirmation explicite). */
+function SupprimerVersionButton({ version }: { version: CartographieVersionItem }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  async function supprimer() {
+    setPending(true);
+    const r = await deleteCartographieVersionAction(version.id);
+    setPending(false);
+    if (r.ok) {
+      toast.success(`Version ${version.version} supprimée.`);
+      setOpen(false);
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-destructive"
+            aria-label={`Supprimer la version ${version.version}`}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        }
+      />
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Supprimer la version {version.version} ?</DialogTitle>
+          <DialogDescription>
+            Cette version figée sera définitivement supprimée de l'historique. À n'utiliser que pour
+            une version créée par erreur. Les autres versions ne sont pas modifiées.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Annuler</Button>} />
+          <Button variant="destructive" onClick={supprimer} disabled={pending}>
+            {pending ? "Suppression…" : "Supprimer définitivement"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

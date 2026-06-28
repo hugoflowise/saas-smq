@@ -12,3 +12,16 @@ export function versionLettre(index: number): string {
   } while (n >= 0);
   return s;
 }
+
+/**
+ * Inverse de `versionLettre` : la lettre vers son index (A → 0, B → 1, … AA → 26).
+ * Utile pour calculer la version suivante à partir des lettres déjà attribuées
+ * (et non d'un simple compteur), afin d'éviter les collisions après suppression.
+ */
+export function versionIndex(lettre: string): number {
+  let n = 0;
+  for (const c of lettre.toUpperCase()) {
+    n = n * 26 + (c.charCodeAt(0) - 64); // A = 1
+  }
+  return n - 1;
+}
