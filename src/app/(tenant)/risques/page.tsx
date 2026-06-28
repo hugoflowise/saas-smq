@@ -171,7 +171,7 @@ export default async function RisquesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Intitulé</TableHead>
+                <TableHead className="w-[40%] min-w-[180px]">Intitulé</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>G × P</TableHead>
                 <TableHead>Criticité brute</TableHead>
@@ -187,7 +187,7 @@ export default async function RisquesPage() {
                   r.statut !== "cloture" && r.date_revue != null && r.date_revue <= today;
                 return (
                   <TableRow key={r.id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="whitespace-normal font-medium">
                       <Link
                         href={`/risques/${r.id}`}
                         className="hover:text-primary hover:underline"
