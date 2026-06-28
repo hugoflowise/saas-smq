@@ -16,9 +16,11 @@ import {
   Workflow,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { DrawioModal } from "@/components/drawio-modal";
 import { ResizableImage } from "@/components/resizable-image";
 import { Button } from "@/components/ui/button";
+import { uploadLogigrammeAction } from "@/lib/actions/logigramme";
 import { cn } from "@/lib/utils";
 
 /** Réduit une image importée (max 1200px de large) en data URL JPEG, pour limiter le poids. */
@@ -202,16 +204,27 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
       <EditorContent editor={editor} className={bare ? BARE_CLASS : PROSE_CLASS} />
       <DrawioModal
         open={drawioOpen}
-        onSave={(xml, svg) => {
-          // On insère l'image SVG ET le schéma draw.io (pour pouvoir le rouvrir).
-          if (svg) {
+        onSave={async (xml, svg) => {
+          if (!svg) {
+            setDrawioOpen(false);
+            return;
+          }
+          // Le SVG et le XML sont stockés (URLs stables) ; le document ne garde
+          // que deux URLs légères → plus de perte à la sauvegarde.
+          const result = await uploadLogigrammeAction(svg, xml);
+          if (result.ok) {
             editor
               .chain()
               .focus()
-              .insertContent({ type: "image", attrs: { src: svg, drawioXml: xml } })
+              .insertContent({
+                type: "image",
+                attrs: { src: result.svgUrl, drawioUrl: result.xmlUrl },
+              })
               .run();
+            setDrawioOpen(false);
+          } else {
+            toast.error(result.error);
           }
-          setDrawioOpen(false);
         }}
         onClose={() => setDrawioOpen(false)}
       />
