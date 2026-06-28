@@ -2,9 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { PartiesPrenantesSnapshot } from "@/app/(tenant)/strategie/parties-prenantes/parties-prenantes-snapshot";
 import type { ActionResult } from "@/lib/actions/types";
+import { prioriteFromTotal, scoreTotal } from "@/lib/parties-prenantes";
+import { canWrite } from "@/lib/permissions";
+import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionIndex, versionLettre } from "@/lib/versions";
 import { softDeleteRow } from "./soft-delete";
 
 async function tenantWrite() {
@@ -136,4 +141,124 @@ export async function deleteAttenteAction(id: string, partieId: string): Promise
   const r = await softDeleteRow("pi_attentes", id);
   if (r.ok) revalidatePath(`/strategie/parties-prenantes/${partieId}`);
   return r;
+}
+
+// ----------------------------------------------------- Référence + versions (DG_SMQ_005)
+
+/** Enregistre la référence documentaire de la cartographie des parties prenantes. */
+export async function savePartiesPrenantesReferenceAction(
+  reference: string,
+): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tenants")
+    .update({ parties_prenantes_reference: reference.trim() || null })
+    .eq("id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/strategie/parties-prenantes");
+  return { ok: true };
+}
+
+/**
+ * Fige une version de la cartographie des parties prenantes : instantané de la
+ * liste (cotation + priorité + nb d'attentes) + référence. Modèle léger sans
+ * circuit d'approbation, comme la cartographie des processus.
+ */
+export async function publishPartiesPrenantesVersionAction(): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+  const tid = ctx.effectiveTenantId;
+
+  const supabase = await createClient();
+  const [{ data: parties }, { data: attentes }, { data: tenant }] = await Promise.all([
+    supabase
+      .from("parties_interessees")
+      .select("id, nom, sphere, type, niveau_interaction, pouvoir, legitimite, urgence")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("nom"),
+    supabase.from("pi_attentes").select("partie_id").eq("tenant_id", tid).is("deleted_at", null),
+    supabase
+      .from("tenants")
+      .select("nom_societe, parties_prenantes_reference")
+      .eq("id", tid)
+      .maybeSingle(),
+  ]);
+
+  if (!parties || parties.length === 0) {
+    return { ok: false, error: "Aucune partie prenante à figer." };
+  }
+
+  const attentesCount = new Map<string, number>();
+  for (const a of attentes ?? []) {
+    attentesCount.set(a.partie_id, (attentesCount.get(a.partie_id) ?? 0) + 1);
+  }
+
+  const snapshot: PartiesPrenantesSnapshot = {
+    reference: tenant?.parties_prenantes_reference ?? null,
+    societe: tenant?.nom_societe ?? null,
+    parties: parties.map((p) => {
+      const total = scoreTotal(p.pouvoir, p.legitimite, p.urgence);
+      return {
+        nom: p.nom,
+        sphere: p.sphere,
+        type: p.type,
+        interaction: p.niveau_interaction,
+        pouvoir: p.pouvoir,
+        legitimite: p.legitimite,
+        urgence: p.urgence,
+        total,
+        priorite: prioriteFromTotal(total),
+        nbAttentes: attentesCount.get(p.id) ?? 0,
+      };
+    }),
+  };
+
+  const { data: existantes } = await supabase
+    .from("parties_prenantes_versions")
+    .select("version")
+    .eq("tenant_id", tid);
+  const maxIndex = (existantes ?? []).reduce((m, v) => Math.max(m, versionIndex(v.version)), -1);
+  const version = versionLettre(maxIndex + 1);
+
+  const { error } = await supabase.from("parties_prenantes_versions").insert({
+    tenant_id: tid,
+    version,
+    snapshot: snapshot as unknown as Json,
+    published_by: ctx.userId,
+  });
+  if (error) return { ok: false, error: `Publication impossible : ${error.message}` };
+
+  revalidatePath("/strategie/parties-prenantes");
+  return { ok: true };
+}
+
+/** Supprime une version figée des parties prenantes (créée par erreur). */
+export async function deletePartiesPrenantesVersionAction(id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("parties_prenantes_versions")
+    .delete()
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .select("id");
+  if (error) return { ok: false, error: `Suppression impossible : ${error.message}` };
+  if (!data || data.length === 0) {
+    return { ok: false, error: "Suppression refusée (droits ou version introuvable)." };
+  }
+
+  revalidatePath("/strategie/parties-prenantes");
+  return { ok: true };
 }
