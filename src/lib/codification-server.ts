@@ -88,11 +88,12 @@ export async function attribuerCodesManquants(
   if (!trimmed) return 0;
   const trigramme: string = trimmed;
 
-  // Compteur courant par famille, incrémenté localement au fil des attributions.
+  // Compteur courant par famille : on repart toujours du plus haut numéro déjà
+  // attribué dans le pool (anti-collision) ou du compteur local, au plus haut.
   const codes = await tousLesCodes(supabase, tenantId);
   const compteur = new Map<FamilleDoc, number>();
   function prochain(famille: FamilleDoc): string {
-    const base = compteur.get(famille) ?? maxChrono(codes, famille, trigramme);
+    const base = Math.max(compteur.get(famille) ?? 0, maxChrono(codes, famille, trigramme));
     const n = base + 1;
     compteur.set(famille, n);
     return formatReference(famille, trigramme, n);
@@ -100,16 +101,17 @@ export async function attribuerCodesManquants(
 
   let poses = 0;
 
-  // Fiche d'identité du processus (famille DG) : assignée en premier pour
-  // obtenir le plus petit numéro DG (typiquement DG_{trigramme}_001).
+  // Fiche d'identité = TOUJOURS DG_{trigramme}_001 (numéro réservé). On réserve
+  // donc 001 pour la famille DG : les autres documents DG repartent de 002.
   if (!proc?.fiche_reference?.trim()) {
     await supabase
       .from("processus")
-      .update({ fiche_reference: prochain("DG") })
+      .update({ fiche_reference: formatReference("DG", trigramme, 1) })
       .eq("id", processusId)
       .eq("tenant_id", tenantId);
     poses++;
   }
+  compteur.set("DG", Math.max(1, maxChrono(codes, "DG", trigramme)));
 
   const { data: procsSansCode } = await supabase
     .from("procedures")

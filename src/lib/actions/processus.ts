@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { normalizeTrigramme } from "@/lib/codification";
-import { attribuerCodesManquants, prochaineReference } from "@/lib/codification-server";
+import { formatReference, normalizeTrigramme } from "@/lib/codification";
+import { attribuerCodesManquants } from "@/lib/codification-server";
 import { canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -30,9 +30,9 @@ export async function createProcessusAction(input: unknown): Promise<ActionResul
   }
 
   const code = normalizeTrigramme(parsed.data.code ?? "") || null;
-  // Référence de la fiche d'identité (DG) attribuée d'office si le trigramme est
-  // fourni dès la création : DG_{trigramme}_001 (modifiable ensuite).
-  const ficheReference = code ? await prochaineReference(ctx.effectiveTenantId, "DG", code) : null;
+  // Référence de la fiche d'identité : TOUJOURS DG_{trigramme}_001 dès que le
+  // trigramme est fourni (numéro réservé, modifiable ensuite).
+  const ficheReference = code ? formatReference("DG", code, 1) : null;
   const supabase = await createClient();
   const { error } = await supabase.from("processus").insert({
     tenant_id: ctx.effectiveTenantId,
