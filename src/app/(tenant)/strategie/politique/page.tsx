@@ -1,6 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { MaitriseDocument } from "@/components/maitrise-document";
@@ -121,15 +120,7 @@ export default async function PolitiquePage({
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      {retourDocuments ? (
-        <Link
-          href="/documents"
-          className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Retour aux documents
-        </Link>
-      ) : null}
+      {retourDocuments ? <BackLink href="/documents" label="Retour aux documents" /> : null}
 
       <PageHeader
         title="Politique qualité"

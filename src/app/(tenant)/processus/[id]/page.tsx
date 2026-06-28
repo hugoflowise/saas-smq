@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CreateProcedureDialog } from "@/app/(tenant)/documentation/procedures/create-procedure-dialog";
@@ -7,6 +6,7 @@ import { NcDialog } from "@/app/(tenant)/nc/nc-dialog";
 import { RoDialog } from "@/app/(tenant)/risques/ro-dialog";
 import { RoTabList } from "@/app/(tenant)/risques/ro-tab-list";
 import { ObjectifDialog } from "@/app/(tenant)/strategie/objectifs/objectif-dialog";
+import { BackLink } from "@/components/back-link";
 import { EmptyState } from "@/components/empty-state";
 import type { FicheProcessusData } from "@/components/fiche-processus";
 import { PageHeader } from "@/components/page-header";
@@ -111,6 +111,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .select("id, reference, intitule, statut")
       .eq("tenant_id", tid)
       .eq("processus_concerne", id)
+      .is("deleted_at", null)
       .order("date_constat", { ascending: false }),
     supabase
       .from("objectifs_qualite")
@@ -222,13 +223,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <Link
-        href="/processus"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Processus
-      </Link>
+      <BackLink href="/processus" label="Processus" />
 
       <PageHeader title={processus.nom}>
         <SupprimerButton

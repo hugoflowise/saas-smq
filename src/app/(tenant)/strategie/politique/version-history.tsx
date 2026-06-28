@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/format";
+import { VERSION_STATUT_LABELS } from "@/lib/labels";
 
 export type VersionItem = {
   id: string;
@@ -43,7 +44,7 @@ export type VersionDocumentChrome = {
 };
 
 const STATUT_EN_COURS_LABEL: Record<string, string> = {
-  brouillon: "Brouillon",
+  brouillon: VERSION_STATUT_LABELS.brouillon,
   en_revue: "En vérification",
   en_approbation: "En approbation",
   approuvee: "Approuvée, en attente de publication",

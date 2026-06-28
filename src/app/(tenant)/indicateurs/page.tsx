@@ -49,6 +49,7 @@ export default async function IndicateursPage() {
     .from("indicateurs_valeurs")
     .select("indicateur_id, valeur, date_mesure")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("date_mesure", { ascending: false });
   const lastByIndicateur = new Map<string, { valeur: number; date: string }>();
   for (const v of valeurs ?? []) {

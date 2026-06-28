@@ -13,15 +13,16 @@ import { Button } from "@/components/ui/button";
 import { publishFicheAction, transitionFicheAction } from "@/lib/actions/processus-fiche";
 import type { FicheUser } from "@/lib/fiche-processus-data";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
+import { VERSION_STATUT_LABELS } from "@/lib/labels";
 import { FicheEditor, type FicheEditorInitial } from "./fiche-editor";
 
+// États stables partagés (VERSION_STATUT_LABELS) + états transitoires du circuit
+// de validation propres à la fiche.
 const STATUT_LABELS: Record<string, string> = {
-  brouillon: "Brouillon",
+  ...VERSION_STATUT_LABELS,
   en_revue: "En vérification",
   en_approbation: "En approbation",
   approuvee: "Approuvée",
-  publiee: "Publiée",
-  archivee: "Archivée",
 };
 
 export function FicheClient({

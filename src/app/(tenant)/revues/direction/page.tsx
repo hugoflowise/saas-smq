@@ -10,16 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
+import { REVUE_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { RevueDialog } from "./revue-dialog";
-
-const STATUT_LABELS: Record<string, string> = {
-  planifiee: "Planifiée",
-  realisee: "Réalisée",
-  cloturee: "Clôturée",
-};
 
 export default async function RevuesDirectionPage() {
   const ctx = await getTenantContext();
@@ -79,7 +74,9 @@ export default async function RevuesDirectionPage() {
                     </Link>
                   </TableCell>
                   <TableCell>{formatDate(r.date_realisation)}</TableCell>
-                  <TableCell>{STATUT_LABELS[r.statut] ?? r.statut}</TableCell>
+                  <TableCell>
+                    {STATUT_LABELS[r.statut as keyof typeof STATUT_LABELS] ?? r.statut}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

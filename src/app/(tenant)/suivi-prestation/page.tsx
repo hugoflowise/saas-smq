@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { QrCode } from "@/components/qr-code";
+import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -135,18 +136,7 @@ export default async function SuiviPrestationPage() {
         </CardContent>
       </Card>
 
-      {items.length > 0 ? (
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {tiles.map((t) => (
-            <Card key={t.label}>
-              <CardContent className="py-5">
-                <p className={`font-semibold text-3xl ${t.cls}`}>{t.value}</p>
-                <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : null}
+      {items.length > 0 ? <StatTiles tiles={tiles} className="mb-6" /> : null}
 
       {items.length === 0 ? (
         <EmptyState

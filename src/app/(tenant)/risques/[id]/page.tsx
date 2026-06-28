@@ -1,24 +1,18 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import type { ACTION_STATUT_LABELS } from "@/lib/labels";
+import { RO_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RoDialog } from "../ro-dialog";
 import { RoActions } from "./ro-actions";
 
 const TYPE_LABELS: Record<string, string> = { risque: "Risque", opportunite: "Opportunité" };
-const STATUT_LABELS: Record<string, string> = {
-  identifie: "Identifié",
-  en_traitement: "En traitement",
-  maitrise: "Maîtrisé",
-  cloture: "Clôturé",
-};
 
 function criticiteClass(c: number) {
   if (c > 15) return "bg-status-nc-majeure/15 text-status-nc-majeure";
@@ -80,13 +74,7 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href="/risques"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Risques & Opportunités
-      </Link>
+      <BackLink href="/risques" label="Risques & Opportunités" />
 
       <PageHeader title={ro.intitule} description={TYPE_LABELS[ro.type] ?? ro.type}>
         <RoDialog processusOptions={processus ?? []} ro={ro} />
@@ -95,7 +83,10 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
       <Card className="mb-6">
         <CardContent className="grid grid-cols-2 gap-5 pt-6 sm:grid-cols-3">
           <Field label="Type" value={TYPE_LABELS[ro.type] ?? ro.type} />
-          <Field label="Statut" value={STATUT_LABELS[ro.statut] ?? ro.statut} />
+          <Field
+            label="Statut"
+            value={STATUT_LABELS[ro.statut as keyof typeof STATUT_LABELS] ?? ro.statut}
+          />
           <Field
             label="Processus"
             value={<ProcessusLink id={ro.processus_id} nom={processusNom} />}

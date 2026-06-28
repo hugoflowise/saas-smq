@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,13 +47,7 @@ export default async function ReunionDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href="/reunions"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Réunions QHSE
-      </Link>
+      <BackLink href="/reunions" label="Réunions QHSE" />
 
       <PageHeader title={reunion.titre} description="Préparation, tenue en séance et compte rendu.">
         <DownloadPdfButton printHref={`/print/reunion/${id}`} label="Compte rendu (PDF)" />

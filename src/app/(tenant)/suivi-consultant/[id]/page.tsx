@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
@@ -49,13 +48,7 @@ export default async function SuiviConsultantDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <Link
-        href="/suivi-consultant"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Suivi consultant
-      </Link>
+      <BackLink href="/suivi-consultant" label="Suivi consultant" />
 
       <PageHeader
         title={`Suivi · ${suivi.nom ?? "-"}`}

@@ -96,6 +96,42 @@ export const AUDIT_STATUT_LABELS = {
   cloture: "Clôturé",
 } as const;
 
+/** Statut d'un risque / opportunité. */
+export const RO_STATUT_LABELS = {
+  identifie: "Identifié",
+  en_traitement: "En traitement",
+  maitrise: "Maîtrisé",
+  cloture: "Clôturé",
+} as const;
+
+/** Statut d'une revue de direction. */
+export const REVUE_STATUT_LABELS = {
+  planifiee: "Planifiée",
+  realisee: "Réalisée",
+  cloturee: "Clôturée",
+} as const;
+
+/** Statut d'une réunion QHSE. */
+export const REUNION_STATUT_LABELS = {
+  planifiee: "Planifiée",
+  terminee: "Terminée",
+} as const;
+
+/** Statut d'une réclamation / remontée. */
+export const RECLAMATION_STATUT_LABELS = {
+  recue: "Reçue",
+  analysee: "Analysée",
+  traitee: "Traitée",
+  cloturee: "Clôturée",
+} as const;
+
+/** Statut publié d'une version de document maîtrisé (états stables partagés). */
+export const VERSION_STATUT_LABELS = {
+  brouillon: "Brouillon",
+  publiee: "Publiée",
+  archivee: "Archivée",
+} as const;
+
 export const ROLE_LABELS = {
   admin_flowise: "Administrateur Flowise",
   dirigeant: "Dirigeant",

@@ -1,6 +1,6 @@
-import { ArrowLeft, Check } from "lucide-react";
-import Link from "next/link";
+import { Check } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,13 +70,7 @@ export default async function PartieDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <Link
-        href="/strategie/parties-prenantes"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Parties prenantes
-      </Link>
+      <BackLink href="/strategie/parties-prenantes" label="Parties prenantes" />
 
       <PageHeader
         title={partie.nom}

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
+import { REUNION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ReunionDialog } from "./reunion-dialog";
@@ -47,6 +48,7 @@ export default async function ReunionsPage() {
     .from("reunions")
     .select("id, titre, type, date_prevue, date_realisation, statut, points")
     .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
     .order("date_prevue", { ascending: false, nullsFirst: false });
 
   const items = reunions ?? [];
@@ -110,7 +112,9 @@ export default async function ReunionsPage() {
                             : "bg-status-pf/15 text-status-pf"
                         }`}
                       >
-                        {r.statut === "terminee" ? "Terminée" : "Planifiée"}
+                        {r.statut === "terminee"
+                          ? REUNION_STATUT_LABELS.terminee
+                          : REUNION_STATUT_LABELS.planifiee}
                       </span>
                     </TableCell>
                     <TableCell>
