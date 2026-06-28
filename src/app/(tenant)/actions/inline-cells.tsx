@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { quickUpdateActionAction } from "@/lib/actions/plan-actions";
 import { COTATION_BADGE_CLASS } from "@/lib/badges";
+import { TIMEZONE } from "@/lib/format";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
 
@@ -185,7 +186,11 @@ export function EcheanceCell({ id, value }: { id: string; value: string | null }
   }
 
   if (readOnly) {
-    return <span className={STATIC}>{val ? new Date(val).toLocaleDateString("fr-FR") : "-"}</span>;
+    return (
+      <span className={STATIC}>
+        {val ? new Date(val).toLocaleDateString("fr-FR", { timeZone: TIMEZONE }) : "-"}
+      </span>
+    );
   }
 
   return (

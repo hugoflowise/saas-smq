@@ -58,3 +58,6 @@ supabase/.branches/
 docs/benchmark-coengi/captures/
 docs/benchmark-coengi/transcript.docx
 docs/benchmark-coengi/transcript.txt
+
+# Worktrees transitoires des agents Claude Code
+.claude/worktrees/

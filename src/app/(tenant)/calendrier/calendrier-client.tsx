@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { todayISO } from "@/lib/format";
+import { TIMEZONE, todayISO } from "@/lib/format";
 
 export type CalEvent = { date: string; label: string; type: string; href: string };
 
@@ -51,6 +51,7 @@ function formatDate(d: string) {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    timeZone: TIMEZONE,
   });
 }
 

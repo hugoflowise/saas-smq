@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { TIMEZONE } from "@/lib/format";
 import { loadNotifications } from "@/lib/notifications-view";
 import { NotificationLink } from "./notification-link";
 
@@ -10,6 +11,7 @@ function formatDate(iso: string) {
     month: "long",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: TIMEZONE,
   });
 }
 

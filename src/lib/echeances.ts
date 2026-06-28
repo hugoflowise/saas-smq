@@ -1,4 +1,5 @@
 import "server-only";
+import { dateOffsetISO, todayISO } from "./format";
 import { AUDIT_TYPE_LABELS } from "./labels";
 
 const ACTIONS_ACTIVES = ["a_faire", "en_cours", "bloquee"] as const;
@@ -37,8 +38,8 @@ export async function collectEcheances(
   tenantId: string,
   jours = 30,
 ): Promise<EcheancesTenant> {
-  const today = new Date().toISOString().slice(0, 10);
-  const horizon = new Date(Date.now() + jours * 86_400_000).toISOString().slice(0, 10);
+  const today = todayISO();
+  const horizon = dateOffsetISO(jours);
 
   const [
     docs,
