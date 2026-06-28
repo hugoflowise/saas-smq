@@ -187,7 +187,10 @@ export function MaitriseDocument({
     return false;
   }
 
-  // Sauvegarde automatique tant qu'on est en brouillon.
+  // Sauvegarde automatique tant qu'on est en brouillon. Les erreurs sont
+  // remontées (une seule fois) au lieu d'être avalées silencieusement, et un
+  // dernier enregistrement est tenté à la fermeture (changement de page).
+  const errorSignaledRef = useRef(false);
   useEffect(() => {
     if (!editable) return;
     const interval = setInterval(async () => {
@@ -195,10 +198,18 @@ export function MaitriseDocument({
       const result = await onSaveContenu((contenuRef.current ?? {}) as Json);
       if (result.ok) {
         dirtyRef.current = false;
+        errorSignaledRef.current = false;
         setSaved(true);
+      } else if (!errorSignaledRef.current) {
+        errorSignaledRef.current = true;
+        toast.error(`Enregistrement automatique impossible : ${result.error}`);
       }
     }, 2000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Flush des dernières modifications avant de quitter la vue.
+      if (dirtyRef.current) void onSaveContenu((contenuRef.current ?? {}) as Json);
+    };
   }, [editable, onSaveContenu]);
 
   async function save() {
