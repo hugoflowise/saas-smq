@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { RetourPieceJointe } from "@/lib/actions/retours";
 import { formatDateTime, nomPersonne } from "@/lib/format";
 import { RETOUR_STATUT_LABELS, RETOUR_TYPE_LABELS } from "@/lib/labels";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -49,7 +50,7 @@ export default async function AdminRetoursPage() {
   const { data: retoursData } = await admin
     .from("retours")
     .select(
-      "id, numero, tenant_id, type, titre, description, page_url, statut, note_admin, created_at, created_by",
+      "id, numero, tenant_id, type, titre, description, page_url, statut, note_admin, created_at, created_by, pieces_jointes",
     )
     .order("created_at", { ascending: false });
   // Tri stable : on garde l'ordre chronologique (récent → ancien) à l'intérieur de
@@ -140,6 +141,9 @@ export default async function AdminRetoursPage() {
                         auteurEmail: author?.email ?? null,
                         client: clientNom,
                         date: formatDateTime(r.created_at),
+                        pieces: Array.isArray(r.pieces_jointes)
+                          ? (r.pieces_jointes as unknown as RetourPieceJointe[])
+                          : [],
                       }}
                       trigger={
                         <TableRow

@@ -30,14 +30,10 @@ export function FeedbackButton() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    // Contexte : page d'où le retour est envoyé.
+    form.set("pageUrl", typeof window !== "undefined" ? window.location.pathname : "");
     setPending(true);
-    const result = await createRetourAction({
-      type: form.get("type"),
-      titre: form.get("titre"),
-      description: form.get("description") || undefined,
-      // Contexte : page d'où le retour est envoyé.
-      pageUrl: typeof window !== "undefined" ? window.location.pathname : undefined,
-    });
+    const result = await createRetourAction(form);
     setPending(false);
     if (result.ok) {
       toast.success("Merci ! Votre retour a bien été transmis.");
@@ -93,6 +89,20 @@ export function FeedbackButton() {
               rows={4}
               placeholder="Décrivez ce qui s'est passé, ce que vous attendiez, ou votre idée…"
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="fichiers">Capture d'écran ou fichier (facultatif)</Label>
+            <Input
+              id="fichiers"
+              name="fichiers"
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+              className="cursor-pointer file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm"
+            />
+            <p className="text-muted-foreground text-xs">
+              Jusqu'à 4 fichiers, 5 Mo chacun. Une capture aide beaucoup à comprendre.
+            </p>
           </div>
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Envoi…" : "Envoyer le retour"}

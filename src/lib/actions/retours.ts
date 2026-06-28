@@ -4,8 +4,21 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { notifyUsers } from "@/lib/notifications";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+
+/** Une pièce jointe d'un retour (métadonnées stockées en jsonb sur la ligne). */
+export type RetourPieceJointe = {
+  path: string;
+  nom: string;
+  taille: number;
+  type: string;
+};
+
+// Garde-fous d'upload : volume raisonnable pour des captures / fichiers de contexte.
+const MAX_FICHIERS = 4;
+const MAX_TAILLE = 5 * 1024 * 1024; // 5 Mo par fichier
 
 const createSchema = z.object({
   type: z.enum(["bug", "amelioration", "remarque"]),
@@ -14,26 +27,109 @@ const createSchema = z.object({
   pageUrl: z.string().trim().optional(),
 });
 
-/** Soumission d'un retour par n'importe quel utilisateur authentifié. */
-export async function createRetourAction(input: unknown): Promise<ActionResult> {
+/** Nettoie un nom de fichier pour un chemin de stockage sûr. */
+function nomSur(nom: string): string {
+  const base = nom
+    .normalize("NFKD")
+    .replace(/[^\w.\- ]/g, "_")
+    .replace(/\s+/g, "_");
+  return base.slice(-80) || "fichier";
+}
+
+/**
+ * Soumission d'un retour par n'importe quel utilisateur authentifié.
+ * Accepte un FormData : champs texte + 0..n fichiers (captures d'écran, pièces).
+ */
+export async function createRetourAction(formData: FormData): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
 
-  const parsed = createSchema.safeParse(input);
+  const parsed = createSchema.safeParse({
+    type: formData.get("type"),
+    titre: formData.get("titre"),
+    description: formData.get("description") || undefined,
+    pageUrl: formData.get("pageUrl") || undefined,
+  });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
   const d = parsed.data;
 
+  // Validation des fichiers avant tout enregistrement.
+  const fichiers = formData
+    .getAll("fichiers")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+  if (fichiers.length > MAX_FICHIERS) {
+    return { ok: false, error: `Maximum ${MAX_FICHIERS} fichiers.` };
+  }
+  for (const f of fichiers) {
+    if (f.size > MAX_TAILLE) {
+      return { ok: false, error: `« ${f.name} » dépasse 5 Mo.` };
+    }
+  }
+
   const supabase = await createClient();
-  const { error } = await supabase.from("retours").insert({
-    tenant_id: ctx.effectiveTenantId ?? null,
-    type: d.type,
-    titre: d.titre,
-    description: d.description || null,
-    page_url: d.pageUrl || null,
-    created_by: ctx.userId,
-  });
-  if (error) return { ok: false, error: error.message };
+  const { data: row, error } = await supabase
+    .from("retours")
+    .insert({
+      tenant_id: ctx.effectiveTenantId ?? null,
+      type: d.type,
+      titre: d.titre,
+      description: d.description || null,
+      page_url: d.pageUrl || null,
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
+  if (error || !row) return { ok: false, error: error?.message ?? "Échec de l'enregistrement." };
+
+  // Upload des fichiers côté serveur (service_role) puis enregistrement des
+  // métadonnées : le bucket « retours » n'est jamais exposé au client.
+  if (fichiers.length > 0) {
+    const admin = createAdminClient();
+    const tenantSeg = ctx.effectiveTenantId ?? "global";
+    const pieces: RetourPieceJointe[] = [];
+    for (const [i, f] of fichiers.entries()) {
+      const path = `${tenantSeg}/${row.id}/${i}-${nomSur(f.name)}`;
+      const { error: upErr } = await admin.storage
+        .from("retours")
+        .upload(path, await f.arrayBuffer(), {
+          contentType: f.type || "application/octet-stream",
+          upsert: true,
+        });
+      if (upErr) continue; // un fichier en échec ne doit pas perdre le retour
+      pieces.push({ path, nom: f.name, taille: f.size, type: f.type || "" });
+    }
+    if (pieces.length > 0) {
+      await admin.from("retours").update({ pieces_jointes: pieces }).eq("id", row.id);
+    }
+  }
+
   return { ok: true };
+}
+
+/**
+ * URL signée pour télécharger une pièce jointe (réservé à l'admin Flowise).
+ * Génère un lien temporaire à la demande, sans exposer le bucket.
+ */
+export async function getRetourPieceUrlAction(
+  path: string,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", ctx.userId)
+    .maybeSingle();
+  if (profile?.role !== "admin_flowise") {
+    return { ok: false, error: "Action réservée à l'administrateur Flowise." };
+  }
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from("retours").createSignedUrl(path, 300);
+  if (error || !data) return { ok: false, error: error?.message ?? "Lien indisponible." };
+  return { ok: true, url: data.signedUrl };
 }
 
 const updateSchema = z.object({

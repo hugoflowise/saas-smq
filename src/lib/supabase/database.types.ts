@@ -3133,6 +3133,7 @@ export type Database = {
           note_admin: string | null
           numero: number
           page_url: string | null
+          pieces_jointes: Json
           statut: Database["public"]["Enums"]["retour_statut"]
           tenant_id: string | null
           titre: string
@@ -3147,6 +3148,7 @@ export type Database = {
           note_admin?: string | null
           numero?: number
           page_url?: string | null
+          pieces_jointes?: Json
           statut?: Database["public"]["Enums"]["retour_statut"]
           tenant_id?: string | null
           titre: string
@@ -3161,6 +3163,7 @@ export type Database = {
           note_admin?: string | null
           numero?: number
           page_url?: string | null
+          pieces_jointes?: Json
           statut?: Database["public"]["Enums"]["retour_statut"]
           tenant_id?: string | null
           titre?: string

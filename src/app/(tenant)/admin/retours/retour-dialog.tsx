@@ -1,5 +1,6 @@
 "use client";
 
+import { Download, Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { updateRetourAction } from "@/lib/actions/retours";
+import {
+  getRetourPieceUrlAction,
+  type RetourPieceJointe,
+  updateRetourAction,
+} from "@/lib/actions/retours";
 import { RETOUR_STATUT_LABELS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -31,7 +36,15 @@ type Retour = {
   auteurEmail: string | null;
   client: string | null;
   date: string;
+  pieces: RetourPieceJointe[];
 };
+
+/** Taille lisible (Ko / Mo). */
+function tailleLisible(o: number): string {
+  if (o < 1024) return `${o} o`;
+  if (o < 1024 * 1024) return `${Math.round(o / 1024)} Ko`;
+  return `${(o / (1024 * 1024)).toFixed(1)} Mo`;
+}
 
 export function RetourDialog({
   retour,
@@ -44,6 +57,19 @@ export function RetourDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [dlPath, setDlPath] = useState<string | null>(null);
+
+  // Téléchargement : on demande une URL signée fraîche puis on ouvre l'onglet.
+  async function handleDownload(piece: RetourPieceJointe) {
+    setDlPath(piece.path);
+    const result = await getRetourPieceUrlAction(piece.path);
+    setDlPath(null);
+    if (result.ok) {
+      window.open(result.url, "_blank", "noopener");
+    } else {
+      toast.error(result.error);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,6 +123,33 @@ export function RetourDialog({
             <p className="text-muted-foreground text-xs">
               Page : <span className="font-mono">{retour.pageUrl}</span>
             </p>
+          ) : null}
+          {retour.pieces.length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              <p className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs">
+                <Paperclip className="size-3.5" />
+                {retour.pieces.length} pièce{retour.pieces.length > 1 ? "s" : ""} jointe
+                {retour.pieces.length > 1 ? "s" : ""}
+              </p>
+              <ul className="flex flex-col gap-1">
+                {retour.pieces.map((piece) => (
+                  <li key={piece.path}>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(piece)}
+                      disabled={dlPath === piece.path}
+                      className="flex w-full items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left text-sm transition hover:bg-muted/50 disabled:opacity-60"
+                    >
+                      <Download className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="flex-1 truncate">{piece.nom}</span>
+                      <span className="shrink-0 text-muted-foreground text-xs">
+                        {dlPath === piece.path ? "Ouverture…" : tailleLisible(piece.taille)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </div>
 
