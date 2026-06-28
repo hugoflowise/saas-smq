@@ -3,7 +3,7 @@
 import type { JSONContent } from "@tiptap/react";
 import { useState } from "react";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
-import { Signataire } from "@/components/maitrise-document";
+import { Signataire } from "@/components/signataires";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Button } from "@/components/ui/button";
 import {
