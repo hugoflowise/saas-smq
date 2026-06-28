@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { setActionStatutAction } from "@/lib/actions/plan-actions";
+import { TIMEZONE } from "@/lib/format";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS, ACTION_STATUTS } from "@/lib/labels";
 import type { ActionRow } from "./action-dialog";
@@ -23,7 +24,7 @@ type Statut = (typeof ACTION_STATUTS)[number];
 export type KanbanAction = ActionRow & { reference: string };
 
 function formatDate(d: string | null) {
-  return d ? new Date(d).toLocaleDateString("fr-FR") : null;
+  return d ? new Date(d).toLocaleDateString("fr-FR", { timeZone: TIMEZONE }) : null;
 }
 
 const PRIORITE_DOT: Record<string, string> = {
