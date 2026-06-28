@@ -37,6 +37,7 @@ export type Database = {
           recommandation: string | null
           reference: string
           reference_iso: string[] | null
+          resultat_efficacite: string | null
           responsable_id: string | null
           revue_id: string | null
           statut: Database["public"]["Enums"]["action_statut"]
@@ -68,6 +69,7 @@ export type Database = {
           recommandation?: string | null
           reference: string
           reference_iso?: string[] | null
+          resultat_efficacite?: string | null
           responsable_id?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
@@ -99,6 +101,7 @@ export type Database = {
           recommandation?: string | null
           reference?: string
           reference_iso?: string[] | null
+          resultat_efficacite?: string | null
           responsable_id?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]

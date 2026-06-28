@@ -34,6 +34,7 @@ export type ActionRow = {
   processus_concerne: string | null;
   date_prevue: string | null;
   indicateur_efficacite: string | null;
+  resultat_efficacite: string | null;
   commentaires: string | null;
   constat?: string | null;
   cause_fondamentale?: string | null;
@@ -52,6 +53,12 @@ const COTATION_OPTIONS: Record<string, string> = {
 type Props = {
   processusOptions: { id: string; nom: string }[];
   action?: ActionRow;
+  /**
+   * Déclencheur personnalisé (ex. nom de la ligne cliquable dans la liste).
+   * Si absent, on retombe sur le bouton « Nouvelle action » (création) ou
+   * l'icône crayon (édition).
+   */
+  trigger?: React.ReactElement;
 };
 
 function Options({ map }: { map: Record<string, string> }) {
@@ -66,7 +73,7 @@ function Options({ map }: { map: Record<string, string> }) {
   );
 }
 
-export function ActionDialog({ processusOptions, action }: Props) {
+export function ActionDialog({ processusOptions, action, trigger }: Props) {
   const isEdit = Boolean(action);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
@@ -84,6 +91,7 @@ export function ActionDialog({ processusOptions, action }: Props) {
           processusConcerne: form.get("processusConcerne") || undefined,
           datePrevue: form.get("datePrevue") || undefined,
           indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
+          resultatEfficacite: form.get("resultatEfficacite") || undefined,
           commentaires: form.get("commentaires") || undefined,
           cotation: form.get("cotation") || undefined,
           constat: form.get("constat") || undefined,
@@ -98,18 +106,21 @@ export function ActionDialog({ processusOptions, action }: Props) {
     });
   }
 
-  // Lecture seule (auditeur) : masquer toute écriture. Pas de prop trigger ici,
-  // donc on masque aussi bien le bouton « Nouvelle action » que l'icône crayon.
-  if (readOnly) return null;
+  // Lecture seule (auditeur) : pas d'écriture. En édition, si un trigger
+  // personnalisé est fourni (nom de la ligne), on l'affiche tel quel sans
+  // ouvrir le dialogue ; sinon on masque le bouton « Nouvelle action » / crayon.
+  if (readOnly) return isEdit ? (trigger ?? null) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           isEdit ? (
-            <Button variant="ghost" size="icon" aria-label="Modifier">
-              <Pencil className="size-4" />
-            </Button>
+            (trigger ?? (
+              <Button variant="ghost" size="icon" aria-label="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+            ))
           ) : (
             <Button>Nouvelle action</Button>
           )
@@ -259,6 +270,18 @@ export function ActionDialog({ processusOptions, action }: Props) {
               id="indicateurEfficacite"
               name="indicateurEfficacite"
               defaultValue={action?.indicateur_efficacite ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="resultatEfficacite">
+              Résultats mesurés / Efficacité de l'action corrective
+            </Label>
+            <Textarea
+              id="resultatEfficacite"
+              name="resultatEfficacite"
+              rows={2}
+              defaultValue={action?.resultat_efficacite ?? ""}
+              placeholder="Résultat mesuré après mise en œuvre et conclusion sur l'efficacité…"
             />
           </div>
           <div className="flex flex-col gap-2">

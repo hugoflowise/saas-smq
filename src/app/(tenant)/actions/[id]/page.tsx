@@ -40,7 +40,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, commentaires, constat, cause_fondamentale, recommandation, cotation",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, commentaires, constat, cause_fondamentale, recommandation, cotation",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -118,6 +118,12 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           <Field label="Échéance" value={formatDate(action.date_prevue)} />
           <Field label="Date effective" value={formatDate(action.date_effective)} />
           <Field label="Indicateur d'efficacité" value={action.indicateur_efficacite} />
+          <div className="sm:col-span-2">
+            <Field
+              label="Résultats mesurés / Efficacité de l'action corrective"
+              value={action.resultat_efficacite}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Field label="Constat" value={action.constat} />
           </div>
