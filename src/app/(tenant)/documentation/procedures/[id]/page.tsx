@@ -141,10 +141,12 @@ export default async function ProcedureDetailPage({
     glossaireAbreviations: procedure.glossaire_abreviations,
     definitions,
     referencesDoc: refsDoc,
+    versions,
   };
   const infosInitial = {
     id: procedure.id,
     objet: procedure.objet ?? "",
+    noteRevision: procedure.note_revision ?? "",
     domaineApplication: procedure.domaine_application ?? "",
     resume: procedure.resume ?? "",
     diffusion: procedure.diffusion ?? "",

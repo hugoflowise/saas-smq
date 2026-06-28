@@ -1,3 +1,5 @@
+import { ProcedureRevisionTable, type RevisionLigne } from "@/components/procedure-revision-table";
+
 export type ProcRef = { numero: string; reference: string; designation: string };
 export type ProcDef = { terme: string; definition: string };
 
@@ -11,6 +13,9 @@ export type ProcedureSectionsData = {
   glossaireAbreviations: string | null;
   definitions: ProcDef[];
   referencesDoc: ProcRef[];
+  // Versions publiées pour le tableau de révision en tête (optionnel : absent à
+  // l'impression d'un instantané figé).
+  versions?: RevisionLigne[];
 };
 
 const HEAD: React.CSSProperties = {
@@ -83,6 +88,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
   const aGlossaire = d.glossaireSigles || d.glossaireSymboles || d.glossaireAbreviations;
   return (
     <div className="flex flex-col">
+      {d.versions?.length ? <ProcedureRevisionTable versions={d.versions} /> : null}
       {d.resume?.trim() || d.diffusion?.trim() ? (
         <div className="mb-6 overflow-hidden rounded-md border text-sm">
           {d.resume?.trim() ? (

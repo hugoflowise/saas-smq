@@ -16,6 +16,7 @@ type Def = { terme: string; definition: string };
 export type ProcInfosInitial = {
   id: string;
   objet: string;
+  noteRevision: string;
   domaineApplication: string;
   resume: string;
   diffusion: string;
@@ -39,6 +40,7 @@ export function ProcedureInfosEditor({ initial }: { initial: ProcInfosInitial })
     const result = await saveProcedureInfosAction({
       id: initial.id,
       objet: f.get("objet") || undefined,
+      noteRevision: f.get("noteRevision") || undefined,
       domaineApplication: f.get("domaineApplication") || undefined,
       resume: f.get("resume") || undefined,
       diffusion: f.get("diffusion") || undefined,
@@ -72,6 +74,11 @@ export function ProcedureInfosEditor({ initial }: { initial: ProcInfosInitial })
           name="domaineApplication"
           label="Domaine d'application"
           defaultValue={initial.domaineApplication}
+        />
+        <Champ
+          name="noteRevision"
+          label="Objet de la modification (révision)"
+          defaultValue={initial.noteRevision}
         />
       </div>
 
