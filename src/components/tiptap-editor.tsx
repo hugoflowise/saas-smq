@@ -102,7 +102,12 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
     content: content ?? "",
     editable,
     immediatelyRender: false,
-    onUpdate: ({ editor }) => onChange?.(editor.getJSON()),
+    // IMPORTANT : `editor.getJSON()` renvoie des attrs en objets à prototype nul
+    // (Object.create(null)). Passés tels quels à une Server Action, ils sont
+    // supprimés par la sérialisation (React Flight) → un logigramme/image perd
+    // src et data, donc disparaît à la sauvegarde. Le round-trip JSON rétablit
+    // des objets normaux, sérialisables.
+    onUpdate: ({ editor }) => onChange?.(JSON.parse(JSON.stringify(editor.getJSON()))),
     editorProps: { attributes: { class: "ProseMirror" } },
   });
 
