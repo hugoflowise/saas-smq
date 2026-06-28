@@ -729,6 +729,7 @@ export type Database = {
           date_revue: string | null
           id: string
           prochain_revue: string | null
+          reference: string | null
           tenant_id: string
           updated_at: string
           updated_by: string | null
@@ -740,6 +741,7 @@ export type Database = {
           date_revue?: string | null
           id?: string
           prochain_revue?: string | null
+          reference?: string | null
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
@@ -751,6 +753,7 @@ export type Database = {
           date_revue?: string | null
           id?: string
           prochain_revue?: string | null
+          reference?: string | null
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
@@ -768,6 +771,48 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contexte_versions: {
+        Row: {
+          created_at: string
+          id: string
+          published_by: string | null
+          snapshot: Json | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contexte_versions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contexte_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
