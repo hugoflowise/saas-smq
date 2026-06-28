@@ -85,7 +85,8 @@ export default async function ModeAuditPage() {
     supabase
       .from("parties_interessees")
       .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid),
+      .eq("tenant_id", tid)
+      .is("deleted_at", null),
     supabase
       .from("processus")
       .select("id", { count: "exact", head: true })
@@ -102,15 +103,18 @@ export default async function ModeAuditPage() {
     supabase
       .from("risques_opportunites")
       .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid),
-    supabase
-      .from("objectifs_qualite")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid),
+      .eq("tenant_id", tid)
+      .is("deleted_at", null),
     supabase
       .from("objectifs_qualite")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null),
+    supabase
+      .from("objectifs_qualite")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .eq("statut", "atteint"),
     supabase
       .from("procedures")
@@ -123,30 +127,39 @@ export default async function ModeAuditPage() {
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
       .is("deleted_at", null),
-    supabase.from("reclamations").select("id", { count: "exact", head: true }).eq("tenant_id", tid),
     supabase
       .from("reclamations")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null),
+    supabase
+      .from("reclamations")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .neq("statut", "cloturee"),
     supabase
       .from("audits_internes")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .in("statut", [...AUDITS_REALISES]),
     supabase
       .from("revues_direction")
       .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid),
+      .eq("tenant_id", tid)
+      .is("deleted_at", null),
     supabase
       .from("non_conformites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .in("statut", [...NC_OUVERTES]),
     supabase
       .from("non_conformites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .in("statut", [...NC_OUVERTES])
       .in("gravite", ["majeure", "critique"] as ("mineure" | "majeure" | "critique")[]),
     supabase

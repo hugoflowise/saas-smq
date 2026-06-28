@@ -188,6 +188,7 @@ export async function generateAuditProgrammeAction(annee: number): Promise<Actio
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", c.tenantId)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
   if (!processus || processus.length === 0) {
     return { ok: false, error: "Aucun processus à auditer. Créez d'abord la cartographie." };

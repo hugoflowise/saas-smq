@@ -47,6 +47,7 @@ export default async function NcPage({
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
 
   let query = supabase
@@ -54,7 +55,8 @@ export default async function NcPage({
     .select(
       "id, reference, intitule, description, date_constat, origine, gravite, type, statut, processus_concerne",
     )
-    .eq("tenant_id", ctx.effectiveTenantId);
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null);
 
   if (statut)
     query = query.eq(

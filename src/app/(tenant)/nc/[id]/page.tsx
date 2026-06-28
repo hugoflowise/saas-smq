@@ -59,6 +59,7 @@ export default async function NcDetailPage({
     .from("processus")
     .select("id, nom")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
   const processusNom = nc.processus_concerne
     ? ((processusOptions ?? []).find((p) => p.id === nc.processus_concerne)?.nom ?? null)
@@ -75,6 +76,7 @@ export default async function NcDetailPage({
     .from("actions")
     .select("id, reference, description_courte, statut")
     .eq("tenant_id", tid)
+    .is("deleted_at", null)
     .order("reference", { ascending: true });
 
   const linked = (allActions ?? []).filter((a) => linkedIds.includes(a.id));

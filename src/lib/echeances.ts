@@ -70,6 +70,7 @@ export async function collectEcheances(
       .from("audits_internes")
       .select("id, reference, type_audit, perimetre, organisme, date_prevue")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .neq("statut", "cloture")
       .gte("date_prevue", today)
       .lte("date_prevue", horizon),
@@ -77,6 +78,7 @@ export async function collectEcheances(
       .from("revues_direction")
       .select("id, annee, date_realisation")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .neq("statut", "cloturee")
       .gte("date_realisation", today)
       .lte("date_realisation", horizon),
@@ -84,6 +86,7 @@ export async function collectEcheances(
       .from("risques_opportunites")
       .select("id, intitule, date_revue")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .neq("statut", "cloture")
       .gte("date_revue", today)
       .lte("date_revue", horizon),

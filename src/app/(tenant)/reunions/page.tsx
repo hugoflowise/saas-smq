@@ -47,6 +47,7 @@ export default async function ReunionsPage() {
     .from("reunions")
     .select("id, titre, type, date_prevue, date_realisation, statut, points")
     .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
     .order("date_prevue", { ascending: false, nullsFirst: false });
 
   const items = reunions ?? [];

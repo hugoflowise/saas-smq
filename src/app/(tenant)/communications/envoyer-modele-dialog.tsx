@@ -57,10 +57,14 @@ export function EnvoyerModeleDialog({
     // Journalise d'abord (traçabilité ISO §7.4), puis ouvre le client mail.
     const audience = cible === "societe" ? "Toute la société" : email || "Destinataire";
     const r = await logCommunicationEnvoyeeAction({ sujet: objet, audience, message: corps });
-    window.location.href = construireMailto({ to, objet, corps });
     setEnvoi(false);
-    if (!r.ok) toast.error(r.error);
-    else toast.success("E-mail ouvert dans votre messagerie et communication enregistrée.");
+    // On n'ouvre le client mail qu'en cas de succès, sinon le toast d'erreur serait avalé.
+    if (!r.ok) {
+      toast.error(r.error);
+      return;
+    }
+    window.location.href = construireMailto({ to, objet, corps });
+    toast.success("E-mail ouvert dans votre messagerie et communication enregistrée.");
     setOpen(false);
   }
 

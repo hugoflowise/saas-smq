@@ -111,6 +111,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .select("id, reference, intitule, statut")
       .eq("tenant_id", tid)
       .eq("processus_concerne", id)
+      .is("deleted_at", null)
       .order("date_constat", { ascending: false }),
     supabase
       .from("objectifs_qualite")
