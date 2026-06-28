@@ -130,7 +130,6 @@ export default async function ProcedureDetailPage({
 
   // Rubriques structurées de la procédure (objet, références, glossaire, définitions).
   const refsDoc = (procedure.references_doc as unknown as ProcRef[] | null) ?? [];
-  const refsAppli = (procedure.references_appli as unknown as ProcRef[] | null) ?? [];
   const definitions = (procedure.definitions as unknown as ProcDef[] | null) ?? [];
   const sectionsData = {
     objet: procedure.objet,
@@ -142,7 +141,6 @@ export default async function ProcedureDetailPage({
     glossaireAbreviations: procedure.glossaire_abreviations,
     definitions,
     referencesDoc: refsDoc,
-    referencesAppli: refsAppli,
   };
   const infosInitial = {
     id: procedure.id,
@@ -155,11 +153,6 @@ export default async function ProcedureDetailPage({
     glossaireAbreviations: procedure.glossaire_abreviations ?? "",
     definitions: definitions.map((d) => ({ terme: d.terme ?? "", definition: d.definition ?? "" })),
     referencesDoc: refsDoc.map((r) => ({
-      numero: r.numero ?? "",
-      reference: r.reference ?? "",
-      designation: r.designation ?? "",
-    })),
-    referencesAppli: refsAppli.map((r) => ({
       numero: r.numero ?? "",
       reference: r.reference ?? "",
       designation: r.designation ?? "",

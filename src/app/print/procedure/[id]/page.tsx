@@ -76,7 +76,6 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
     glossaire_abreviations: string | null;
     definitions: unknown;
     references_doc: unknown;
-    references_appli: unknown;
   };
   const src = ((version?.sections_snapshot as unknown as SectionsSrc | null) ??
     procedure) as SectionsSrc;
@@ -110,9 +109,8 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         glossaireAbreviations={src.glossaire_abreviations}
         definitions={(src.definitions as unknown as ProcDef[] | null) ?? []}
         referencesDoc={(src.references_doc as unknown as ProcRef[] | null) ?? []}
-        referencesAppli={(src.references_appli as unknown as ProcRef[] | null) ?? []}
       />
-      <div className="doc-chapitres" style={{ counterReset: "chap 6" }}>
+      <div className="doc-chapitres" style={{ counterReset: "chap 5" }}>
         <TiptapEditor content={contenu} editable={false} bare />
       </div>
       {isPublished ? (

@@ -24,14 +24,12 @@ export type ProcInfosInitial = {
   glossaireAbreviations: string;
   definitions: Def[];
   referencesDoc: Ref[];
-  referencesAppli: Ref[];
 };
 
 export function ProcedureInfosEditor({ initial }: { initial: ProcInfosInitial }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [refsDoc, setRefsDoc] = useState<Ref[]>(initial.referencesDoc);
-  const [refsAppli, setRefsAppli] = useState<Ref[]>(initial.referencesAppli);
   const [definitions, setDefinitions] = useState<Def[]>(initial.definitions);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -49,7 +47,6 @@ export function ProcedureInfosEditor({ initial }: { initial: ProcInfosInitial })
       glossaireAbreviations: f.get("glossaireAbreviations") || undefined,
       definitions: definitions.filter((d) => d.terme.trim() || d.definition.trim()),
       referencesDoc: refsDoc.filter((r) => r.reference.trim() || r.designation.trim()),
-      referencesAppli: refsAppli.filter((r) => r.reference.trim() || r.designation.trim()),
     });
     setPending(false);
     if (result.ok) {
@@ -79,7 +76,6 @@ export function ProcedureInfosEditor({ initial }: { initial: ProcInfosInitial })
       </div>
 
       <RefsListe titre="Documents de référence" refs={refsDoc} set={setRefsDoc} />
-      <RefsListe titre="Documents applicables" refs={refsAppli} set={setRefsAppli} />
 
       <Bloc titre="Glossaire (une entrée par ligne)">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

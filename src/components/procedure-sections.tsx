@@ -11,7 +11,6 @@ export type ProcedureSectionsData = {
   glossaireAbreviations: string | null;
   definitions: ProcDef[];
   referencesDoc: ProcRef[];
-  referencesAppli: ProcRef[];
 };
 
 const HEAD: React.CSSProperties = {
@@ -114,10 +113,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
       <Section n={3} titre="Documents de référence">
         <TableReferences refs={d.referencesDoc} />
       </Section>
-      <Section n={4} titre="Documents applicables">
-        <TableReferences refs={d.referencesAppli} />
-      </Section>
-      <Section n={5} titre="Glossaire">
+      <Section n={4} titre="Glossaire">
         {aGlossaire ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
@@ -137,7 +133,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
           <p className="text-[#0b1120]/50 text-sm">Sans objet</p>
         )}
       </Section>
-      <Section n={6} titre="Définitions">
+      <Section n={5} titre="Définitions">
         {d.definitions.length === 0 ? (
           <p className="text-[#0b1120]/50 text-sm">-</p>
         ) : (
