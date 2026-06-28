@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/react";
 import { PrintShell, type Societe } from "@/components/print-shell";
 import { type ProcDef, ProcedureSections, type ProcRef } from "@/components/procedure-sections";
+import { SignatairesBlock } from "@/components/signataires";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { formatDate, todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -41,21 +42,24 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
     ? await supabase
         .from("procedures_versions")
         .select(
-          "version, approved_at, approved_by, contenu_snapshot, sections_snapshot, redacteur, verificateur",
+          "version, approved_at, approved_by, redige_par, redige_le, verifie_par, verifie_le, contenu_snapshot, sections_snapshot",
         )
         .eq("id", procedure.version_actuelle_id)
         .maybeSingle()
     : { data: null };
 
-  let approverName: string | null = null;
-  if (version?.approved_by) {
-    const { data: approver } = await supabase
-      .from("profiles")
-      .select("full_name, email")
-      .eq("id", version.approved_by)
-      .maybeSingle();
-    approverName = approver?.full_name ?? approver?.email ?? null;
-  }
+  // Noms + signatures des 3 rôles figés dans la version publiée.
+  const signerIds = [version?.redige_par, version?.verifie_par, version?.approved_by].filter(
+    Boolean,
+  ) as string[];
+  const { data: signers } = signerIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, full_name, email, signature_image")
+        .in("id", signerIds)
+    : { data: [] };
+  const nameById = new Map((signers ?? []).map((p) => [p.id, p.full_name ?? p.email]));
+  const sigById = new Map((signers ?? []).map((p) => [p.id, p.signature_image]));
 
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? procedure.contenu ?? null) as JSONContent | null;
@@ -83,9 +87,6 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
           ? { label: "Réf. ISO", value: procedure.reference_iso.join(", ") }
           : null,
         { label: "Version", value: version?.version ?? "-" },
-        { label: "Rédacteur", value: version?.redacteur ?? "-" },
-        { label: "Vérificateur", value: version?.verificateur ?? "-" },
-        { label: "Approbateur", value: approverName ?? "-" },
         { label: "Approuvée le", value: formatDate(version?.approved_at ?? null) },
       ].filter((m): m is { label: string; value: string } => m !== null)
     : [{ label: "Statut", value: "Brouillon (non publié)" }];
@@ -114,6 +115,34 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
       <div className="doc-chapitres" style={{ counterReset: "chap 6" }}>
         <TiptapEditor content={contenu} editable={false} bare />
       </div>
+      {isPublished ? (
+        <SignatairesBlock
+          className="mt-8"
+          cells={[
+            {
+              label: "Rédigé par",
+              nom: version?.redige_par ? (nameById.get(version.redige_par) ?? null) : null,
+              image: version?.redige_par ? (sigById.get(version.redige_par) ?? null) : null,
+              date: version?.redige_le ?? null,
+              signe: Boolean(version?.redige_par),
+            },
+            {
+              label: "Vérifié par",
+              nom: version?.verifie_par ? (nameById.get(version.verifie_par) ?? null) : null,
+              image: version?.verifie_par ? (sigById.get(version.verifie_par) ?? null) : null,
+              date: version?.verifie_le ?? null,
+              signe: Boolean(version?.verifie_par),
+            },
+            {
+              label: "Approuvé par",
+              nom: version?.approved_by ? (nameById.get(version.approved_by) ?? null) : null,
+              image: version?.approved_by ? (sigById.get(version.approved_by) ?? null) : null,
+              date: version?.approved_at ?? null,
+              signe: Boolean(version?.approved_by),
+            },
+          ]}
+        />
+      ) : null}
     </PrintShell>
   );
 }

@@ -2119,7 +2119,10 @@ export type Database = {
           titre: string
           updated_at: string
           updated_by: string | null
+          verification_data: Json | null
           verificateur: string | null
+          verifie_le: string | null
+          verifie_par: string | null
           version_actuelle_id: string | null
         }
         Insert: {
@@ -2158,7 +2161,10 @@ export type Database = {
           titre: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Update: {
@@ -2197,7 +2203,10 @@ export type Database = {
           titre?: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Relationships: [
@@ -2263,10 +2272,14 @@ export type Database = {
           pdf_url: string | null
           procedure_id: string
           redacteur: string | null
+          redige_le: string | null
+          redige_par: string | null
           sections_snapshot: Json | null
           signature_data: Json | null
           tenant_id: string
           verificateur: string | null
+          verifie_le: string | null
+          verifie_par: string | null
           version: string
         }
         Insert: {
@@ -2279,10 +2292,14 @@ export type Database = {
           pdf_url?: string | null
           procedure_id: string
           redacteur?: string | null
+          redige_le?: string | null
+          redige_par?: string | null
           sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id: string
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version: string
         }
         Update: {
@@ -2295,10 +2312,14 @@ export type Database = {
           pdf_url?: string | null
           procedure_id?: string
           redacteur?: string | null
+          redige_le?: string | null
+          redige_par?: string | null
           sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id?: string
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version?: string
         }
         Relationships: [
