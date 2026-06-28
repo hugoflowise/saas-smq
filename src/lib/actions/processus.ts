@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { normalizeTrigramme } from "@/lib/codification";
+import { attribuerCodesManquants } from "@/lib/codification-server";
 import { canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -71,8 +72,14 @@ export async function saveProcessusCodeAction(id: string, code: string): Promise
     return { ok: false, error: error.message };
   }
 
+  // Le trigramme étant désormais connu, on attribue son code aux documents du
+  // processus qui en étaient privés (créés avant la saisie du trigramme).
+  if (value) await attribuerCodesManquants(ctx.effectiveTenantId, id);
+
   revalidatePath("/processus");
   revalidatePath(`/processus/${id}`);
+  revalidatePath("/documentation/procedures");
+  revalidatePath("/documents");
   return { ok: true };
 }
 

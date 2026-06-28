@@ -55,11 +55,13 @@ export default async function ProceduresPage() {
 
   const { data: processus } = await supabase
     .from("processus")
-    .select("id, nom")
+    .select("id, nom, code")
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
   const processusName = new Map((processus ?? []).map((p) => [p.id, p.nom]));
+  // Avertissement de saisie : des processus sans trigramme = des documents sans code auto.
+  const sansTrigramme = (processus ?? []).filter((p) => !p.code?.trim()).length;
 
   const [{ data: procedures }, { data: registre }] = await Promise.all([
     supabase
@@ -113,6 +115,14 @@ export default async function ProceduresPage() {
       >
         <CreateProcedureDialog processusOptions={processus ?? []} />
       </PageHeader>
+
+      {sansTrigramme > 0 ? (
+        <div className="mb-4 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-2.5 text-sm text-status-pa">
+          {sansTrigramme} processus sans trigramme. Renseignez-le sur chaque fiche processus (champ
+          « Trigramme ») pour que les documents reçoivent un code automatique (ex.{" "}
+          <span className="font-mono">PR_SMQ_001</span>).
+        </div>
+      ) : null}
 
       {items.length === 0 ? (
         <EmptyState

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,11 +21,17 @@ export function CreateProcedureDialog({
   processusOptions,
   presetProcessusId,
 }: {
-  processusOptions: { id: string; nom: string }[];
+  processusOptions: { id: string; nom: string; code?: string | null }[];
   presetProcessusId?: string;
 }) {
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+  const [processusId, setProcessusId] = useState(presetProcessusId ?? "");
+
+  // Le code documentaire (PR_xxx_001) n'est généré que si le processus a un
+  // trigramme : on prévient quand ce n'est pas le cas.
+  const selected = processusOptions.find((p) => p.id === processusId);
+  const sansTrigramme = Boolean(processusId) && !selected?.code?.trim();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -59,15 +66,24 @@ export function CreateProcedureDialog({
               id="processusId"
               name="processusId"
               className={SELECT_CLASS}
-              defaultValue={presetProcessusId ?? ""}
+              value={processusId}
+              onChange={(e) => setProcessusId(e.target.value)}
             >
               <option value="">-</option>
               {processusOptions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nom}
+                  {p.code?.trim() ? ` (${p.code})` : ""}
                 </option>
               ))}
             </select>
+            {sansTrigramme ? (
+              <p className="rounded-md border border-status-pa/40 bg-status-pa/10 px-2.5 py-1.5 text-status-pa text-xs">
+                Ce processus n'a pas encore de trigramme : la procédure sera créée sans code.
+                Renseignez le trigramme sur la fiche du processus — le code sera attribué
+                automatiquement.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="referenceIso">Références ISO (séparées par des virgules)</Label>
