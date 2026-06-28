@@ -109,12 +109,18 @@ export async function deleteCartographieVersionAction(id: string): Promise<Actio
   if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
 
   const supabase = await createClient();
-  const { error } = await supabase
+  // `.select()` permet de vérifier qu'une ligne a bien été supprimée : sans
+  // policy DELETE, RLS renvoie 0 ligne sans erreur — on le remonte explicitement.
+  const { data, error } = await supabase
     .from("cartographie_versions")
     .delete()
     .eq("id", id)
-    .eq("tenant_id", ctx.effectiveTenantId);
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .select("id");
   if (error) return { ok: false, error: `Suppression impossible : ${error.message}` };
+  if (!data || data.length === 0) {
+    return { ok: false, error: "Suppression refusée (droits ou version introuvable)." };
+  }
 
   revalidatePath("/processus");
   return { ok: true };
