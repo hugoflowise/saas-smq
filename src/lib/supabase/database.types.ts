@@ -1832,6 +1832,48 @@ export type Database = {
           },
         ]
       }
+      parties_prenantes_versions: {
+        Row: {
+          created_at: string
+          id: string
+          published_by: string | null
+          snapshot: Json | null
+          tenant_id: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          published_by?: string | null
+          snapshot?: Json | null
+          tenant_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parties_prenantes_versions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parties_prenantes_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pi_attentes: {
         Row: {
           action: string | null
@@ -3758,6 +3800,7 @@ export type Database = {
           logo_url: string | null
           mentions_legales: string | null
           nom_societe: string
+          parties_prenantes_reference: string | null
           responsable_flowise_id: string | null
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
           siret: string | null
@@ -3789,6 +3832,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe: string
+          parties_prenantes_reference?: string | null
           responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           siret?: string | null
@@ -3820,6 +3864,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe?: string
+          parties_prenantes_reference?: string | null
           responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
           siret?: string | null

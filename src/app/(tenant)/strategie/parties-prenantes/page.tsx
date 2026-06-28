@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate, nomPersonne } from "@/lib/format";
 import {
   INTERACTION_LABELS,
   PRIORITE_CLASS,
@@ -24,6 +25,13 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { Cartographie } from "./cartographie";
 import { PartieDialog } from "./partie-dialog";
+import { PartiesPrenantesReference } from "./parties-prenantes-reference";
+import type { PartiesPrenantesSnapshot } from "./parties-prenantes-snapshot";
+import {
+  PartiesPrenantesVersionHistory,
+  type PartiesPrenantesVersionItem,
+} from "./parties-prenantes-version-history";
+import { PublierPartiesPrenantesButton } from "./publier-parties-prenantes-button";
 
 export default async function PartiesPrenantesPage() {
   const ctx = await getTenantContext();
@@ -56,9 +64,37 @@ export default async function PartiesPrenantesPage() {
       .is("deleted_at", null)
       .order("nom", { ascending: true }),
     supabase.from("pi_attentes").select("partie_id").eq("tenant_id", tid).is("deleted_at", null),
-    supabase.from("tenants").select("nom_societe").eq("id", tid).maybeSingle(),
+    supabase
+      .from("tenants")
+      .select("nom_societe, parties_prenantes_reference")
+      .eq("id", tid)
+      .maybeSingle(),
   ]);
   const nomSociete = tenant?.nom_societe ?? "Notre organisme";
+
+  // Versions figées (la plus récente = courante).
+  const { data: rawVersions } = await supabase
+    .from("parties_prenantes_versions")
+    .select("id, version, created_at, published_by, snapshot")
+    .eq("tenant_id", tid)
+    .order("created_at", { ascending: false });
+  const publisherIds = [
+    ...new Set((rawVersions ?? []).map((v) => v.published_by).filter((id): id is string => !!id)),
+  ];
+  const { data: publishers } = publisherIds.length
+    ? await supabase.from("profiles").select("id, full_name, email").in("id", publisherIds)
+    : { data: [] };
+  const nameById = new Map(
+    (publishers ?? []).map((p) => [p.id, nomPersonne(p.full_name, p.email)]),
+  );
+  const versions: PartiesPrenantesVersionItem[] = (rawVersions ?? []).map((v) => ({
+    id: v.id,
+    version: v.version,
+    publishedAt: v.created_at,
+    publisher: v.published_by ? (nameById.get(v.published_by) ?? null) : null,
+    snapshot: v.snapshot as unknown as PartiesPrenantesSnapshot | null,
+  }));
+  const currentVersion = versions[0] ?? null;
 
   const attentesCount = new Map<string, number>();
   for (const a of attentes ?? []) {
@@ -101,8 +137,29 @@ export default async function PartiesPrenantesPage() {
         isoClause="ISO 9001 §4.2"
         help="Identifiez les parties intéressées pertinentes et leurs attentes. Cotez leur saillance (Pouvoir, Légitimité, Urgence, chacun de 1 à 3) : la priorité et la criticité résiduelle de chaque attente sont calculées automatiquement. Ouvrez une partie prenante pour gérer ses attentes (risque, opportunité, maîtrise, action)."
       >
+        <PublierPartiesPrenantesButton />
         <PartieDialog />
       </PageHeader>
+
+      {/* Référence documentaire + version courante figée. */}
+      <div className="-mt-2 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-sm">
+        <PartiesPrenantesReference initial={tenant?.parties_prenantes_reference ?? null} />
+        {currentVersion ? (
+          <>
+            <span className="text-muted-foreground/50">·</span>
+            <span>
+              Version <span className="font-medium text-foreground">{currentVersion.version}</span>{" "}
+              · figée le {formatDate(currentVersion.publishedAt)}
+              {currentVersion.publisher ? ` par ${currentVersion.publisher}` : ""}
+            </span>
+          </>
+        ) : (
+          <span>
+            <span className="text-muted-foreground/50">·</span> Aucune version figée. « Publier une
+            version » pour archiver l'état actuel.
+          </span>
+        )}
+      </div>
 
       {items.length === 0 ? (
         <EmptyState
@@ -198,6 +255,18 @@ export default async function PartiesPrenantesPage() {
           </div>
         </div>
       )}
+
+      {/* Historique des versions figées (consultables en lecture seule). */}
+      <details className="group mt-8 rounded-lg border bg-surface text-sm">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-muted-foreground hover:text-foreground">
+          <span className="font-medium">Historique des versions ({versions.length})</span>
+          <span className="ml-auto text-xs group-open:hidden">Afficher</span>
+          <span className="ml-auto hidden text-xs group-open:inline">Masquer</span>
+        </summary>
+        <div className="border-t p-3">
+          <PartiesPrenantesVersionHistory versions={versions} />
+        </div>
+      </details>
     </div>
   );
 }
