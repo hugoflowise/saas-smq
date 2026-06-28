@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
+import { SignatairesBlock } from "@/components/signataires";
 import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
@@ -444,37 +445,36 @@ export function MaitriseDocument({
           />
         </div>
         {!editing && showSignatures ? (
-          <div
-            className={`mt-8 grid overflow-hidden rounded-md border text-sm ${
-              withVerification ? "grid-cols-3" : "grid-cols-2"
-            }`}
-          >
-            <Signataire
-              label="Rédigé par"
-              nom={showDrafter ? drafterName : null}
-              image={showDrafter ? (drafterSignature ?? null) : null}
-              date={showDrafter ? (drafterSignedAt ?? null) : null}
-              signe={showDrafter}
-            />
-            {withVerification ? (
-              <Signataire
-                label="Vérifié par"
-                nom={showVerifier ? (verifierName ?? null) : null}
-                image={showVerifier ? (verifierSignature ?? null) : null}
-                date={showVerifier ? (verifierSignedAt ?? null) : null}
-                signe={showVerifier}
-                border
-              />
-            ) : null}
-            <Signataire
-              label="Approuvé par"
-              nom={showApprover ? approverName : null}
-              image={showApprover ? (approverSignature ?? null) : null}
-              date={showApprover ? (approvedAt ?? null) : null}
-              signe={showApprover}
-              border
-            />
-          </div>
+          <SignatairesBlock
+            className="mt-8"
+            cells={[
+              {
+                label: "Rédigé par",
+                nom: showDrafter ? drafterName : null,
+                image: showDrafter ? (drafterSignature ?? null) : null,
+                date: showDrafter ? (drafterSignedAt ?? null) : null,
+                signe: showDrafter,
+              },
+              ...(withVerification
+                ? [
+                    {
+                      label: "Vérifié par",
+                      nom: showVerifier ? (verifierName ?? null) : null,
+                      image: showVerifier ? (verifierSignature ?? null) : null,
+                      date: showVerifier ? (verifierSignedAt ?? null) : null,
+                      signe: showVerifier,
+                    },
+                  ]
+                : []),
+              {
+                label: "Approuvé par",
+                nom: showApprover ? approverName : null,
+                image: showApprover ? (approverSignature ?? null) : null,
+                date: showApprover ? (approvedAt ?? null) : null,
+                signe: showApprover,
+              },
+            ]}
+          />
         ) : null}
       </DocumentPaper>
 
@@ -535,48 +535,6 @@ function ReferenceEditor({
         disabled={saving}
         className="h-8 w-44"
       />
-    </div>
-  );
-}
-
-/** Cellule de signature (rédacteur / approbateur) avec image et horodatage. */
-export function Signataire({
-  label,
-  nom,
-  image,
-  date,
-  signe,
-  border,
-}: {
-  label: string;
-  nom: string | null;
-  image: string | null;
-  date: string | null;
-  signe: boolean;
-  border?: boolean;
-}) {
-  return (
-    <div className={border ? "border-l" : ""}>
-      <div
-        className="px-3 py-1.5 font-semibold"
-        style={{ backgroundColor: "var(--charte)", color: "var(--charte-contrast)" }}
-      >
-        {label}
-      </div>
-      <div className="flex min-h-24 flex-col px-3 py-2">
-        <p className="font-medium">{nom?.trim() ? nom : "-"}</p>
-        {signe && image ? (
-          // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
-          <img src={image} alt="Signature" className="mt-1 h-12 w-auto object-contain" />
-        ) : null}
-        {signe ? (
-          <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
-            Signé électroniquement{date ? ` le ${fmt(date)}` : ""}
-          </p>
-        ) : label === "Approuvé par" ? (
-          <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
-        ) : null}
-      </div>
     </div>
   );
 }
