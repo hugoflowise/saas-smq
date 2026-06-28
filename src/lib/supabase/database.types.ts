@@ -2367,7 +2367,10 @@ export type Database = {
           fiche_soumis_le: string | null
           fiche_soumis_par: string | null
           fiche_statut: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data: Json | null
           fiche_verificateur: string | null
+          fiche_verifie_le: string | null
+          fiche_verifie_par: string | null
           fiche_version: string | null
           finalite: string | null
           id: string
@@ -2412,7 +2415,10 @@ export type Database = {
           fiche_soumis_le?: string | null
           fiche_soumis_par?: string | null
           fiche_statut?: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data?: Json | null
           fiche_verificateur?: string | null
+          fiche_verifie_le?: string | null
+          fiche_verifie_par?: string | null
           fiche_version?: string | null
           finalite?: string | null
           id?: string
@@ -2457,7 +2463,10 @@ export type Database = {
           fiche_soumis_le?: string | null
           fiche_soumis_par?: string | null
           fiche_statut?: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data?: Json | null
           fiche_verificateur?: string | null
+          fiche_verifie_le?: string | null
+          fiche_verifie_par?: string | null
           fiche_version?: string | null
           finalite?: string | null
           id?: string

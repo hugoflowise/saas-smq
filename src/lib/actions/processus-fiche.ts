@@ -181,10 +181,13 @@ export async function saveFicheProcessusAction(input: unknown): Promise<ActionRe
 }
 
 /** Transitions de statut autorisées (publication gérée à part). */
+// Circuit à 3 rôles : brouillon → en_revue (vérification) → en_approbation
+// (approbation) → approuvee, avec renvoi possible en brouillon.
 const TRANSITIONS: Record<string, string[]> = {
   brouillon: ["en_revue"],
-  en_revue: ["brouillon", "approuvee"],
-  approuvee: ["en_revue"],
+  en_revue: ["en_approbation", "brouillon"],
+  en_approbation: ["approuvee", "brouillon"],
+  approuvee: ["brouillon"],
   publiee: ["brouillon"], // démarre une nouvelle version
   archivee: [],
 };
@@ -204,7 +207,7 @@ export async function transitionFicheAction(id: string, target: string): Promise
   const supabase = await createClient();
   const { data: fiche } = await supabase
     .from("processus")
-    .select("fiche_statut, fiche_redige_par, nom")
+    .select("fiche_statut, fiche_redige_par, fiche_soumis_par, fiche_verifie_par, nom")
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -215,36 +218,59 @@ export async function transitionFicheAction(id: string, target: string): Promise
     return { ok: false, error: "Transition non autorisée." };
   }
 
-  // Depuis « en revue » (approuver / renvoyer) => approbateur ; sinon rédacteur.
-  const allowed = fiche.fiche_statut === "en_revue" ? canApprove(ctx.role) : canWrite(ctx.role);
+  // Droits par étape : approuver = approbateur (dirigeant) ; vérifier/soumettre/
+  // renvoyer = rédacteur/vérificateur (writer).
+  const isApprouver = fiche.fiche_statut === "en_approbation" && target === "approuvee";
+  const allowed = isApprouver ? canApprove(ctx.role) : canWrite(ctx.role);
   if (!allowed) return { ok: false, error: "Droits insuffisants pour cette action." };
 
+  // Séparation des tâches : l'approbateur ≠ rédacteur (qui a soumis) et ≠ vérificateur.
+  if (isApprouver) {
+    if (ctx.userId === fiche.fiche_soumis_par || ctx.userId === fiche.fiche_redige_par) {
+      return { ok: false, error: "L'approbateur doit être différent du rédacteur." };
+    }
+    if (ctx.userId === fiche.fiche_verifie_par) {
+      return { ok: false, error: "L'approbateur doit être différent du vérificateur." };
+    }
+  }
+
+  const now = new Date().toISOString();
   const update: ProcessusUpdate = {
     fiche_statut: target as ProcessusUpdate["fiche_statut"],
     updated_by: ctx.userId,
   };
 
+  const signature = async () => {
+    const h = await headers();
+    return {
+      user_id: ctx.userId,
+      signed_at: now,
+      ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      user_agent: h.get("user-agent") ?? null,
+    } satisfies Json;
+  };
+
   if (target === "en_revue") {
     update.fiche_soumis_par = ctx.userId;
-    update.fiche_soumis_le = new Date().toISOString();
+    update.fiche_soumis_le = now;
     // Filet de sécurité : si la fiche n'a pas encore de rédacteur (processus
     // créé sans passer par l'éditeur), on l'attribue à celui qui la soumet.
     if (!fiche.fiche_redige_par) {
       update.fiche_redige_par = ctx.userId;
-      update.fiche_redige_le = new Date().toISOString();
+      update.fiche_redige_le = now;
     }
   }
 
-  if (target === "approuvee") {
-    const h = await headers();
+  if (fiche.fiche_statut === "en_revue" && target === "en_approbation") {
+    update.fiche_verifie_par = ctx.userId;
+    update.fiche_verifie_le = now;
+    update.fiche_verification_data = await signature();
+  }
+
+  if (isApprouver) {
     update.fiche_approuvee_par = ctx.userId;
-    update.fiche_approuvee_le = new Date().toISOString();
-    update.fiche_signature = {
-      user_id: ctx.userId,
-      signed_at: new Date().toISOString(),
-      ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-      user_agent: h.get("user-agent") ?? null,
-    } satisfies Json;
+    update.fiche_approuvee_le = now;
+    update.fiche_signature = await signature();
   }
 
   const { error } = await supabase
@@ -257,21 +283,28 @@ export async function transitionFicheAction(id: string, target: string): Promise
   // Notification ciblée sur la personne qui doit agir à l'étape suivante.
   const lien = `/processus/${id}`;
   if (target === "en_revue") {
+    await notifyRole(tid, ["manager", "dirigeant"], {
+      type: "approval_request",
+      title: "Fiche d'identité à vérifier",
+      body: `La fiche du processus « ${fiche.nom} » est en attente de vérification.`,
+      link: lien,
+    });
+  } else if (target === "en_approbation") {
     await notifyRole(tid, ["dirigeant"], {
       type: "approval_request",
       title: "Fiche d'identité à approuver",
-      body: `La fiche du processus « ${fiche.nom} » est en attente de votre approbation.`,
+      body: `La fiche du processus « ${fiche.nom} » a été vérifiée et attend votre approbation.`,
       link: lien,
     });
   } else if (target === "approuvee") {
-    await notifyUsers([fiche.fiche_redige_par], {
+    await notifyUsers([fiche.fiche_soumis_par ?? fiche.fiche_redige_par], {
       type: "approval_granted",
       title: "Fiche d'identité approuvée",
       body: `La fiche du processus « ${fiche.nom} » a été approuvée et signée.`,
       link: lien,
     });
-  } else if (statutAvant === "en_revue" && target === "brouillon") {
-    await notifyUsers([fiche.fiche_redige_par], {
+  } else if (target === "brouillon" && statutAvant !== "publiee") {
+    await notifyUsers([fiche.fiche_soumis_par ?? fiche.fiche_redige_par], {
       type: "mention",
       title: "Modifications demandées",
       body: `Des modifications sont demandées sur la fiche du processus « ${fiche.nom} ».`,

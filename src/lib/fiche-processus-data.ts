@@ -55,7 +55,7 @@ export async function loadFicheProcessusData(
   const { data: p } = await supabase
     .from("processus")
     .select(
-      "id, nom, intitule_long, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, pilote_nom, finalite, perimetre, referentiels, fiche_statut, fiche_reference, fiche_version, fiche_redige_par, fiche_soumis_par, fiche_soumis_le, fiche_approuvee_par, fiche_approuvee_le, fiche_publiee_le",
+      "id, nom, intitule_long, type, entrees, sorties, date_derniere_revue, date_prochaine_revue, ressources_humaines, ressources_materielles, ressources_logicielles, ressources_financieres, ressources_documentaires, pilote_id, pilote_nom, finalite, perimetre, referentiels, fiche_statut, fiche_reference, fiche_version, fiche_redige_par, fiche_soumis_par, fiche_soumis_le, fiche_verifie_par, fiche_verifie_le, fiche_approuvee_par, fiche_approuvee_le, fiche_publiee_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -113,6 +113,7 @@ export async function loadFicheProcessusData(
     ...pilotesRows.map((r) => r.pilote_id),
     p.fiche_redige_par,
     p.fiche_soumis_par,
+    p.fiche_verifie_par,
     p.fiche_approuvee_par,
   ].filter(Boolean) as string[];
   const { data: persons } = personIds.length
@@ -201,7 +202,11 @@ export async function loadFicheProcessusData(
     signatureRedacteur: p.fiche_redige_par ? (signatureById.get(p.fiche_redige_par) ?? null) : null,
     // Le rédacteur « signe » au moment où il soumet la fiche à approbation.
     redacteurSigneLe: p.fiche_soumis_le,
-    verificateur: p.fiche_soumis_par ? (nameById.get(p.fiche_soumis_par) ?? null) : null,
+    verificateur: p.fiche_verifie_par ? (nameById.get(p.fiche_verifie_par) ?? null) : null,
+    signatureVerificateur: p.fiche_verifie_par
+      ? (signatureById.get(p.fiche_verifie_par) ?? null)
+      : null,
+    verificateurSigneLe: p.fiche_verifie_le,
     approbateur: p.fiche_approuvee_par ? (nameById.get(p.fiche_approuvee_par) ?? null) : null,
     signatureApprobateur: p.fiche_approuvee_par
       ? (signatureById.get(p.fiche_approuvee_par) ?? null)

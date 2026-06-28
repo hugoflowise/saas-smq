@@ -17,7 +17,8 @@ import { FicheEditor, type FicheEditorInitial } from "./fiche-editor";
 
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
-  en_revue: "En revue",
+  en_revue: "En vérification",
+  en_approbation: "En approbation",
   approuvee: "Approuvée",
   publiee: "Publiée",
   archivee: "Archivée",
@@ -102,19 +103,43 @@ export function FicheClient({
 
           {statut === "brouillon" && canWrite && !readOnly ? (
             <SignatureCapture
-              triggerLabel="Soumettre à approbation"
-              title="Soumettre la fiche à approbation"
-              description="Signez avec votre mot de passe pour soumettre cette fiche à approbation."
+              triggerLabel="Soumettre à vérification"
+              title="Soumettre la fiche à vérification"
+              description="Signez avec votre mot de passe pour soumettre cette fiche au circuit de validation."
               onSigned={() =>
-                run(
-                  () => transitionFicheAction(initial.id, "en_revue"),
-                  "Fiche soumise à approbation.",
-                )
+                run(() => transitionFicheAction(initial.id, "en_revue"), "Fiche soumise.")
               }
             />
           ) : null}
 
-          {statut === "en_revue" && canApprove && !readOnly ? (
+          {/* Étape de vérification (circuit à 3 rôles). */}
+          {statut === "en_revue" && canWrite && !readOnly ? (
+            <>
+              <Button
+                variant="outline"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () => transitionFicheAction(initial.id, "brouillon"),
+                    "Fiche renvoyée en brouillon.",
+                  )
+                }
+              >
+                Demander des modifications
+              </Button>
+              <SignatureCapture
+                triggerLabel="Vérifier et signer"
+                title="Vérifier la fiche d'identité"
+                description="Signez avec votre mot de passe pour attester la vérification de cette fiche."
+                onSigned={() =>
+                  run(() => transitionFicheAction(initial.id, "en_approbation"), "Fiche vérifiée.")
+                }
+              />
+            </>
+          ) : null}
+
+          {/* Étape d'approbation. */}
+          {statut === "en_approbation" && canApprove && !readOnly ? (
             <>
               <Button
                 variant="outline"
@@ -171,17 +196,27 @@ export function FicheClient({
       {statut === "brouillon" ? (
         <div className="rounded-lg border bg-muted/40 px-3 py-2 text-muted-foreground text-sm">
           Étape : <span className="font-medium text-foreground">rédaction</span>. Complétez la
-          fiche, puis « Soumettre à approbation » (rédacteur : manager ou dirigeant).
+          fiche, puis « Soumettre à vérification » (rédacteur : manager ou dirigeant).
         </div>
       ) : null}
       {statut === "en_revue" ? (
         <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
+          <span className="font-medium text-status-pa">En attente de vérification.</span>{" "}
+          <span className="text-muted-foreground">
+            {canWrite
+              ? "Vérifiez la fiche puis « Vérifier et signer » (manager ou dirigeant)."
+              : "Un vérificateur (manager ou dirigeant) doit attester la vérification."}
+          </span>
+        </div>
+      ) : null}
+      {statut === "en_approbation" ? (
+        <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
           <span className="font-medium text-status-pa">
-            En attente d'approbation par le dirigeant.
+            Vérifiée, en attente d'approbation par le dirigeant.
           </span>{" "}
           <span className="text-muted-foreground">
             {canApprove
-              ? "Vérifiez la fiche puis « Approuver et signer »."
+              ? "Approuvez et signez (vous devez être différent du rédacteur et du vérificateur)."
               : "Seul le dirigeant peut approuver et signer."}
           </span>
         </div>
