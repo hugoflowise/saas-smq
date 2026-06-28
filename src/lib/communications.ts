@@ -5,6 +5,8 @@
  * (Outlook…) avec l'objet et le corps préremplis, prêt à relire et envoyer.
  */
 
+import { TIMEZONE } from "./format";
+
 /** Catégories de modèles. */
 export const MODELE_CATEGORIES: Record<string, string> = {
   qualite: "Qualité",
@@ -45,7 +47,7 @@ export function appliquerVariables(texte: string, valeurs: Record<string, string
 
 /** Date du jour au format FR (pour la variable {date}). */
 export function todayLabel(): string {
-  return new Date().toLocaleDateString("fr-FR");
+  return new Date().toLocaleDateString("fr-FR", { timeZone: TIMEZONE });
 }
 
 /** Construit un lien mailto (objet + corps préremplis). `to` peut être vide. */

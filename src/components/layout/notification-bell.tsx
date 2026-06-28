@@ -10,6 +10,7 @@ import {
   markAllNotificationsReadAction,
   markNotificationReadAction,
 } from "@/lib/actions/notifications";
+import { TIMEZONE } from "@/lib/format";
 
 export type NotificationItem = {
   id: string;
@@ -21,11 +22,12 @@ export type NotificationItem = {
 };
 
 function timeAgo(iso: string) {
-  return new Date(iso).toLocaleDateString("fr-FR", {
+  return new Date(iso).toLocaleString("fr-FR", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: TIMEZONE,
   });
 }
 

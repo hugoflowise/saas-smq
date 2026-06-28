@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/lib/actions/types";
+import { TIMEZONE } from "@/lib/format";
 import type { Json } from "@/lib/supabase/database.types";
 import { versionLettre } from "@/lib/versions";
 
@@ -25,7 +26,8 @@ const STATUT_LABELS: Record<string, string> = {
   archivee: "Archivée",
 };
 
-const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
+const fmt = (d: string | null) =>
+  d ? new Date(d).toLocaleDateString("fr-FR", { timeZone: TIMEZONE }) : "-";
 
 /**
  * Document maîtrisé (politique, procédure…) : workflow de validation commun

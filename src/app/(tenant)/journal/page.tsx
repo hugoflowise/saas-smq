@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
+import { TIMEZONE } from "@/lib/format";
 import {
   AUDIT_ACTION_CLASS,
   AUDIT_ACTION_LABELS,
@@ -30,6 +31,7 @@ function formatHorodatage(iso: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: TIMEZONE,
   });
 }
 

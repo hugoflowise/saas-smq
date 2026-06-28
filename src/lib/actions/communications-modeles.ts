@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -82,7 +83,7 @@ export async function logCommunicationEnvoyeeAction(input: {
     audience: input.audience || null,
     message: input.message ?? null,
     statut: "realisee",
-    date_realisee: new Date().toISOString().slice(0, 10),
+    date_realisee: todayISO(),
     created_by: ctx.userId,
   });
   if (error) return { ok: false, error: error.message };
