@@ -199,14 +199,15 @@ export function DocumentDialog({
           <DialogTitle>{isEdit ? "Modifier le document" : "Nouveau document"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-[120px_1fr] gap-3">
+          <div className="grid grid-cols-[140px_1fr] gap-3">
             <div className="flex flex-col gap-2">
               <Label htmlFor="code">Code</Label>
               <Input
                 id="code"
                 name="code"
                 defaultValue={document?.code ?? ""}
-                placeholder="PR-04"
+                placeholder={isEdit ? "" : "Auto"}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -214,6 +215,13 @@ export function DocumentDialog({
               <Input id="titre" name="titre" required defaultValue={document?.titre ?? ""} />
             </div>
           </div>
+          {!isEdit ? (
+            <p className="-mt-2 text-muted-foreground text-xs">
+              Laissez le code vide pour une génération automatique{" "}
+              <span className="font-mono">FAMILLE_PROCESSUS_001</span> (selon le type et le
+              processus choisis).
+            </p>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">

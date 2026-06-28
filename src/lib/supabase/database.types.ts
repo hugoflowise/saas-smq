@@ -2348,6 +2348,7 @@ export type Database = {
       }
       processus: {
         Row: {
+          code: string | null
           created_at: string
           created_by: string | null
           date_derniere_revue: string | null
@@ -2396,6 +2397,7 @@ export type Database = {
           valide_le: string | null
         }
         Insert: {
+          code?: string | null
           created_at?: string
           created_by?: string | null
           date_derniere_revue?: string | null
@@ -2444,6 +2446,7 @@ export type Database = {
           valide_le?: string | null
         }
         Update: {
+          code?: string | null
           created_at?: string
           created_by?: string | null
           date_derniere_revue?: string | null

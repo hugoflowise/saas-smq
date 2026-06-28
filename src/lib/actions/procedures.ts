@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { prochaineReference } from "@/lib/codification-server";
 import { notifyRole, notifyTenant, notifyUsers } from "@/lib/notifications";
 import { canApprove, canWrite } from "@/lib/permissions";
 import type { Database, Json } from "@/lib/supabase/database.types";
@@ -55,17 +56,54 @@ export async function createProcedureAction(input: unknown): Promise<ActionResul
     : null;
 
   const supabase = await createClient();
+
+  // Référence documentaire auto (PR_{processus}_{chrono}) si le processus a un
+  // trigramme. Modifiable ensuite ; absente si aucun processus/trigramme.
+  let code: string | null = null;
+  if (d.processusId) {
+    const { data: proc } = await supabase
+      .from("processus")
+      .select("code")
+      .eq("id", d.processusId)
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .maybeSingle();
+    code = await prochaineReference(ctx.effectiveTenantId, "PR", proc?.code);
+  }
+
   const { error } = await supabase.from("procedures").insert({
     tenant_id: ctx.effectiveTenantId,
     titre: d.titre,
     processus_id: d.processusId ?? null,
     description_courte: d.descriptionCourte ?? null,
     reference_iso: refIso,
+    code,
     created_by: ctx.userId,
   });
 
   if (error) return { ok: false, error: error.message };
   revalidatePath("/documentation/procedures");
+  revalidatePath("/documents");
+  return { ok: true };
+}
+
+/** Enregistre/corrige la référence documentaire d'une procédure (rédacteur). */
+export async function saveProcedureCodeAction(id: string, code: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("procedures")
+    .update({ code: code.trim() || null })
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/documentation/procedures/${id}`);
+  revalidatePath("/documentation/procedures");
+  revalidatePath("/documents");
   return { ok: true };
 }
 
