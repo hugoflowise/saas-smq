@@ -80,7 +80,7 @@ export async function attribuerCodesManquants(
 
   const { data: proc } = await supabase
     .from("processus")
-    .select("code")
+    .select("code, fiche_reference")
     .eq("id", processusId)
     .eq("tenant_id", tenantId)
     .maybeSingle();
@@ -99,6 +99,17 @@ export async function attribuerCodesManquants(
   }
 
   let poses = 0;
+
+  // Fiche d'identité du processus (famille DG) : assignée en premier pour
+  // obtenir le plus petit numéro DG (typiquement DG_{trigramme}_001).
+  if (!proc?.fiche_reference?.trim()) {
+    await supabase
+      .from("processus")
+      .update({ fiche_reference: prochain("DG") })
+      .eq("id", processusId)
+      .eq("tenant_id", tenantId);
+    poses++;
+  }
 
   const { data: procsSansCode } = await supabase
     .from("procedures")
