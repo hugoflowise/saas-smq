@@ -6,18 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import type { ACTION_STATUT_LABELS } from "@/lib/labels";
+import { RO_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RoDialog } from "../ro-dialog";
 import { RoActions } from "./ro-actions";
 
 const TYPE_LABELS: Record<string, string> = { risque: "Risque", opportunite: "Opportunité" };
-const STATUT_LABELS: Record<string, string> = {
-  identifie: "Identifié",
-  en_traitement: "En traitement",
-  maitrise: "Maîtrisé",
-  cloture: "Clôturé",
-};
 
 function criticiteClass(c: number) {
   if (c > 15) return "bg-status-nc-majeure/15 text-status-nc-majeure";
@@ -88,7 +83,10 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
       <Card className="mb-6">
         <CardContent className="grid grid-cols-2 gap-5 pt-6 sm:grid-cols-3">
           <Field label="Type" value={TYPE_LABELS[ro.type] ?? ro.type} />
-          <Field label="Statut" value={STATUT_LABELS[ro.statut] ?? ro.statut} />
+          <Field
+            label="Statut"
+            value={STATUT_LABELS[ro.statut as keyof typeof STATUT_LABELS] ?? ro.statut}
+          />
           <Field
             label="Processus"
             value={<ProcessusLink id={ro.processus_id} nom={processusNom} />}

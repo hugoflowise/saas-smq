@@ -5,20 +5,13 @@ import { toast } from "sonner";
 import { quickUpdateReclamationAction } from "@/lib/actions/registres";
 import { GRAVITE_BADGE_CLASS } from "@/lib/badges";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
-import { NC_GRAVITE_LABELS } from "@/lib/labels";
+import { NC_GRAVITE_LABELS, RECLAMATION_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
 
 // Affichage statique (lecture seule auditeur) : même gabarit que le select mais inerte.
 const STATIC = "inline-flex h-8 items-center rounded-md border border-input px-2 text-sm";
-
-const STATUT_LABELS: Record<string, string> = {
-  recue: "Reçue",
-  analysee: "Analysée",
-  traitee: "Traitée",
-  cloturee: "Clôturée",
-};
 
 export function RecStatutCell({ id, value }: { id: string; value: string }) {
   const [val, setVal] = useState(value);
@@ -38,7 +31,9 @@ export function RecStatutCell({ id, value }: { id: string; value: string }) {
   }
 
   if (readOnly) {
-    return <span className={STATIC}>{STATUT_LABELS[val] ?? val}</span>;
+    return (
+      <span className={STATIC}>{STATUT_LABELS[val as keyof typeof STATUT_LABELS] ?? val}</span>
+    );
   }
 
   return (

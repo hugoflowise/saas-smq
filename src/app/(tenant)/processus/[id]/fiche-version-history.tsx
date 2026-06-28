@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/format";
+import { VERSION_STATUT_LABELS } from "@/lib/labels";
 
 export type FicheVersionItem = {
   id: string;
@@ -23,7 +24,7 @@ export type FicheVersionItem = {
 };
 
 const STATUT_EN_COURS_LABEL: Record<string, string> = {
-  brouillon: "Brouillon",
+  brouillon: VERSION_STATUT_LABELS.brouillon,
   en_revue: "En revue",
   approuvee: "Approuvée, en attente de publication",
 };
