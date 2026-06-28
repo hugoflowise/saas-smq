@@ -24,6 +24,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { FicheClient } from "./fiche-client";
 import { FicheVersionHistory } from "./fiche-version-history";
+import { TrigrammeEditor } from "./trigramme-editor";
 
 const TYPE_LABELS: Record<string, string> = {
   pilotage: "Pilotage",
@@ -71,7 +72,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
 
   const { data: processus } = await supabase
     .from("processus")
-    .select("id, nom, type, date_derniere_revue, date_prochaine_revue")
+    .select("id, nom, type, code, date_derniere_revue, date_prochaine_revue")
     .eq("id", id)
     .eq("tenant_id", tid)
     .is("deleted_at", null)
@@ -122,7 +123,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
       .order("created_at"),
     supabase
       .from("processus")
-      .select("id, nom")
+      .select("id, nom, code")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("ordre_affichage"),
@@ -237,12 +238,15 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
           redirectTo="/processus"
         />
       </PageHeader>
-      <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <Badge variant="secondary">{TYPE_LABELS[processus.type] ?? processus.type}</Badge>
         <span className="text-muted-foreground text-sm">
           Dernière revue : {formatDate(processus.date_derniere_revue)} · Prochaine :{" "}
           {formatDate(processus.date_prochaine_revue)}
         </span>
+      </div>
+      <div className="mb-6">
+        <TrigrammeEditor id={processus.id} initial={processus.code ?? null} />
       </div>
 
       <Tabs defaultValue="fiche">

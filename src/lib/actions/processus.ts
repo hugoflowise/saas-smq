@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { formatReference, normalizeTrigramme } from "@/lib/codification";
+import { attribuerCodesManquants } from "@/lib/codification-server";
+import { canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -11,6 +14,7 @@ const createProcessusSchema = z.object({
   nom: z.string().trim().min(2, "Nom requis."),
   type: z.enum(["pilotage", "realisation", "support"]),
   description: z.string().trim().optional(),
+  code: z.string().trim().optional(),
 });
 
 export async function createProcessusAction(input: unknown): Promise<ActionResult> {
@@ -25,18 +29,61 @@ export async function createProcessusAction(input: unknown): Promise<ActionResul
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
 
+  const code = normalizeTrigramme(parsed.data.code ?? "") || null;
+  // Référence de la fiche d'identité : TOUJOURS DG_{trigramme}_001 dès que le
+  // trigramme est fourni (numéro réservé, modifiable ensuite).
+  const ficheReference = code ? formatReference("DG", code, 1) : null;
   const supabase = await createClient();
   const { error } = await supabase.from("processus").insert({
     tenant_id: ctx.effectiveTenantId,
     nom: parsed.data.nom,
     type: parsed.data.type,
     description: parsed.data.description ?? null,
+    code,
+    fiche_reference: ficheReference,
     created_by: ctx.userId,
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    if (error.code === "23505") {
+      return { ok: false, error: "Ce trigramme est déjà utilisé par un autre processus." };
+    }
+    return { ok: false, error: error.message };
+  }
 
   revalidatePath("/processus");
+  return { ok: true };
+}
+
+/** Enregistre le trigramme (code court) d'un processus, utilisé pour codifier ses documents. */
+export async function saveProcessusCodeAction(id: string, code: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const value = normalizeTrigramme(code) || null;
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("processus")
+    .update({ code: value })
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) {
+    if (error.code === "23505") {
+      return { ok: false, error: "Ce trigramme est déjà utilisé par un autre processus." };
+    }
+    return { ok: false, error: error.message };
+  }
+
+  // Le trigramme étant désormais connu, on attribue son code aux documents du
+  // processus qui en étaient privés (créés avant la saisie du trigramme).
+  if (value) await attribuerCodesManquants(ctx.effectiveTenantId, id);
+
+  revalidatePath("/processus");
+  revalidatePath(`/processus/${id}`);
+  revalidatePath("/documentation/procedures");
+  revalidatePath("/documents");
   return { ok: true };
 }
 
