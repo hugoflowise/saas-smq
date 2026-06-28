@@ -124,17 +124,20 @@ export async function computeRevuePerformance(
       .from("indicateurs_valeurs")
       .select("indicateur_id, valeur, date_mesure")
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .order("date_mesure", { ascending: false }),
     supabase
       .from("non_conformites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .gte("date_constat", debut)
       .lte("date_constat", fin),
     supabase
       .from("non_conformites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .gte("date_constat", debut)
       .lte("date_constat", fin)
       .in("statut", ["cloturee", "efficace", "inefficace"]),
@@ -142,22 +145,26 @@ export async function computeRevuePerformance(
       .from("non_conformites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .in("statut", [...NC_OUVERTES]),
     supabase
       .from("reclamations")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .neq("statut", "cloturee"),
     supabase
       .from("audits_internes")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .gte("date_prevue", debut)
       .lte("date_prevue", fin),
     supabase
       .from("audits_internes")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .not("date_realisee", "is", null)
       .gte("date_realisee", debut)
       .lte("date_realisee", fin),
@@ -165,6 +172,7 @@ export async function computeRevuePerformance(
       .from("risques_opportunites")
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
       .eq("type", "risque")
       .gt("criticite", 15),
     supabase

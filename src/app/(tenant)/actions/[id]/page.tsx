@@ -1,7 +1,6 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { SupprimerButton } from "@/components/supprimer-button";
@@ -60,13 +59,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <Link
-        href="/actions"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Plan d'actions
-      </Link>
+      <BackLink href="/actions" label="Plan d'actions" />
 
       <PageHeader title={action.description_courte}>
         <ActionDialog processusOptions={processusOptions ?? []} action={action} />

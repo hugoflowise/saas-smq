@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ACTION_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
@@ -58,13 +57,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href="/audits"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Audits
-      </Link>
+      <BackLink href="/audits" label="Audits" />
 
       <PageHeader
         title={`Audit ${audit.reference}`}

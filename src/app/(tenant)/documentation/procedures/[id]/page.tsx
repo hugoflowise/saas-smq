@@ -1,8 +1,7 @@
 import type { JSONContent } from "@tiptap/react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { VersionHistory } from "@/app/(tenant)/strategie/politique/version-history";
+import { BackLink } from "@/components/back-link";
 import type { Societe } from "@/components/document-paper";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
@@ -167,13 +166,7 @@ export default async function ProcedureDetailPage({
   };
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <Link
-        href={backHref}
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        {backLabel}
-      </Link>
+      <BackLink href={backHref} label={backLabel} />
 
       <PageHeader title={procedure.titre}>
         <SupprimerButton

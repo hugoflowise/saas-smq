@@ -1,11 +1,11 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
-import { ACTION_STATUT_LABELS } from "@/lib/labels";
+import { ACTION_STATUT_LABELS, REVUE_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
 import { computeRevuePerformance, type RevuePerformance, revuePerfCells } from "@/lib/revue-perf";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -14,12 +14,6 @@ import { RevueActionForm } from "./revue-action-form";
 import { RevuePerformanceCapture } from "./revue-performance-capture";
 import type { RevueParticipant } from "./revue-structure-editor";
 import { RevueStructureEditor } from "./revue-structure-editor";
-
-const STATUT_LABELS: Record<string, string> = {
-  planifiee: "Planifiée",
-  realisee: "Réalisée",
-  cloturee: "Clôturée",
-};
 
 export default async function RevueDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -55,18 +49,12 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   const actions = linkedActions ?? [];
 
   return (
-    <div className="w-full">
-      <Link
-        href="/revues/direction"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Revues de direction
-      </Link>
+    <div className="mx-auto w-full max-w-4xl">
+      <BackLink href="/revues/direction" label="Revues de direction" />
 
       <PageHeader
         title={`Revue de direction ${revue.annee}`}
-        description={`${STATUT_LABELS[revue.statut] ?? revue.statut}${
+        description={`${STATUT_LABELS[revue.statut as keyof typeof STATUT_LABELS] ?? revue.statut}${
           revue.date_realisation ? ` · ${formatDate(revue.date_realisation)}` : ""
         }`}
         isoClause="ISO 9001 §9.3"
