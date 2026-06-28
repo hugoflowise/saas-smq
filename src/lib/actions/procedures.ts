@@ -18,10 +18,13 @@ function permissions(role: string) {
   return { approver: canApprove(role), writer: canWrite(role) };
 }
 
+// Circuit à 3 rôles : brouillon → en_revue (vérification) → en_approbation
+// (approbation) → approuvee, avec renvoi possible en brouillon.
 const TRANSITIONS: Record<string, string[]> = {
   brouillon: ["en_revue"],
-  en_revue: ["brouillon", "approuvee"],
-  approuvee: ["en_revue"],
+  en_revue: ["en_approbation", "brouillon"],
+  en_approbation: ["approuvee", "brouillon"],
+  approuvee: ["brouillon"],
   publiee: ["brouillon"],
   archivee: [],
 };
@@ -71,7 +74,7 @@ async function loadProcedure(tenantId: string, id: string) {
   const { data } = await supabase
     .from("procedures")
     .select(
-      "id, titre, statut, contenu, created_by, approved_by, approved_at, signature_data, redacteur, verificateur, note_revision",
+      "id, titre, statut, contenu, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, signature_data, redacteur, verificateur, note_revision",
     )
     .eq("tenant_id", tenantId)
     .eq("id", id)
@@ -180,28 +183,52 @@ export async function transitionProcedureStatutAction(
     return { ok: false, error: "Transition non autorisée." };
   }
 
+  // Droits par étape : approuver = approbateur (dirigeant) ; vérifier/soumettre/
+  // renvoyer = rédacteur/vérificateur (writer).
   const perms = permissions(ctx.role);
-  const allowed = procedure.statut === "en_revue" ? perms.approver : perms.writer;
+  const isApprouver = procedure.statut === "en_approbation" && target === "approuvee";
+  const allowed = isApprouver ? perms.approver : perms.writer;
   if (!allowed) return { ok: false, error: "Droits insuffisants pour cette action." };
 
+  // Séparation des tâches : l'approbateur ≠ rédacteur (qui a soumis) et ≠ vérificateur.
+  if (isApprouver) {
+    if (ctx.userId === procedure.soumis_par) {
+      return { ok: false, error: "L'approbateur doit être différent du rédacteur." };
+    }
+    if (ctx.userId === procedure.verifie_par) {
+      return { ok: false, error: "L'approbateur doit être différent du vérificateur." };
+    }
+  }
+
+  const now = new Date().toISOString();
   const update: ProcedureUpdate = {
     statut: target as ProcedureUpdate["statut"],
     updated_by: ctx.userId,
   };
-  if (target === "en_revue") {
-    update.soumis_par = ctx.userId;
-    update.soumis_le = new Date().toISOString();
-  }
-  if (target === "approuvee") {
+
+  const signature = async () => {
     const h = await headers();
-    update.approved_by = ctx.userId;
-    update.approved_at = new Date().toISOString();
-    update.signature_data = {
+    return {
       user_id: ctx.userId,
-      signed_at: new Date().toISOString(),
+      signed_at: now,
       ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
       user_agent: h.get("user-agent") ?? null,
     } satisfies Json;
+  };
+
+  if (target === "en_revue") {
+    update.soumis_par = ctx.userId;
+    update.soumis_le = now;
+  }
+  if (procedure.statut === "en_revue" && target === "en_approbation") {
+    update.verifie_par = ctx.userId;
+    update.verifie_le = now;
+    update.verification_data = await signature();
+  }
+  if (isApprouver) {
+    update.approved_by = ctx.userId;
+    update.approved_at = now;
+    update.signature_data = await signature();
   }
 
   const { error } = await supabase.from("procedures").update(update).eq("id", id);
@@ -210,21 +237,28 @@ export async function transitionProcedureStatutAction(
   // Notification ciblée sur la personne qui doit agir à l'étape suivante.
   const lien = `/documentation/procedures/${id}`;
   if (target === "en_revue") {
+    await notifyRole(ctx.effectiveTenantId, ["manager", "dirigeant"], {
+      type: "approval_request",
+      title: "Procédure à vérifier",
+      body: `La procédure « ${procedure.titre} » est en attente de vérification.`,
+      link: lien,
+    });
+  } else if (target === "en_approbation") {
     await notifyRole(ctx.effectiveTenantId, ["dirigeant"], {
       type: "approval_request",
       title: "Procédure à approuver",
-      body: `La procédure « ${procedure.titre} » est en attente de votre approbation.`,
+      body: `La procédure « ${procedure.titre} » a été vérifiée et attend votre approbation.`,
       link: lien,
     });
   } else if (target === "approuvee") {
-    await notifyUsers([procedure.created_by], {
+    await notifyUsers([procedure.soumis_par], {
       type: "approval_granted",
       title: "Procédure approuvée",
       body: `La procédure « ${procedure.titre} » a été approuvée et signée.`,
       link: lien,
     });
-  } else if (procedure.statut === "en_revue" && target === "brouillon") {
-    await notifyUsers([procedure.created_by], {
+  } else if (target === "brouillon" && procedure.statut !== "publiee") {
+    await notifyUsers([procedure.soumis_par], {
       type: "mention",
       title: "Modifications demandées",
       body: `Des modifications sont demandées sur la procédure « ${procedure.titre} ».`,
@@ -271,6 +305,10 @@ export async function publishProcedureAction(id: string): Promise<ActionResult> 
       version,
       contenu_snapshot: procedure.contenu,
       sections_snapshot: (sections ?? null) as Json,
+      redige_par: procedure.soumis_par,
+      redige_le: procedure.soumis_le,
+      verifie_par: procedure.verifie_par,
+      verifie_le: procedure.verifie_le,
       approved_by: procedure.approved_by,
       approved_at: procedure.approved_at,
       signature_data: procedure.signature_data,

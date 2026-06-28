@@ -44,7 +44,7 @@ export default async function ProcedureDetailPage({
     supabase
       .from("procedures")
       .select(
-        "id, titre, contenu, statut, version_actuelle_id, created_by, approved_by, approved_at, soumis_le, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+        "id, titre, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
       )
       .eq("id", id)
       .eq("tenant_id", tid)
@@ -68,7 +68,7 @@ export default async function ProcedureDetailPage({
   const { data: rawVersions } = await supabase
     .from("procedures_versions")
     .select(
-      "id, version, approved_at, approved_by, contenu_snapshot, created_at, redacteur, verificateur, note_revision",
+      "id, version, approved_at, approved_by, redige_par, redige_le, verifie_par, verifie_le, contenu_snapshot, created_at, note_revision",
     )
     .eq("procedure_id", id)
     .order("created_at", { ascending: false });
@@ -76,9 +76,10 @@ export default async function ProcedureDetailPage({
   const personIds = [
     ...new Set(
       [
-        procedure.created_by,
+        procedure.soumis_par,
+        procedure.verifie_par,
         procedure.approved_by,
-        ...(rawVersions ?? []).map((v) => v.approved_by),
+        ...(rawVersions ?? []).flatMap((v) => [v.approved_by, v.redige_par, v.verifie_par]),
       ].filter(Boolean),
     ),
   ] as string[];
@@ -96,9 +97,14 @@ export default async function ProcedureDetailPage({
     version: v.version,
     approvedAt: v.approved_at,
     approverName: v.approved_by ? (nameById.get(v.approved_by) ?? null) : null,
+    approverSignature: v.approved_by ? (signatureById.get(v.approved_by) ?? null) : null,
     snapshot: (v.contenu_snapshot ?? null) as JSONContent | null,
-    redacteur: v.redacteur,
-    verificateur: v.verificateur,
+    redacteur: v.redige_par ? (nameById.get(v.redige_par) ?? null) : null,
+    redacteurSignature: v.redige_par ? (signatureById.get(v.redige_par) ?? null) : null,
+    redacteurSignedAt: v.redige_le ?? null,
+    verificateur: v.verifie_par ? (nameById.get(v.verifie_par) ?? null) : null,
+    verificateurSignature: v.verifie_par ? (signatureById.get(v.verifie_par) ?? null) : null,
+    verificateurSignedAt: v.verifie_le ?? null,
     noteRevision: v.note_revision,
   }));
 
@@ -194,11 +200,20 @@ export default async function ProcedureDetailPage({
             publishedCount={versions.length}
             canWrite={canWrite}
             canApprove={isApprover}
-            drafterName={procedure.created_by ? (nameById.get(procedure.created_by) ?? null) : null}
+            drafterName={procedure.soumis_par ? (nameById.get(procedure.soumis_par) ?? null) : null}
             drafterSignature={
-              procedure.created_by ? (signatureById.get(procedure.created_by) ?? null) : null
+              procedure.soumis_par ? (signatureById.get(procedure.soumis_par) ?? null) : null
             }
             drafterSignedAt={procedure.soumis_le ?? null}
+            withVerification
+            canVerify={canWrite}
+            verifierName={
+              procedure.verifie_par ? (nameById.get(procedure.verifie_par) ?? null) : null
+            }
+            verifierSignature={
+              procedure.verifie_par ? (signatureById.get(procedure.verifie_par) ?? null) : null
+            }
+            verifierSignedAt={procedure.verifie_le ?? null}
             approverName={
               procedure.approved_by ? (nameById.get(procedure.approved_by) ?? null) : null
             }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
+import { SignatairesBlock } from "@/components/signataires";
 import { formatDate } from "@/lib/format";
 
 /**
@@ -59,6 +60,8 @@ export type FicheProcessusData = {
   signatureRedacteur?: string | null;
   redacteurSigneLe?: string | null;
   verificateur: string | null;
+  signatureVerificateur?: string | null;
+  verificateurSigneLe?: string | null;
   approbateur: string | null;
   signatureApprobateur?: string | null;
   approuveeLe: string | null;
@@ -69,7 +72,8 @@ export type FicheProcessusData = {
 
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
-  en_revue: "En revue",
+  en_revue: "En vérification",
+  en_approbation: "En approbation",
   approuvee: "Approuvée",
   publiee: "Publiée",
   archivee: "Archivée",
@@ -350,52 +354,51 @@ export function FicheProcessus(data: FicheProcessusData) {
             </tr>
           </tbody>
         </table>
-        <div className="grid grid-cols-2 overflow-hidden rounded-md border text-sm">
-          {(
-            [
-              {
-                label: "Rédigé par",
-                nom: data.redacteur,
-                date: data.redacteurSigneLe ?? null,
-                signe: Boolean(data.redacteurSigneLe),
-                image: data.signatureRedacteur ?? null,
-              },
-              {
-                label: "Approuvé par",
-                nom: data.approbateur,
-                date: data.approuveeLe,
-                signe: Boolean(data.approbateur),
-                image: data.signatureApprobateur ?? null,
-              },
-            ] as {
-              label: string;
-              nom: string | null;
-              date: string | null;
-              signe: boolean;
-              image: string | null;
-            }[]
-          ).map((c, i) => (
-            <div key={c.label} className={i > 0 ? "border-l" : ""}>
-              <div className="px-3 py-1.5 font-semibold" style={HEAD}>
-                {c.label}
-              </div>
-              <div className="flex min-h-24 flex-col px-3 py-2">
-                <p className="font-medium">{c.nom?.trim() ? c.nom : "-"}</p>
-                {c.signe && c.image ? (
-                  // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
-                  <img src={c.image} alt="Signature" className="mt-1 h-12 w-auto object-contain" />
-                ) : null}
-                {c.signe ? (
-                  <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
-                    Signé électroniquement{c.date ? ` le ${formatDate(c.date)}` : ""}
-                  </p>
-                ) : c.label === "Approuvé par" ? (
-                  <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/*
+          Circuit à 3 rôles : chaque signature n'apparaît qu'une fois son étape
+          franchie (et le signataire nommé). Un brouillon ne montre rien.
+        */}
+        {data.statut !== "brouillon"
+          ? (() => {
+              const showRedacteur = Boolean(data.redacteur) && Boolean(data.redacteurSigneLe);
+              const showVerificateur =
+                (data.statut === "en_approbation" ||
+                  data.statut === "approuvee" ||
+                  data.statut === "publiee") &&
+                Boolean(data.verificateur) &&
+                Boolean(data.verificateurSigneLe);
+              const showApprobateur =
+                (data.statut === "approuvee" || data.statut === "publiee") &&
+                Boolean(data.approbateur);
+              return (
+                <SignatairesBlock
+                  cells={[
+                    {
+                      label: "Rédigé par",
+                      nom: showRedacteur ? data.redacteur : null,
+                      image: showRedacteur ? (data.signatureRedacteur ?? null) : null,
+                      date: showRedacteur ? (data.redacteurSigneLe ?? null) : null,
+                      signe: showRedacteur,
+                    },
+                    {
+                      label: "Vérifié par",
+                      nom: showVerificateur ? data.verificateur : null,
+                      image: showVerificateur ? (data.signatureVerificateur ?? null) : null,
+                      date: showVerificateur ? (data.verificateurSigneLe ?? null) : null,
+                      signe: showVerificateur,
+                    },
+                    {
+                      label: "Approuvé par",
+                      nom: showApprobateur ? data.approbateur : null,
+                      image: showApprobateur ? (data.signatureApprobateur ?? null) : null,
+                      date: showApprobateur ? data.approuveeLe : null,
+                      signe: showApprobateur,
+                    },
+                  ]}
+                />
+              );
+            })()
+          : null}
       </Section>
     </DocumentPaper>
   );

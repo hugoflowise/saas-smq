@@ -1903,6 +1903,9 @@ export type Database = {
           tenant_id: string
           updated_at: string
           updated_by: string | null
+          verification_data: Json | null
+          verifie_le: string | null
+          verifie_par: string | null
           version_actuelle_id: string | null
         }
         Insert: {
@@ -1921,6 +1924,9 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Update: {
@@ -1939,6 +1945,9 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Relationships: [
@@ -1977,6 +1986,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "politique_qualite_verifie_par_fkey"
+            columns: ["verifie_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       politique_qualite_versions: {
@@ -1988,8 +2004,12 @@ export type Database = {
           id: string
           pdf_url: string | null
           politique_id: string
+          redige_le: string | null
+          redige_par: string | null
           signature_data: Json | null
           tenant_id: string
+          verifie_le: string | null
+          verifie_par: string | null
           version: string
         }
         Insert: {
@@ -2000,8 +2020,12 @@ export type Database = {
           id?: string
           pdf_url?: string | null
           politique_id: string
+          redige_le?: string | null
+          redige_par?: string | null
           signature_data?: Json | null
           tenant_id: string
+          verifie_le?: string | null
+          verifie_par?: string | null
           version: string
         }
         Update: {
@@ -2012,8 +2036,12 @@ export type Database = {
           id?: string
           pdf_url?: string | null
           politique_id?: string
+          redige_le?: string | null
+          redige_par?: string | null
           signature_data?: Json | null
           tenant_id?: string
+          verifie_le?: string | null
+          verifie_par?: string | null
           version?: string
         }
         Relationships: [
@@ -2029,6 +2057,20 @@ export type Database = {
             columns: ["politique_id"]
             isOneToOne: false
             referencedRelation: "politique_qualite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_redige_par_fkey"
+            columns: ["redige_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "politique_qualite_versions_verifie_par_fkey"
+            columns: ["verifie_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2077,7 +2119,10 @@ export type Database = {
           titre: string
           updated_at: string
           updated_by: string | null
+          verification_data: Json | null
           verificateur: string | null
+          verifie_le: string | null
+          verifie_par: string | null
           version_actuelle_id: string | null
         }
         Insert: {
@@ -2116,7 +2161,10 @@ export type Database = {
           titre: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Update: {
@@ -2155,7 +2203,10 @@ export type Database = {
           titre?: string
           updated_at?: string
           updated_by?: string | null
+          verification_data?: Json | null
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version_actuelle_id?: string | null
         }
         Relationships: [
@@ -2221,10 +2272,14 @@ export type Database = {
           pdf_url: string | null
           procedure_id: string
           redacteur: string | null
+          redige_le: string | null
+          redige_par: string | null
           sections_snapshot: Json | null
           signature_data: Json | null
           tenant_id: string
           verificateur: string | null
+          verifie_le: string | null
+          verifie_par: string | null
           version: string
         }
         Insert: {
@@ -2237,10 +2292,14 @@ export type Database = {
           pdf_url?: string | null
           procedure_id: string
           redacteur?: string | null
+          redige_le?: string | null
+          redige_par?: string | null
           sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id: string
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version: string
         }
         Update: {
@@ -2253,10 +2312,14 @@ export type Database = {
           pdf_url?: string | null
           procedure_id?: string
           redacteur?: string | null
+          redige_le?: string | null
+          redige_par?: string | null
           sections_snapshot?: Json | null
           signature_data?: Json | null
           tenant_id?: string
           verificateur?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
           version?: string
         }
         Relationships: [
@@ -2304,7 +2367,10 @@ export type Database = {
           fiche_soumis_le: string | null
           fiche_soumis_par: string | null
           fiche_statut: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data: Json | null
           fiche_verificateur: string | null
+          fiche_verifie_le: string | null
+          fiche_verifie_par: string | null
           fiche_version: string | null
           finalite: string | null
           id: string
@@ -2349,7 +2415,10 @@ export type Database = {
           fiche_soumis_le?: string | null
           fiche_soumis_par?: string | null
           fiche_statut?: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data?: Json | null
           fiche_verificateur?: string | null
+          fiche_verifie_le?: string | null
+          fiche_verifie_par?: string | null
           fiche_version?: string | null
           finalite?: string | null
           id?: string
@@ -2394,7 +2463,10 @@ export type Database = {
           fiche_soumis_le?: string | null
           fiche_soumis_par?: string | null
           fiche_statut?: Database["public"]["Enums"]["document_statut"]
+          fiche_verification_data?: Json | null
           fiche_verificateur?: string | null
+          fiche_verifie_le?: string | null
+          fiche_verifie_par?: string | null
           fiche_version?: string | null
           finalite?: string | null
           id?: string
@@ -3934,6 +4006,7 @@ export type Database = {
       document_statut:
         | "brouillon"
         | "en_revue"
+        | "en_approbation"
         | "approuvee"
         | "publiee"
         | "archivee"
@@ -4233,6 +4306,7 @@ export const Constants = {
       document_statut: [
         "brouillon",
         "en_revue",
+        "en_approbation",
         "approuvee",
         "publiee",
         "archivee",

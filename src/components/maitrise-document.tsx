@@ -1,16 +1,17 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DocumentPaper, type Societe } from "@/components/document-paper";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
+import { SignatairesBlock } from "@/components/signataires";
 import { SignatureCapture } from "@/components/signature-capture";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/lib/actions/types";
 import type { Json } from "@/lib/supabase/database.types";
 import { versionLettre } from "@/lib/versions";
@@ -18,6 +19,7 @@ import { versionLettre } from "@/lib/versions";
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
   en_revue: "En revue",
+  en_approbation: "En approbation",
   approuvee: "Approuvée",
   publiee: "Publiée",
   archivee: "Archivée",
@@ -36,6 +38,8 @@ export function MaitriseDocument({
   surtitre,
   titre,
   societe,
+  reference,
+  onSaveReference,
   metaExtra,
   initialContenu,
   statut,
@@ -47,6 +51,11 @@ export function MaitriseDocument({
   drafterName,
   drafterSignature,
   drafterSignedAt,
+  withVerification,
+  canVerify,
+  verifierName,
+  verifierSignature,
+  verifierSignedAt,
   approverName,
   approverSignature,
   approvedAt,
@@ -64,6 +73,13 @@ export function MaitriseDocument({
   surtitre: string;
   titre: string;
   societe: Societe;
+  /**
+   * Code documentaire (ex. « DG_SMQ_004 »). Si la prop est fournie (même null),
+   * une ligne « Référence » est affichée en tête de l'en-tête du document.
+   */
+  reference?: string | null;
+  /** Si fourni (et droits d'écriture), permet d'éditer la référence en ligne. */
+  onSaveReference?: (code: string) => Promise<ActionResult>;
   /** Métadonnées spécifiques au document (ex. Processus, Réf. ISO). */
   metaExtra?: { label: string; value: string; href?: string }[];
   initialContenu: JSONContent | null;
@@ -76,6 +92,16 @@ export function MaitriseDocument({
   drafterName: string | null;
   drafterSignature?: string | null;
   drafterSignedAt?: string | null;
+  /**
+   * Circuit à 3 rôles : insère une étape de VÉRIFICATION entre la soumission
+   * (rédacteur) et l'approbation. L'approbateur doit être différent du rédacteur
+   * et du vérificateur (garanti côté server action).
+   */
+  withVerification?: boolean;
+  canVerify?: boolean;
+  verifierName?: string | null;
+  verifierSignature?: string | null;
+  verifierSignedAt?: string | null;
   approverName: string | null;
   approverSignature?: string | null;
   approvedAt: string | null;
@@ -108,19 +134,39 @@ export function MaitriseDocument({
   const isPublished = statut === "publiee";
   const nextVersion = versionLettre(publishedCount);
 
+  // Libellé de statut : avec vérification, « en revue » = « en vérification ».
+  const statutLabel = (s: string) =>
+    withVerification && s === "en_revue" ? "En vérification" : (STATUT_LABELS[s] ?? s);
+
+  // Les signatures/approbations ne reflètent QUE le cycle en cours : un brouillon
+  // (nouvelle version) ne doit jamais afficher l'approbation de la version
+  // précédente. Chaque rôle n'apparaît qu'une fois son étape franchie (et nommé).
+  const showDrafter = statut !== "brouillon" && Boolean(drafterName) && Boolean(drafterSignedAt);
+  const showVerifier =
+    Boolean(withVerification) &&
+    (statut === "en_approbation" || statut === "approuvee" || isPublished) &&
+    Boolean(verifierName) &&
+    Boolean(verifierSignedAt);
+  const showApprover = (statut === "approuvee" || isPublished) && Boolean(approverName);
+  // La grille de signature apparaît dès la soumission, avec les étapes
+  // suivantes « en attente » tant qu'elles ne sont pas franchies.
+  const showSignatures = statut !== "brouillon";
+
   const documentMeta = [
-    { label: "Statut", value: STATUT_LABELS[statut] ?? statut },
+    // « Référence » en tête (l'en-tête du gabarit n'affiche que les 3 premières).
+    ...(reference !== undefined ? [{ label: "Référence", value: reference?.trim() || "-" }] : []),
+    { label: "Statut", value: statutLabel(statut) },
     {
       label: "Version",
       value: isPublished && currentVersion ? currentVersion : `${nextVersion} (projet)`,
     },
-    ...(approverName
+    ...(showApprover
       ? [
           { label: "Approuvé le", value: fmt(approvedAt ?? currentVersionDate) },
-          { label: "Signataire", value: approverName },
+          { label: "Signataire", value: approverName as string },
         ]
       : []),
-    ...(drafterName ? [{ label: "Rédacteur", value: drafterName }] : []),
+    ...(showDrafter ? [{ label: "Rédacteur", value: drafterName as string }] : []),
     ...(metaExtra ?? []),
   ];
 
@@ -194,7 +240,7 @@ export function MaitriseDocument({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">Statut</span>
-          <Badge variant="secondary">{STATUT_LABELS[statut] ?? statut}</Badge>
+          <Badge variant="secondary">{statutLabel(statut)}</Badge>
           {isPublished && currentVersion ? (
             <span className="text-muted-foreground text-sm">
               · {currentVersion}
@@ -245,13 +291,38 @@ export function MaitriseDocument({
 
           {!editing && statut === "brouillon" && canWrite ? (
             <SignatureCapture
-              triggerLabel="Soumettre à approbation"
-              title={`Soumettre ${labelDocument} à approbation`}
-              description="Signez avec votre mot de passe pour soumettre ce document à approbation."
-              onSigned={() => transition("en_revue", "Soumise à approbation.")}
+              triggerLabel={
+                withVerification ? "Soumettre à vérification" : "Soumettre à approbation"
+              }
+              title={`Soumettre ${labelDocument} à ${withVerification ? "vérification" : "approbation"}`}
+              description="Signez avec votre mot de passe pour soumettre ce document."
+              onSigned={() => transition("en_revue", "Soumise pour la suite du circuit.")}
             />
           ) : null}
-          {statut === "en_revue" && canApprove ? (
+
+          {/* Étape de vérification (circuit à 3 rôles). */}
+          {withVerification && statut === "en_revue" && canVerify ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => transition("brouillon", "Renvoyée en brouillon.")}
+                disabled={pending}
+              >
+                Demander des modifications
+              </Button>
+              <SignatureCapture
+                triggerLabel="Vérifier et signer"
+                title={`Vérifier ${labelDocument}`}
+                description="Signez avec votre mot de passe pour attester la vérification du document."
+                onSigned={() => transition("en_approbation", `${cap(labelDocument)} vérifiée.`)}
+              />
+            </>
+          ) : null}
+
+          {/* Étape d'approbation : en_approbation (avec vérif) ou en_revue (sans). */}
+          {((withVerification && statut === "en_approbation") ||
+            (!withVerification && statut === "en_revue")) &&
+          canApprove ? (
             <>
               <Button
                 variant="outline"
@@ -290,10 +361,22 @@ export function MaitriseDocument({
       {statut === "brouillon" ? (
         <div className="rounded-lg border bg-muted/40 px-3 py-2 text-muted-foreground text-sm">
           Étape : <span className="font-medium text-foreground">rédaction</span>. Complétez le
-          document, puis « Soumettre à approbation » (rédacteur : manager ou dirigeant).
+          document, puis «{" "}
+          {withVerification ? "Soumettre à vérification" : "Soumettre à approbation"} » (rédacteur :
+          manager ou dirigeant).
         </div>
       ) : null}
-      {statut === "en_revue" ? (
+      {statut === "en_revue" && withVerification ? (
+        <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
+          <span className="font-medium text-status-pa">En attente de vérification.</span>{" "}
+          <span className="text-muted-foreground">
+            {canVerify
+              ? "Vérifiez le document puis « Vérifier et signer » (manager ou dirigeant)."
+              : "Un vérificateur (manager ou dirigeant) doit attester la vérification."}
+          </span>
+        </div>
+      ) : null}
+      {statut === "en_revue" && !withVerification ? (
         <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
           <span className="font-medium text-status-pa">
             En attente d'approbation par le dirigeant.
@@ -301,6 +384,18 @@ export function MaitriseDocument({
           <span className="text-muted-foreground">
             {canApprove
               ? "Vérifiez le document puis « Approuver et signer »."
+              : "Seul le dirigeant peut approuver et signer."}
+          </span>
+        </div>
+      ) : null}
+      {statut === "en_approbation" ? (
+        <div className="rounded-lg border border-status-pa/40 bg-status-pa/10 px-3 py-2 text-sm">
+          <span className="font-medium text-status-pa">
+            Vérifiée, en attente d'approbation par le dirigeant.
+          </span>{" "}
+          <span className="text-muted-foreground">
+            {canApprove
+              ? "Approuvez et signez (vous devez être différent du rédacteur et du vérificateur)."
               : "Seul le dirigeant peut approuver et signer."}
           </span>
         </div>
@@ -314,6 +409,11 @@ export function MaitriseDocument({
             {currentVersion ? ` En attendant, la version en vigueur reste ${currentVersion}.` : ""}
           </span>
         </div>
+      ) : null}
+
+      {/* Code documentaire éditable (ex. DG_SMQ_004), réservé aux rédacteurs. */}
+      {onSaveReference && canWrite ? (
+        <ReferenceEditor initial={reference ?? null} onSave={onSaveReference} />
       ) : null}
 
       {/* Mode édition (documents structurés) : éditeur des rubriques au-dessus du gabarit. */}
@@ -344,24 +444,37 @@ export function MaitriseDocument({
             bare={!editable}
           />
         </div>
-        {!editing && (drafterName || approverName) ? (
-          <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-md border text-sm">
-            <Signataire
-              label="Rédigé par"
-              nom={drafterName}
-              image={drafterSignature ?? null}
-              date={drafterSignedAt ?? null}
-              signe={Boolean(drafterSignedAt)}
-            />
-            <Signataire
-              label="Approuvé par"
-              nom={approverName}
-              image={approverSignature ?? null}
-              date={approvedAt ?? null}
-              signe={Boolean(approverName)}
-              border
-            />
-          </div>
+        {!editing && showSignatures ? (
+          <SignatairesBlock
+            className="mt-8"
+            cells={[
+              {
+                label: "Rédigé par",
+                nom: showDrafter ? drafterName : null,
+                image: showDrafter ? (drafterSignature ?? null) : null,
+                date: showDrafter ? (drafterSignedAt ?? null) : null,
+                signe: showDrafter,
+              },
+              ...(withVerification
+                ? [
+                    {
+                      label: "Vérifié par",
+                      nom: showVerifier ? (verifierName ?? null) : null,
+                      image: showVerifier ? (verifierSignature ?? null) : null,
+                      date: showVerifier ? (verifierSignedAt ?? null) : null,
+                      signe: showVerifier,
+                    },
+                  ]
+                : []),
+              {
+                label: "Approuvé par",
+                nom: showApprover ? approverName : null,
+                image: showApprover ? (approverSignature ?? null) : null,
+                date: showApprover ? (approvedAt ?? null) : null,
+                signe: showApprover,
+              },
+            ]}
+          />
         ) : null}
       </DocumentPaper>
 
@@ -378,44 +491,50 @@ function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-/** Cellule de signature (rédacteur / approbateur) avec image et horodatage. */
-function Signataire({
-  label,
-  nom,
-  image,
-  date,
-  signe,
-  border,
+/** Saisie en ligne du code documentaire (enregistrement à la perte de focus). */
+function ReferenceEditor({
+  initial,
+  onSave,
 }: {
-  label: string;
-  nom: string | null;
-  image: string | null;
-  date: string | null;
-  signe: boolean;
-  border?: boolean;
+  initial: string | null;
+  onSave: (code: string) => Promise<ActionResult>;
 }) {
+  const router = useRouter();
+  const [value, setValue] = useState(initial ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function commit() {
+    const v = value.trim();
+    if (v === (initial ?? "")) return;
+    setSaving(true);
+    const result = await onSave(v);
+    setSaving(false);
+    if (result.ok) {
+      toast.success("Référence enregistrée.");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+      setValue(initial ?? "");
+    }
+  }
+
   return (
-    <div className={border ? "border-l" : ""}>
-      <div
-        className="px-3 py-1.5 font-semibold"
-        style={{ backgroundColor: "var(--charte)", color: "var(--charte-contrast)" }}
-      >
-        {label}
-      </div>
-      <div className="flex min-h-24 flex-col px-3 py-2">
-        <p className="font-medium">{nom?.trim() ? nom : "-"}</p>
-        {signe && image ? (
-          // biome-ignore lint/performance/noImgElement: signature (data URL), document imprimable
-          <img src={image} alt="Signature" className="mt-1 h-12 w-auto object-contain" />
-        ) : null}
-        {signe ? (
-          <p className="mt-auto text-xs italic" style={{ color: "var(--charte)" }}>
-            Signé électroniquement{date ? ` le ${fmt(date)}` : ""}
-          </p>
-        ) : label === "Approuvé par" ? (
-          <p className="mt-auto text-[#0b1120]/40 text-xs">En attente d'approbation</p>
-        ) : null}
-      </div>
+    <div className="mb-4 flex items-center gap-2">
+      <label htmlFor="doc-reference" className="font-medium text-muted-foreground text-sm">
+        Référence du document
+      </label>
+      <Input
+        id="doc-reference"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        placeholder="ex. DG_SMQ_004"
+        disabled={saving}
+        className="h-8 w-44"
+      />
     </div>
   );
 }
