@@ -2,7 +2,7 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import {
   createDocumentMaitriseAction,
   createDocumentUploadUrlAction,
   deleteDocumentMaitriseAction,
+  previewDocumentCodeAction,
   removeDocumentFichierAction,
   updateDocumentMaitriseAction,
 } from "@/lib/actions/documents-maitrise";
@@ -64,6 +65,29 @@ export function DocumentDialog({
   const [file, setFile] = useState<File | null>(null);
   const [fichierNom, setFichierNom] = useState(document?.fichier_nom ?? null);
   const readOnly = useReadOnly();
+
+  // Aperçu du prochain code disponible (création uniquement). On suit le code
+  // saisi, le type et le processus pour interroger le serveur quand le champ
+  // Code est laissé vide. Le code calculé reste indicatif : c'est le serveur
+  // qui génère réellement à l'insertion si le champ est vide.
+  const [code, setCode] = useState(document?.code ?? "");
+  const [type, setType] = useState(document?.type ?? "document_externe");
+  const [processusId, setProcessusId] = useState(document?.processus_id ?? "");
+  const [previewCode, setPreviewCode] = useState<string | null>(null);
+  const [previewPending, startPreview] = useTransition();
+
+  useEffect(() => {
+    // Aperçu pertinent seulement à la création, hors lecture seule, champ vide,
+    // type + processus renseignés.
+    if (isEdit || readOnly || code.trim() || !type || !processusId) {
+      setPreviewCode(null);
+      return;
+    }
+    startPreview(async () => {
+      const r = await previewDocumentCodeAction({ type, processusId });
+      setPreviewCode(r.ok ? r.code : null);
+    });
+  }, [isEdit, readOnly, code, type, processusId]);
 
   async function handleDelete() {
     if (!document) return;
@@ -205,8 +229,9 @@ export function DocumentDialog({
               <Input
                 id="code"
                 name="code"
-                defaultValue={document?.code ?? ""}
-                placeholder={isEdit ? "" : "Auto"}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder={isEdit ? "" : (previewCode ?? "Auto")}
                 className="font-mono"
               />
             </div>
@@ -217,9 +242,21 @@ export function DocumentDialog({
           </div>
           {!isEdit ? (
             <p className="-mt-2 text-muted-foreground text-xs">
-              Laissez le code vide pour une génération automatique{" "}
-              <span className="font-mono">FAMILLE_PROCESSUS_001</span> (selon le type et le
-              processus choisis).
+              {!code.trim() && previewCode ? (
+                <>
+                  Prochain code disponible :{" "}
+                  <span className="font-mono text-foreground">{previewCode}</span>. Laissez le champ
+                  vide pour l'attribuer automatiquement.
+                </>
+              ) : !code.trim() && previewPending ? (
+                "Calcul du prochain code…"
+              ) : (
+                <>
+                  Laissez le code vide pour une génération automatique{" "}
+                  <span className="font-mono">FAMILLE_PROCESSUS_001</span> (selon le type et le
+                  processus choisis).
+                </>
+              )}
             </p>
           ) : null}
 
@@ -230,7 +267,8 @@ export function DocumentDialog({
                 id="type"
                 name="type"
                 className={SELECT_CLASS}
-                defaultValue={document?.type ?? "document_externe"}
+                value={type}
+                onChange={(e) => setType(e.target.value)}
               >
                 {Object.entries(DOC_MAITRISE_TYPE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -267,7 +305,8 @@ export function DocumentDialog({
                 id="processusId"
                 name="processusId"
                 className={SELECT_CLASS}
-                defaultValue={document?.processus_id ?? ""}
+                value={processusId}
+                onChange={(e) => setProcessusId(e.target.value)}
               >
                 <option value="">-</option>
                 {processus.map((p) => (

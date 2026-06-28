@@ -93,6 +93,48 @@ export async function createDocumentMaitriseAction(input: unknown): Promise<Crea
   return { ok: true, id: data.id };
 }
 
+/**
+ * Résultat de la prévisualisation du prochain code documentaire. `code` vaut
+ * `null` quand le type n'est pas codifié automatiquement ou que le processus
+ * n'a pas de trigramme : dans ce cas il n'y a pas de code auto à proposer.
+ */
+type PreviewCodeResult = { ok: true; code: string | null } | { ok: false; error: string };
+
+const previewCodeSchema = z.object({
+  type: base.type,
+  processusId: z.string().uuid(),
+});
+
+/**
+ * Calcule, sans rien enregistrer, le prochain code documentaire disponible pour
+ * un couple (type → famille, processus). Sert d'aperçu indicatif à la création
+ * d'un document (le serveur reste seul juge à l'insertion réelle).
+ */
+export async function previewDocumentCodeAction(input: unknown): Promise<PreviewCodeResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+
+  const parsed = previewCodeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+
+  const famille = TYPE_MAITRISE_TO_FAMILLE[parsed.data.type];
+  if (!famille) return { ok: true, code: null };
+
+  const supabase = await createClient();
+  const { data: proc } = await supabase
+    .from("processus")
+    .select("code")
+    .eq("id", parsed.data.processusId)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .maybeSingle();
+
+  const code = await prochaineReference(ctx.effectiveTenantId, famille, proc?.code);
+  return { ok: true, code };
+}
+
 type UploadUrl = { ok: true; path: string; token: string } | { ok: false; error: string };
 
 /**
