@@ -1,9 +1,11 @@
 "use client";
 
+import { TableKit } from "@tiptap/extension-table";
 import { EditorContent, type JSONContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
+  Columns3,
   Heading1,
   Heading2,
   Heading3,
@@ -12,6 +14,9 @@ import {
   List,
   ListOrdered,
   Redo2,
+  Rows3,
+  Table as TableIcon,
+  Trash2,
   Undo2,
   Workflow,
 } from "lucide-react";
@@ -98,7 +103,11 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [drawioOpen, setDrawioOpen] = useState(false);
   const editor = useEditor({
-    extensions: [StarterKit, ResizableImage.configure({ allowBase64: true, inline: false })],
+    extensions: [
+      StarterKit,
+      ResizableImage.configure({ allowBase64: true, inline: false }),
+      TableKit.configure({ table: { resizable: true } }),
+    ],
     content: content ?? "",
     editable,
     immediatelyRender: false,
@@ -135,7 +144,9 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
   return (
     <div className="flex flex-col gap-2">
       {editable ? (
-        <div className="flex flex-wrap gap-1 rounded-lg border bg-card p-1">
+        // Barre d'outils « collante » : reste visible en haut de la zone de
+        // défilement même dans un long document (plus besoin de remonter).
+        <div className="sticky top-0 z-20 flex flex-wrap gap-1 rounded-lg border bg-card p-1 shadow-sm">
           <ToolbarButton
             label="Gras"
             active={editor.isActive("bold")}
@@ -191,6 +202,52 @@ export function TiptapEditor({ content, editable, onChange, bare = false }: Prop
           <ToolbarButton label="Logigramme" onClick={() => setDrawioOpen(true)}>
             <Workflow className="size-4" />
           </ToolbarButton>
+          <ToolbarButton
+            label="Insérer un tableau"
+            active={editor.isActive("table")}
+            onClick={() =>
+              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+            }
+          >
+            <TableIcon className="size-4" />
+          </ToolbarButton>
+          {/* Contrôles de tableau : visibles seulement quand le curseur est dedans. */}
+          {editor.isActive("table") ? (
+            <>
+              <span className="mx-0.5 w-px self-stretch bg-border" aria-hidden />
+              <ToolbarButton
+                label="Ajouter une colonne"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+              >
+                <Columns3 className="size-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                label="Ajouter une ligne"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+              >
+                <Rows3 className="size-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                label="Supprimer la colonne"
+                onClick={() => editor.chain().focus().deleteColumn().run()}
+              >
+                <Columns3 className="size-4 text-destructive" />
+              </ToolbarButton>
+              <ToolbarButton
+                label="Supprimer la ligne"
+                onClick={() => editor.chain().focus().deleteRow().run()}
+              >
+                <Rows3 className="size-4 text-destructive" />
+              </ToolbarButton>
+              <ToolbarButton
+                label="Supprimer le tableau"
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                <Trash2 className="size-4 text-destructive" />
+              </ToolbarButton>
+              <span className="mx-0.5 w-px self-stretch bg-border" aria-hidden />
+            </>
+          ) : null}
           <ToolbarButton label="Annuler" onClick={() => editor.chain().focus().undo().run()}>
             <Undo2 className="size-4" />
           </ToolbarButton>
