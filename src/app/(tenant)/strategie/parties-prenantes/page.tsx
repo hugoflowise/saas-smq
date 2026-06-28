@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ProposeBadge } from "@/components/propose-badge";
 import { ProposeBanner, RefuserButton, ValiderButton } from "@/components/propose-controls";
+import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -169,16 +170,7 @@ export default async function PartiesPrenantesPage() {
       ) : (
         <div className="flex flex-col gap-6">
           <ProposeBanner table="parties_interessees" count={aValider} libelle="parties prenantes" />
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {tiles.map((t) => (
-              <Card key={t.label}>
-                <CardContent className="py-5">
-                  <p className={`font-semibold text-3xl ${t.cls}`}>{t.value}</p>
-                  <p className="mt-1 text-muted-foreground text-xs">{t.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <StatTiles tiles={tiles} />
 
           <Card>
             <CardHeader>
