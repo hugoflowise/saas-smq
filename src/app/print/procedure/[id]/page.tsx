@@ -48,10 +48,24 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         .maybeSingle()
     : { data: null };
 
-  // Noms + signatures des 3 rôles figés dans la version publiée.
-  const signerIds = [version?.redige_par, version?.verifie_par, version?.approved_by].filter(
-    Boolean,
-  ) as string[];
+  // Toutes les versions publiées pour le tableau de révision en tête.
+  const { data: allVersions } = await supabase
+    .from("procedures_versions")
+    .select("id, version, approved_at, approved_by, redige_par, verifie_par, note_revision")
+    .eq("procedure_id", id)
+    .order("created_at", { ascending: false });
+
+  // Noms + signatures des 3 rôles : version courante + toutes les versions.
+  const signerIds = [
+    ...new Set(
+      [
+        version?.redige_par,
+        version?.verifie_par,
+        version?.approved_by,
+        ...(allVersions ?? []).flatMap((v) => [v.redige_par, v.verifie_par, v.approved_by]),
+      ].filter(Boolean),
+    ),
+  ] as string[];
   const { data: signers } = signerIds.length
     ? await supabase
         .from("profiles")
@@ -60,6 +74,19 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
     : { data: [] };
   const nameById = new Map((signers ?? []).map((p) => [p.id, p.full_name ?? p.email]));
   const sigById = new Map((signers ?? []).map((p) => [p.id, p.signature_image]));
+
+  const revisions = (allVersions ?? []).map((v) => ({
+    id: v.id,
+    version: v.version,
+    approvedAt: v.approved_at,
+    noteRevision: v.note_revision,
+    redacteur: v.redige_par ? (nameById.get(v.redige_par) ?? null) : null,
+    redacteurSignature: v.redige_par ? (sigById.get(v.redige_par) ?? null) : null,
+    verificateur: v.verifie_par ? (nameById.get(v.verifie_par) ?? null) : null,
+    verificateurSignature: v.verifie_par ? (sigById.get(v.verifie_par) ?? null) : null,
+    approverName: v.approved_by ? (nameById.get(v.approved_by) ?? null) : null,
+    approverSignature: v.approved_by ? (sigById.get(v.approved_by) ?? null) : null,
+  }));
 
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? procedure.contenu ?? null) as JSONContent | null;
@@ -76,7 +103,6 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
     glossaire_abreviations: string | null;
     definitions: unknown;
     references_doc: unknown;
-    references_appli: unknown;
   };
   const src = ((version?.sections_snapshot as unknown as SectionsSrc | null) ??
     procedure) as SectionsSrc;
@@ -110,9 +136,9 @@ export default async function ProcedurePrintPage({ params }: { params: Promise<{
         glossaireAbreviations={src.glossaire_abreviations}
         definitions={(src.definitions as unknown as ProcDef[] | null) ?? []}
         referencesDoc={(src.references_doc as unknown as ProcRef[] | null) ?? []}
-        referencesAppli={(src.references_appli as unknown as ProcRef[] | null) ?? []}
+        versions={revisions}
       />
-      <div className="doc-chapitres" style={{ counterReset: "chap 6" }}>
+      <div className="doc-chapitres" style={{ counterReset: "chap 5" }}>
         <TiptapEditor content={contenu} editable={false} bare />
       </div>
       {isPublished ? (
