@@ -25,6 +25,7 @@ import { CreateProcedureDialog } from "./create-procedure-dialog";
 // pour que l'onglet reflète exactement la liste maîtresse.
 type LigneProcedure = {
   key: string;
+  code: string | null;
   titre: string;
   processusId: string | null;
   processusNom: string | null;
@@ -63,7 +64,7 @@ export default async function ProceduresPage() {
   const [{ data: procedures }, { data: registre }] = await Promise.all([
     supabase
       .from("procedures")
-      .select("id, titre, processus_id, reference_iso, statut")
+      .select("id, code, titre, processus_id, reference_iso, statut")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("titre", { ascending: true }),
@@ -79,6 +80,7 @@ export default async function ProceduresPage() {
 
   const natives: LigneProcedure[] = (procedures ?? []).map((p) => ({
     key: `proc-${p.id}`,
+    code: p.code,
     titre: p.titre,
     processusId: p.processus_id,
     processusNom: p.processus_id ? (processusName.get(p.processus_id) ?? null) : null,
@@ -89,6 +91,7 @@ export default async function ProceduresPage() {
   }));
   const duRegistre: LigneProcedure[] = (registre ?? []).map((d) => ({
     key: `reg-${d.id}`,
+    code: d.code,
     titre: d.titre,
     processusId: d.processus_id,
     processusNom: d.processus_id ? (processusName.get(d.processus_id) ?? null) : null,
@@ -121,6 +124,7 @@ export default async function ProceduresPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-28">Code</TableHead>
                 <TableHead>Titre</TableHead>
                 <TableHead>Processus</TableHead>
                 <TableHead>§ ISO</TableHead>
@@ -130,6 +134,9 @@ export default async function ProceduresPage() {
             <TableBody>
               {items.map((p) => (
                 <TableRow key={p.key}>
+                  <TableCell className="font-mono text-muted-foreground text-xs">
+                    {p.code ?? "-"}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {p.href ? (
                       <Link href={p.href} className="hover:text-primary hover:underline">

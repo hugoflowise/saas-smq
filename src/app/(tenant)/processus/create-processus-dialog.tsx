@@ -28,6 +28,7 @@ export function CreateProcessusDialog() {
           nom: form.get("nom"),
           type: form.get("type"),
           description: form.get("description") || undefined,
+          code: form.get("code") || undefined,
         }),
       success: "Processus créé.",
     });
@@ -56,6 +57,20 @@ export function CreateProcessusDialog() {
               <option value="realisation">Réalisation</option>
               <option value="support">Support</option>
             </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="code">Trigramme (code court)</Label>
+            <Input
+              id="code"
+              name="code"
+              placeholder="SMQ, DIR, RH…"
+              maxLength={6}
+              className="w-32"
+            />
+            <p className="text-muted-foreground text-xs">
+              Sert à générer les références des documents du processus (ex.{" "}
+              <span className="font-mono">PR_SMQ_001</span>).
+            </p>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description (optionnel)</Label>

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import { TYPE_MAITRISE_TO_FAMILLE } from "@/lib/codification";
+import { prochaineReference } from "@/lib/codification-server";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -63,9 +65,27 @@ export async function createDocumentMaitriseAction(input: unknown): Promise<Crea
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
   const supabase = await createClient();
+
+  // Code documentaire : on respecte la saisie si présente, sinon génération
+  // automatique `{FAMILLE}_{PROCESSUS}_{CHRONO}` quand le type est codifiable
+  // et que le processus a un trigramme.
+  const body = payload(parsed.data);
+  if (!body.code) {
+    const famille = TYPE_MAITRISE_TO_FAMILLE[parsed.data.type];
+    if (famille && parsed.data.processusId) {
+      const { data: proc } = await supabase
+        .from("processus")
+        .select("code")
+        .eq("id", parsed.data.processusId)
+        .eq("tenant_id", ctx.effectiveTenantId)
+        .maybeSingle();
+      body.code = await prochaineReference(ctx.effectiveTenantId, famille, proc?.code);
+    }
+  }
+
   const { data, error } = await supabase
     .from("documents_maitrise")
-    .insert({ tenant_id: ctx.effectiveTenantId, ...payload(parsed.data), created_by: ctx.userId })
+    .insert({ tenant_id: ctx.effectiveTenantId, ...body, created_by: ctx.userId })
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: error?.message ?? "Création impossible." };

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   deleteProcedureAction,
   publishProcedureAction,
+  saveProcedureCodeAction,
   saveProcedureContenuAction,
   transitionProcedureStatutAction,
 } from "@/lib/actions/procedures";
@@ -44,7 +45,7 @@ export default async function ProcedureDetailPage({
     supabase
       .from("procedures")
       .select(
-        "id, titre, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
+        "id, titre, code, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, redacteur, verificateur, note_revision, processus_id, reference_iso, objet, domaine_application, resume, diffusion, glossaire_sigles, glossaire_symboles, glossaire_abreviations, definitions, references_doc, references_appli",
       )
       .eq("id", id)
       .eq("tenant_id", tid)
@@ -189,6 +190,8 @@ export default async function ProcedureDetailPage({
             surtitre="Procédure"
             titre={procedure.titre}
             societe={tenant as Societe}
+            reference={procedure.code ?? null}
+            onSaveReference={saveProcedureCodeAction.bind(null, procedure.id)}
             metaExtra={metaExtra}
             beforeContent={<ProcedureSections {...sectionsData} />}
             structuredEditor={<ProcedureInfosEditor initial={infosInitial} />}
