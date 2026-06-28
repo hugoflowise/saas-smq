@@ -1,6 +1,6 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { KpiChart } from "@/components/kpi-chart";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
@@ -73,13 +73,7 @@ export default async function IndicateurDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href={backHref}
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        {backLabel}
-      </Link>
+      <BackLink href={backHref} label={backLabel} />
 
       <PageHeader title={ind.nom} description={ind.description ?? undefined}>
         <IndicateurDialog indicateur={ind} processusOptions={processusOptions ?? []} />

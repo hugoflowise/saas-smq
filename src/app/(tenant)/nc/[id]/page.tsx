@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { Badge } from "@/components/ui/badge";
@@ -97,13 +96,7 @@ export default async function NcDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href={backHref}
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        {backLabel}
-      </Link>
+      <BackLink href={backHref} label={backLabel} />
 
       <PageHeader title={`${nc.reference} · ${nc.intitule}`}>
         <NcDialog

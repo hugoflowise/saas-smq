@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,13 +79,7 @@ export default async function RoDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="mx-auto w-full max-w-4xl">
-      <Link
-        href="/risques"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Risques & Opportunités
-      </Link>
+      <BackLink href="/risques" label="Risques & Opportunités" />
 
       <PageHeader title={ro.intitule} description={TYPE_LABELS[ro.type] ?? ro.type}>
         <RoDialog processusOptions={processus ?? []} ro={ro} />

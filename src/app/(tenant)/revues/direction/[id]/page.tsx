@@ -1,6 +1,6 @@
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,14 +55,8 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   const actions = linkedActions ?? [];
 
   return (
-    <div className="w-full">
-      <Link
-        href="/revues/direction"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Revues de direction
-      </Link>
+    <div className="mx-auto w-full max-w-4xl">
+      <BackLink href="/revues/direction" label="Revues de direction" />
 
       <PageHeader
         title={`Revue de direction ${revue.annee}`}

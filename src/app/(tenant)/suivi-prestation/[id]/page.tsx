@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
@@ -47,13 +46,7 @@ export default async function SuiviDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <Link
-        href="/suivi-prestation"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Suivis de prestation
-      </Link>
+      <BackLink href="/suivi-prestation" label="Suivis de prestation" />
 
       <PageHeader
         title={`Suivi · ${suivi.client ?? "-"}`}
