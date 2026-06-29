@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { sendEmail, welcomeActivatedEmailHtml } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
 
 const nomSchema = z.object({ fullName: z.string().trim().min(2, "Nom trop court.") });
@@ -81,11 +82,34 @@ export async function markPasswordSetAction(): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Non authentifié." };
 
+  // On lit l'état AVANT pour ne déclencher l'e-mail de bienvenue qu'à la
+  // PREMIÈRE définition du mot de passe (drapeau true → false). Un simple
+  // changement de mot de passe ultérieur (depuis /compte) ne renvoie rien.
+  const { data: avant } = await supabase
+    .from("profiles")
+    .select("must_set_password, full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("profiles")
     .update({ must_set_password: false })
     .eq("id", user.id);
   if (error) return { ok: false, error: error.message };
+
+  // E-mail « votre espace est actif » (best-effort : ne doit jamais faire
+  // échouer l'activation du compte).
+  if (avant?.must_set_password && user.email) {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    await sendEmail({
+      to: user.email,
+      subject: "Votre espace qualité est actif",
+      html: welcomeActivatedEmailHtml({
+        prenom: avant.full_name ?? null,
+        appUrl: `${base}/mise-en-route`,
+      }),
+    });
+  }
 
   revalidatePath("/", "layout");
   return { ok: true };

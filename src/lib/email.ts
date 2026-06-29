@@ -153,6 +153,30 @@ export function resetEmailHtml(opts: { actionLink: string }): string {
 </div>`;
 }
 
+/**
+ * Gabarit HTML de l'e-mail « votre espace est actif », envoyé une seule fois,
+ * juste après que l'utilisateur a défini son mot de passe pour la première fois.
+ * Confirme l'activation et oriente vers la mise en route. `prenom` est optionnel
+ * (repli sur une formule neutre). `appUrl` est le lien (absolu) vers l'app.
+ */
+export function welcomeActivatedEmailHtml(opts: {
+  prenom?: string | null;
+  appUrl: string;
+}): string {
+  const bonjour = opts.prenom?.trim() ? `Bonjour ${opts.prenom.trim()},` : "Bonjour,";
+  return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px">
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px">
+    ${emailLogo()}
+    <h1 style="margin:0;font-size:18px;color:#0f172a">Votre espace qualité est actif 🎉</h1>
+    <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">${bonjour}</p>
+    <p style="margin:8px 0 0;color:#475569;font-size:14px;line-height:1.6">Votre mot de passe est défini et votre espace est prêt. Pour vous faire gagner du temps, il est déjà <strong>pré-rempli</strong> (cartographie des processus, parties prenantes, plan d'actions de démarrage) : il ne vous reste qu'à passer ces éléments en revue et les adapter à votre organisation.</p>
+    <a href="${opts.appUrl}" style="display:inline-block;margin-top:16px;background:#ff6b5e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">Commencer la mise en route</a>
+    <p style="margin:16px 0 0;color:#94a3b8;font-size:12px">Une question ? Répondez simplement à cet e-mail, nous sommes là pour vous accompagner.</p>
+  </div>
+  <p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:16px">flowise. · pilotage de la qualité</p>
+</div>`;
+}
+
 /** Une section de la liste du digest (titre + lignes cliquables). */
 export type DigestSection = {
   titre: string;
