@@ -5,12 +5,23 @@ import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
-import { ACTION_STATUT_LABELS, REVUE_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
-import { computeRevuePerformance, type RevuePerformance, revuePerfCells } from "@/lib/revue-perf";
+import {
+  ACTION_STATUT_LABELS,
+  RO_STATUT_LABELS,
+  REVUE_STATUT_LABELS as STATUT_LABELS,
+} from "@/lib/labels";
+import { canApprove } from "@/lib/permissions";
+import {
+  computeRevueEntreesPrefill,
+  computeRevuePerformance,
+  type RevuePerformance,
+  revuePerfCells,
+} from "@/lib/revue-perf";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RevueDialog } from "../revue-dialog";
 import { RevueActionForm } from "./revue-action-form";
+import { RevueApprobation } from "./revue-approbation";
 import { RevuePerformanceCapture } from "./revue-performance-capture";
 import type { RevueParticipant } from "./revue-structure-editor";
 import { RevueStructureEditor } from "./revue-structure-editor";
@@ -26,7 +37,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   const { data: revue } = await supabase
     .from("revues_direction")
     .select(
-      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, participants, points_specifiques",
+      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, participants, points_specifiques, approuve_par, approuve_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -37,6 +48,22 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   // Données de performance : instantané figé si capturé, sinon valeurs vivantes.
   const snapshot = revue.donnees_performance as RevuePerformance | null;
   const perf = snapshot ?? (await computeRevuePerformance(supabase, tid, revue.annee));
+
+  // Aide à la saisie des entrées (§9.3.2 a et e) : actions des revues
+  // antérieures + R&O critiques du client (calculées en direct, jamais figées).
+  const prefill = await computeRevueEntreesPrefill(supabase, tid, revue.annee, revue.id);
+
+  // Approbation : nom de l'approbateur (§9.3) si la revue a été approuvée.
+  const peutApprouver = canApprove(ctx.role);
+  let approuveParNom: string | null = null;
+  if (revue.approuve_par) {
+    const { data: approbateur } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", revue.approuve_par)
+      .maybeSingle();
+    approuveParNom = approbateur?.full_name || approbateur?.email || null;
+  }
 
   // Actions décidées en revue (§9.3.3) rattachées à cette revue.
   const { data: linkedActions } = await supabase
@@ -86,8 +113,34 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
+        {/* §9.3 — approbation de la revue par la direction */}
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-base">Approbation (§9.3)</CardTitle>
+              <p className="mt-1 text-muted-foreground text-xs">
+                {revue.approuve_le
+                  ? `Approuvée par ${approuveParNom ?? "—"} le ${formatDate(revue.approuve_le)}.`
+                  : "Revue non encore approuvée par la direction."}
+              </p>
+            </div>
+            {peutApprouver && !revue.approuve_le ? <RevueApprobation revueId={revue.id} /> : null}
+          </CardHeader>
+        </Card>
+
         {/* §9.3.2 a→f + §9.3.3 — éléments d'entrée / sortie */}
         <RevueStructureEditor
+          prefill={{
+            actionsAnterieures: prefill.actionsAnterieures.map((a) => ({
+              ...a,
+              statutLabel:
+                ACTION_STATUT_LABELS[a.statut as keyof typeof ACTION_STATUT_LABELS] ?? a.statut,
+            })),
+            roCritiques: prefill.roCritiques.map((r) => ({
+              ...r,
+              statutLabel: RO_STATUT_LABELS[r.statut as keyof typeof RO_STATUT_LABELS] ?? r.statut,
+            })),
+          }}
           initial={{
             id: revue.id,
             participants: (revue.participants as RevueParticipant[]) ?? [],

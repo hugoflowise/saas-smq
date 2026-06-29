@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { canApprove } from "@/lib/permissions";
 import { computeRevuePerformance } from "@/lib/revue-perf";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -410,6 +411,34 @@ export async function captureRevuePerformanceAction(id: unknown): Promise<Action
     })
     .eq("id", revueId.data)
     .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${revueId.data}`);
+  return { ok: true };
+}
+
+/**
+ * Approbation de la revue de direction (§9.3) : pose `approuve_par` + `approuve_le`.
+ * Réservée au rôle direction / approbateur (dirigeant, admin Flowise).
+ */
+export async function approveRevueAction(id: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canApprove(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const revueId = z.string().uuid().safeParse(id);
+  if (!revueId.success) return { ok: false, error: "Revue invalide." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("revues_direction")
+    .update({
+      approuve_par: ctx.userId,
+      approuve_le: new Date().toISOString(),
+      updated_by: ctx.userId,
+    })
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/revues/direction/${revueId.data}`);
   return { ok: true };

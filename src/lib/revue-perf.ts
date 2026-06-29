@@ -275,3 +275,94 @@ export async function computeRevuePerformance(
     fournisseursNoteMoyenne,
   };
 }
+
+/**
+ * Données d'aide à la saisie des éléments d'entrée de la revue (§9.3.2).
+ * Ces listes sont calculées en direct (jamais figées) : elles servent à montrer
+ * que les entrées obligatoires sont couvertes et à pré-remplir les champs vides.
+ * - (a) actions décidées lors des revues de direction antérieures + leur état ;
+ * - (e) risques & opportunités critiques du client (efficacité des actions R&O).
+ */
+export type RevueEntreeAction = {
+  id: string;
+  reference: string;
+  description: string;
+  statut: string;
+  revueAnnee: number;
+};
+
+export type RevueRoCritique = {
+  id: string;
+  intitule: string;
+  criticite: number | null;
+  criticiteResiduelle: number | null;
+  statut: string;
+};
+
+export type RevueEntreesPrefill = {
+  actionsAnterieures: RevueEntreeAction[];
+  roCritiques: RevueRoCritique[];
+};
+
+/** Seuil de criticité au-delà duquel un risque est considéré comme critique. */
+export const RO_CRITICITE_SEUIL = 15;
+
+export async function computeRevueEntreesPrefill(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+  annee: number,
+  revueId: string,
+): Promise<RevueEntreesPrefill> {
+  // Revues de direction antérieures (années précédentes ou même année, hors revue
+  // courante) : on récupère leur année pour situer les actions décidées.
+  const { data: revuesAnterieures } = await supabase
+    .from("revues_direction")
+    .select("id, annee")
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
+    .neq("id", revueId)
+    .lte("annee", annee);
+
+  const anneeParRevue = new Map<string, number>(
+    (revuesAnterieures ?? []).map((r) => [r.id, r.annee]),
+  );
+  const idsAnterieures = [...anneeParRevue.keys()];
+
+  const [actionsRes, roRes] = await Promise.all([
+    idsAnterieures.length > 0
+      ? supabase
+          .from("actions")
+          .select("id, reference, description_courte, statut, revue_id")
+          .eq("tenant_id", tenantId)
+          .is("deleted_at", null)
+          .in("revue_id", idsAnterieures)
+          .order("date_creation", { ascending: false })
+      : Promise.resolve({ data: [] as never[] }),
+    supabase
+      .from("risques_opportunites")
+      .select("id, intitule, criticite, criticite_residuelle, statut")
+      .eq("tenant_id", tenantId)
+      .is("deleted_at", null)
+      .eq("type", "risque")
+      .gt("criticite", RO_CRITICITE_SEUIL)
+      .order("criticite", { ascending: false }),
+  ]);
+
+  const actionsAnterieures: RevueEntreeAction[] = (actionsRes.data ?? []).map((a) => ({
+    id: a.id,
+    reference: a.reference,
+    description: a.description_courte,
+    statut: a.statut,
+    revueAnnee: a.revue_id ? (anneeParRevue.get(a.revue_id) ?? annee) : annee,
+  }));
+
+  const roCritiques: RevueRoCritique[] = (roRes.data ?? []).map((r) => ({
+    id: r.id,
+    intitule: r.intitule,
+    criticite: r.criticite,
+    criticiteResiduelle: r.criticite_residuelle,
+    statut: r.statut,
+  }));
+
+  return { actionsAnterieures, roCritiques };
+}
