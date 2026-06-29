@@ -3,6 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import {
+  messageImpartialite,
+  type ProcessusPilotage,
+  processusEnConflit,
+} from "@/lib/audit-impartialite";
 import { computeRevuePerformance } from "@/lib/revue-perf";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +25,10 @@ const auditBase = {
   organisme: z.string().trim().optional(),
   perimetre: z.string().trim().optional(),
   processusAudites: z.array(z.string().uuid()).optional(),
+  auditeurId: z.string().uuid().optional(),
+  // Lève le garde-fou d'impartialité §9.2.2 (auditeur ≠ pilote du processus audité)
+  // lorsque le rédacteur confirme malgré l'avertissement.
+  forcerImpartialite: z.coerce.boolean().optional(),
   datePrevue: z.string().optional(),
   dateRealisee: z.string().optional(),
   dureePrevue: z.coerce.number().optional(),
@@ -44,6 +53,7 @@ function auditPayload(d: z.infer<typeof auditCreate>) {
     perimetre: d.perimetre ?? null,
     processus_audites:
       d.processusAudites && d.processusAudites.length > 0 ? d.processusAudites : null,
+    auditeur_id: d.auditeurId ?? null,
     date_prevue: d.datePrevue || null,
     date_realisee: d.dateRealisee || null,
     duree_prevue: d.dureePrevue ?? null,
@@ -53,11 +63,77 @@ function auditPayload(d: z.infer<typeof auditCreate>) {
   };
 }
 
+/**
+ * Garde-fou d'impartialité §9.2.2 : « les auditeurs ne doivent pas auditer
+ * leur propre travail ». Vérifie que l'auditeur retenu n'est pilote d'aucun
+ * des processus audités (un audit peut en couvrir plusieurs). Renvoie un
+ * message d'avertissement listant les processus concernés, ou `null` si tout
+ * est conforme. Le blocage est souple : le rédacteur peut passer outre via
+ * `forcerImpartialite`.
+ */
+async function verifierImpartialite(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+  auditeurId: string | undefined,
+  processusAudites: string[] | undefined,
+): Promise<string | null> {
+  if (!auditeurId || !processusAudites || processusAudites.length === 0) return null;
+
+  // Pilotes liés (table multi-pilotes) + pilote « legacy » porté par le processus.
+  const [pilotesRes, processusRes] = await Promise.all([
+    supabase
+      .from("processus_pilotes")
+      .select("processus_id, pilote_id")
+      .eq("tenant_id", tenantId)
+      .in("processus_id", processusAudites)
+      .is("deleted_at", null),
+    supabase
+      .from("processus")
+      .select("id, nom, pilote_id")
+      .eq("tenant_id", tenantId)
+      .in("id", processusAudites),
+  ]);
+
+  // Agrège les pilotes par processus (legacy + multi-pilotes), puis délègue la
+  // détection de conflit à la logique pure (testée unitairement).
+  const piloteIdsParProcessus = new Map<string, Set<string>>();
+  const nomParId = new Map((processusRes.data ?? []).map((p) => [p.id, p.nom]));
+  for (const p of processusRes.data ?? []) {
+    const set = piloteIdsParProcessus.get(p.id) ?? new Set<string>();
+    if (p.pilote_id) set.add(p.pilote_id);
+    piloteIdsParProcessus.set(p.id, set);
+  }
+  for (const r of pilotesRes.data ?? []) {
+    if (!r.pilote_id) continue;
+    const set = piloteIdsParProcessus.get(r.processus_id) ?? new Set<string>();
+    set.add(r.pilote_id);
+    piloteIdsParProcessus.set(r.processus_id, set);
+  }
+
+  const processus: ProcessusPilotage[] = [...piloteIdsParProcessus.entries()].map(([id, set]) => ({
+    id,
+    nom: nomParId.get(id) ?? "ce processus",
+    piloteIds: [...set],
+  }));
+
+  return messageImpartialite(processusEnConflit(auditeurId, processus));
+}
+
 export async function createAuditAction(input: unknown): Promise<ActionResult> {
   const c = await tenantWrite();
   if (!c) return { ok: false, error: "Sélectionnez d'abord un client." };
   const parsed = auditCreate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+
+  if (!parsed.data.forcerImpartialite) {
+    const avertissement = await verifierImpartialite(
+      c.supabase,
+      c.tenantId,
+      parsed.data.auditeurId,
+      parsed.data.processusAudites,
+    );
+    if (avertissement) return { ok: false, error: avertissement };
+  }
 
   const year = new Date().getFullYear();
   const prefix = `${AUDIT_PREFIX[parsed.data.typeAudit]}-${year}-`;
@@ -84,6 +160,17 @@ export async function updateAuditAction(input: unknown): Promise<ActionResult> {
   if (!c) return { ok: false, error: "Aucun client actif." };
   const parsed = auditUpdate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+
+  if (!parsed.data.forcerImpartialite) {
+    const avertissement = await verifierImpartialite(
+      c.supabase,
+      c.tenantId,
+      parsed.data.auditeurId,
+      parsed.data.processusAudites,
+    );
+    if (avertissement) return { ok: false, error: avertissement };
+  }
+
   const { error } = await c.supabase
     .from("audits_internes")
     .update({ ...auditPayload(parsed.data), updated_by: c.userId })

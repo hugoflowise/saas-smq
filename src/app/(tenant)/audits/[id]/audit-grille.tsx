@@ -12,16 +12,9 @@ import {
   updateAuditQuestionAction,
 } from "@/lib/actions/audits-revues";
 import { COTATION_BADGE_CLASS } from "@/lib/badges";
+import { COTATION_LABELS } from "@/lib/labels";
 
-const COTATION_OPTIONS: Record<string, string> = {
-  non_evalue: "Non évalué",
-  conforme: "Conforme",
-  point_fort: "Point fort",
-  point_attention: "Point d'attention",
-  nc_mineure: "NC mineure",
-  nc_majeure: "NC majeure",
-  non_applicable: "Non applicable",
-};
+const COTATION_OPTIONS: Record<string, string> = COTATION_LABELS;
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
