@@ -41,6 +41,13 @@ function nomSur(nom: string): string {
  * Accepte un FormData : champs texte + 0..n fichiers (captures d'écran, pièces).
  */
 export async function createRetourAction(formData: FormData): Promise<ActionResult> {
+  // Garde-fou : en cas de décalage de version (onglet ouvert avant un déploiement),
+  // l'argument décodé peut ne pas être un FormData. On renvoie alors une erreur
+  // propre plutôt que de laisser `formData.get` lever un 500 non géré.
+  if (!(formData instanceof FormData)) {
+    return { ok: false, error: "Session expirée. Rechargez la page et réessayez." };
+  }
+
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
 

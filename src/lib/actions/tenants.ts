@@ -407,6 +407,10 @@ export async function removeDirigeantAction(input: unknown): Promise<ActionResul
 }
 
 export async function uploadTenantLogoAction(formData: FormData): Promise<ActionResult> {
+  // Garde-fou décalage de version (cf. createRetourAction).
+  if (!(formData instanceof FormData)) {
+    return { ok: false, error: "Session expirée. Rechargez la page et réessayez." };
+  }
   const auth = await requireAdmin();
   if (!auth.ok) return auth;
 
