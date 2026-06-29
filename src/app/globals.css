@@ -189,7 +189,7 @@
   content: counter(chap) ". ";
 }
 
-/* Tableaux du contenu riche (Tiptap) — édition, lecture et impression
+/* Tableaux du contenu riche (Tiptap) - édition, lecture et impression
    (tout passe par .ProseMirror). Bordures nettes + redimensionnement. */
 .ProseMirror table {
   border-collapse: collapse;

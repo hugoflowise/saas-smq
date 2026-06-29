@@ -110,7 +110,7 @@ export async function deleteCartographieVersionAction(id: string): Promise<Actio
 
   const supabase = await createClient();
   // `.select()` permet de vérifier qu'une ligne a bien été supprimée : sans
-  // policy DELETE, RLS renvoie 0 ligne sans erreur — on le remonte explicitement.
+  // policy DELETE, RLS renvoie 0 ligne sans erreur - on le remonte explicitement.
   const { data, error } = await supabase
     .from("cartographie_versions")
     .delete()

@@ -324,7 +324,7 @@ export function FicheProcessus(data: FicheProcessusData) {
         </div>
       </Section>
 
-      {/* 8. Documents associés — renvoi vers la liste maîtresse (source unique) */}
+      {/* 8. Documents associés - renvoi vers la liste maîtresse (source unique) */}
       <Section titre="8. Documents associés">
         <p className="text-sm">
           La liste exhaustive des documents associés au processus est tenue à jour dans la{" "}

@@ -29,9 +29,9 @@ const RUBRIQUES_OBLIGATOIRES: { champ: keyof RevueChamps; label: string }[] = [
     label: "e) Efficacité des actions face aux risques et opportunités",
   },
   { champ: "entree_opportunites", label: "f) Opportunités d'amélioration" },
-  { champ: "sortie_amelioration", label: "Sortie — Décisions et actions d'amélioration" },
-  { champ: "sortie_changements", label: "Sortie — Besoins de changement du SMQ" },
-  { champ: "sortie_ressources", label: "Sortie — Besoins en ressources" },
+  { champ: "sortie_amelioration", label: "Sortie - Décisions et actions d'amélioration" },
+  { champ: "sortie_changements", label: "Sortie - Besoins de changement du SMQ" },
+  { champ: "sortie_ressources", label: "Sortie - Besoins en ressources" },
 ];
 
 /**
@@ -50,5 +50,5 @@ export function revueComplete(revue: RevueChamps): { complete: boolean; manquant
 export function messageRevueIncomplete(manquants: string[]): string {
   return `Revue incomplète : renseignez d'abord ${manquants.length === 1 ? "la rubrique" : "les rubriques"} suivante${
     manquants.length === 1 ? "" : "s"
-  } — ${manquants.join(" ; ")}.`;
+  } - ${manquants.join(" ; ")}.`;
 }

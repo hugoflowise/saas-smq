@@ -90,7 +90,7 @@ export default async function CorbeillePage() {
         title="Corbeille"
         description="Éléments supprimés (mis en corbeille). Restaurez-les pour les faire réapparaître dans leur module."
         isoClause="ISO 9001 §7.5"
-        help="La suppression dans l'application est réversible : rien n'est effacé définitivement. Cette page permet de retrouver et restaurer un document, un enregistrement ou tout autre élément métier mis en corbeille — utile pour préserver vos preuves d'audit."
+        help="La suppression dans l'application est réversible : rien n'est effacé définitivement. Cette page permet de retrouver et restaurer un document, un enregistrement ou tout autre élément métier mis en corbeille - utile pour préserver vos preuves d'audit."
       />
 
       {total === 0 ? (

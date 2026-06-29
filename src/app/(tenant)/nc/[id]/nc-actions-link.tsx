@@ -80,7 +80,7 @@ export function NcActionsLink({
       ) : (
         <ul className="flex flex-col gap-2">
           {linked.map((a) => {
-            // §10.2 — la vérification d'efficacité ne concerne que les correctives.
+            // §10.2 - la vérification d'efficacité ne concerne que les correctives.
             const estCorrective = a.type === "corrective";
             const verifiee = Boolean(
               a.date_verification_efficacite && a.resultat_verification?.trim(),
@@ -101,7 +101,7 @@ export function NcActionsLink({
                   {estCorrective ? (
                     verifiee ? (
                       <span className="mt-1 block text-status-conforme text-xs">
-                        Efficacité vérifiée le {a.date_verification_efficacite} —{" "}
+                        Efficacité vérifiée le {a.date_verification_efficacite} -{" "}
                         {a.resultat_verification}
                       </span>
                     ) : (

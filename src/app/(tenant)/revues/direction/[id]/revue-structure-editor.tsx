@@ -90,7 +90,7 @@ export function RevueStructureEditor({
     (prefill.actionsAnterieures.length > 0
       ? prefill.actionsAnterieures
           .map(
-            (a) => `- ${a.reference} (revue ${a.revueAnnee}) : ${a.description} — ${a.statutLabel}`,
+            (a) => `- ${a.reference} (revue ${a.revueAnnee}) : ${a.description} - ${a.statutLabel}`,
           )
           .join("\n")
       : "");
@@ -132,14 +132,14 @@ export function RevueStructureEditor({
           </CardHeader>
           <CardContent>
             {initial.participants.length === 0 ? (
-              <p className="text-muted-foreground text-sm">—</p>
+              <p className="text-muted-foreground text-sm">-</p>
             ) : (
               <ul className="flex flex-col gap-1 text-sm">
                 {initial.participants.map((p, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: liste figée en lecture seule
                   <li key={i}>
                     <span className="font-medium">{p.nom}</span>
-                    {p.fonction ? ` — ${p.fonction}` : ""}
+                    {p.fonction ? ` - ${p.fonction}` : ""}
                   </li>
                 ))}
               </ul>
@@ -163,7 +163,7 @@ export function RevueStructureEditor({
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-muted-foreground text-sm">
-              {initial.pointsSpecifiques || "—"}
+              {initial.pointsSpecifiques || "-"}
             </p>
           </CardContent>
         </Card>
@@ -327,7 +327,7 @@ function PrefillRo({ roCritiques }: { roCritiques: RevuePrefillRo[] }) {
             <li key={r.id} className="flex items-baseline justify-between gap-3">
               <span className="min-w-0">{r.intitule}</span>
               <span className="shrink-0 text-muted-foreground text-xs">
-                criticité {r.criticite ?? "—"}
+                criticité {r.criticite ?? "-"}
                 {r.criticiteResiduelle != null ? ` → ${r.criticiteResiduelle}` : ""} ·{" "}
                 {r.statutLabel}
               </span>
@@ -375,7 +375,7 @@ function ReadOnlyBloc({
           <div key={c.name} className="flex flex-col gap-1">
             <p className="font-medium text-sm">{c.label}</p>
             <p className="whitespace-pre-wrap text-muted-foreground text-sm">
-              {initial[c.name] || "—"}
+              {initial[c.name] || "-"}
             </p>
           </div>
         ))}

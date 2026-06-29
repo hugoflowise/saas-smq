@@ -37,7 +37,7 @@ const baseSchema = {
   datePrevue: z.string().optional(),
   indicateurEfficacite: z.string().trim().optional(),
   resultatEfficacite: z.string().trim().optional(),
-  // §10.2 — quand et avec quel résultat l'efficacité de l'action a été vérifiée.
+  // §10.2 - quand et avec quel résultat l'efficacité de l'action a été vérifiée.
   dateVerificationEfficacite: z.string().optional(),
   resultatVerification: z.string().trim().optional(),
   commentaires: z.string().trim().optional(),

@@ -71,7 +71,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
       .select("id, full_name, email")
       .in("id", validateurIds);
     for (const v of validateurs ?? []) {
-      nomParId.set(v.id, v.full_name || v.email || "—");
+      nomParId.set(v.id, v.full_name || v.email || "-");
     }
   }
   const verifieParNom = revue.verifie_par ? (nomParId.get(revue.verifie_par) ?? null) : null;
@@ -104,7 +104,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
       </PageHeader>
 
       <div className="flex flex-col gap-6">
-        {/* §9.3.2 c — Données de performance du SMQ */}
+        {/* §9.3.2 c - Données de performance du SMQ */}
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-3">
             <div>
@@ -112,7 +112,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
               <p className="mt-1 text-muted-foreground text-xs">
                 {revue.donnees_capturees_le
                   ? `Données figées le ${formatDate(revue.donnees_capturees_le)}.`
-                  : "Données vivantes (non figées) — capturez-les pour conserver la trace examinée en revue."}
+                  : "Données vivantes (non figées) - capturez-les pour conserver la trace examinée en revue."}
               </p>
             </div>
             <RevuePerformanceCapture
@@ -125,7 +125,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
-        {/* §9.3 — circuit de validation : vérification puis approbation/signature */}
+        {/* §9.3 - circuit de validation : vérification puis approbation/signature */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Validation de la revue (§9.3)</CardTitle>
@@ -152,7 +152,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
-        {/* §9.3.2 a→f + §9.3.3 — éléments d'entrée / sortie */}
+        {/* §9.3.2 a→f + §9.3.3 - éléments d'entrée / sortie */}
         <RevueStructureEditor
           prefill={{
             actionsAnterieures: prefill.actionsAnterieures.map((a) => ({
@@ -181,7 +181,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           }}
         />
 
-        {/* §9.3.3 — actions décidées rattachées à la revue */}
+        {/* §9.3.3 - actions décidées rattachées à la revue */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle className="text-base">Actions décidées (§9.3.3)</CardTitle>

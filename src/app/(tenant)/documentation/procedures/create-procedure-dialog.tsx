@@ -80,7 +80,7 @@ export function CreateProcedureDialog({
             {sansTrigramme ? (
               <p className="rounded-md border border-status-pa/40 bg-status-pa/10 px-2.5 py-1.5 text-status-pa text-xs">
                 Ce processus n'a pas encore de trigramme : la procédure sera créée sans code.
-                Renseignez le trigramme sur la fiche du processus — le code sera attribué
+                Renseignez le trigramme sur la fiche du processus - le code sera attribué
                 automatiquement.
               </p>
             ) : null}

@@ -98,7 +98,7 @@ export function NcDialog({
       },
       success: isEdit ? "Non-conformité mise à jour." : "Non-conformité créée.",
       // Verrou d'efficacité (§10.2) : message central bloquant au lieu d'un toast.
-      onError: handleStatutError,
+      onError: (r) => handleStatutError(r, nc?.id),
     });
   }
 

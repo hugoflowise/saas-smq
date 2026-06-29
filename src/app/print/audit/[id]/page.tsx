@@ -121,7 +121,7 @@ export default async function AuditPrintPage({ params }: { params: Promise<{ id:
             ) : null}
             <p>
               <span className="font-semibold">Processus audités : </span>
-              {processusNoms.length ? processusNoms.join(", ") : "—"}
+              {processusNoms.length ? processusNoms.join(", ") : "-"}
             </p>
             {audit.perimetre ? (
               <p>
@@ -155,7 +155,7 @@ export default async function AuditPrintPage({ params }: { params: Promise<{ id:
                 {(questions ?? []).map((q) => (
                   <tr key={q.id} className="border-[#0b1120]/10 border-b align-top">
                     <td className="py-1.5 pr-2 font-mono text-[#0b1120]/60 text-xs">
-                      {q.reference_iso ?? "—"}
+                      {q.reference_iso ?? "-"}
                     </td>
                     <td className="py-1.5 pr-2">
                       <p className="font-medium">{q.question}</p>

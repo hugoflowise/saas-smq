@@ -271,7 +271,7 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
               defaultValue={action?.indicateur_efficacite ?? ""}
             />
           </div>
-          {/* §10.2 — vérification de l'efficacité : quand + résultat probant.
+          {/* §10.2 - vérification de l'efficacité : quand + résultat probant.
               Requis pour pouvoir clôturer une NC liée avec un verdict. */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[max-content_1fr]">
             <div className="flex flex-col gap-2">

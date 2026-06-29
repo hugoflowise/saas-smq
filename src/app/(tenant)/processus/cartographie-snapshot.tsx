@@ -16,7 +16,7 @@ const COLUMNS: { type: ProcessusType; label: string }[] = [
   { type: "support", label: "Processus support" },
 ];
 
-/** Bande latérale (entrées à gauche, sorties à droite) — identique à la carte vivante. */
+/** Bande latérale (entrées à gauche, sorties à droite) - identique à la carte vivante. */
 function SideBand({ label, side }: { label: string; side: "left" | "right" }) {
   const band = (
     <div className="flex w-full items-center justify-center rounded-md bg-muted px-3 py-4 text-center font-semibold text-[11px] text-muted-foreground uppercase leading-snug tracking-wide lg:h-full lg:w-32">

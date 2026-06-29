@@ -91,7 +91,7 @@ export function DocumentDialog({
 
   async function handleDelete() {
     if (!document) return;
-    // §7.5 — Garde-fou : un enregistrement en vigueur est une preuve à conserver.
+    // §7.5 - Garde-fou : un enregistrement en vigueur est une preuve à conserver.
     // On avertit explicitement (confirmation renforcée) avant la mise en corbeille.
     const estPreuve = document.type === "enregistrement" && document.statut === "en_vigueur";
     const message = estPreuve

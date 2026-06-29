@@ -507,8 +507,8 @@ export async function captureRevuePerformanceAction(id: unknown): Promise<Action
 
 // ------------------------------------------------------ Circuit de validation
 // Circuit en 2 étapes (§9.3), à l'image du circuit documentaire :
-//   1. Vérification (verifierRevueAction)  — rôle qualité/manager (writer).
-//   2. Approbation + signature (approveRevueAction) — direction (canApprove),
+//   1. Vérification (verifierRevueAction)  - rôle qualité/manager (writer).
+//   2. Approbation + signature (approveRevueAction) - direction (canApprove),
 //      après vérification, par une personne ≠ vérificateur (séparation des tâches).
 // Les deux exigent une revue complète (verrou de complétude §9.3.2/§9.3.3).
 

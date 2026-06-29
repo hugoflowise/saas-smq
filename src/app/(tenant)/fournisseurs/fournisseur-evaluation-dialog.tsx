@@ -87,7 +87,7 @@ export function FournisseurEvaluationDialog({
       />
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Évaluations — {fournisseurNom}</DialogTitle>
+          <DialogTitle>Évaluations - {fournisseurNom}</DialogTitle>
         </DialogHeader>
 
         {!readOnly ? (

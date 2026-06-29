@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -30,25 +31,35 @@ function estErreurEfficacite(error: string | undefined): error is string {
  * // …puis rendre `{dialog}` dans le composant.
  */
 export function useNcStatutError() {
+  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  // Id de la NC concernée : permet de proposer un bouton vers ses actions liées.
+  const [ncId, setNcId] = useState<string | null>(null);
 
   /**
    * Traite un `ActionResult` en échec.
+   * @param ncId id de la NC concernée (pour le bouton « Voir les actions liées »).
    * @returns `true` si l'erreur a été prise en charge par la modale centrale,
    *          `false` si elle a été affichée en toast (erreur générique).
    */
-  function handleStatutError(result: ActionResult): boolean {
+  function handleStatutError(result: ActionResult, ncId?: string): boolean {
     if (result.ok) return false;
     if (estErreurEfficacite(result.error)) {
       setMessage(result.error);
+      setNcId(ncId ?? null);
       return true;
     }
     toast.error(result.error);
     return false;
   }
 
+  function fermer() {
+    setMessage(null);
+    setNcId(null);
+  }
+
   const dialog = (
-    <Dialog open={message !== null} onOpenChange={(o) => !o && setMessage(null)}>
+    <Dialog open={message !== null} onOpenChange={(o) => !o && fermer()}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -57,9 +68,24 @@ export function useNcStatutError() {
           </DialogTitle>
         </DialogHeader>
         <p className="text-sm">{message}</p>
-        <Button type="button" className="w-full" onClick={() => setMessage(null)}>
-          J'ai compris
-        </Button>
+        <div className="flex flex-col gap-2">
+          {ncId ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                router.push(`/nc/${ncId}`);
+                fermer();
+              }}
+            >
+              Voir les actions liées
+            </Button>
+          ) : null}
+          <Button type="button" className="w-full" onClick={fermer}>
+            J'ai compris
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

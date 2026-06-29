@@ -143,7 +143,7 @@ export function ModificationDialog({
                 className={SELECT_CLASS}
                 defaultValue={modification?.responsable_id ?? ""}
               >
-                <option value="">—</option>
+                <option value="">-</option>
                 {membres.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.label}

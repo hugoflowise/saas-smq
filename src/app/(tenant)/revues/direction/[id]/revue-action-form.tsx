@@ -68,9 +68,9 @@ export function RevueActionForm({ revueId }: { revueId: string }) {
             <div className="flex flex-col gap-2">
               <Label htmlFor="priorite">Priorité</Label>
               <select id="priorite" name="priorite" className={SELECT_CLASS} defaultValue="p2">
-                <option value="p1">P1 — haute</option>
-                <option value="p2">P2 — moyenne</option>
-                <option value="p3">P3 — basse</option>
+                <option value="p1">P1 - haute</option>
+                <option value="p2">P2 - moyenne</option>
+                <option value="p3">P3 - basse</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">

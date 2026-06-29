@@ -137,7 +137,7 @@ export default async function AuditsPage({
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {a.auditeur_id ? (nomAuditeurParId.get(a.auditeur_id) ?? "—") : "—"}
+                    {a.auditeur_id ? (nomAuditeurParId.get(a.auditeur_id) ?? "-") : "-"}
                   </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
                   <TableCell>

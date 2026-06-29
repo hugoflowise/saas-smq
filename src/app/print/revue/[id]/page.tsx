@@ -54,7 +54,7 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
       .select("id, full_name, email")
       .in("id", validateurIds);
     for (const v of validateurs ?? []) {
-      nomParId.set(v.id, v.full_name || v.email || "—");
+      nomParId.set(v.id, v.full_name || v.email || "-");
     }
   }
   const verifieParNom = revue.verifie_par ? (nomParId.get(revue.verifie_par) ?? null) : null;
@@ -102,13 +102,13 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
     {
       label: "Vérification",
       value: revue.verifie_le
-        ? `${verifieParNom ?? "—"} le ${formatDate(revue.verifie_le)}`
+        ? `${verifieParNom ?? "-"} le ${formatDate(revue.verifie_le)}`
         : "Non vérifiée",
     },
     {
       label: "Approbation",
       value: revue.approuve_le
-        ? `${approuveParNom ?? "—"} le ${formatDate(revue.approuve_le)}`
+        ? `${approuveParNom ?? "-"} le ${formatDate(revue.approuve_le)}`
         : "Non approuvée",
     },
   ];
@@ -131,7 +131,7 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
                 // biome-ignore lint/suspicious/noArrayIndexKey: liste figée pour impression
                 <li key={i}>
                   <span className="font-semibold">{p.nom}</span>
-                  {p.fonction ? ` — ${p.fonction}` : ""}
+                  {p.fonction ? ` - ${p.fonction}` : ""}
                 </li>
               ))}
             </ul>
@@ -141,7 +141,7 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
         <section>
           <h2 className="mb-2 font-semibold text-sm uppercase tracking-wide">
             Performance du SMQ (§9.3.2 c)
-            {revue.donnees_capturees_le ? ` — au ${formatDate(revue.donnees_capturees_le)}` : ""}
+            {revue.donnees_capturees_le ? ` - au ${formatDate(revue.donnees_capturees_le)}` : ""}
           </h2>
           <div className="grid grid-cols-3 gap-3">
             {revuePerfCells(perf).map((c) => (
@@ -186,7 +186,7 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
           </section>
         ) : null}
 
-        {/* §9.3 — visa du circuit de validation (vérification puis approbation) */}
+        {/* §9.3 - visa du circuit de validation (vérification puis approbation) */}
         <section className="break-inside-avoid">
           <h2 className="mb-2 font-semibold text-sm uppercase tracking-wide">Validation (§9.3)</h2>
           <div className="grid grid-cols-2 overflow-hidden rounded-md border border-[#0b1120]/15 text-sm">
@@ -224,7 +224,7 @@ function Visa({
     <div className={border ? "border-[#0b1120]/15 border-l" : ""}>
       <div className="bg-[#0b1120]/5 px-3 py-1.5 font-semibold">{label}</div>
       <div className="flex min-h-20 flex-col px-3 py-2">
-        <p className="font-medium">{nom?.trim() ? nom : "—"}</p>
+        <p className="font-medium">{nom?.trim() ? nom : "-"}</p>
         {date ? (
           <p className="mt-auto text-[#0b1120]/60 text-xs italic">
             Signé électroniquement le {date}
@@ -251,7 +251,7 @@ function Bloc({
         {lignes.map((l) => (
           <div key={l.label}>
             <p className="font-semibold text-sm">{l.label}</p>
-            <p className="whitespace-pre-wrap text-sm">{l.value || "—"}</p>
+            <p className="whitespace-pre-wrap text-sm">{l.value || "-"}</p>
           </div>
         ))}
       </div>

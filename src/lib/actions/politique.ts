@@ -279,7 +279,7 @@ export async function publishPolitiqueAction(): Promise<ActionResult> {
 /**
  * Réinitialise la politique qualité : efface le contenu et repart d'un brouillon
  * vide. La politique étant un document unique par client (contrainte d'unicité),
- * on ne supprime pas la ligne — on la vide, ce qui permet de recommencer.
+ * on ne supprime pas la ligne - on la vide, ce qui permet de recommencer.
  * Le paramètre `_id` n'est pas utilisé (signature commune au bouton Supprimer).
  */
 export async function resetPolitiqueAction(_id?: string): Promise<ActionResult> {
