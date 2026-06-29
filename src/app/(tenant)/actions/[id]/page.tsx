@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { BackLink } from "@/components/back-link";
@@ -57,6 +58,24 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
     ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
     : "-";
 
+  // Non-conformité(s) liée(s) via la table pivot nc_actions → on permet de
+  // remonter à la NC d'origine depuis la fiche action.
+  const { data: ncLinks } = await supabase
+    .from("nc_actions")
+    .select("nc_id")
+    .eq("action_id", id)
+    .eq("tenant_id", tid);
+
+  const ncIds = (ncLinks ?? []).map((l) => l.nc_id);
+  const { data: ncLiees } = ncIds.length
+    ? await supabase
+        .from("non_conformites")
+        .select("id, reference, intitule")
+        .in("id", ncIds)
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+    : { data: [] };
+
   return (
     <div className="mx-auto w-full max-w-3xl">
       <BackLink href="/actions" label="Plan d'actions" />
@@ -82,6 +101,26 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           </span>
         ) : null}
       </div>
+
+      {(ncLiees ?? []).length > 0 ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Non-conformité liée</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {(ncLiees ?? []).map((nc) => (
+              <Link
+                key={nc.id}
+                href={`/nc/${nc.id}`}
+                className="text-sm hover:text-primary hover:underline"
+              >
+                <span className="font-mono text-muted-foreground text-xs">{nc.reference}</span>{" "}
+                {nc.intitule}
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

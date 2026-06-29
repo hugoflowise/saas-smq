@@ -48,6 +48,12 @@ export function useDialogForm() {
     options: {
       action: (formData: FormData) => Promise<ActionResult>;
       success: string;
+      /**
+       * Gestion d'erreur personnalisée (optionnelle). Reçoit le résultat en
+       * échec ; renvoyer `true` indique que l'erreur a déjà été affichée
+       * (ex. modale dédiée) et supprime le toast d'erreur par défaut.
+       */
+      onError?: (result: Extract<ActionResult, { ok: false }>) => boolean;
     },
   ) {
     event.preventDefault();
@@ -63,7 +69,7 @@ export function useDialogForm() {
         toast.success(options.success);
         setOpen(false);
         router.refresh();
-      } else {
+      } else if (!options.onError?.(result)) {
         toast.error(result.error);
       }
     } catch (err) {

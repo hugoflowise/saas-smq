@@ -20,6 +20,7 @@ import {
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
   ACTION_TYPE_LABELS,
+  COTATION_OPTIONS,
 } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -42,14 +43,6 @@ export type ActionRow = {
   cause_fondamentale?: string | null;
   recommandation?: string | null;
   cotation?: string | null;
-};
-
-const COTATION_OPTIONS: Record<string, string> = {
-  non_evalue: "Non évalué",
-  conforme: "Conforme",
-  point_attention: "Point d'attention",
-  nc_mineure: "NC mineure",
-  nc_majeure: "NC majeure",
 };
 
 type Props = {
@@ -200,6 +193,8 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
                 className={SELECT_CLASS}
                 defaultValue={action?.cotation ?? "non_evalue"}
               >
+                {/* État initial « non coté » : affichable mais discret, pas un vrai choix. */}
+                <option value="non_evalue">Non évalué</option>
                 <Options map={COTATION_OPTIONS} />
               </select>
             </div>
