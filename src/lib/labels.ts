@@ -96,6 +96,17 @@ export const AUDIT_STATUT_LABELS = {
   cloture: "Clôturé",
 } as const;
 
+/** Cotation d'un point de contrôle de la grille d'audit (§9.2). */
+export const COTATION_LABELS = {
+  non_evalue: "Non évalué",
+  conforme: "Conforme",
+  point_fort: "Point fort",
+  point_attention: "Point d'attention",
+  nc_mineure: "NC mineure",
+  nc_majeure: "NC majeure",
+  non_applicable: "Non applicable",
+} as const;
+
 /** Statut d'un risque / opportunité. */
 export const RO_STATUT_LABELS = {
   identifie: "Identifié",

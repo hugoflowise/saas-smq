@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateAuditAction } from "@/lib/actions/audits-revues";
+import { IMPARTIALITE_MARQUEUR } from "@/lib/audit-impartialite";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
+import type { TenantMember } from "@/lib/tenant-users";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type AuditDetail = {
@@ -17,6 +19,7 @@ export type AuditDetail = {
   organisme: string | null;
   perimetre: string | null;
   processus_audites: string[] | null;
+  auditeur_id: string | null;
   date_prevue: string | null;
   date_realisee: string | null;
   duree_prevue: number | null;
@@ -28,9 +31,11 @@ export type AuditDetail = {
 export function AuditEditForm({
   audit,
   processusOptions,
+  auditeurs,
 }: {
   audit: AuditDetail;
   processusOptions: { id: string; nom: string }[];
+  auditeurs: TenantMember[];
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -39,21 +44,37 @@ export function AuditEditForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
     const f = new FormData(event.currentTarget);
-    const result = await updateAuditAction({
+    const payload = {
       id: audit.id,
       typeAudit: f.get("typeAudit"),
       organisme: f.get("organisme") || undefined,
       perimetre: f.get("perimetre") || undefined,
       processusAudites: f.getAll("processusAudites").map(String),
+      auditeurId: f.get("auditeurId") || undefined,
       datePrevue: f.get("datePrevue") || undefined,
       dateRealisee: f.get("dateRealisee") || undefined,
       dureePrevue: f.get("dureePrevue") || undefined,
       statut: f.get("statut"),
       rapport: f.get("rapport") || undefined,
       ecartsConstates: f.get("ecartsConstates") || undefined,
-    });
+    };
+
+    setPending(true);
+    let result = await updateAuditAction(payload);
+
+    // Garde-fou souple §9.2.2 : si l'auditeur est pilote d'un processus audité,
+    // on demande confirmation puis on force l'enregistrement.
+    if (!result.ok && result.error.includes(IMPARTIALITE_MARQUEUR)) {
+      const confirme = window.confirm(`${result.error}\n\nEnregistrer malgré tout ?`);
+      if (confirme) {
+        result = await updateAuditAction({ ...payload, forcerImpartialite: true });
+      } else {
+        setPending(false);
+        return;
+      }
+    }
+
     setPending(false);
     if (result.ok) {
       toast.success("Audit enregistré.");
@@ -88,6 +109,26 @@ export function AuditEditForm({
             placeholder="Certificateur, client ou fournisseur (optionnel)"
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="auditeurId">Auditeur</Label>
+        <select
+          id="auditeurId"
+          name="auditeurId"
+          className={SELECT_CLASS}
+          defaultValue={audit.auditeur_id ?? ""}
+        >
+          <option value="">À désigner</option>
+          {auditeurs.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.nom}
+            </option>
+          ))}
+        </select>
+        <p className="text-muted-foreground text-xs">
+          Impartialité (§9.2.2) : l'auditeur ne peut pas auditer un processus qu'il pilote.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

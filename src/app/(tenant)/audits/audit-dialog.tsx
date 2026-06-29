@@ -14,9 +14,10 @@ import { Label } from "@/components/ui/label";
 import { createAuditAction } from "@/lib/actions/audits-revues";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import type { TenantMember } from "@/lib/tenant-users";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
-export function AuditDialog() {
+export function AuditDialog({ auditeurs }: { auditeurs: TenantMember[] }) {
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
 
@@ -26,6 +27,7 @@ export function AuditDialog() {
         createAuditAction({
           typeAudit: f.get("typeAudit"),
           organisme: f.get("organisme") || undefined,
+          auditeurId: f.get("auditeurId") || undefined,
           datePrevue: f.get("datePrevue") || undefined,
           dureePrevue: f.get("dureePrevue") || undefined,
           statut: f.get("statut"),
@@ -63,6 +65,21 @@ export function AuditDialog() {
               name="organisme"
               placeholder="Certificateur, client ou fournisseur (optionnel)"
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="auditeurId">Auditeur</Label>
+            <select id="auditeurId" name="auditeurId" className={SELECT_CLASS} defaultValue="">
+              <option value="">À désigner</option>
+              {auditeurs.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nom}
+                </option>
+              ))}
+            </select>
+            <p className="text-muted-foreground text-xs">
+              L'auditeur doit être impartial : il ne peut pas auditer un processus qu'il pilote
+              (§9.2.2).
+            </p>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="datePrevue">Date prévue</Label>
