@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,16 +38,23 @@ export function ObjectifDialog({
   objectif,
   processusOptions = [],
   indicateurOptions = [],
+  linkedIndicateurIds = [],
   presetProcessusId,
 }: {
   objectif?: ObjectifRow;
   processusOptions?: { id: string; nom: string }[];
   indicateurOptions?: { id: string; nom: string }[];
+  linkedIndicateurIds?: string[];
   presetProcessusId?: string;
 }) {
   const isEdit = Boolean(objectif);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+  const [indicateurIds, setIndicateurIds] = useState<string[]>(linkedIndicateurIds);
+
+  function toggleIndicateur(id: string) {
+    setIndicateurIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -62,7 +70,7 @@ export function ObjectifDialog({
           unite: f.get("unite") || undefined,
           sens: f.get("sens") || undefined,
           processusId: f.get("processusId") || undefined,
-          indicateurId: f.get("indicateurId") || undefined,
+          indicateurIds,
         };
         return isEdit
           ? updateObjectifAction({ id: objectif?.id, ...data })
@@ -158,22 +166,6 @@ export function ObjectifDialog({
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="indicateurId">Indicateur de mesure</Label>
-              <select
-                id="indicateurId"
-                name="indicateurId"
-                className={SELECT_CLASS}
-                defaultValue={objectif?.indicateur_id ?? ""}
-              >
-                <option value="">Aucun (saisie manuelle)</option>
-                {indicateurOptions.map((i) => (
-                  <option key={i.id} value={i.id}>
-                    {i.nom}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-2">
               <Label htmlFor="echeance">Échéance</Label>
               <Input
                 id="echeance"
@@ -205,10 +197,37 @@ export function ObjectifDialog({
               </select>
             </div>
           </div>
-          <p className="text-muted-foreground text-xs">
-            Si un indicateur de mesure est associé, la progression de l'objectif suit
-            automatiquement sa dernière valeur mesurée (la saisie manuelle est ignorée).
-          </p>
+          <div className="flex flex-col gap-2">
+            <Label>Indicateurs de mesure</Label>
+            {indicateurOptions.length === 0 ? (
+              <p className="rounded-lg border border-dashed px-3 py-2 text-muted-foreground text-xs">
+                Aucun indicateur disponible. Créez vos indicateurs dans Pilotage → Indicateurs, puis
+                revenez les rattacher ici.
+              </p>
+            ) : (
+              <div className="flex max-h-44 flex-col gap-1 overflow-y-auto rounded-lg border p-2">
+                {indicateurOptions.map((i) => (
+                  <label
+                    key={i.id}
+                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-muted/50"
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4"
+                      checked={indicateurIds.includes(i.id)}
+                      onChange={() => toggleIndicateur(i.id)}
+                    />
+                    {i.nom}
+                  </label>
+                ))}
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Rattachez le ou les indicateurs qui mesurent cet objectif (ISO 9001 §6.2/§9.1). Avec
+              un seul indicateur, la progression de l'objectif suit automatiquement sa dernière
+              valeur mesurée.
+            </p>
+          </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea

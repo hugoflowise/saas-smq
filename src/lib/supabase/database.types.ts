@@ -1997,6 +1997,52 @@ export type Database = {
           },
         ]
       }
+      objectif_indicateurs: {
+        Row: {
+          created_at: string
+          id: string
+          indicateur_id: string
+          objectif_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indicateur_id: string
+          objectif_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indicateur_id?: string
+          objectif_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objectif_indicateurs_indicateur_id_fkey"
+            columns: ["indicateur_id"]
+            isOneToOne: false
+            referencedRelation: "indicateurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectif_indicateurs_objectif_id_fkey"
+            columns: ["objectif_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_qualite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectif_indicateurs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       objectifs_qualite: {
         Row: {
           cible_chiffree: string | null
