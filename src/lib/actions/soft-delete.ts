@@ -9,6 +9,8 @@ import type { ActionResult } from "./types";
 export type SoftDeletableTable =
   | "actions"
   | "communication_modeles"
+  | "competences"
+  | "competences_personnes"
   | "consultants"
   | "documents_maitrise"
   | "enquetes_satisfaction"

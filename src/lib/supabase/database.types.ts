@@ -648,6 +648,166 @@ export type Database = {
           },
         ]
       }
+      competences: {
+        Row: {
+          categorie: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          libelle: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competences_personnes: {
+        Row: {
+          commentaire: string | null
+          competence_id: string
+          consultant_id: string
+          created_at: string
+          created_by: string | null
+          date_echeance: string | null
+          date_obtention: string | null
+          deleted_at: string | null
+          id: string
+          justificatif_nom: string | null
+          justificatif_path: string | null
+          niveau_acquis: string | null
+          niveau_requis: string | null
+          organisme: string | null
+          statut: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          competence_id: string
+          consultant_id: string
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_obtention?: string | null
+          deleted_at?: string | null
+          id?: string
+          justificatif_nom?: string | null
+          justificatif_path?: string | null
+          niveau_acquis?: string | null
+          niveau_requis?: string | null
+          organisme?: string | null
+          statut?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          competence_id?: string
+          consultant_id?: string
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_obtention?: string | null
+          deleted_at?: string | null
+          id?: string
+          justificatif_nom?: string | null
+          justificatif_path?: string | null
+          niveau_acquis?: string | null
+          niveau_requis?: string | null
+          organisme?: string | null
+          statut?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competences_personnes_competence_id_fkey"
+            columns: ["competence_id"]
+            isOneToOne: false
+            referencedRelation: "competences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultants: {
         Row: {
           created_at: string
