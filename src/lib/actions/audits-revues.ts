@@ -381,7 +381,9 @@ export async function unlinkAuditActionAction(
 const revueBase = {
   annee: z.coerce.number().int().min(2000).max(2100),
   dateRealisation: z.string().optional(),
-  statut: z.enum(["planifiee", "realisee", "cloturee"]),
+  // Défaut « planifiee » : à la création, le formulaire n'envoie pas de statut
+  // (une revue démarre toujours planifiée ; le statut n'est éditable qu'ensuite).
+  statut: z.enum(["planifiee", "realisee", "cloturee"]).default("planifiee"),
   ordreDuJour: z.string().trim().optional(),
   conclusions: z.string().trim().optional(),
   decisions: z.string().trim().optional(),
