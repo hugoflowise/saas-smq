@@ -76,3 +76,62 @@ export async function deleteFournisseurAction(id: string): Promise<ActionResult>
   if (r.ok) revalidatePath("/fournisseurs");
   return r;
 }
+
+// ── Évaluations datées (historique §8.4.1) ──────────────────────────────────
+
+const evaluationSchema = z.object({
+  fournisseurId: z.string().uuid(),
+  dateEvaluation: z.string().min(1, "Date d'évaluation requise."),
+  noteGlobale: z.coerce.number().int().min(1).max(5),
+  // Notes par critère : clé du critère → note 1-5 (critères côté code).
+  notesCriteres: z.record(z.string(), z.coerce.number().int().min(1).max(5)).default({}),
+  commentaire: z.string().trim().optional(),
+  prochaineEvaluation: z.string().optional(),
+});
+
+/**
+ * Enregistre une (ré)évaluation fournisseur :
+ *  (a) ajoute une ligne d'HISTORIQUE dans `fournisseur_evaluations` (note globale
+ *      + notes par critère + date), preuve de la surveillance périodique ;
+ *  (b) met à jour le fournisseur (note_evaluation, date_evaluation,
+ *      prochaine_evaluation) pour refléter la dernière évaluation.
+ */
+export async function enregistrerEvaluationFournisseurAction(
+  input: unknown,
+): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  const parsed = evaluationSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  const supabase = await createClient();
+
+  const { error: insertError } = await supabase.from("fournisseur_evaluations").insert({
+    tenant_id: ctx.effectiveTenantId,
+    fournisseur_id: d.fournisseurId,
+    date_evaluation: d.dateEvaluation,
+    note_globale: d.noteGlobale,
+    notes_criteres: d.notesCriteres,
+    commentaire: d.commentaire ?? null,
+    created_by: ctx.userId,
+  });
+  if (insertError) return { ok: false, error: insertError.message };
+
+  const { error: updateError } = await supabase
+    .from("fournisseurs")
+    .update({
+      note_evaluation: d.noteGlobale,
+      date_evaluation: d.dateEvaluation,
+      prochaine_evaluation: d.prochaineEvaluation || null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", d.fournisseurId)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (updateError) return { ok: false, error: updateError.message };
+
+  revalidatePath("/fournisseurs");
+  return { ok: true };
+}

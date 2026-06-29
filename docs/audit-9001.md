@@ -10,6 +10,42 @@ L'application **permet de construire et faire vivre un SMQ 9001 et est globaleme
 
 Il reste **3 vrais manques d'information documentée obligatoire** + **3 manques de structuration** qui, traités, rendent le dossier irréprochable. Aucun n'est un chantier lourd.
 
+---
+
+## Réactualisation du 2026-06-28 (re-confrontation au code, clause par clause)
+
+Nouvelle passe complète (5 audits parallèles : cohérence structurelle + clauses §4-6 / §7 / §8 / §9-10) sur l'état **actuel** du code.
+
+**Cohérence structurelle : OK.** Les chantiers récents sont bien en place sur `main` : fuseau `Europe/Paris` partout (`TIMEZONE` dans `format.ts`), composant `BackLink`, `StatTiles` généralisé, libellés centralisés dans `labels.ts`, `deleted_at` filtré (dashboard, calendrier, listes/compteurs). Pas d'incohérence structurelle bloquante restante.
+
+**Ce qui a été RÉSOLU depuis le 2026-06-25 :**
+- **§4.3 Domaine d'application** ✅ — module `/strategie/domaine` livré (énoncé + sites + exclusions {clause, intitulé, justification} + date + validation). *C'était le P0 le plus net.* Réserves : justification des exclusions à rédiger (proposées vides), et validation à réserver au **dirigeant** (aujourd'hui posable par un manager).
+- **§9.3 Revue de direction** 🟡→ fort progrès — trame structurée couvrant toutes les entrées a→f + 3 sorties + snapshot KPI + participants + PDF. Reste P1 (voir ci-dessous).
+- **§8.7 NC** ✅ — typologie remontées (réclamation/dysfonctionnement/incident/accident) + chaîne NC→cause(5 pourquoi)→action liée→efficacité.
+
+**P0 réactualisés — un auditeur peut réellement bloquer :**
+1. **§7.2 Compétences** 🔴 (inchangé) — aucune preuve de compétence : ni matrice (requis vs acquis), ni formations/habilitations datées + échéances, ni pièce justificative attachable. `consultants` ne porte qu'ODM/PDP/visite médicale. **Manque RH le plus visible.**
+2. **§10.2 Efficacité des actions correctives non probante** — une NC peut passer à `cloturee` **sans verdict** efficace/inefficace (pas de gate dans `nc.ts`) ; la preuve d'efficacité est un texte libre sans date de vérification. *(Le champ `resultat_efficacite` ajouté le 28/06 aide mais il manque `date_verification_efficacite` + le verrou de clôture.)*
+3. **§9.2 Audit interne** — `auditeur_id` existe mais **n'est câblé dans aucun formulaire** → impossible de prouver l'impartialité (auditeur ≠ audité, §9.2.2) ; **pas de PDF de rapport d'audit** (`/print/audit/[id]` absent).
+4. **§8.4 Prestataires externes** 🟡 (rétrogradé de ✅) — note 1-5 globale **sans grille de critères** et **sans historique de réévaluation daté** (chaque maj écrase les dates) → la « surveillance/réévaluation » du §8.4.1 n'est pas probante. Pas de pièces jointes.
+5. **§8.2.3 Revue des exigences avant engagement** — aucune trace de revue de la commande/devis/contrat avant engagement (à clarifier : tracé hors outil ? sinon champ de revue d'engagement).
+
+**P1 — structuration / robustesse de la preuve :**
+- **§6.2 Objectifs** — pas de **plan d'actions relié** (aucun `objectif_id` sur `actions`, contrairement à `ro_actions`), pas de lien à la politique, pas de trace « établi par la direction ».
+- **§6.3 Planification des modifications du SMQ** 🔴 (inchangé) — aucun registre ni rubrique dédiée.
+- **§9.3** — pré-remplir les entrées a→f depuis les données (afficher les **R&O critiques** pour l'élément e, auto-lister les actions de la revue N-1 pour a), et utiliser `approuve_par` (validation direction, colonne présente mais inutilisée).
+- **Conservation des enregistrements vs soft-delete** — un `documents_maitrise` de type `enregistrement` (= une preuve) peut être soft-deleted **sans corbeille/restauration UI** → risque de perte de preuve. Ajouter corbeille/restore (ou bloquer le soft-delete d'un enregistrement en vigueur).
+- **§8.7** — exposer `responsable_traitement` (en DB, jamais saisi) + un champ « type de traitement » (correction / dérogation-concession / reclassement).
+- **§7.5 registre** — `documents_maitrise.redacteur/approbateur` en texte libre (vs circuit signé des docs natifs).
+
+**P2 — confort, non bloquant :** §8.5 clôture/réception de prestation formalisée ; §9.1.1 analyse d'écart par indicateur hors cible (seuils `seuil_alerte_min/max` présents mais non câblés) ; pièces jointes transversales (fournisseurs/NC/suivis) ; §8.5.3-4 propriété client.
+
+**Faux-positifs confirmés (ne pas coder)** : manuel qualité, fiches de poste/organigramme (§5.3), accusé de lecture politique, base de connaissances dédiée (§7.1.6), métrologie (§7.1.5 exclu), conception (§8.3 exclu), libération industrielle (§8.6 exclu).
+
+**Séquencement recommandé 2026-06-28 :** (1) §10.2 verrou efficacité + date de vérification — petit, fort impact audit ; (2) §9.2 câbler auditeur + PDF rapport d'audit ; (3) §7.2 module compétences ; (4) §8.4 grille critères + historique réévaluation ; (5) §6.2 lien objectif→actions + §6.3 registre ; (6) §9.3 pré-remplissage + approbation. §8.2.3 après clarification du fonctionnement réel (CRM/devis/Boond).
+
+---
+
 ## Légende des statuts
 
 - ✅ **Couvert** — exigence satisfaite, preuve disponible

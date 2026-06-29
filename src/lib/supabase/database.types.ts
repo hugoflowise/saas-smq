@@ -1128,6 +1128,67 @@ export type Database = {
           },
         ]
       }
+      fournisseur_evaluations: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_evaluation: string
+          deleted_at: string | null
+          fournisseur_id: string
+          id: string
+          note_globale: number | null
+          notes_criteres: Json
+          tenant_id: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_evaluation: string
+          deleted_at?: string | null
+          fournisseur_id: string
+          id?: string
+          note_globale?: number | null
+          notes_criteres?: Json
+          tenant_id: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_evaluation?: string
+          deleted_at?: string | null
+          fournisseur_id?: string
+          id?: string
+          note_globale?: number | null
+          notes_criteres?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fournisseur_evaluations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseur_evaluations_fournisseur_id_fkey"
+            columns: ["fournisseur_id"]
+            isOneToOne: false
+            referencedRelation: "fournisseurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseur_evaluations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fournisseurs: {
         Row: {
           categorie: string | null

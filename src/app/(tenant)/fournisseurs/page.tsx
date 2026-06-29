@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
+import type { NotesCriteres } from "@/lib/fournisseurs-criteres";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { FournisseurDialog } from "./fournisseur-dialog";
+import { type EvaluationRow, FournisseurEvaluationDialog } from "./fournisseur-evaluation-dialog";
 
 const CRITICITE_LABELS: Record<string, string> = {
   faible: "Faible",
@@ -52,6 +54,30 @@ export default async function FournisseursPage() {
     .order("nom", { ascending: true });
 
   const items = fournisseurs ?? [];
+
+  // Historique des évaluations (preuve de surveillance §8.4.1), regroupé par
+  // fournisseur, plus récent en premier ; soft-delete filtré côté RLS et ici.
+  const { data: evaluations } = await supabase
+    .from("fournisseur_evaluations")
+    .select("id, fournisseur_id, date_evaluation, note_globale, notes_criteres, commentaire")
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
+    .order("date_evaluation", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  const evaluationsParFournisseur = new Map<string, EvaluationRow[]>();
+  for (const e of evaluations ?? []) {
+    const liste = evaluationsParFournisseur.get(e.fournisseur_id) ?? [];
+    liste.push({
+      id: e.id,
+      date_evaluation: e.date_evaluation,
+      note_globale: e.note_globale,
+      notes_criteres: (e.notes_criteres ?? {}) as NotesCriteres,
+      commentaire: e.commentaire,
+    });
+    evaluationsParFournisseur.set(e.fournisseur_id, liste);
+  }
+
   const critiques = items.filter((f) => f.criticite === "critique").length;
   const notes = items.map((f) => f.note_evaluation).filter((n): n is number => n != null);
   const noteMoyenne =
@@ -98,6 +124,7 @@ export default async function FournisseursPage() {
                 <TableHead>Évaluation</TableHead>
                 <TableHead>Prochaine éval.</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="text-right">Évaluations</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -122,9 +149,24 @@ export default async function FournisseursPage() {
                   <TableCell>
                     {f.note_evaluation != null ? `${f.note_evaluation}/5` : "-"}
                   </TableCell>
-                  <TableCell>{formatDate(f.prochaine_evaluation)}</TableCell>
+                  <TableCell>
+                    {formatDate(f.prochaine_evaluation)}
+                    {f.statut === "actif" &&
+                    (!f.prochaine_evaluation || f.prochaine_evaluation <= today) ? (
+                      <span className={`${BADGE_BASE} ml-2 bg-status-pa/15 text-status-pa`}>
+                        À (ré)évaluer
+                      </span>
+                    ) : null}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {f.statut === "actif" ? "Actif" : "Inactif"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <FournisseurEvaluationDialog
+                      fournisseurId={f.id}
+                      fournisseurNom={f.nom}
+                      evaluations={evaluationsParFournisseur.get(f.id) ?? []}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
