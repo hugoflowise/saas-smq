@@ -31,6 +31,7 @@ export type Database = {
           description_detail: string | null
           id: string
           indicateur_efficacite: string | null
+          objectif_id: string | null
           origine: Database["public"]["Enums"]["action_origine"]
           priorite: Database["public"]["Enums"]["action_priorite"]
           processus_concerne: string | null
@@ -65,6 +66,7 @@ export type Database = {
           description_detail?: string | null
           id?: string
           indicateur_efficacite?: string | null
+          objectif_id?: string | null
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
@@ -99,6 +101,7 @@ export type Database = {
           description_detail?: string | null
           id?: string
           indicateur_efficacite?: string | null
+          objectif_id?: string | null
           origine?: Database["public"]["Enums"]["action_origine"]
           priorite?: Database["public"]["Enums"]["action_priorite"]
           processus_concerne?: string | null
@@ -123,6 +126,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_objectif_id_fkey"
+            columns: ["objectif_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_qualite"
             referencedColumns: ["id"]
           },
           {
@@ -1968,6 +1978,8 @@ export type Database = {
           updated_by: string | null
           valeur_actuelle: number | null
           valeur_cible: number | null
+          valide_le: string | null
+          valide_par: string | null
         }
         Insert: {
           cible_chiffree?: string | null
@@ -1991,6 +2003,8 @@ export type Database = {
           updated_by?: string | null
           valeur_actuelle?: number | null
           valeur_cible?: number | null
+          valide_le?: string | null
+          valide_par?: string | null
         }
         Update: {
           cible_chiffree?: string | null
@@ -2014,6 +2028,8 @@ export type Database = {
           updated_by?: string | null
           valeur_actuelle?: number | null
           valeur_cible?: number | null
+          valide_le?: string | null
+          valide_par?: string | null
         }
         Relationships: [
           {
@@ -2054,6 +2070,13 @@ export type Database = {
           {
             foreignKeyName: "objectifs_qualite_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_valide_par_fkey"
+            columns: ["valide_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -4390,6 +4413,7 @@ export type Database = {
         | "dysfonctionnement"
         | "incident"
         | "accident"
+        | "objectif"
       action_priorite: "p1" | "p2" | "p3"
       action_statut:
         | "a_faire"
@@ -4688,6 +4712,7 @@ export const Constants = {
         "dysfonctionnement",
         "incident",
         "accident",
+        "objectif",
       ],
       action_priorite: ["p1", "p2", "p3"],
       action_statut: [

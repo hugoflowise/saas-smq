@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
 import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
+import { canApprove } from "@/lib/permissions";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -315,6 +316,40 @@ export async function updateObjectifAction(input: unknown): Promise<ActionResult
     .update({ ...objPayload(parsed.data), updated_by: c.userId })
     .eq("id", parsed.data.id)
     .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/strategie/objectifs");
+  return { ok: true };
+}
+
+const objValiderSchema = z.object({ id: z.string().uuid(), valider: z.boolean() });
+
+/**
+ * §6.2 : établissement / validation d'un objectif par la direction.
+ * Pose (ou retire) la trace valide_par / valide_le. Réservé à un approbateur
+ * (dirigeant ou admin Flowise) : c'est une preuve d'engagement de la direction.
+ */
+export async function validerObjectifAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canApprove(ctx.role)) {
+    return { ok: false, error: "Seule la direction peut établir un objectif." };
+  }
+
+  const parsed = objValiderSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Données invalides." };
+  const { id, valider } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("objectifs_qualite")
+    .update({
+      valide_par: valider ? ctx.userId : null,
+      valide_le: valider ? new Date().toISOString() : null,
+      updated_by: ctx.userId,
+    })
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/strategie/objectifs");
   return { ok: true };

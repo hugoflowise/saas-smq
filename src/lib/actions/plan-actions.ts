@@ -28,11 +28,14 @@ const baseSchema = {
     "dysfonctionnement",
     "incident",
     "accident",
+    "objectif",
   ]),
   type: z.enum(["preventive", "corrective"]),
   priorite: z.enum(["p1", "p2", "p3"]),
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
   processusConcerne: z.string().uuid().optional(),
+  // §6.2.2 : objectif qualité auquel cette action contribue (lien direct).
+  objectifId: z.string().uuid().optional(),
   revueId: z.string().uuid().optional(),
   datePrevue: z.string().optional(),
   indicateurEfficacite: z.string().trim().optional(),
@@ -91,16 +94,21 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
   const supabase = await createClient();
   const reference = await nextActionReference(supabase, ctx.effectiveTenantId);
 
+  // §6.2.2 : si une action est rattachée à un objectif sans origine explicite
+  // (origine laissée sur « manuelle » par défaut), on la classe « objectif ».
+  const origine = d.objectifId && d.origine === "manuelle" ? "objectif" : d.origine;
+
   const { error } = await supabase.from("actions").insert({
     tenant_id: ctx.effectiveTenantId,
     reference,
     description_courte: d.descriptionCourte,
     description_detail: d.descriptionDetail ?? null,
-    origine: d.origine,
+    origine,
     type: d.type,
     priorite: d.priorite,
     statut: d.statut,
     processus_concerne: d.processusConcerne ?? null,
+    objectif_id: d.objectifId ?? null,
     revue_id: d.revueId ?? null,
     date_prevue: d.datePrevue || null,
     indicateur_efficacite: d.indicateurEfficacite ?? null,
@@ -119,6 +127,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
 
   revalidatePath("/actions");
   if (d.revueId) revalidatePath(`/revues/direction/${d.revueId}`);
+  if (d.objectifId) revalidatePath("/strategie/objectifs");
   return { ok: true };
 }
 
@@ -213,17 +222,20 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
   }
   const d = parsed.data;
 
+  const origine = d.objectifId && d.origine === "manuelle" ? "objectif" : d.origine;
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("actions")
     .update({
       description_courte: d.descriptionCourte,
       description_detail: d.descriptionDetail ?? null,
-      origine: d.origine,
+      origine,
       type: d.type,
       priorite: d.priorite,
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
+      objectif_id: d.objectifId ?? null,
       date_prevue: d.datePrevue || null,
       date_effective: d.statut === "termine" ? todayISO() : null,
       indicateur_efficacite: d.indicateurEfficacite ?? null,
@@ -243,6 +255,48 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/actions");
+  if (d.objectifId) revalidatePath("/strategie/objectifs");
+  return { ok: true };
+}
+
+// §6.2.2 : création rapide d'une action de mise en œuvre, liée à un objectif.
+const createForObjectifSchema = z.object({
+  objectifId: z.string().uuid(),
+  descriptionCourte: z.string().trim().min(2, "Description requise."),
+  priorite: z.enum(["p1", "p2", "p3"]),
+  datePrevue: z.string().optional(),
+});
+
+/** Crée une action « objectif » rattachée à un objectif qualité et la lie. */
+export async function createActionForObjectifAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = createForObjectifSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  const supabase = await createClient();
+  const reference = await nextActionReference(supabase, ctx.effectiveTenantId);
+
+  const { error } = await supabase.from("actions").insert({
+    tenant_id: ctx.effectiveTenantId,
+    reference,
+    description_courte: d.descriptionCourte,
+    origine: "objectif",
+    type: "preventive",
+    priorite: d.priorite,
+    statut: "a_faire",
+    objectif_id: d.objectifId,
+    date_prevue: d.datePrevue || null,
+    created_by: ctx.userId,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/actions");
+  revalidatePath("/strategie/objectifs");
   return { ok: true };
 }
 
