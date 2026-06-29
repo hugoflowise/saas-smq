@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Smile,
   Target,
+  Trash2,
   Truck,
   UserCog,
   Users,
@@ -106,6 +107,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Utilisateurs", href: "/utilisateurs", icon: UserCog },
       { label: "Main courante", href: "/journal", icon: History },
       { label: "Paramètres", href: "/parametres", icon: Settings },
+      { label: "Corbeille", href: "/corbeille", icon: Trash2 },
     ],
   },
 ];

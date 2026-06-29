@@ -67,7 +67,13 @@ export function DocumentDialog({
 
   async function handleDelete() {
     if (!document) return;
-    if (!confirm(`Supprimer le document « ${document.titre} » ? Il sera mis à la corbeille.`)) {
+    // §7.5 — Garde-fou : un enregistrement en vigueur est une preuve à conserver.
+    // On avertit explicitement (confirmation renforcée) avant la mise en corbeille.
+    const estPreuve = document.type === "enregistrement" && document.statut === "en_vigueur";
+    const message = estPreuve
+      ? `⚠️ « ${document.titre} » est un ENREGISTREMENT en vigueur : c'est une preuve à conserver (ISO 9001 §7.5). Il sera mis à la corbeille (restaurable depuis la page Corbeille), mais ne supprimez un enregistrement que si vous êtes certain qu'il ne constitue pas une preuve d'audit. Confirmer la mise en corbeille ?`
+      : `Supprimer le document « ${document.titre} » ? Il sera mis à la corbeille.`;
+    if (!confirm(message)) {
       return;
     }
     setPending(true);
