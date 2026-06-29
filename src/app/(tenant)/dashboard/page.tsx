@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { MonthView } from "@/app/(tenant)/calendrier/calendrier-client";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { loadCalendarEvents } from "@/lib/calendrier";
 import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
 import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
@@ -290,6 +292,9 @@ export default async function DashboardPage() {
     });
   }
   echeances.sort((a, b) => a.date.localeCompare(b.date));
+
+  // Aperçu du calendrier qualité (même source que la page Calendrier).
+  const calendarEvents = await loadCalendarEvents(tid);
   const echeancesAvenir = echeances.slice(0, 8);
 
   const stats: { label: string; value: string | number; href: string; cls?: string }[] = [
@@ -523,6 +528,27 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base">Calendrier qualité</CardTitle>
+            <Link href="/calendrier" className="font-medium text-primary text-sm hover:underline">
+              Voir le calendrier →
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {calendarEvents.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              Aucune échéance planifiée. Planifiez des audits, revues, actions… ou ajoutez un
+              événement dans le calendrier.
+            </p>
+          ) : (
+            <MonthView events={calendarEvents} />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

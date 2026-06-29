@@ -52,7 +52,7 @@ export default async function VeillePage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const [{ data: textes }, { data: tenant }, { data: suggestions }, { data: derniere }] =
+  const [{ data: textes }, { data: tenant }, { data: suggestions }, { data: historique }] =
     await Promise.all([
       supabase
         .from("veille_reglementaire")
@@ -71,16 +71,30 @@ export default async function VeillePage() {
         .order("date_texte", { ascending: false, nullsFirst: false }),
       supabase
         .from("veille_suggestions")
-        .select("created_at")
+        .select("id, titre, ref, source, created_at")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .limit(300),
     ]);
 
   const items = textes ?? [];
   const motsCles = tenant?.veille_mots_cles ?? "";
   const suggs = suggestions ?? [];
+
+  // Historique des collectes : on regroupe les suggestions importées par jour
+  // (created_at = date d'import). La liste est déjà triée du plus récent au plus
+  // ancien, donc l'ordre des jours est conservé (Map = ordre d'insertion).
+  const historiqueList = historique ?? [];
+  const derniereCollecte = historiqueList[0]?.created_at ?? null;
+  const collectesParJour = new Map<string, { titre: string; ref: string; source: string }[]>();
+  for (const s of historiqueList) {
+    const jour = s.created_at.slice(0, 10);
+    const arr = collectesParJour.get(jour) ?? [];
+    arr.push({ titre: s.titre, ref: s.ref, source: s.source });
+    collectesParJour.set(jour, arr);
+  }
+  const collectes = [...collectesParJour.entries()];
 
   const tiles = [
     { label: "Textes suivis", value: items.length, cls: "text-foreground" },
@@ -92,7 +106,7 @@ export default async function VeillePage() {
     { label: "Suggestions à examiner", value: suggs.length, cls: "text-primary" },
     {
       label: "Dernière collecte",
-      value: derniere?.created_at ? formatDate(derniere.created_at) : "-",
+      value: derniereCollecte ? formatDate(derniereCollecte) : "-",
       cls: "text-foreground",
     },
   ];
@@ -148,6 +162,39 @@ export default async function VeillePage() {
             ))}
           </div>
         </div>
+      ) : null}
+
+      {/* Historique des collectes automatiques (par date d'import) */}
+      {collectes.length > 0 ? (
+        <details className="mb-6 rounded-xl border bg-card">
+          <summary className="cursor-pointer px-4 py-3 font-semibold text-sm">
+            Historique des collectes ({collectes.length})
+          </summary>
+          <div className="flex flex-col divide-y border-t">
+            {collectes.map(([jour, textesJour]) => (
+              <div key={jour} className="px-4 py-3">
+                <p className="font-medium text-sm">
+                  {formatDate(jour)}{" "}
+                  <span className="text-muted-foreground text-xs">
+                    · {textesJour.length} texte{textesJour.length > 1 ? "s" : ""} collecté
+                    {textesJour.length > 1 ? "s" : ""}
+                  </span>
+                </p>
+                <ul className="mt-1 flex flex-col gap-0.5">
+                  {textesJour.map((t, i) => (
+                    <li
+                      // biome-ignore lint/suspicious/noArrayIndexKey: textes d'une même collecte
+                      key={`${jour}-${i}`}
+                      className="text-muted-foreground text-xs"
+                    >
+                      <span className="font-mono">{t.ref}</span> · {t.titre}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
       ) : null}
 
       {items.length === 0 ? (

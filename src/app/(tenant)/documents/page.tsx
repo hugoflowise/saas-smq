@@ -1,9 +1,11 @@
+import { BookOpenCheck } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
 import { StatTiles } from "@/components/stat-tiles";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -113,6 +115,17 @@ export default async function DocumentsPage({
 
   const processusList = (processus ?? []).map((p) => ({ id: p.id, nom: p.nom }));
   const processusNom = new Map(processusList.map((p) => [p.id, p.nom]));
+
+  // Procédure de maîtrise documentaire (si le client en a rédigé une) : on la
+  // repère par son titre pour proposer un aller-retour en un clic depuis la
+  // liste maîtresse (signalement utilisateur).
+  const procedureMaitrise = (procedures ?? []).find((p) => {
+    const t = (p.titre ?? "").toLowerCase();
+    return (
+      (t.includes("maitrise") || t.includes("maîtrise")) &&
+      (t.includes("document") || t.includes("informations"))
+    );
+  });
 
   // Versions courantes (politique + procédures) pour le n° de version.
   const versionIds = [
@@ -275,6 +288,15 @@ export default async function DocumentsPage({
         help="Tenez à jour la liste de vos informations documentées : codification, version en vigueur, statut, qui approuve, et date de révision prévue. La politique et les procédures rédigées dans l'application y figurent automatiquement ; ajoutez ici vos autres documents (manuel, instructions, enregistrements, documents externes)."
       >
         <div className="flex flex-wrap items-center gap-2">
+          {procedureMaitrise ? (
+            <Link
+              href={`/documentation/procedures/${procedureMaitrise.id}?from=/documents`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <BookOpenCheck className="size-4" />
+              Voir la procédure de maîtrise documentaire
+            </Link>
+          ) : null}
           {rows.length > 0 ? (
             <DocumentsFilters
               types={typeOptions}

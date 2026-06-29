@@ -71,7 +71,7 @@ function EventRow({ e }: { e: CalEvent }) {
   );
 }
 
-function MonthView({ events }: { events: CalEvent[] }) {
+export function MonthView({ events }: { events: CalEvent[] }) {
   const now = new Date();
   const [cursor, setCursor] = useState(() => new Date(now.getFullYear(), now.getMonth(), 1));
   const year = cursor.getFullYear();
