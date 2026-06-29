@@ -64,6 +64,10 @@ export async function updateInfosSocieteAction(input: unknown): Promise<ActionRe
  * sur les documents générés (politique, procédures, fiches…).
  */
 export async function uploadLogoSocieteAction(formData: FormData): Promise<ActionResult> {
+  // Garde-fou décalage de version (cf. createRetourAction).
+  if (!(formData instanceof FormData)) {
+    return { ok: false, error: "Session expirée. Rechargez la page et réessayez." };
+  }
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
