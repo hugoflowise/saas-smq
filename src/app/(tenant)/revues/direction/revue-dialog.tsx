@@ -79,7 +79,14 @@ export function RevueDialog({
           <DialogTitle>{isEdit ? "Modifier la revue" : "Nouvelle revue de direction"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-3 gap-3">
+          {!isEdit ? (
+            <p className="text-muted-foreground text-sm">
+              On planifie ici la revue. Les éléments d'entrée, la performance, les conclusions et
+              les décisions se renseignent ensuite sur la fiche de la revue, au fil de sa
+              préparation.
+            </p>
+          ) : null}
+          <div className={isEdit ? "grid grid-cols-3 gap-3" : "grid grid-cols-2 gap-3"}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="annee">Année</Label>
               <Input
@@ -91,7 +98,7 @@ export function RevueDialog({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="dateRealisation">Date</Label>
+              <Label htmlFor="dateRealisation">{isEdit ? "Date" : "Date prévue"}</Label>
               <Input
                 id="dateRealisation"
                 name="dateRealisation"
@@ -99,19 +106,22 @@ export function RevueDialog({
                 defaultValue={revue?.date_realisation ?? ""}
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="statut">Statut</Label>
-              <select
-                id="statut"
-                name="statut"
-                className={SELECT_CLASS}
-                defaultValue={revue?.statut ?? "planifiee"}
-              >
-                <option value="planifiee">Planifiée</option>
-                <option value="realisee">Réalisée</option>
-                <option value="cloturee">Clôturée</option>
-              </select>
-            </div>
+            {/* Statut : seulement en édition. À la création, une revue est « Planifiée ». */}
+            {isEdit ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="statut">Statut</Label>
+                <select
+                  id="statut"
+                  name="statut"
+                  className={SELECT_CLASS}
+                  defaultValue={revue?.statut ?? "planifiee"}
+                >
+                  <option value="planifiee">Planifiée</option>
+                  <option value="realisee">Réalisée</option>
+                  <option value="cloturee">Clôturée</option>
+                </select>
+              </div>
+            ) : null}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="ordreDuJour">Ordre du jour</Label>
@@ -122,24 +132,29 @@ export function RevueDialog({
               defaultValue={revue?.ordre_du_jour ?? ""}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="conclusions">Conclusions</Label>
-            <Textarea
-              id="conclusions"
-              name="conclusions"
-              rows={3}
-              defaultValue={revue?.conclusions ?? ""}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="decisions">Décisions</Label>
-            <Textarea
-              id="decisions"
-              name="decisions"
-              rows={3}
-              defaultValue={revue?.decisions ?? ""}
-            />
-          </div>
+          {/* Conclusions & décisions : pas à la création (la revue n'a pas encore eu lieu). */}
+          {isEdit ? (
+            <>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="conclusions">Conclusions</Label>
+                <Textarea
+                  id="conclusions"
+                  name="conclusions"
+                  rows={3}
+                  defaultValue={revue?.conclusions ?? ""}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="decisions">Décisions</Label>
+                <Textarea
+                  id="decisions"
+                  name="decisions"
+                  rows={3}
+                  defaultValue={revue?.decisions ?? ""}
+                />
+              </div>
+            </>
+          ) : null}
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
           </Button>

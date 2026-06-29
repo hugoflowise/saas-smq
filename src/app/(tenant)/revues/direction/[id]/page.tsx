@@ -125,33 +125,6 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
-        {/* §9.3 - circuit de validation : vérification puis approbation/signature */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Validation de la revue (§9.3)</CardTitle>
-            <p className="mt-1 text-muted-foreground text-xs">
-              La revue doit être complète, puis vérifiée, puis approuvée et signée par la direction
-              (l'approbateur doit être différent du vérificateur).
-            </p>
-          </CardHeader>
-          <CardContent>
-            <RevueApprobation
-              revueId={revue.id}
-              etat={{
-                complete,
-                manquants,
-                verifieParNom,
-                verifieLe: revue.verifie_le ? formatDate(revue.verifie_le) : null,
-                approuveParNom,
-                approuveLe: revue.approuve_le ? formatDate(revue.approuve_le) : null,
-                peutVerifier,
-                peutApprouver,
-                estVerificateur: Boolean(revue.verifie_par && revue.verifie_par === ctx.userId),
-              }}
-            />
-          </CardContent>
-        </Card>
-
         {/* §9.3.2 a→f + §9.3.3 - éléments d'entrée / sortie */}
         <RevueStructureEditor
           prefill={{
@@ -212,6 +185,33 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
                 ))}
               </ul>
             )}
+          </CardContent>
+        </Card>
+
+        {/* §9.3 - validation EN FIN de revue : vérification puis approbation/signature */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Validation de la revue (§9.3)</CardTitle>
+            <p className="mt-1 text-muted-foreground text-xs">
+              Dernière étape : une fois la revue complète, elle doit être vérifiée, puis approuvée
+              et signée par la direction (l'approbateur doit être différent du vérificateur).
+            </p>
+          </CardHeader>
+          <CardContent>
+            <RevueApprobation
+              revueId={revue.id}
+              etat={{
+                complete,
+                manquants,
+                verifieParNom,
+                verifieLe: revue.verifie_le ? formatDate(revue.verifie_le) : null,
+                approuveParNom,
+                approuveLe: revue.approuve_le ? formatDate(revue.approuve_le) : null,
+                peutVerifier,
+                peutApprouver,
+                estVerificateur: Boolean(revue.verifie_par && revue.verifie_par === ctx.userId),
+              }}
+            />
           </CardContent>
         </Card>
       </div>
