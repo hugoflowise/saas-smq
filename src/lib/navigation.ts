@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   AlertTriangle,
+  Award,
   Building2,
   CalendarDays,
   ClipboardCheck,
@@ -53,6 +54,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Réunions QHSE", href: "/reunions", icon: MessagesSquare },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
       { label: "Effectif & couverture", href: "/effectif", icon: UsersRound },
+      { label: "Compétences", href: "/effectif/competences", icon: Award },
       { label: "Suivi consultant", href: "/suivi-consultant", icon: ClipboardList },
     ],
   },
