@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { DomaineSnapshot } from "@/app/(tenant)/strategie/domaine/domaine-snapshot";
 import type { ActionResult } from "@/lib/actions/types";
+import { canWrite } from "@/lib/permissions";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionIndex, versionLettre } from "@/lib/versions";
 
 // §4.3 : énoncé du périmètre + exclusions justifiées.
 const exclusion = z.object({
@@ -49,22 +52,80 @@ export async function saveDomaineAction(input: unknown): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Valide (ou retire la validation) du domaine d'application - preuve d'approbation direction. */
-export async function validerDomaineAction(valider: boolean): Promise<ActionResult> {
+/**
+ * Fige une version du domaine d'application (instantané périmètre/exclusions).
+ * Modèle léger sans circuit d'approbation : tout rédacteur peut publier.
+ */
+export async function publishDomaineVersionAction(): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+  const tid = ctx.effectiveTenantId;
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: domaine } = await supabase
     .from("domaine_application")
-    .update({
-      valide_par: valider ? ctx.userId : null,
-      valide_le: valider ? new Date().toISOString() : null,
-      updated_by: ctx.userId,
-    })
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
+    .select("perimetre, sites, exclusions, date_etablissement, prochaine_revue")
+    .eq("tenant_id", tid)
+    .maybeSingle();
+  if (!domaine) {
+    return { ok: false, error: "Renseignez d'abord le domaine d'application." };
+  }
+
+  const exRaw = Array.isArray(domaine.exclusions) ? domaine.exclusions : [];
+  const exclusions = (exRaw as Record<string, unknown>[]).map((e) => ({
+    clause: typeof e.clause === "string" ? e.clause : "",
+    intitule: typeof e.intitule === "string" ? e.intitule : "",
+    justification: typeof e.justification === "string" ? e.justification : "",
+  }));
+  const snapshot: DomaineSnapshot = {
+    perimetre: domaine.perimetre,
+    sites: domaine.sites,
+    exclusions,
+    dateEtablissement: domaine.date_etablissement,
+    prochaineRevue: domaine.prochaine_revue,
+  };
+
+  // Version = lettre suivant la plus haute déjà attribuée (anti-collision après suppression).
+  const { data: existantes } = await supabase
+    .from("domaine_versions")
+    .select("version")
+    .eq("tenant_id", tid);
+  const maxIndex = (existantes ?? []).reduce((m, v) => Math.max(m, versionIndex(v.version)), -1);
+  const version = versionLettre(maxIndex + 1);
+
+  const { error } = await supabase.from("domaine_versions").insert({
+    tenant_id: tid,
+    version,
+    snapshot: snapshot as unknown as Json,
+    published_by: ctx.userId,
+  });
+  if (error) return { ok: false, error: `Publication impossible : ${error.message}` };
+
+  revalidatePath("/strategie/domaine");
+  return { ok: true };
+}
+
+/** Supprime une version figée du domaine (créée par erreur). Suppression définitive. */
+export async function deleteDomaineVersionAction(id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("domaine_versions")
+    .delete()
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .select("id");
+  if (error) return { ok: false, error: `Suppression impossible : ${error.message}` };
+  if (!data || data.length === 0) {
+    return { ok: false, error: "Suppression refusée (droits ou version introuvable)." };
+  }
+
   revalidatePath("/strategie/domaine");
   return { ok: true };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,8 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { saveDomaineAction, validerDomaineAction } from "@/lib/actions/domaine";
-import { formatDate } from "@/lib/format";
+import { saveDomaineAction } from "@/lib/actions/domaine";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 export type Exclusion = { clause: string; intitule: string; justification: string };
@@ -30,17 +29,7 @@ const EXCLUSIONS_TYPES: Exclusion[] = [
   { clause: "8.6", intitule: "Libération des produits et services", justification: "" },
 ];
 
-export function DomaineForm({
-  exists,
-  initial,
-  valideLe,
-  validateurNom,
-}: {
-  exists: boolean;
-  initial: Initial;
-  valideLe: string | null;
-  validateurNom: string | null;
-}) {
+export function DomaineForm({ initial }: { exists: boolean; initial: Initial }) {
   const router = useRouter();
   const readOnly = useReadOnly();
   const [perimetre, setPerimetre] = useState(initial.perimetre);
@@ -73,41 +62,8 @@ export function DomaineForm({
     }
   }
 
-  async function toggleValidation(valider: boolean) {
-    setPending(true);
-    const result = await validerDomaineAction(valider);
-    setPending(false);
-    if (result.ok) {
-      toast.success(valider ? "Domaine validé." : "Validation retirée.");
-      router.refresh();
-    } else {
-      toast.error(result.error);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-6">
-      {/* Bandeau de validation */}
-      {valideLe ? (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-status-conforme/40 bg-status-conforme/10 px-4 py-3">
-          <p className="flex items-center gap-2 text-sm text-status-conforme">
-            <BadgeCheck className="size-4" />
-            Domaine d'application validé le {formatDate(valideLe)}
-            {validateurNom ? ` par ${validateurNom}` : ""}.
-          </p>
-          {!readOnly && (
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={pending}
-              onClick={() => toggleValidation(false)}
-            >
-              Retirer la validation
-            </Button>
-          )}
-        </div>
-      ) : null}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Périmètre du SMQ</CardTitle>
@@ -257,18 +213,12 @@ export function DomaineForm({
         </CardContent>
       </Card>
 
-      {/* Barre d'actions */}
+      {/* Barre d'actions : l'approbation officielle se fait via « Publier une version ». */}
       {!readOnly && (
         <div className="flex flex-wrap gap-2">
           <Button onClick={save} disabled={pending}>
             {pending ? "Enregistrement…" : "Enregistrer"}
           </Button>
-          {exists && !valideLe && (
-            <Button variant="outline" disabled={pending} onClick={() => toggleValidation(true)}>
-              <BadgeCheck className="size-4" />
-              Valider le domaine
-            </Button>
-          )}
         </div>
       )}
     </div>
