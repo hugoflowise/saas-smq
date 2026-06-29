@@ -1,5 +1,8 @@
+import { headers } from "next/headers";
+import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QrCode } from "@/components/qr-code";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -44,11 +47,11 @@ export default async function ReclamationsPage() {
   }
 
   const supabase = await createClient();
-  const [{ data: reclamations }, { data: processus }] = await Promise.all([
+  const [{ data: reclamations }, { data: processus }, { data: tenant }] = await Promise.all([
     supabase
       .from("reclamations")
       .select(
-        "id, type, objet, client, date_reception, canal, gravite, description, traitement, statut",
+        "id, type, objet, client, declarant_email, date_reception, canal, gravite, description, traitement, statut",
       )
       .eq("tenant_id", ctx.effectiveTenantId)
       .order("date_reception", { ascending: false }),
@@ -58,10 +61,19 @@ export default async function ReclamationsPage() {
       .eq("tenant_id", ctx.effectiveTenantId)
       .is("deleted_at", null)
       .order("nom"),
+    supabase.from("tenants").select("survey_token").eq("id", ctx.effectiveTenantId).maybeSingle(),
   ]);
 
   const items = reclamations ?? [];
   const processusOptions = processus ?? [];
+
+  // Lien public de signalement : à partager (e-mail de fin de mission, site, QR
+  // sur site/affichage) pour que clients et intervenants sans compte remontent
+  // réclamations, dysfonctionnements, incidents et accidents.
+  const h = await headers();
+  const host = h.get("host") ?? "app.flowise.fr";
+  const proto = host.includes("localhost") ? "http" : "https";
+  const signalementUrl = `${proto}://${host}/signalement/${tenant?.survey_token ?? ""}`;
 
   return (
     <div className="w-full">
@@ -73,6 +85,28 @@ export default async function ReclamationsPage() {
       >
         <ReclamationDialog processusOptions={processusOptions} />
       </PageHeader>
+
+      <details className="group mb-6 rounded-2xl border bg-card text-sm">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 font-medium hover:text-primary">
+          Formulaire public de signalement (lien / QR)
+          <span className="ml-auto text-muted-foreground text-xs group-open:hidden">Afficher</span>
+          <span className="ml-auto hidden text-muted-foreground text-xs group-open:inline">
+            Masquer
+          </span>
+        </summary>
+        <div className="flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-col gap-2">
+            <p className="text-muted-foreground text-xs">
+              Partagez ce lien (ou le QR) à vos clients et intervenants sans compte : leurs
+              signalements arrivent directement ici, au statut « reçue ».
+            </p>
+            <CopyField label="Lien public de signalement" value={signalementUrl} />
+          </div>
+          <div className="shrink-0 rounded-xl border bg-surface p-3">
+            <QrCode value={signalementUrl} size={132} />
+          </div>
+        </div>
+      </details>
 
       {items.length === 0 ? (
         <EmptyState
@@ -111,7 +145,17 @@ export default async function ReclamationsPage() {
                       }
                     />
                   </TableCell>
-                  <TableCell>{r.client ?? "-"}</TableCell>
+                  <TableCell>
+                    {r.client ?? "-"}
+                    {r.declarant_email ? (
+                      <a
+                        href={`mailto:${r.declarant_email}`}
+                        className="block text-primary text-xs hover:underline"
+                      >
+                        {r.declarant_email}
+                      </a>
+                    ) : null}
+                  </TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
                   <TableCell>
                     <RecGraviteCell id={r.id} value={r.gravite} />

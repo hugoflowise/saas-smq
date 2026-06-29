@@ -17,6 +17,7 @@ const PUBLIC_PATHS = [
   "/api/ingest",
   "/api/cron",
   "/enquete",
+  "/signalement",
 ];
 
 /**
