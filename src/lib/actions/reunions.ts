@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { todayISO } from "@/lib/format";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -105,7 +106,7 @@ export async function createActionFromReunionAction(input: unknown): Promise<Act
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
   const d = parsed.data;
 
-  const year = new Date().getFullYear();
+  const year = todayISO().slice(0, 4);
   const prefix = `ACT-${year}-`;
   const { count } = await c.supabase
     .from("actions")
