@@ -31,10 +31,12 @@ export default async function NcDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; tab?: string }>;
 }) {
   const { id } = await params;
-  const { from } = await searchParams;
+  const { from, tab } = await searchParams;
+  // Onglet actif piloté par l'URL (ex. lien « Voir les actions liées » → ?tab=actions).
+  const ongletActif = tab === "actions" || tab === "causes" ? tab : "details";
   const backHref = from?.startsWith("/") ? from : "/nc";
   const backLabel = from?.startsWith("/processus") ? "Retour au processus" : "Non-conformités";
   const ctx = await getTenantContext();
@@ -133,7 +135,7 @@ export default async function NcDetailPage({
         <Badge variant="secondary">Origine : {NC_ORIGINE_LABELS[nc.origine]}</Badge>
       </div>
 
-      <Tabs defaultValue="details">
+      <Tabs defaultValue={ongletActif}>
         <TabsList>
           <TabsTrigger value="details">Détails</TabsTrigger>
           <TabsTrigger value="causes">Analyse des causes</TabsTrigger>

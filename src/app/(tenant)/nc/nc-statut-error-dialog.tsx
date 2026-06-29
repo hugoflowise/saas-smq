@@ -75,7 +75,7 @@ export function useNcStatutError() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                router.push(`/nc/${ncId}`);
+                router.push(`/nc/${ncId}?tab=actions`);
                 fermer();
               }}
             >
