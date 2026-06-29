@@ -2,7 +2,9 @@ import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { deleteReunionAction } from "@/lib/actions/reunions";
 import type { ACTION_STATUT_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -51,6 +53,12 @@ export default async function ReunionDetailPage({ params }: { params: Promise<{ 
 
       <PageHeader title={reunion.titre} description="Préparation, tenue en séance et compte rendu.">
         <DownloadPdfButton printHref={`/print/reunion/${id}`} label="Compte rendu (PDF)" />
+        <SupprimerButton
+          action={deleteReunionAction}
+          id={reunion.id}
+          libelle="cette réunion"
+          redirectTo="/reunions"
+        />
       </PageHeader>
 
       <Card className="mb-6">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createActionFromReunionAction, unlinkReunionActionAction } from "@/lib/actions/reunions";
+import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { ACTION_STATUT_LABELS } from "@/lib/labels";
 import { SELECT_CLASS_INLINE as SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -25,6 +26,7 @@ export function ReunionActions({
   linked: LinkedAction[];
 }) {
   const router = useRouter();
+  const readOnly = useReadOnly();
   const [pending, setPending] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -74,21 +76,23 @@ export function ReunionActions({
                   ({ACTION_STATUT_LABELS[a.statut]})
                 </span>
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Délier"
-                disabled={pending}
-                onClick={() => unlink(a.id)}
-              >
-                <X className="size-4" />
-              </Button>
+              {readOnly ? null : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Délier"
+                  disabled={pending}
+                  onClick={() => unlink(a.id)}
+                >
+                  <X className="size-4" />
+                </Button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      {creating ? (
+      {readOnly ? null : creating ? (
         <form onSubmit={handleCreate} className="flex flex-col gap-3 rounded-lg border p-3">
           <Input name="descriptionCourte" required placeholder="Action décidée en réunion" />
           <div className="flex flex-wrap gap-2">
