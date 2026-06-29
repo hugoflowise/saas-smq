@@ -49,8 +49,6 @@ export function FournisseurDialog({
           categorie: f.get("categorie") || undefined,
           contact: f.get("contact") || undefined,
           criticite: f.get("criticite"),
-          noteEvaluation: f.get("noteEvaluation") || undefined,
-          dateEvaluation: f.get("dateEvaluation") || undefined,
           prochaineEvaluation: f.get("prochaineEvaluation") || undefined,
           statut: f.get("statut"),
           commentaire: f.get("commentaire") || undefined,
@@ -127,26 +125,6 @@ export function FournisseurDialog({
                 <option value="actif">Actif</option>
                 <option value="inactif">Inactif</option>
               </select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="noteEvaluation">Évaluation (1 à 5)</Label>
-              <Input
-                id="noteEvaluation"
-                name="noteEvaluation"
-                type="number"
-                min={1}
-                max={5}
-                defaultValue={fournisseur?.note_evaluation ?? ""}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="dateEvaluation">Date d'évaluation</Label>
-              <Input
-                id="dateEvaluation"
-                name="dateEvaluation"
-                type="date"
-                defaultValue={fournisseur?.date_evaluation ?? ""}
-              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="prochaineEvaluation">Prochaine évaluation</Label>
