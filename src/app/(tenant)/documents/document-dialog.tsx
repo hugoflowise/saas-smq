@@ -276,12 +276,25 @@ export function DocumentDialog({
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
-                {Object.entries(DOC_MAITRISE_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
+                {Object.entries(DOC_MAITRISE_TYPE_LABELS)
+                  // « Procédure » se rédige dans son module natif (Documentation →
+                  // Procédures) et apparaît automatiquement dans la liste : on ne
+                  // le propose donc pas à la création d'un document de registre
+                  // (qui attend un fichier). On le conserve en édition pour ne pas
+                  // casser une éventuelle ligne existante de ce type.
+                  .filter(([value]) => isEdit || value !== "procedure")
+                  .map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
               </select>
+              {!isEdit ? (
+                <p className="text-muted-foreground text-xs">
+                  Les procédures et la politique se rédigent dans leur module et apparaissent ici
+                  automatiquement.
+                </p>
+              ) : null}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="statut">Statut</Label>
