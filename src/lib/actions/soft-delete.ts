@@ -53,3 +53,28 @@ export async function softDeleteRow(table: SoftDeletableTable, id: string): Prom
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+/**
+ * Restauration depuis la corbeille (inverse de `softDeleteRow`) : remet
+ * `deleted_at = null` pour faire réapparaître l'élément dans les listes.
+ *
+ * Même contournement RLS que pour la suppression (client service-role) : la
+ * policy SELECT filtrant `deleted_at is null`, le client utilisateur ne « voit »
+ * pas la ligne en corbeille et ne peut donc pas la mettre à jour. Les gardes
+ * (client actif, droits d'écriture, périmètre tenant) sont imposées ici, côté
+ * serveur — l'auditeur (lecture seule) ne peut donc pas restaurer.
+ */
+export async function restoreRow(table: SoftDeletableTable, id: string): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId || !ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from(table)
+    .update({ deleted_at: null, updated_by: ctx.userId })
+    .eq("id", id)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
