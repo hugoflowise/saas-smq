@@ -4139,7 +4139,15 @@ export type Database = {
         Row: {
           adresse: string | null
           boond_account_id: string | null
+          boond_app_key: string | null
+          boond_app_token: string | null
+          boond_auth_mode: Database["public"]["Enums"]["boond_auth_mode"] | null
+          boond_connected_at: string | null
+          boond_last_sync_at: string | null
+          boond_last_sync_error: string | null
           boond_oauth_token: string | null
+          boond_sync_status: Database["public"]["Enums"]["boond_sync_status"]
+          boond_user_token: string | null
           bureau_etudes: boolean
           cartographie_reference: string | null
           code_postal: string | null
@@ -4171,7 +4179,15 @@ export type Database = {
         Insert: {
           adresse?: string | null
           boond_account_id?: string | null
+          boond_app_key?: string | null
+          boond_app_token?: string | null
+          boond_auth_mode?: Database["public"]["Enums"]["boond_auth_mode"] | null
+          boond_connected_at?: string | null
+          boond_last_sync_at?: string | null
+          boond_last_sync_error?: string | null
           boond_oauth_token?: string | null
+          boond_sync_status?: Database["public"]["Enums"]["boond_sync_status"]
+          boond_user_token?: string | null
           bureau_etudes?: boolean
           cartographie_reference?: string | null
           code_postal?: string | null
@@ -4203,7 +4219,15 @@ export type Database = {
         Update: {
           adresse?: string | null
           boond_account_id?: string | null
+          boond_app_key?: string | null
+          boond_app_token?: string | null
+          boond_auth_mode?: Database["public"]["Enums"]["boond_auth_mode"] | null
+          boond_connected_at?: string | null
+          boond_last_sync_at?: string | null
+          boond_last_sync_error?: string | null
           boond_oauth_token?: string | null
+          boond_sync_status?: Database["public"]["Enums"]["boond_sync_status"]
+          boond_user_token?: string | null
           bureau_etudes?: boolean
           cartographie_reference?: string | null
           code_postal?: string | null
@@ -4429,6 +4453,8 @@ export type Database = {
         | "rapport_redige"
         | "cloture"
       audit_type: "interne" | "externe" | "fournisseur"
+      boond_auth_mode: "app" | "client"
+      boond_sync_status: "non_connecte" | "connecte" | "erreur"
       communication_canal:
         | "email"
         | "intranet"
@@ -4731,6 +4757,8 @@ export const Constants = {
         "cloture",
       ],
       audit_type: ["interne", "externe", "fournisseur"],
+      boond_auth_mode: ["app", "client"],
+      boond_sync_status: ["non_connecte", "connecte", "erreur"],
       communication_canal: [
         "email",
         "intranet",

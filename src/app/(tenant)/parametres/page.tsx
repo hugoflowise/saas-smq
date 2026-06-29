@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -30,7 +31,7 @@ export default async function ParametresPage() {
   const { data: tenant } = await admin
     .from("tenants")
     .select(
-      "logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, liste_diffusion, couleur_charte",
+      "logo_url, forme_juridique, siret, adresse, code_postal, ville, mentions_legales, liste_diffusion, couleur_charte, boond_account_id, boond_sync_status",
     )
     .eq("id", ctx.effectiveTenantId)
     .maybeSingle();
@@ -69,6 +70,41 @@ export default async function ParametresPage() {
               couleur_charte: tenant?.couleur_charte ?? null,
             }}
           />
+        </CardContent>
+      </Card>
+
+      {/*
+        Intégration BoondManager — section DÉSACTIVÉE (préparation).
+        Aucune action réseau : on affiche seulement l'état de connexion lu en base
+        (boond_account_id / boond_sync_status). Le bouton « Connecter » est inactif
+        tant que le partenariat technique n'est pas en place.
+        Voir docs/integration-boond.md.
+      */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Intégration BoondManager</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <p className="text-muted-foreground text-sm">
+            Connectez votre compte BoondManager pour alimenter automatiquement l'effectif, les
+            indicateurs et la revue d'engagement. Chaque client reste isolé sur son propre compte.
+          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Statut :</span>
+            <span className="font-medium">
+              {tenant?.boond_account_id
+                ? "Compte renseigné"
+                : tenant?.boond_sync_status === "erreur"
+                  ? "Erreur de synchronisation"
+                  : "Non connecté"}
+            </span>
+          </div>
+          <div>
+            <Button type="button" disabled>
+              Connecter Boond
+            </Button>
+            <p className="mt-1 text-muted-foreground text-xs">Disponible prochainement.</p>
+          </div>
         </CardContent>
       </Card>
     </div>
