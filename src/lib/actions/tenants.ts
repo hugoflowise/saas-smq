@@ -182,6 +182,27 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     };
   }
 
+  // 7) Procédure de maîtrise de l'information documentée (§7.5) : présente par
+  // défaut chez tous les clients (clé stable), pour que la liste maîtresse
+  // pointe toujours vers elle. Créée en brouillon, à compléter par le client.
+  const { error: procMaitriseError } = await admin.from("procedures").insert({
+    tenant_id: tenant.id,
+    titre: "Maîtrise de l'information documentée",
+    statut: "brouillon",
+    cle: "maitrise_documentaire",
+    objet:
+      "Définir les règles de création, de validation, d'identification, de diffusion, de conservation et de maîtrise des informations documentées du SMQ (documents et enregistrements), conformément à l'exigence ISO 9001 §7.5.",
+    domaine_application:
+      "S'applique à l'ensemble des informations documentées du système de management de la qualité : documents internes (politique, procédures, instructions, formulaires) et externes, ainsi qu'aux enregistrements constituant des preuves.",
+    reference_iso: ["7.5"],
+  });
+  if (procMaitriseError) {
+    return {
+      ok: false,
+      error: `Initialisation de la procédure de maîtrise documentaire impossible : ${procMaitriseError.message}`,
+    };
+  }
+
   revalidatePath("/admin/clients");
   return { ok: true };
 }

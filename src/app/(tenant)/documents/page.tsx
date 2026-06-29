@@ -91,7 +91,7 @@ export default async function DocumentsPage({
       supabase
         .from("procedures")
         .select(
-          "id, code, titre, statut, version_actuelle_id, approved_by, approved_at, processus_id, date_revision_prevue, updated_at",
+          "id, code, titre, statut, cle, version_actuelle_id, approved_by, approved_at, processus_id, date_revision_prevue, updated_at",
         )
         .eq("tenant_id", tid)
         .is("deleted_at", null)
@@ -116,16 +116,19 @@ export default async function DocumentsPage({
   const processusList = (processus ?? []).map((p) => ({ id: p.id, nom: p.nom }));
   const processusNom = new Map(processusList.map((p) => [p.id, p.nom]));
 
-  // Procédure de maîtrise documentaire (si le client en a rédigé une) : on la
-  // repère par son titre pour proposer un aller-retour en un clic depuis la
-  // liste maîtresse (signalement utilisateur).
-  const procedureMaitrise = (procedures ?? []).find((p) => {
-    const t = (p.titre ?? "").toLowerCase();
-    return (
-      (t.includes("maitrise") || t.includes("maîtrise")) &&
-      (t.includes("document") || t.includes("informations"))
-    );
-  });
+  // Procédure de maîtrise de l'information documentée (§7.5) : présente par
+  // défaut chez tous les clients (clé stable), on la relie de façon déterministe
+  // — insensible au renommage — pour l'aller-retour en un clic depuis la liste
+  // maîtresse. Repli sur le titre pour les anciennes procédures sans clé.
+  const procedureMaitrise =
+    (procedures ?? []).find((p) => p.cle === "maitrise_documentaire") ??
+    (procedures ?? []).find((p) => {
+      const t = (p.titre ?? "").toLowerCase();
+      return (
+        (t.includes("maitrise") || t.includes("maîtrise")) &&
+        (t.includes("document") || t.includes("informations"))
+      );
+    });
 
   // Versions courantes (politique + procédures) pour le n° de version.
   const versionIds = [
