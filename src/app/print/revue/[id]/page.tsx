@@ -34,7 +34,7 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
   const { data: revue } = await supabase
     .from("revues_direction")
     .select(
-      "id, annee, date_realisation, statut, donnees_performance, donnees_capturees_le, participants, points_specifiques, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, approuve_par, approuve_le",
+      "id, annee, date_realisation, statut, donnees_performance, donnees_capturees_le, participants, points_specifiques, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, verifie_par, verifie_le, approuve_par, approuve_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -43,16 +43,22 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
     return <p className="p-8 text-sm">Revue introuvable.</p>;
   }
 
-  // Approbation (§9.3) : nom de l'approbateur pour le compte rendu.
-  let approuveParNom: string | null = null;
-  if (revue.approuve_par) {
-    const { data: approbateur } = await supabase
+  // Circuit de validation (§9.3) : noms du vérificateur et de l'approbateur.
+  const validateurIds = [revue.verifie_par, revue.approuve_par].filter((v): v is string =>
+    Boolean(v),
+  );
+  const nomParId = new Map<string, string>();
+  if (validateurIds.length > 0) {
+    const { data: validateurs } = await supabase
       .from("profiles")
-      .select("full_name, email")
-      .eq("id", revue.approuve_par)
-      .maybeSingle();
-    approuveParNom = approbateur?.full_name || approbateur?.email || null;
+      .select("id, full_name, email")
+      .in("id", validateurIds);
+    for (const v of validateurs ?? []) {
+      nomParId.set(v.id, v.full_name || v.email || "—");
+    }
   }
+  const verifieParNom = revue.verifie_par ? (nomParId.get(revue.verifie_par) ?? null) : null;
+  const approuveParNom = revue.approuve_par ? (nomParId.get(revue.approuve_par) ?? null) : null;
 
   const snapshot = revue.donnees_performance as RevuePerformance | null;
   const perf = snapshot ?? (await computeRevuePerformance(supabase, tid, revue.annee));
@@ -93,6 +99,12 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
     { label: "Année", value: String(revue.annee) },
     { label: "Date", value: revue.date_realisation ? formatDate(revue.date_realisation) : "-" },
     { label: "Statut", value: STATUT_LABELS[revue.statut] ?? revue.statut },
+    {
+      label: "Vérification",
+      value: revue.verifie_le
+        ? `${verifieParNom ?? "—"} le ${formatDate(revue.verifie_le)}`
+        : "Non vérifiée",
+    },
     {
       label: "Approbation",
       value: revue.approuve_le
@@ -173,8 +185,55 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
             <p className="whitespace-pre-wrap text-sm">{revue.points_specifiques}</p>
           </section>
         ) : null}
+
+        {/* §9.3 — visa du circuit de validation (vérification puis approbation) */}
+        <section className="break-inside-avoid">
+          <h2 className="mb-2 font-semibold text-sm uppercase tracking-wide">Validation (§9.3)</h2>
+          <div className="grid grid-cols-2 overflow-hidden rounded-md border border-[#0b1120]/15 text-sm">
+            <Visa
+              label="Vérifiée par"
+              nom={verifieParNom}
+              date={revue.verifie_le ? formatDate(revue.verifie_le) : null}
+            />
+            <Visa
+              label="Approuvée et signée par"
+              nom={approuveParNom}
+              date={revue.approuve_le ? formatDate(revue.approuve_le) : null}
+              border
+            />
+          </div>
+        </section>
       </div>
     </PrintShell>
+  );
+}
+
+/** Cellule de visa (vérification / approbation) pour le compte rendu imprimable. */
+function Visa({
+  label,
+  nom,
+  date,
+  border,
+}: {
+  label: string;
+  nom: string | null;
+  date: string | null;
+  border?: boolean;
+}) {
+  return (
+    <div className={border ? "border-[#0b1120]/15 border-l" : ""}>
+      <div className="bg-[#0b1120]/5 px-3 py-1.5 font-semibold">{label}</div>
+      <div className="flex min-h-20 flex-col px-3 py-2">
+        <p className="font-medium">{nom?.trim() ? nom : "—"}</p>
+        {date ? (
+          <p className="mt-auto text-[#0b1120]/60 text-xs italic">
+            Signé électroniquement le {date}
+          </p>
+        ) : (
+          <p className="mt-auto text-[#0b1120]/40 text-xs">En attente</p>
+        )}
+      </div>
+    </div>
   );
 }
 

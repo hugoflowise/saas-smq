@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import {
@@ -8,9 +9,10 @@ import {
   type ProcessusPilotage,
   processusEnConflit,
 } from "@/lib/audit-impartialite";
-import { canApprove } from "@/lib/permissions";
+import { canApprove, canWrite } from "@/lib/permissions";
+import { messageRevueIncomplete, type RevueChamps, revueComplete } from "@/lib/revue-circuit";
 import { computeRevuePerformance } from "@/lib/revue-perf";
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -503,9 +505,77 @@ export async function captureRevuePerformanceAction(id: unknown): Promise<Action
   return { ok: true };
 }
 
+// ------------------------------------------------------ Circuit de validation
+// Circuit en 2 étapes (§9.3), à l'image du circuit documentaire :
+//   1. Vérification (verifierRevueAction)  — rôle qualité/manager (writer).
+//   2. Approbation + signature (approveRevueAction) — direction (canApprove),
+//      après vérification, par une personne ≠ vérificateur (séparation des tâches).
+// Les deux exigent une revue complète (verrou de complétude §9.3.2/§9.3.3).
+
+/** Champs nécessaires au contrôle du circuit (complétude + état de validation). */
+const CIRCUIT_SELECT =
+  "entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, verifie_par, signature_data";
+
+/** Signature électronique horodatée (identité confirmée côté client par mdp). */
+async function captureSignature(userId: string): Promise<Json> {
+  const h = await headers();
+  return {
+    user_id: userId,
+    signed_at: new Date().toISOString(),
+    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    user_agent: h.get("user-agent") ?? null,
+  };
+}
+
 /**
- * Approbation de la revue de direction (§9.3) : pose `approuve_par` + `approuve_le`.
- * Réservée au rôle direction / approbateur (dirigeant, admin Flowise).
+ * Vérification de la revue de direction (§9.3) : pose `verifie_par` + `verifie_le`.
+ * Exige une revue complète. Réservée aux rôles écriture (qualité/manager) ;
+ * l'auditeur (lecture seule) en est exclu.
+ */
+export async function verifierRevueAction(id: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const revueId = z.string().uuid().safeParse(id);
+  if (!revueId.success) return { ok: false, error: "Revue invalide." };
+
+  const supabase = await createClient();
+  const { data: revue, error: readErr } = await supabase
+    .from("revues_direction")
+    .select(CIRCUIT_SELECT)
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .maybeSingle();
+  if (readErr) return { ok: false, error: readErr.message };
+  if (!revue) return { ok: false, error: "Revue introuvable." };
+
+  const { complete, manquants } = revueComplete(revue as RevueChamps);
+  if (!complete) return { ok: false, error: messageRevueIncomplete(manquants) };
+
+  // Conserve la trace de signature existante (approbateur) en y ajoutant le visa.
+  const existing = (revue.signature_data as Record<string, Json> | null) ?? {};
+  const { error } = await supabase
+    .from("revues_direction")
+    .update({
+      verifie_par: ctx.userId,
+      verifie_le: new Date().toISOString(),
+      signature_data: { ...existing, verificateur: await captureSignature(ctx.userId) },
+      updated_by: ctx.userId,
+    })
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${revueId.data}`);
+  return { ok: true };
+}
+
+/**
+ * Approbation + signature de la revue de direction (§9.3) : pose `approuve_par`
+ * + `approuve_le` et enregistre la signature dans `signature_data`.
+ * Exige : revue complète, déjà vérifiée, rôle direction (`canApprove`), et
+ * séparation des tâches (approbateur ≠ vérificateur).
  */
 export async function approveRevueAction(id: unknown): Promise<ActionResult> {
   const ctx = await getTenantContext();
@@ -517,11 +587,31 @@ export async function approveRevueAction(id: unknown): Promise<ActionResult> {
   if (!revueId.success) return { ok: false, error: "Revue invalide." };
 
   const supabase = await createClient();
+  const { data: revue, error: readErr } = await supabase
+    .from("revues_direction")
+    .select(CIRCUIT_SELECT)
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .maybeSingle();
+  if (readErr) return { ok: false, error: readErr.message };
+  if (!revue) return { ok: false, error: "Revue introuvable." };
+
+  const { complete, manquants } = revueComplete(revue as RevueChamps);
+  if (!complete) return { ok: false, error: messageRevueIncomplete(manquants) };
+  if (!revue.verifie_par) {
+    return { ok: false, error: "La revue doit d'abord être vérifiée avant d'être approuvée." };
+  }
+  if (revue.verifie_par === ctx.userId) {
+    return { ok: false, error: "L'approbateur doit être différent du vérificateur." };
+  }
+
+  const existing = (revue.signature_data as Record<string, Json> | null) ?? {};
   const { error } = await supabase
     .from("revues_direction")
     .update({
       approuve_par: ctx.userId,
       approuve_le: new Date().toISOString(),
+      signature_data: { ...existing, approbateur: await captureSignature(ctx.userId) },
       updated_by: ctx.userId,
     })
     .eq("id", revueId.data)

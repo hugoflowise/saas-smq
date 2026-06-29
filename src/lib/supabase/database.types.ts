@@ -3704,6 +3704,7 @@ export type Database = {
           ordre_du_jour: string | null
           participants: Json
           points_specifiques: string | null
+          signature_data: Json | null
           sortie_amelioration: string | null
           sortie_changements: string | null
           sortie_ressources: string | null
@@ -3711,6 +3712,8 @@ export type Database = {
           tenant_id: string
           updated_at: string
           updated_by: string | null
+          verifie_le: string | null
+          verifie_par: string | null
         }
         Insert: {
           annee: number
@@ -3734,6 +3737,7 @@ export type Database = {
           ordre_du_jour?: string | null
           participants?: Json
           points_specifiques?: string | null
+          signature_data?: Json | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null
@@ -3741,6 +3745,8 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
         }
         Update: {
           annee?: number
@@ -3764,6 +3770,7 @@ export type Database = {
           ordre_du_jour?: string | null
           participants?: Json
           points_specifiques?: string | null
+          signature_data?: Json | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null
@@ -3771,6 +3778,8 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
         }
         Relationships: [
           {
@@ -3797,6 +3806,13 @@ export type Database = {
           {
             foreignKeyName: "revues_direction_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revues_direction_verifie_par_fkey"
+            columns: ["verifie_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
