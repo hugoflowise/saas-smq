@@ -107,6 +107,19 @@ export const COTATION_LABELS = {
   non_applicable: "Non applicable",
 } as const;
 
+/**
+ * Cotations sélectionnables pour une action (liste « Léa »).
+ * `non_evalue` reste l'état initial « non coté » mais n'est pas proposé au choix ;
+ * `non_applicable` est volontairement retiré des choix.
+ */
+export const COTATION_OPTIONS: Record<string, string> = {
+  conforme: COTATION_LABELS.conforme,
+  point_fort: COTATION_LABELS.point_fort,
+  point_attention: COTATION_LABELS.point_attention,
+  nc_mineure: COTATION_LABELS.nc_mineure,
+  nc_majeure: COTATION_LABELS.nc_majeure,
+};
+
 /** Statut d'un risque / opportunité. */
 export const RO_STATUT_LABELS = {
   identifie: "Identifié",
