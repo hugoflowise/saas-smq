@@ -63,7 +63,7 @@ export async function softDeleteRow(table: SoftDeletableTable, id: string): Prom
  * policy SELECT filtrant `deleted_at is null`, le client utilisateur ne « voit »
  * pas la ligne en corbeille et ne peut donc pas la mettre à jour. Les gardes
  * (client actif, droits d'écriture, périmètre tenant) sont imposées ici, côté
- * serveur — l'auditeur (lecture seule) ne peut donc pas restaurer.
+ * serveur - l'auditeur (lecture seule) ne peut donc pas restaurer.
  */
 export async function restoreRow(table: SoftDeletableTable, id: string): Promise<ActionResult> {
   const ctx = await getTenantContext();

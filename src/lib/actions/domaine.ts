@@ -49,7 +49,7 @@ export async function saveDomaineAction(input: unknown): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Valide (ou retire la validation) du domaine d'application — preuve d'approbation direction. */
+/** Valide (ou retire la validation) du domaine d'application - preuve d'approbation direction. */
 export async function validerDomaineAction(valider: boolean): Promise<ActionResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };

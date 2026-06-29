@@ -157,12 +157,12 @@ export default async function ActionsPage({
             <TableHeader>
               <TableRow>
                 <TableHead>Réf.</TableHead>
-                <TableHead>Intitulé</TableHead>
+                <TableHead className="min-w-[220px]">Intitulé</TableHead>
                 <TableHead>Cotation</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Échéance</TableHead>
-                <TableHead>Résultats / Efficacité</TableHead>
+                <TableHead className="min-w-[200px]">Résultats / Efficacité</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,7 +173,7 @@ export default async function ActionsPage({
                       {a.reference}
                     </Link>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="whitespace-normal font-medium">
                     <div className="flex flex-wrap items-center gap-2">
                       <ActionDialog
                         processusOptions={options}
@@ -205,10 +205,8 @@ export default async function ActionsPage({
                   <TableCell>
                     <EcheanceCell id={a.id} value={a.date_prevue} />
                   </TableCell>
-                  <TableCell className="max-w-[16rem] text-muted-foreground text-sm">
-                    <span className="line-clamp-2" title={a.resultat_efficacite ?? undefined}>
-                      {a.resultat_efficacite || "-"}
-                    </span>
+                  <TableCell className="max-w-[16rem] whitespace-normal text-muted-foreground text-sm">
+                    {a.resultat_efficacite || "-"}
                   </TableCell>
                 </TableRow>
               ))}

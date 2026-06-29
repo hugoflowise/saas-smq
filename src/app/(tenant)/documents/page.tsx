@@ -198,7 +198,7 @@ export default async function DocumentsPage({
     rows.push({
       key: `fiche-${p.id}`,
       code: p.fiche_reference,
-      titre: `Fiche d'identité — ${p.nom}`,
+      titre: `Fiche d'identité - ${p.nom}`,
       typeToken: "fiche",
       typeLabel: "Fiche d'identité",
       version: p.fiche_version,

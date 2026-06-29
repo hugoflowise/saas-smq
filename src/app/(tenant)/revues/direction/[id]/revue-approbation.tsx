@@ -68,7 +68,7 @@ export function RevueApprobation({ revueId, etat }: { revueId: string; etat: Eta
           libelle="Vérifiée"
           detail={
             dejaVerifiee && etat.verifieLe
-              ? `par ${etat.verifieParNom ?? "—"} le ${etat.verifieLe}`
+              ? `par ${etat.verifieParNom ?? "-"} le ${etat.verifieLe}`
               : "en attente de vérification"
           }
         />
@@ -77,7 +77,7 @@ export function RevueApprobation({ revueId, etat }: { revueId: string; etat: Eta
           libelle="Approuvée et signée"
           detail={
             dejaApprouvee && etat.approuveLe
-              ? `par ${etat.approuveParNom ?? "—"} le ${etat.approuveLe}`
+              ? `par ${etat.approuveParNom ?? "-"} le ${etat.approuveLe}`
               : "en attente d'approbation"
           }
         />
@@ -88,7 +88,7 @@ export function RevueApprobation({ revueId, etat }: { revueId: string; etat: Eta
         <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900 text-xs">
           <p className="flex items-center gap-1.5 font-medium">
             <FileWarning className="size-3.5" />
-            Revue incomplète — à compléter avant vérification :
+            Revue incomplète - à compléter avant vérification :
           </p>
           <ul className="mt-1.5 list-disc pl-5">
             {etat.manquants.map((m) => (
@@ -142,7 +142,7 @@ function Etape({ fait, libelle, detail }: { fait: boolean; libelle: string; deta
       />
       <span className={fait ? "font-medium" : "text-muted-foreground"}>
         {libelle}
-        <span className="ml-1 font-normal text-muted-foreground text-xs">— {detail}</span>
+        <span className="ml-1 font-normal text-muted-foreground text-xs">- {detail}</span>
       </span>
     </li>
   );

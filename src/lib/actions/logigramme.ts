@@ -18,7 +18,7 @@ function svgFromDataUrl(dataUrl: string): Buffer | null {
  * et renvoie les URLs stables du SVG (affichage) et du XML (ré-édition).
  *
  * Pourquoi : auparavant le SVG complet était stocké en data-URL DANS le contenu
- * du document et renvoyé à chaque sauvegarde automatique — fragile (poids,
+ * du document et renvoyé à chaque sauvegarde automatique - fragile (poids,
  * échecs silencieux) et source de pertes. Désormais le document ne garde que
  * deux URLs légères.
  */

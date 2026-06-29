@@ -26,7 +26,7 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
     startTransition(async () => {
       const r = await quickUpdateNcAction({ id, statut: next });
       if (!r.ok) {
-        handleStatutError(r);
+        handleStatutError(r, id);
         setVal(value);
       }
     });

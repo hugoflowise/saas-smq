@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 /**
  * Définition du mot de passe, atteinte via un lien d'invitation ou de
  * réinitialisation. Le lien connecte automatiquement l'utilisateur ; cette page
- * est volontairement HORS du shell applicatif (pas de menu) — comme la connexion.
+ * est volontairement HORS du shell applicatif (pas de menu) - comme la connexion.
  */
 export default function BienvenuePage() {
   return (

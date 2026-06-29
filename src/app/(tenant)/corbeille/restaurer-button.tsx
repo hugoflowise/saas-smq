@@ -10,7 +10,7 @@ import { useReadOnly } from "@/lib/hooks/read-only-context";
 
 /**
  * Bouton de restauration d'un élément en corbeille. Masqué pour les rôles en
- * lecture seule (auditeur) — la sécurité reste imposée côté serveur.
+ * lecture seule (auditeur) - la sécurité reste imposée côté serveur.
  */
 export function RestaurerButton({ table, id }: { table: string; id: string }) {
   const router = useRouter();

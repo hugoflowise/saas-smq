@@ -95,7 +95,7 @@ export function NcKanban({ initial }: { initial: KanbanNc[] }) {
     const result = await setNcStatutAction({ id, statut: target });
     if (!result.ok) {
       setItems(previous);
-      handleStatutError(result);
+      handleStatutError(result, id);
     }
   }
 

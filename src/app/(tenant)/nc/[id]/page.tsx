@@ -85,7 +85,7 @@ export default async function NcDetailPage({
     .filter((a) => !linkedIds.includes(a.id))
     .map((a) => ({ id: a.id, reference: a.reference, description_courte: a.description_courte }));
 
-  // §10.2 — état de la vérification d'efficacité des actions correctives liées.
+  // §10.2 - état de la vérification d'efficacité des actions correctives liées.
   // Le verdict de clôture (efficace/inefficace) reste bloqué tant qu'une corrective
   // n'a pas sa date ET son résultat de vérification renseignés.
   const correctivesLiees = linked.filter((a) => a.type === "corrective");
@@ -174,7 +174,7 @@ export default async function NcDetailPage({
               <CardTitle className="text-base">Actions correctives</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              {/* §10.2 — explication du verrou de clôture si une corrective est liée. */}
+              {/* §10.2 - explication du verrou de clôture si une corrective est liée. */}
               {clotureBloquee ? (
                 <p
                   className={`rounded-md border px-3 py-2 text-sm ${

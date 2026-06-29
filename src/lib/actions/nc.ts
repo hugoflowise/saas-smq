@@ -19,7 +19,7 @@ const STATUTS_CLOTURE = ["cloturee", ...STATUTS_VERDICT] as const;
 type StatutNc = "ouverte" | "analysee" | "action_definie" | "cloturee" | "efficace" | "inefficace";
 
 /**
- * §10.2 — Verrou d'efficacité des actions correctives.
+ * §10.2 - Verrou d'efficacité des actions correctives.
  *
  * Empêche de clôturer une NC sans preuve d'efficacité probante :
  *  - une NC ayant au moins une action corrective liée ne peut pas être passée à

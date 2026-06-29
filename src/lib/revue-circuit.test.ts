@@ -41,7 +41,7 @@ describe("revueComplete (verrou §9.3)", () => {
   it("considère un champ rempli d'espaces comme manquant (trim)", () => {
     const r = revueComplete({ ...revueComplete_, sortie_changements: "   " });
     expect(r.complete).toBe(false);
-    expect(r.manquants).toEqual(["Sortie — Besoins de changement du SMQ"]);
+    expect(r.manquants).toEqual(["Sortie - Besoins de changement du SMQ"]);
   });
 
   it("signale une seule rubrique manquante", () => {
