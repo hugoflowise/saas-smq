@@ -7,6 +7,7 @@ import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { objectifProgress } from "@/lib/objectifs";
+import { loadOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -193,6 +194,12 @@ export default async function DashboardPage() {
   const aValiderTotal =
     (partiesAValider.count ?? 0) + (processusAValider.count ?? 0) + (actionsAValider.count ?? 0);
 
+  // État de la mise en route : pilote le bandeau d'accueil. On guide le nouveau
+  // dirigeant tant que les 7 étapes ne sont pas terminées (et pas seulement
+  // tant qu'il reste des éléments préremplis à valider).
+  const onboarding = await loadOnboarding(tid);
+  const prochaineEtape = onboarding.steps.find((s) => s.cle === onboarding.prochaineCle) ?? null;
+
   // Échéances à venir (30 jours) : agrégation multi-modules
   const [auditsAvenir, revuesAvenir, roAvenir, actionsAvenir, reunionsAvenir, jalonsAvenir] =
     await Promise.all([
@@ -346,18 +353,26 @@ export default async function DashboardPage() {
         description="Vue d'ensemble du Système de Management de la Qualité."
       />
 
-      {aValiderTotal > 0 ? (
+      {onboarding.complete ? null : (
         <Link href="/mise-en-route" className="mb-6 block">
           <div className="flex items-center justify-between gap-3 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-3 transition-colors hover:bg-status-pa/15">
-            <p className="text-sm text-status-pa">
-              <strong>{aValiderTotal}</strong> élément{aValiderTotal > 1 ? "s" : ""} prérempli
-              {aValiderTotal > 1 ? "s" : ""} {aValiderTotal > 1 ? "restent" : "reste"} à passer en
-              revue et valider.
-            </p>
-            <span className="shrink-0 font-medium text-primary text-sm">Mise en route →</span>
+            <div className="min-w-0">
+              <p className="font-medium text-sm text-status-pa">
+                Bienvenue dans votre espace qualité · mise en route {onboarding.done}/
+                {onboarding.total} étapes
+              </p>
+              <p className="mt-0.5 text-status-pa/80 text-xs">
+                {aValiderTotal > 0
+                  ? `Votre espace est déjà pré-rempli : ${aValiderTotal} élément${aValiderTotal > 1 ? "s" : ""} à passer en revue et valider.`
+                  : prochaineEtape
+                    ? `Prochaine étape : ${prochaineEtape.titre}.`
+                    : "Finalisez les dernières étapes de configuration."}
+              </p>
+            </div>
+            <span className="shrink-0 font-medium text-primary text-sm">Continuer →</span>
           </div>
         </Link>
-      ) : null}
+      )}
 
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((s) => (
