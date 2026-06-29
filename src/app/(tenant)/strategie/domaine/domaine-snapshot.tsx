@@ -13,8 +13,6 @@ export type DomaineSnapshot = {
   exclusions: DomaineExclusion[];
   dateEtablissement?: string | null;
   prochaineRevue?: string | null;
-  valideLe?: string | null;
-  validateur?: string | null;
 };
 
 /** Rendu en lecture seule d'un domaine d'application figé (historique des versions). */
@@ -70,13 +68,10 @@ export function DomaineSnapshotView({ snapshot }: { snapshot: DomaineSnapshot })
         )}
       </section>
 
-      {snapshot.dateEtablissement || snapshot.prochaineRevue || snapshot.valideLe ? (
+      {snapshot.dateEtablissement || snapshot.prochaineRevue ? (
         <p className="text-muted-foreground text-sm">
           Établi le {formatDate(snapshot.dateEtablissement ?? null)} · Prochaine revue :{" "}
           {formatDate(snapshot.prochaineRevue ?? null)}
-          {snapshot.valideLe
-            ? ` · Validé le ${formatDate(snapshot.valideLe)}${snapshot.validateur ? ` par ${snapshot.validateur}` : ""}`
-            : ""}
         </p>
       ) : null}
     </div>

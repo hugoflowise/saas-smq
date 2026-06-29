@@ -66,24 +66,11 @@ export async function publishDomaineVersionAction(): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: domaine } = await supabase
     .from("domaine_application")
-    .select(
-      "perimetre, sites, exclusions, date_etablissement, prochaine_revue, valide_le, valide_par",
-    )
+    .select("perimetre, sites, exclusions, date_etablissement, prochaine_revue")
     .eq("tenant_id", tid)
     .maybeSingle();
   if (!domaine) {
     return { ok: false, error: "Renseignez d'abord le domaine d'application." };
-  }
-
-  // Nom du validateur (capturé dans l'instantané pour la traçabilité).
-  let validateur: string | null = null;
-  if (domaine.valide_par) {
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("full_name, email")
-      .eq("id", domaine.valide_par)
-      .maybeSingle();
-    validateur = p?.full_name ?? p?.email ?? null;
   }
 
   const exRaw = Array.isArray(domaine.exclusions) ? domaine.exclusions : [];
@@ -98,8 +85,6 @@ export async function publishDomaineVersionAction(): Promise<ActionResult> {
     exclusions,
     dateEtablissement: domaine.date_etablissement,
     prochaineRevue: domaine.prochaine_revue,
-    valideLe: domaine.valide_le,
-    validateur,
   };
 
   // Version = lettre suivant la plus haute déjà attribuée (anti-collision après suppression).
@@ -141,26 +126,6 @@ export async function deleteDomaineVersionAction(id: string): Promise<ActionResu
     return { ok: false, error: "Suppression refusée (droits ou version introuvable)." };
   }
 
-  revalidatePath("/strategie/domaine");
-  return { ok: true };
-}
-
-/** Valide (ou retire la validation) du domaine d'application - preuve d'approbation direction. */
-export async function validerDomaineAction(valider: boolean): Promise<ActionResult> {
-  const ctx = await getTenantContext();
-  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
-  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("domaine_application")
-    .update({
-      valide_par: valider ? ctx.userId : null,
-      valide_le: valider ? new Date().toISOString() : null,
-      updated_by: ctx.userId,
-    })
-    .eq("tenant_id", ctx.effectiveTenantId);
-  if (error) return { ok: false, error: error.message };
   revalidatePath("/strategie/domaine");
   return { ok: true };
 }
