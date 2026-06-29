@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isModuleVisible } from "@/lib/modules";
 import { ADMIN_NAV_SECTION, NAV_ITEMS_GESTION_UTILISATEURS, NAV_SECTIONS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -14,12 +15,15 @@ export function NavLinks({
   isAdmin = false,
   canManageUsers = false,
   showOnboarding = true,
+  normesActives = ["9001"],
   onNavigate,
 }: {
   isAdmin?: boolean;
   canManageUsers?: boolean;
   /** Affiche l'entrée « Mise en route » (masquée une fois la mise en route terminée). */
   showOnboarding?: boolean;
+  /** Référentiels actifs du client : pilote l'affichage des modules métier. */
+  normesActives?: string[];
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -30,7 +34,12 @@ export function NavLinks({
     ...(showOnboarding ? [] : ["/mise-en-route"]),
   ];
   const sections = baseSections
-    .map((s) => ({ ...s, items: s.items.filter((i) => !masques.includes(i.href)) }))
+    .map((s) => ({
+      ...s,
+      items: s.items.filter(
+        (i) => !masques.includes(i.href) && isModuleVisible(i.href, normesActives),
+      ),
+    }))
     .filter((s) => s.items.length > 0);
 
   return (

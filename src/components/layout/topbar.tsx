@@ -34,6 +34,8 @@ type TopBarProps = {
   canManageUsers: boolean;
   /** Affiche l'entrée « Mise en route » (masquée une fois terminée). */
   showOnboarding: boolean;
+  /** Référentiels actifs du client : pilote l'affichage des modules métier. */
+  normesActives: string[];
   tenants: { id: string; nom: string }[];
   activeTenantId: string | null;
   activeTenantName: string | null;
@@ -49,6 +51,7 @@ export function TopBar({
   simulating,
   canManageUsers,
   showOnboarding,
+  normesActives,
   tenants,
   activeTenantId,
   activeTenantName,
@@ -92,6 +95,7 @@ export function TopBar({
                 isAdmin={isAdmin}
                 canManageUsers={canManageUsers}
                 showOnboarding={showOnboarding}
+                normesActives={normesActives}
                 onNavigate={() => setMobileOpen(false)}
               />
             </div>

@@ -41,25 +41,30 @@ export default async function TenantLayout({ children }: { children: React.React
   let tenants: { id: string; nom: string }[] = [];
   let activeTenantId: string | null = null;
   let activeTenantName: string | null = null;
+  // Référentiels actifs du client courant : pilote l'affichage des modules.
+  let normesActives: string[] = ["9001"];
 
   if (realIsAdmin) {
     const admin = createAdminClient();
     const { data } = await admin
       .from("tenants")
-      .select("id, nom_societe")
+      .select("id, nom_societe, normes_actives")
       .is("deleted_at", null)
       .order("nom_societe", { ascending: true });
     tenants = (data ?? []).map((t) => ({ id: t.id, nom: t.nom_societe }));
     activeTenantId = await getActiveTenantId();
-    activeTenantName = tenants.find((t) => t.id === activeTenantId)?.nom ?? null;
+    const active = (data ?? []).find((t) => t.id === activeTenantId);
+    activeTenantName = active?.nom_societe ?? null;
+    normesActives = active?.normes_actives ?? ["9001"];
   } else if (profile?.tenant_id) {
     activeTenantId = profile.tenant_id;
     const { data: tenant } = await supabase
       .from("tenants")
-      .select("nom_societe")
+      .select("nom_societe, normes_actives")
       .eq("id", profile.tenant_id)
       .maybeSingle();
     activeTenantName = tenant?.nom_societe ?? null;
+    normesActives = tenant?.normes_actives ?? ["9001"];
   }
 
   // Notifications (cloche) : logique partagée avec la page /notifications.
@@ -77,6 +82,7 @@ export default async function TenantLayout({ children }: { children: React.React
         isAdmin={isAdmin}
         canManageUsers={canManageUsers(role)}
         showOnboarding={showOnboarding}
+        normesActives={normesActives}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
@@ -87,6 +93,7 @@ export default async function TenantLayout({ children }: { children: React.React
           simulating={simulating}
           canManageUsers={canManageUsers(role)}
           showOnboarding={showOnboarding}
+          normesActives={normesActives}
           tenants={tenants}
           activeTenantId={activeTenantId}
           activeTenantName={activeTenantName}
