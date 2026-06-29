@@ -35,6 +35,8 @@ export type ActionRow = {
   date_prevue: string | null;
   indicateur_efficacite: string | null;
   resultat_efficacite: string | null;
+  date_verification_efficacite: string | null;
+  resultat_verification: string | null;
   commentaires: string | null;
   constat?: string | null;
   cause_fondamentale?: string | null;
@@ -92,6 +94,8 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
           datePrevue: form.get("datePrevue") || undefined,
           indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
           resultatEfficacite: form.get("resultatEfficacite") || undefined,
+          dateVerificationEfficacite: form.get("dateVerificationEfficacite") || undefined,
+          resultatVerification: form.get("resultatVerification") || undefined,
           commentaires: form.get("commentaires") || undefined,
           cotation: form.get("cotation") || undefined,
           constat: form.get("constat") || undefined,
@@ -271,6 +275,29 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
               name="indicateurEfficacite"
               defaultValue={action?.indicateur_efficacite ?? ""}
             />
+          </div>
+          {/* §10.2 — vérification de l'efficacité : quand + résultat probant.
+              Requis pour pouvoir clôturer une NC liée avec un verdict. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[max-content_1fr]">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dateVerificationEfficacite">Date de vérification d'efficacité</Label>
+              <Input
+                id="dateVerificationEfficacite"
+                name="dateVerificationEfficacite"
+                type="date"
+                defaultValue={action?.date_verification_efficacite ?? ""}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="resultatVerification">Résultat de la vérification</Label>
+              <Textarea
+                id="resultatVerification"
+                name="resultatVerification"
+                rows={2}
+                defaultValue={action?.resultat_verification ?? ""}
+                placeholder="Constat probant : l'action est-elle efficace ? preuve à l'appui…"
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="resultatEfficacite">

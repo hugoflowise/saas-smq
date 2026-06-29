@@ -25,6 +25,7 @@ export type Database = {
           date_creation: string
           date_effective: string | null
           date_prevue: string | null
+          date_verification_efficacite: string | null
           deleted_at: string | null
           description_courte: string
           description_detail: string | null
@@ -39,6 +40,7 @@ export type Database = {
           reference_iso: string[] | null
           resultat_efficacite: string | null
           responsable_id: string | null
+          resultat_verification: string | null
           revue_id: string | null
           statut: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
@@ -57,6 +59,7 @@ export type Database = {
           date_creation?: string
           date_effective?: string | null
           date_prevue?: string | null
+          date_verification_efficacite?: string | null
           deleted_at?: string | null
           description_courte: string
           description_detail?: string | null
@@ -71,6 +74,7 @@ export type Database = {
           reference_iso?: string[] | null
           resultat_efficacite?: string | null
           responsable_id?: string | null
+          resultat_verification?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
@@ -89,6 +93,7 @@ export type Database = {
           date_creation?: string
           date_effective?: string | null
           date_prevue?: string | null
+          date_verification_efficacite?: string | null
           deleted_at?: string | null
           description_courte?: string
           description_detail?: string | null
@@ -103,6 +108,7 @@ export type Database = {
           reference_iso?: string[] | null
           resultat_efficacite?: string | null
           responsable_id?: string | null
+          resultat_verification?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id?: string

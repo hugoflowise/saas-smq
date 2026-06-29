@@ -73,7 +73,9 @@ export default async function NcDetailPage({
 
   const { data: allActions } = await supabase
     .from("actions")
-    .select("id, reference, description_courte, statut")
+    .select(
+      "id, reference, description_courte, statut, type, date_verification_efficacite, resultat_verification",
+    )
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("reference", { ascending: true });
@@ -82,6 +84,16 @@ export default async function NcDetailPage({
   const available = (allActions ?? [])
     .filter((a) => !linkedIds.includes(a.id))
     .map((a) => ({ id: a.id, reference: a.reference, description_courte: a.description_courte }));
+
+  // §10.2 — état de la vérification d'efficacité des actions correctives liées.
+  // Le verdict de clôture (efficace/inefficace) reste bloqué tant qu'une corrective
+  // n'a pas sa date ET son résultat de vérification renseignés.
+  const correctivesLiees = linked.filter((a) => a.type === "corrective");
+  const correctivesNonVerifiees = correctivesLiees.filter(
+    (a) => !a.date_verification_efficacite || !a.resultat_verification?.trim(),
+  );
+  const clotureBloquee = correctivesLiees.length > 0;
+  const verdictBloque = correctivesNonVerifiees.length > 0;
 
   const rawCauses = (nc.causes_identifiees ?? {}) as {
     probleme?: string;
@@ -161,7 +173,21 @@ export default async function NcDetailPage({
             <CardHeader>
               <CardTitle className="text-base">Actions correctives</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-4">
+              {/* §10.2 — explication du verrou de clôture si une corrective est liée. */}
+              {clotureBloquee ? (
+                <p
+                  className={`rounded-md border px-3 py-2 text-sm ${
+                    verdictBloque
+                      ? "border-status-nc-mineure/40 bg-status-nc-mineure/10 text-status-nc-mineure"
+                      : "border-status-conforme/40 bg-status-conforme/10 text-status-conforme"
+                  }`}
+                >
+                  {verdictBloque
+                    ? "Clôture bloquée : renseignez la date ET le résultat de vérification d'efficacité de chaque action corrective, puis clôturez la NC avec un verdict Efficace ou Inefficace."
+                    : "Efficacité vérifiée : vous pouvez clôturer cette NC avec un verdict Efficace ou Inefficace (le statut « Clôturée » seul est refusé)."}
+                </p>
+              ) : null}
               <NcActionsLink ncId={nc.id} linked={linked} available={available} />
             </CardContent>
           </Card>
