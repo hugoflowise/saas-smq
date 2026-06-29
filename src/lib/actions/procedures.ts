@@ -148,6 +148,7 @@ const refSchema = z.object({
 const infosSchema = z.object({
   id: z.string().uuid(),
   objet: z.string().trim().optional(),
+  noteRevision: z.string().trim().optional(),
   domaineApplication: z.string().trim().optional(),
   resume: z.string().trim().optional(),
   diffusion: z.string().trim().optional(),
@@ -189,6 +190,7 @@ export async function saveProcedureInfosAction(input: unknown): Promise<ActionRe
     .from("procedures")
     .update({
       objet: d.objet ?? null,
+      note_revision: d.noteRevision ?? null,
       domaine_application: d.domaineApplication ?? null,
       resume: d.resume ?? null,
       diffusion: d.diffusion ?? null,

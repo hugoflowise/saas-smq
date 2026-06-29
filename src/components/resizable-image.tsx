@@ -12,7 +12,7 @@ import { uploadLogigrammeAction } from "@/lib/actions/logigramme";
  *  - redimensionnable (poignée en bas à droite, largeur dans l'attribut `width`) ;
  *  - logigramme draw.io : `drawioUrl` pointe vers le XML stocké (ré-éditable).
  *    Le SVG et le XML vivent dans le stockage (URLs stables) et non plus en
- *    data-URL dans le document — fini les pertes à la sauvegarde.
+ *    data-URL dans le document - fini les pertes à la sauvegarde.
  *    `drawioXml` (ancien attribut, XML en clair) reste lu pour rétro-compat.
  */
 export const ResizableImage = Image.extend({

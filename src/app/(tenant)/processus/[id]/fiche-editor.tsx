@@ -181,7 +181,7 @@ export function FicheEditor({
                             {u.nom}
                           </option>
                         ))}
-                        <option value="__autre__">Autre — personne sans compte…</option>
+                        <option value="__autre__">Autre - personne sans compte…</option>
                       </select>
                       {pl.mode === "__autre__" ? (
                         <Input

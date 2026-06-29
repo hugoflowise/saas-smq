@@ -5,12 +5,24 @@ import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
-import { ACTION_STATUT_LABELS, REVUE_STATUT_LABELS as STATUT_LABELS } from "@/lib/labels";
-import { computeRevuePerformance, type RevuePerformance, revuePerfCells } from "@/lib/revue-perf";
+import {
+  ACTION_STATUT_LABELS,
+  RO_STATUT_LABELS,
+  REVUE_STATUT_LABELS as STATUT_LABELS,
+} from "@/lib/labels";
+import { canApprove, canWrite } from "@/lib/permissions";
+import { revueComplete } from "@/lib/revue-circuit";
+import {
+  computeRevueEntreesPrefill,
+  computeRevuePerformance,
+  type RevuePerformance,
+  revuePerfCells,
+} from "@/lib/revue-perf";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { RevueDialog } from "../revue-dialog";
 import { RevueActionForm } from "./revue-action-form";
+import { RevueApprobation } from "./revue-approbation";
 import { RevuePerformanceCapture } from "./revue-performance-capture";
 import type { RevueParticipant } from "./revue-structure-editor";
 import { RevueStructureEditor } from "./revue-structure-editor";
@@ -26,7 +38,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   const { data: revue } = await supabase
     .from("revues_direction")
     .select(
-      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, participants, points_specifiques",
+      "id, annee, date_realisation, statut, ordre_du_jour, conclusions, decisions, donnees_performance, donnees_capturees_le, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, participants, points_specifiques, verifie_par, verifie_le, approuve_par, approuve_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -37,6 +49,33 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
   // Données de performance : instantané figé si capturé, sinon valeurs vivantes.
   const snapshot = revue.donnees_performance as RevuePerformance | null;
   const perf = snapshot ?? (await computeRevuePerformance(supabase, tid, revue.annee));
+
+  // Aide à la saisie des entrées (§9.3.2 a et e) : actions des revues
+  // antérieures + R&O critiques du client (calculées en direct, jamais figées).
+  const prefill = await computeRevueEntreesPrefill(supabase, tid, revue.annee, revue.id);
+
+  // Circuit de validation (§9.3) : vérification puis approbation/signature.
+  // Verrou de complétude : les 6 entrées (a→f) + 3 sorties doivent être remplies.
+  const { complete, manquants } = revueComplete(revue);
+  const peutApprouver = canApprove(ctx.role);
+  const peutVerifier = canWrite(ctx.role);
+
+  // Noms du vérificateur et de l'approbateur pour l'affichage du circuit.
+  const validateurIds = [revue.verifie_par, revue.approuve_par].filter((v): v is string =>
+    Boolean(v),
+  );
+  const nomParId = new Map<string, string>();
+  if (validateurIds.length > 0) {
+    const { data: validateurs } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", validateurIds);
+    for (const v of validateurs ?? []) {
+      nomParId.set(v.id, v.full_name || v.email || "-");
+    }
+  }
+  const verifieParNom = revue.verifie_par ? (nomParId.get(revue.verifie_par) ?? null) : null;
+  const approuveParNom = revue.approuve_par ? (nomParId.get(revue.approuve_par) ?? null) : null;
 
   // Actions décidées en revue (§9.3.3) rattachées à cette revue.
   const { data: linkedActions } = await supabase
@@ -65,7 +104,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
       </PageHeader>
 
       <div className="flex flex-col gap-6">
-        {/* §9.3.2 c — Données de performance du SMQ */}
+        {/* §9.3.2 c - Données de performance du SMQ */}
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-3">
             <div>
@@ -73,7 +112,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
               <p className="mt-1 text-muted-foreground text-xs">
                 {revue.donnees_capturees_le
                   ? `Données figées le ${formatDate(revue.donnees_capturees_le)}.`
-                  : "Données vivantes (non figées) — capturez-les pour conserver la trace examinée en revue."}
+                  : "Données vivantes (non figées) - capturez-les pour conserver la trace examinée en revue."}
               </p>
             </div>
             <RevuePerformanceCapture
@@ -86,8 +125,19 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           </CardContent>
         </Card>
 
-        {/* §9.3.2 a→f + §9.3.3 — éléments d'entrée / sortie */}
+        {/* §9.3.2 a→f + §9.3.3 - éléments d'entrée / sortie */}
         <RevueStructureEditor
+          prefill={{
+            actionsAnterieures: prefill.actionsAnterieures.map((a) => ({
+              ...a,
+              statutLabel:
+                ACTION_STATUT_LABELS[a.statut as keyof typeof ACTION_STATUT_LABELS] ?? a.statut,
+            })),
+            roCritiques: prefill.roCritiques.map((r) => ({
+              ...r,
+              statutLabel: RO_STATUT_LABELS[r.statut as keyof typeof RO_STATUT_LABELS] ?? r.statut,
+            })),
+          }}
           initial={{
             id: revue.id,
             participants: (revue.participants as RevueParticipant[]) ?? [],
@@ -104,7 +154,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
           }}
         />
 
-        {/* §9.3.3 — actions décidées rattachées à la revue */}
+        {/* §9.3.3 - actions décidées rattachées à la revue */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle className="text-base">Actions décidées (§9.3.3)</CardTitle>
@@ -135,6 +185,33 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
                 ))}
               </ul>
             )}
+          </CardContent>
+        </Card>
+
+        {/* §9.3 - validation EN FIN de revue : vérification puis approbation/signature */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Validation de la revue (§9.3)</CardTitle>
+            <p className="mt-1 text-muted-foreground text-xs">
+              Dernière étape : une fois la revue complète, elle doit être vérifiée, puis approuvée
+              et signée par la direction (l'approbateur doit être différent du vérificateur).
+            </p>
+          </CardHeader>
+          <CardContent>
+            <RevueApprobation
+              revueId={revue.id}
+              etat={{
+                complete,
+                manquants,
+                verifieParNom,
+                verifieLe: revue.verifie_le ? formatDate(revue.verifie_le) : null,
+                approuveParNom,
+                approuveLe: revue.approuve_le ? formatDate(revue.approuve_le) : null,
+                peutVerifier,
+                peutApprouver,
+                estVerificateur: Boolean(revue.verifie_par && revue.verifie_par === ctx.userId),
+              }}
+            />
           </CardContent>
         </Card>
       </div>

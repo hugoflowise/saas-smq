@@ -120,7 +120,7 @@ export default async function AdminRetoursPage() {
               <TableBody>
                 {retours.map((r) => {
                   const author = r.created_by ? authorById.get(r.created_by) : null;
-                  const auteurNom = author ? nomPersonne(author.full_name, author.email) : "—";
+                  const auteurNom = author ? nomPersonne(author.full_name, author.email) : "-";
                   const clientNom = r.tenant_id ? (tenantById.get(r.tenant_id) ?? null) : null;
                   // Les retours clos (traité / rejeté) sont atténués pour faire
                   // ressortir les sujets encore à traiter.

@@ -18,6 +18,7 @@ import {
   MessagesSquare,
   Milestone,
   Presentation,
+  Replace,
   Rocket,
   Scale,
   ScrollText,
@@ -25,6 +26,7 @@ import {
   ShieldCheck,
   Smile,
   Target,
+  Trash2,
   Truck,
   UserCog,
   Users,
@@ -53,6 +55,9 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Réunions QHSE", href: "/reunions", icon: MessagesSquare },
       { label: "Mode audit", href: "/mode-audit", icon: Presentation },
       { label: "Effectif & couverture", href: "/effectif", icon: UsersRound },
+      // Compétences (§7.2) masqué tant que l'intégration Boond n'alimente pas
+      // les diplômes/habilitations par collaborateur. La page reste accessible
+      // par URL et sera réactivée avec Boond. Voir [[chantier-conformite-9001-staging]].
       { label: "Suivi consultant", href: "/suivi-consultant", icon: ClipboardList },
     ],
   },
@@ -64,6 +69,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Domaine d'application", href: "/strategie/domaine", icon: Milestone },
       { label: "Parties prenantes", href: "/strategie/parties-prenantes", icon: Users },
       { label: "Risques & opportunités", href: "/risques", icon: ShieldCheck },
+      { label: "Modifications du SMQ", href: "/modifications-smq", icon: Replace },
     ],
   },
   {
@@ -106,6 +112,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Utilisateurs", href: "/utilisateurs", icon: UserCog },
       { label: "Main courante", href: "/journal", icon: History },
       { label: "Paramètres", href: "/parametres", icon: Settings },
+      { label: "Corbeille", href: "/corbeille", icon: Trash2 },
     ],
   },
 ];

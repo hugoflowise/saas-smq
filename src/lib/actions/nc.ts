@@ -11,6 +11,66 @@ import { nextActionReference } from "./plan-actions";
 
 type NcUpdate = Database["public"]["Tables"]["non_conformites"]["Update"];
 
+// Statuts de clôture d'une NC. `cloturee` = clôture neutre ; `efficace`/
+// `inefficace` = clôture avec verdict d'efficacité (le seul niveau probant).
+const STATUTS_VERDICT = ["efficace", "inefficace"] as const;
+const STATUTS_CLOTURE = ["cloturee", ...STATUTS_VERDICT] as const;
+
+type StatutNc = "ouverte" | "analysee" | "action_definie" | "cloturee" | "efficace" | "inefficace";
+
+/**
+ * §10.2 - Verrou d'efficacité des actions correctives.
+ *
+ * Empêche de clôturer une NC sans preuve d'efficacité probante :
+ *  - une NC ayant au moins une action corrective liée ne peut pas être passée à
+ *    `cloturee` (raccourci qui saute le verdict) : il faut choisir efficace/inefficace ;
+ *  - pour atteindre `efficace`/`inefficace`, chaque action corrective liée doit avoir
+ *    une `date_verification_efficacite` ET un `resultat_verification` renseignés.
+ *
+ * Renvoie `null` si la transition est autorisée, sinon le message d'erreur FR.
+ * N'intervient que sur les transitions vers un statut de clôture (le reste passe).
+ */
+async function verifierVerrouCloture(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+  ncId: string,
+  statutCible: StatutNc,
+): Promise<string | null> {
+  if (!(STATUTS_CLOTURE as readonly string[]).includes(statutCible)) return null;
+
+  // Actions correctives liées (on ignore celles à la corbeille).
+  const { data: links } = await supabase
+    .from("nc_actions")
+    .select("action_id")
+    .eq("nc_id", ncId)
+    .eq("tenant_id", tenantId);
+  const actionIds = (links ?? []).map((l) => l.action_id);
+  if (actionIds.length === 0) return null; // pas d'action corrective : clôture libre.
+
+  const { data: actions } = await supabase
+    .from("actions")
+    .select("type, date_verification_efficacite, resultat_verification")
+    .in("id", actionIds)
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null);
+  const correctives = (actions ?? []).filter((a) => a.type === "corrective");
+  if (correctives.length === 0) return null; // aucune action corrective active.
+
+  // `cloturee` ne doit pas servir de raccourci : on impose le verdict.
+  if (statutCible === "cloturee") {
+    return "Cette NC a une action corrective : clôturez-la avec un verdict d'efficacité (Efficace ou Inefficace), pas via le statut « Clôturée ».";
+  }
+
+  // Verdict efficace/inefficace : chaque corrective doit être vérifiée (date + résultat).
+  const nonVerifiees = correctives.filter(
+    (a) => !a.date_verification_efficacite || !a.resultat_verification?.trim(),
+  );
+  if (nonVerifiees.length > 0) {
+    return "Impossible de prononcer un verdict d'efficacité : chaque action corrective liée doit d'abord avoir une date de vérification d'efficacité ET un résultat de vérification renseignés.";
+  }
+  return null;
+}
+
 const base = {
   intitule: z.string().trim().min(2, "Intitulé requis."),
   description: z.string().trim().optional(),
@@ -277,6 +337,16 @@ export async function setNcStatutAction(input: unknown): Promise<ActionResult> {
 
   const isCloture = ["cloturee", "efficace", "inefficace"].includes(parsed.data.statut);
   const supabase = await createClient();
+
+  // Verrou §10.2 : pas de clôture sans verdict d'efficacité probant.
+  const verrou = await verifierVerrouCloture(
+    supabase,
+    ctx.effectiveTenantId,
+    parsed.data.id,
+    parsed.data.statut,
+  );
+  if (verrou) return { ok: false, error: verrou };
+
   const { error } = await supabase
     .from("non_conformites")
     .update({
@@ -311,8 +381,13 @@ export async function quickUpdateNcAction(input: unknown): Promise<ActionResult>
   if (!parsed.success) return { ok: false, error: "Données invalides." };
   const d = parsed.data;
 
+  const supabase = await createClient();
+
   const patch: NcUpdate = { updated_by: ctx.userId };
   if (d.statut !== undefined) {
+    // Verrou §10.2 : pas de clôture sans verdict d'efficacité probant.
+    const verrou = await verifierVerrouCloture(supabase, ctx.effectiveTenantId, d.id, d.statut);
+    if (verrou) return { ok: false, error: verrou };
     patch.statut = d.statut;
     patch.date_cloture = ["cloturee", "efficace", "inefficace"].includes(d.statut)
       ? todayISO()
@@ -320,7 +395,6 @@ export async function quickUpdateNcAction(input: unknown): Promise<ActionResult>
   }
   if (d.gravite !== undefined) patch.gravite = d.gravite;
 
-  const supabase = await createClient();
   const { error } = await supabase
     .from("non_conformites")
     .update(patch)
@@ -344,6 +418,11 @@ export async function updateNcAction(input: unknown): Promise<ActionResult> {
   const isCloture = ["cloturee", "efficace", "inefficace"].includes(d.statut);
 
   const supabase = await createClient();
+
+  // Verrou §10.2 : pas de clôture sans verdict d'efficacité probant.
+  const verrou = await verifierVerrouCloture(supabase, ctx.effectiveTenantId, d.id, d.statut);
+  if (verrou) return { ok: false, error: verrou };
+
   const { error } = await supabase
     .from("non_conformites")
     .update({

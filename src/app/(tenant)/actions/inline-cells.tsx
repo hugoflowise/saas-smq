@@ -6,15 +6,12 @@ import { quickUpdateActionAction } from "@/lib/actions/plan-actions";
 import { COTATION_BADGE_CLASS } from "@/lib/badges";
 import { TIMEZONE } from "@/lib/format";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
-import { ACTION_PRIORITE_LABELS, ACTION_STATUT_LABELS } from "@/lib/labels";
-
-const COTATION_OPTIONS: Record<string, string> = {
-  non_evalue: "Non évalué",
-  conforme: "Conforme",
-  point_attention: "Point d'attention",
-  nc_mineure: "NC mineure",
-  nc_majeure: "NC majeure",
-};
+import {
+  ACTION_PRIORITE_LABELS,
+  ACTION_STATUT_LABELS,
+  COTATION_LABELS,
+  COTATION_OPTIONS,
+} from "@/lib/labels";
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
@@ -143,9 +140,9 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
   if (readOnly) {
     return (
       <span
-        className={`${STATIC} font-medium ${val !== "non_evalue" ? (COTATION_BADGE_CLASS[val] ?? "") : ""}`}
+        className={`${STATIC} font-medium ${val !== "non_evalue" ? (COTATION_BADGE_CLASS[val] ?? "") : "text-muted-foreground"}`}
       >
-        {COTATION_OPTIONS[val] ?? val}
+        {COTATION_LABELS[val as keyof typeof COTATION_LABELS] ?? val}
       </span>
     );
   }
@@ -155,9 +152,13 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
       value={val}
       onChange={onChange}
       disabled={pending}
-      className={`${CONTROL} font-medium ${val !== "non_evalue" ? (COTATION_BADGE_CLASS[val] ?? "") : ""}`}
+      className={`${CONTROL} font-medium ${val !== "non_evalue" ? (COTATION_BADGE_CLASS[val] ?? "") : "text-muted-foreground"}`}
       aria-label="Cotation"
     >
+      {/* État initial « non coté » : présent pour l'affichage, non re-sélectionnable. */}
+      <option value="non_evalue" disabled>
+        Non évalué
+      </option>
       {Object.entries(COTATION_OPTIONS).map(([v, label]) => (
         <option key={v} value={v}>
           {label}

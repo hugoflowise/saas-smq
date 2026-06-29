@@ -1,10 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import {
+  messageImpartialite,
+  type ProcessusPilotage,
+  processusEnConflit,
+} from "@/lib/audit-impartialite";
+import { canApprove, canWrite } from "@/lib/permissions";
+import { messageRevueIncomplete, type RevueChamps, revueComplete } from "@/lib/revue-circuit";
 import { computeRevuePerformance } from "@/lib/revue-perf";
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -20,6 +28,10 @@ const auditBase = {
   organisme: z.string().trim().optional(),
   perimetre: z.string().trim().optional(),
   processusAudites: z.array(z.string().uuid()).optional(),
+  auditeurId: z.string().uuid().optional(),
+  // Lève le garde-fou d'impartialité §9.2.2 (auditeur ≠ pilote du processus audité)
+  // lorsque le rédacteur confirme malgré l'avertissement.
+  forcerImpartialite: z.coerce.boolean().optional(),
   datePrevue: z.string().optional(),
   dateRealisee: z.string().optional(),
   dureePrevue: z.coerce.number().optional(),
@@ -44,6 +56,7 @@ function auditPayload(d: z.infer<typeof auditCreate>) {
     perimetre: d.perimetre ?? null,
     processus_audites:
       d.processusAudites && d.processusAudites.length > 0 ? d.processusAudites : null,
+    auditeur_id: d.auditeurId ?? null,
     date_prevue: d.datePrevue || null,
     date_realisee: d.dateRealisee || null,
     duree_prevue: d.dureePrevue ?? null,
@@ -53,11 +66,77 @@ function auditPayload(d: z.infer<typeof auditCreate>) {
   };
 }
 
+/**
+ * Garde-fou d'impartialité §9.2.2 : « les auditeurs ne doivent pas auditer
+ * leur propre travail ». Vérifie que l'auditeur retenu n'est pilote d'aucun
+ * des processus audités (un audit peut en couvrir plusieurs). Renvoie un
+ * message d'avertissement listant les processus concernés, ou `null` si tout
+ * est conforme. Le blocage est souple : le rédacteur peut passer outre via
+ * `forcerImpartialite`.
+ */
+async function verifierImpartialite(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+  auditeurId: string | undefined,
+  processusAudites: string[] | undefined,
+): Promise<string | null> {
+  if (!auditeurId || !processusAudites || processusAudites.length === 0) return null;
+
+  // Pilotes liés (table multi-pilotes) + pilote « legacy » porté par le processus.
+  const [pilotesRes, processusRes] = await Promise.all([
+    supabase
+      .from("processus_pilotes")
+      .select("processus_id, pilote_id")
+      .eq("tenant_id", tenantId)
+      .in("processus_id", processusAudites)
+      .is("deleted_at", null),
+    supabase
+      .from("processus")
+      .select("id, nom, pilote_id")
+      .eq("tenant_id", tenantId)
+      .in("id", processusAudites),
+  ]);
+
+  // Agrège les pilotes par processus (legacy + multi-pilotes), puis délègue la
+  // détection de conflit à la logique pure (testée unitairement).
+  const piloteIdsParProcessus = new Map<string, Set<string>>();
+  const nomParId = new Map((processusRes.data ?? []).map((p) => [p.id, p.nom]));
+  for (const p of processusRes.data ?? []) {
+    const set = piloteIdsParProcessus.get(p.id) ?? new Set<string>();
+    if (p.pilote_id) set.add(p.pilote_id);
+    piloteIdsParProcessus.set(p.id, set);
+  }
+  for (const r of pilotesRes.data ?? []) {
+    if (!r.pilote_id) continue;
+    const set = piloteIdsParProcessus.get(r.processus_id) ?? new Set<string>();
+    set.add(r.pilote_id);
+    piloteIdsParProcessus.set(r.processus_id, set);
+  }
+
+  const processus: ProcessusPilotage[] = [...piloteIdsParProcessus.entries()].map(([id, set]) => ({
+    id,
+    nom: nomParId.get(id) ?? "ce processus",
+    piloteIds: [...set],
+  }));
+
+  return messageImpartialite(processusEnConflit(auditeurId, processus));
+}
+
 export async function createAuditAction(input: unknown): Promise<ActionResult> {
   const c = await tenantWrite();
   if (!c) return { ok: false, error: "Sélectionnez d'abord un client." };
   const parsed = auditCreate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+
+  if (!parsed.data.forcerImpartialite) {
+    const avertissement = await verifierImpartialite(
+      c.supabase,
+      c.tenantId,
+      parsed.data.auditeurId,
+      parsed.data.processusAudites,
+    );
+    if (avertissement) return { ok: false, error: avertissement };
+  }
 
   const year = new Date().getFullYear();
   const prefix = `${AUDIT_PREFIX[parsed.data.typeAudit]}-${year}-`;
@@ -84,6 +163,17 @@ export async function updateAuditAction(input: unknown): Promise<ActionResult> {
   if (!c) return { ok: false, error: "Aucun client actif." };
   const parsed = auditUpdate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+
+  if (!parsed.data.forcerImpartialite) {
+    const avertissement = await verifierImpartialite(
+      c.supabase,
+      c.tenantId,
+      parsed.data.auditeurId,
+      parsed.data.processusAudites,
+    );
+    if (avertissement) return { ok: false, error: avertissement };
+  }
+
   const { error } = await c.supabase
     .from("audits_internes")
     .update({ ...auditPayload(parsed.data), updated_by: c.userId })
@@ -291,7 +381,9 @@ export async function unlinkAuditActionAction(
 const revueBase = {
   annee: z.coerce.number().int().min(2000).max(2100),
   dateRealisation: z.string().optional(),
-  statut: z.enum(["planifiee", "realisee", "cloturee"]),
+  // Défaut « planifiee » : à la création, le formulaire n'envoie pas de statut
+  // (une revue démarre toujours planifiée ; le statut n'est éditable qu'ensuite).
+  statut: z.enum(["planifiee", "realisee", "cloturee"]).default("planifiee"),
   ordreDuJour: z.string().trim().optional(),
   conclusions: z.string().trim().optional(),
   decisions: z.string().trim().optional(),
@@ -410,6 +502,122 @@ export async function captureRevuePerformanceAction(id: unknown): Promise<Action
     })
     .eq("id", revueId.data)
     .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${revueId.data}`);
+  return { ok: true };
+}
+
+// ------------------------------------------------------ Circuit de validation
+// Circuit en 2 étapes (§9.3), à l'image du circuit documentaire :
+//   1. Vérification (verifierRevueAction)  - rôle qualité/manager (writer).
+//   2. Approbation + signature (approveRevueAction) - direction (canApprove),
+//      après vérification, par une personne ≠ vérificateur (séparation des tâches).
+// Les deux exigent une revue complète (verrou de complétude §9.3.2/§9.3.3).
+
+/** Champs nécessaires au contrôle du circuit (complétude + état de validation). */
+const CIRCUIT_SELECT =
+  "entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, verifie_par, signature_data";
+
+/** Signature électronique horodatée (identité confirmée côté client par mdp). */
+async function captureSignature(userId: string): Promise<Json> {
+  const h = await headers();
+  return {
+    user_id: userId,
+    signed_at: new Date().toISOString(),
+    ip: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+    user_agent: h.get("user-agent") ?? null,
+  };
+}
+
+/**
+ * Vérification de la revue de direction (§9.3) : pose `verifie_par` + `verifie_le`.
+ * Exige une revue complète. Réservée aux rôles écriture (qualité/manager) ;
+ * l'auditeur (lecture seule) en est exclu.
+ */
+export async function verifierRevueAction(id: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const revueId = z.string().uuid().safeParse(id);
+  if (!revueId.success) return { ok: false, error: "Revue invalide." };
+
+  const supabase = await createClient();
+  const { data: revue, error: readErr } = await supabase
+    .from("revues_direction")
+    .select(CIRCUIT_SELECT)
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .maybeSingle();
+  if (readErr) return { ok: false, error: readErr.message };
+  if (!revue) return { ok: false, error: "Revue introuvable." };
+
+  const { complete, manquants } = revueComplete(revue as RevueChamps);
+  if (!complete) return { ok: false, error: messageRevueIncomplete(manquants) };
+
+  // Conserve la trace de signature existante (approbateur) en y ajoutant le visa.
+  const existing = (revue.signature_data as Record<string, Json> | null) ?? {};
+  const { error } = await supabase
+    .from("revues_direction")
+    .update({
+      verifie_par: ctx.userId,
+      verifie_le: new Date().toISOString(),
+      signature_data: { ...existing, verificateur: await captureSignature(ctx.userId) },
+      updated_by: ctx.userId,
+    })
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/revues/direction/${revueId.data}`);
+  return { ok: true };
+}
+
+/**
+ * Approbation + signature de la revue de direction (§9.3) : pose `approuve_par`
+ * + `approuve_le` et enregistre la signature dans `signature_data`.
+ * Exige : revue complète, déjà vérifiée, rôle direction (`canApprove`), et
+ * séparation des tâches (approbateur ≠ vérificateur).
+ */
+export async function approveRevueAction(id: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+  if (!canApprove(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const revueId = z.string().uuid().safeParse(id);
+  if (!revueId.success) return { ok: false, error: "Revue invalide." };
+
+  const supabase = await createClient();
+  const { data: revue, error: readErr } = await supabase
+    .from("revues_direction")
+    .select(CIRCUIT_SELECT)
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .maybeSingle();
+  if (readErr) return { ok: false, error: readErr.message };
+  if (!revue) return { ok: false, error: "Revue introuvable." };
+
+  const { complete, manquants } = revueComplete(revue as RevueChamps);
+  if (!complete) return { ok: false, error: messageRevueIncomplete(manquants) };
+  if (!revue.verifie_par) {
+    return { ok: false, error: "La revue doit d'abord être vérifiée avant d'être approuvée." };
+  }
+  if (revue.verifie_par === ctx.userId) {
+    return { ok: false, error: "L'approbateur doit être différent du vérificateur." };
+  }
+
+  const existing = (revue.signature_data as Record<string, Json> | null) ?? {};
+  const { error } = await supabase
+    .from("revues_direction")
+    .update({
+      approuve_par: ctx.userId,
+      approuve_le: new Date().toISOString(),
+      signature_data: { ...existing, approbateur: await captureSignature(ctx.userId) },
+      updated_by: ctx.userId,
+    })
+    .eq("id", revueId.data)
+    .eq("tenant_id", ctx.effectiveTenantId);
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/revues/direction/${revueId.data}`);
   return { ok: true };

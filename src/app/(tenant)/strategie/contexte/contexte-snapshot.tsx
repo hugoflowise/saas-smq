@@ -55,9 +55,9 @@ const PESTEL_FIELDS: { key: keyof ContextePestel; label: string; lettre: string 
   { key: "legal", label: "Légal", lettre: "L" },
 ];
 
-/** Liste de points en lecture seule (vide → « — »). */
+/** Liste de points en lecture seule (vide → « - »). */
 function Points({ items }: { items: string[] }) {
-  if (!items.length) return <p className="text-muted-foreground text-xs">—</p>;
+  if (!items.length) return <p className="text-muted-foreground text-xs">-</p>;
   return (
     <ul className="flex flex-col gap-1 text-sm">
       {items.map((item) => (

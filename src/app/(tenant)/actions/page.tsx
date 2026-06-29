@@ -15,6 +15,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
 import { CotationCell, EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
@@ -62,7 +63,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, commentaires, cotation, propose, valide_le",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, propose, valide_le",
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null);
@@ -156,11 +157,12 @@ export default async function ActionsPage({
             <TableHeader>
               <TableRow>
                 <TableHead>Réf.</TableHead>
-                <TableHead>Intitulé</TableHead>
+                <TableHead className="min-w-[220px]">Intitulé</TableHead>
                 <TableHead>Cotation</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Échéance</TableHead>
+                <TableHead className="min-w-[200px]">Résultats / Efficacité</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -171,14 +173,17 @@ export default async function ActionsPage({
                       {a.reference}
                     </Link>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="whitespace-normal font-medium">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/actions/${a.id}`}
-                        className="hover:text-primary hover:underline"
-                      >
-                        {a.description_courte}
-                      </Link>
+                      <ActionDialog
+                        processusOptions={options}
+                        action={a}
+                        trigger={
+                          <button type="button" className={ROW_NAME_BUTTON}>
+                            {a.description_courte}
+                          </button>
+                        }
+                      />
                       {a.propose && !a.valide_le ? <ProposeBadge /> : null}
                       {a.propose && !a.valide_le ? (
                         <>
@@ -199,6 +204,9 @@ export default async function ActionsPage({
                   </TableCell>
                   <TableCell>
                     <EcheanceCell id={a.id} value={a.date_prevue} />
+                  </TableCell>
+                  <TableCell className="max-w-[16rem] whitespace-normal text-muted-foreground text-sm">
+                    {a.resultat_efficacite || "-"}
                   </TableCell>
                 </TableRow>
               ))}

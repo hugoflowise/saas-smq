@@ -2,6 +2,13 @@ import { getActiveTenantId } from "./active-tenant";
 import { createClient } from "./supabase/server";
 import { getSimulatedRole } from "./view-as-cookie";
 
+// Environnement de staging (identifié par le projet Supabase). Certaines aides
+// au test — comme l'identité simulée (agir sous un vrai utilisateur du tenant en
+// vue manager/dirigeant) — n'y sont activées QUE là, jamais en production.
+export const IS_STAGING = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").includes(
+  "bsiwwzfundeueiirufmn",
+);
+
 export type TenantContext = {
   userId: string | null;
   /** Rôle effectif pour l'affichage : le rôle simulé si un admin prévisualise. */
@@ -47,17 +54,44 @@ export async function getTenantContext(): Promise<TenantContext> {
   let role = realRole;
   let isAdmin = realIsAdmin;
   let simulating = false;
+  let userId = user?.id ?? null;
   if (realIsAdmin) {
     const simulatedRole = await getSimulatedRole();
     if (simulatedRole) {
       role = simulatedRole;
       isAdmin = false;
       simulating = true;
+
+      // STAGING uniquement : en vue manager/dirigeant, l'admin agit sous
+      // l'identité d'un utilisateur réel du tenant ayant ce rôle. Cela permet de
+      // dérouler un circuit complet rédacteur ≠ vérificateur ≠ approbateur (et
+      // de tester les signatures) avec un seul compte admin. En prod, on ne
+      // touche jamais à `userId` (l'attribution created_by/signataire reste
+      // l'admin).
+      if (
+        IS_STAGING &&
+        effectiveTenantId &&
+        (simulatedRole === "manager" || simulatedRole === "dirigeant")
+      ) {
+        const { data: personas } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .eq("tenant_id", effectiveTenantId)
+          .eq("role", simulatedRole)
+          .limit(50);
+        // On privilégie un profil dédié « … flowise » (par nom ou e-mail) s'il
+        // existe, sinon le premier utilisateur réel de ce rôle dans le tenant.
+        const persona =
+          (personas ?? []).find((p) =>
+            `${p.full_name ?? ""} ${p.email ?? ""}`.toLowerCase().includes("flowise"),
+          ) ?? (personas ?? [])[0];
+        if (persona) userId = persona.id;
+      }
     }
   }
 
   return {
-    userId: user?.id ?? null,
+    userId,
     role,
     isAdmin,
     realRole,

@@ -1,3 +1,5 @@
+import { ProcedureRevisionTable, type RevisionLigne } from "@/components/procedure-revision-table";
+
 export type ProcRef = { numero: string; reference: string; designation: string };
 export type ProcDef = { terme: string; definition: string };
 
@@ -11,7 +13,12 @@ export type ProcedureSectionsData = {
   glossaireAbreviations: string | null;
   definitions: ProcDef[];
   referencesDoc: ProcRef[];
-  referencesAppli: ProcRef[];
+  // Versions publiées pour le tableau de révision en tête (optionnel : absent à
+  // l'impression d'un instantané figé).
+  versions?: RevisionLigne[];
+  // Ligne provisoire « version en cours » : affichée en dernier dans le tableau
+  // de révision tant que la procédure n'est pas publiée à jour.
+  versionEnCours?: RevisionLigne | null;
 };
 
 const HEAD: React.CSSProperties = {
@@ -84,6 +91,9 @@ export function ProcedureSections(d: ProcedureSectionsData) {
   const aGlossaire = d.glossaireSigles || d.glossaireSymboles || d.glossaireAbreviations;
   return (
     <div className="flex flex-col">
+      {d.versions?.length || d.versionEnCours ? (
+        <ProcedureRevisionTable versions={d.versions ?? []} versionEnCours={d.versionEnCours} />
+      ) : null}
       {d.resume?.trim() || d.diffusion?.trim() ? (
         <div className="mb-6 overflow-hidden rounded-md border text-sm">
           {d.resume?.trim() ? (
@@ -114,10 +124,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
       <Section n={3} titre="Documents de référence">
         <TableReferences refs={d.referencesDoc} />
       </Section>
-      <Section n={4} titre="Documents applicables">
-        <TableReferences refs={d.referencesAppli} />
-      </Section>
-      <Section n={5} titre="Glossaire">
+      <Section n={4} titre="Glossaire">
         {aGlossaire ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
@@ -137,7 +144,7 @@ export function ProcedureSections(d: ProcedureSectionsData) {
           <p className="text-[#0b1120]/50 text-sm">Sans objet</p>
         )}
       </Section>
-      <Section n={6} titre="Définitions">
+      <Section n={5} titre="Définitions">
         {d.definitions.length === 0 ? (
           <p className="text-[#0b1120]/50 text-sm">-</p>
         ) : (

@@ -10,10 +10,10 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useState } from "react";
-import { toast } from "sonner";
 import { setNcStatutAction } from "@/lib/actions/nc";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { NC_GRAVITE_LABELS, NC_STATUT_LABELS, NC_STATUTS } from "@/lib/labels";
+import { useNcStatutError } from "./nc-statut-error-dialog";
 
 type Statut = (typeof NC_STATUTS)[number];
 
@@ -79,6 +79,7 @@ export function NcKanban({ initial }: { initial: KanbanNc[] }) {
   const [items, setItems] = useState(initial);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const readOnly = useReadOnly();
+  const { handleStatutError, dialog } = useNcStatutError();
 
   async function handleDragEnd(event: DragEndEvent) {
     const id = String(event.active.id);
@@ -94,7 +95,7 @@ export function NcKanban({ initial }: { initial: KanbanNc[] }) {
     const result = await setNcStatutAction({ id, statut: target });
     if (!result.ok) {
       setItems(previous);
-      toast.error(result.error);
+      handleStatutError(result, id);
     }
   }
 
@@ -115,17 +116,20 @@ export function NcKanban({ initial }: { initial: KanbanNc[] }) {
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-2">
-        {NC_STATUTS.map((statut) => (
-          <Column
-            key={statut}
-            statut={statut}
-            ncs={items.filter((n) => n.statut === statut)}
-            readOnly={false}
-          />
-        ))}
-      </div>
-    </DndContext>
+    <>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {NC_STATUTS.map((statut) => (
+            <Column
+              key={statut}
+              statut={statut}
+              ncs={items.filter((n) => n.statut === statut)}
+              readOnly={false}
+            />
+          ))}
+        </div>
+      </DndContext>
+      {dialog}
+    </>
   );
 }

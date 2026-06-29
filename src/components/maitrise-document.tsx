@@ -66,6 +66,7 @@ export function MaitriseDocument({
   signatureTitle,
   signatureDescription,
   beforeContent,
+  hideSignataireMeta = false,
   structuredEditor,
   numberContentHeadingsFrom,
   onSaveContenu,
@@ -114,6 +115,8 @@ export function MaitriseDocument({
   signatureDescription: string;
   /** Rubriques structurées rendues dans le document (lecture), avant le contenu riche. */
   beforeContent?: React.ReactNode;
+  /** Masque date d'approbation / signataire / rédacteur du bloc méta (doublon quand un tableau de révision les affiche déjà). */
+  hideSignataireMeta?: boolean;
   /** Éditeur des rubriques structurées, affiché en mode édition (bascule « Modifier »). */
   structuredEditor?: React.ReactNode;
   /** Numérote automatiquement les titres (h1) du contenu à partir de ce numéro. */
@@ -162,13 +165,17 @@ export function MaitriseDocument({
       label: "Version",
       value: isPublished && currentVersion ? currentVersion : `${nextVersion} (projet)`,
     },
-    ...(showApprover
+    // Quand un tableau de révision est affiché (procédures), il porte déjà la
+    // date et les signataires de chaque version : on évite le doublon ici.
+    ...(showApprover && !hideSignataireMeta
       ? [
           { label: "Approuvé le", value: fmt(approvedAt ?? currentVersionDate) },
           { label: "Signataire", value: approverName as string },
         ]
       : []),
-    ...(showDrafter ? [{ label: "Rédacteur", value: drafterName as string }] : []),
+    ...(showDrafter && !hideSignataireMeta
+      ? [{ label: "Rédacteur", value: drafterName as string }]
+      : []),
     ...(metaExtra ?? []),
   ];
 

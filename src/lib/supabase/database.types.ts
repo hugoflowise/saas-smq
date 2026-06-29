@@ -25,6 +25,7 @@ export type Database = {
           date_creation: string
           date_effective: string | null
           date_prevue: string | null
+          date_verification_efficacite: string | null
           deleted_at: string | null
           description_courte: string
           description_detail: string | null
@@ -37,7 +38,9 @@ export type Database = {
           recommandation: string | null
           reference: string
           reference_iso: string[] | null
+          resultat_efficacite: string | null
           responsable_id: string | null
+          resultat_verification: string | null
           revue_id: string | null
           statut: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
@@ -56,6 +59,7 @@ export type Database = {
           date_creation?: string
           date_effective?: string | null
           date_prevue?: string | null
+          date_verification_efficacite?: string | null
           deleted_at?: string | null
           description_courte: string
           description_detail?: string | null
@@ -68,7 +72,9 @@ export type Database = {
           recommandation?: string | null
           reference: string
           reference_iso?: string[] | null
+          resultat_efficacite?: string | null
           responsable_id?: string | null
+          resultat_verification?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id: string
@@ -87,6 +93,7 @@ export type Database = {
           date_creation?: string
           date_effective?: string | null
           date_prevue?: string | null
+          date_verification_efficacite?: string | null
           deleted_at?: string | null
           description_courte?: string
           description_detail?: string | null
@@ -99,7 +106,9 @@ export type Database = {
           recommandation?: string | null
           reference?: string
           reference_iso?: string[] | null
+          resultat_efficacite?: string | null
           responsable_id?: string | null
+          resultat_verification?: string | null
           revue_id?: string | null
           statut?: Database["public"]["Enums"]["action_statut"]
           tenant_id?: string
@@ -639,6 +648,166 @@ export type Database = {
           },
         ]
       }
+      competences: {
+        Row: {
+          categorie: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          libelle: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          libelle?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competences_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competences_personnes: {
+        Row: {
+          commentaire: string | null
+          competence_id: string
+          consultant_id: string
+          created_at: string
+          created_by: string | null
+          date_echeance: string | null
+          date_obtention: string | null
+          deleted_at: string | null
+          id: string
+          justificatif_nom: string | null
+          justificatif_path: string | null
+          niveau_acquis: string | null
+          niveau_requis: string | null
+          organisme: string | null
+          statut: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          competence_id: string
+          consultant_id: string
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_obtention?: string | null
+          deleted_at?: string | null
+          id?: string
+          justificatif_nom?: string | null
+          justificatif_path?: string | null
+          niveau_acquis?: string | null
+          niveau_requis?: string | null
+          organisme?: string | null
+          statut?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          competence_id?: string
+          consultant_id?: string
+          created_at?: string
+          created_by?: string | null
+          date_echeance?: string | null
+          date_obtention?: string | null
+          deleted_at?: string | null
+          id?: string
+          justificatif_nom?: string | null
+          justificatif_path?: string | null
+          niveau_acquis?: string | null
+          niveau_requis?: string | null
+          organisme?: string | null
+          statut?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competences_personnes_competence_id_fkey"
+            columns: ["competence_id"]
+            isOneToOne: false
+            referencedRelation: "competences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competences_personnes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultants: {
         Row: {
           created_at: string
@@ -1125,6 +1294,67 @@ export type Database = {
           },
         ]
       }
+      fournisseur_evaluations: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_evaluation: string
+          deleted_at: string | null
+          fournisseur_id: string
+          id: string
+          note_globale: number | null
+          notes_criteres: Json
+          tenant_id: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_evaluation: string
+          deleted_at?: string | null
+          fournisseur_id: string
+          id?: string
+          note_globale?: number | null
+          notes_criteres?: Json
+          tenant_id: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_evaluation?: string
+          deleted_at?: string | null
+          fournisseur_id?: string
+          id?: string
+          note_globale?: number | null
+          notes_criteres?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fournisseur_evaluations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseur_evaluations_fournisseur_id_fkey"
+            columns: ["fournisseur_id"]
+            isOneToOne: false
+            referencedRelation: "fournisseurs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fournisseur_evaluations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fournisseurs: {
         Row: {
           categorie: string | null
@@ -1420,6 +1650,92 @@ export type Database = {
           },
           {
             foreignKeyName: "jalons_certification_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modifications_smq: {
+        Row: {
+          commentaire: string | null
+          consequences: string | null
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisee: string | null
+          deleted_at: string | null
+          finalite: string | null
+          id: string
+          objet: string
+          responsable_id: string | null
+          ressources: string | null
+          statut: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          finalite?: string | null
+          id?: string
+          objet: string
+          responsable_id?: string | null
+          ressources?: string | null
+          statut?: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          finalite?: string | null
+          id?: string
+          objet?: string
+          responsable_id?: string | null
+          ressources?: string | null
+          statut?: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modifications_smq_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -3368,6 +3684,7 @@ export type Database = {
       revues_direction: {
         Row: {
           annee: number
+          approuve_le: string | null
           approuve_par: string | null
           conclusions: string | null
           created_at: string
@@ -3387,6 +3704,7 @@ export type Database = {
           ordre_du_jour: string | null
           participants: Json
           points_specifiques: string | null
+          signature_data: Json | null
           sortie_amelioration: string | null
           sortie_changements: string | null
           sortie_ressources: string | null
@@ -3394,9 +3712,12 @@ export type Database = {
           tenant_id: string
           updated_at: string
           updated_by: string | null
+          verifie_le: string | null
+          verifie_par: string | null
         }
         Insert: {
           annee: number
+          approuve_le?: string | null
           approuve_par?: string | null
           conclusions?: string | null
           created_at?: string
@@ -3416,6 +3737,7 @@ export type Database = {
           ordre_du_jour?: string | null
           participants?: Json
           points_specifiques?: string | null
+          signature_data?: Json | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null
@@ -3423,9 +3745,12 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           updated_by?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
         }
         Update: {
           annee?: number
+          approuve_le?: string | null
           approuve_par?: string | null
           conclusions?: string | null
           created_at?: string
@@ -3445,6 +3770,7 @@ export type Database = {
           ordre_du_jour?: string | null
           participants?: Json
           points_specifiques?: string | null
+          signature_data?: Json | null
           sortie_amelioration?: string | null
           sortie_changements?: string | null
           sortie_ressources?: string | null
@@ -3452,6 +3778,8 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           updated_by?: string | null
+          verifie_le?: string | null
+          verifie_par?: string | null
         }
         Relationships: [
           {
@@ -3478,6 +3806,13 @@ export type Database = {
           {
             foreignKeyName: "revues_direction_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revues_direction_verifie_par_fkey"
+            columns: ["verifie_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -4136,6 +4471,11 @@ export type Database = {
         | "audit_surveillance"
         | "revue"
         | "autre"
+      modification_smq_statut:
+        | "planifiee"
+        | "en_cours"
+        | "realisee"
+        | "abandonnee"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_origine:
         | "audit_interne"
@@ -4439,6 +4779,12 @@ export const Constants = {
         "audit_surveillance",
         "revue",
         "autre",
+      ],
+      modification_smq_statut: [
+        "planifiee",
+        "en_cours",
+        "realisee",
+        "abandonnee",
       ],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_origine: [

@@ -6,6 +6,7 @@ import { quickUpdateNcAction } from "@/lib/actions/nc";
 import { GRAVITE_BADGE_CLASS } from "@/lib/badges";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { NC_GRAVITE_LABELS, NC_STATUT_LABELS } from "@/lib/labels";
+import { useNcStatutError } from "./nc-statut-error-dialog";
 
 const CONTROL =
   "h-8 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-50";
@@ -17,6 +18,7 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
   const [val, setVal] = useState(value);
   const [pending, startTransition] = useTransition();
   const readOnly = useReadOnly();
+  const { handleStatutError, dialog } = useNcStatutError();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value;
@@ -24,7 +26,7 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
     startTransition(async () => {
       const r = await quickUpdateNcAction({ id, statut: next });
       if (!r.ok) {
-        toast.error(r.error);
+        handleStatutError(r, id);
         setVal(value);
       }
     });
@@ -39,19 +41,22 @@ export function NcStatutCell({ id, value }: { id: string; value: string }) {
   }
 
   return (
-    <select
-      value={val}
-      onChange={onChange}
-      disabled={pending}
-      className={CONTROL}
-      aria-label="Statut"
-    >
-      {Object.entries(NC_STATUT_LABELS).map(([v, label]) => (
-        <option key={v} value={v}>
-          {label}
-        </option>
-      ))}
-    </select>
+    <>
+      <select
+        value={val}
+        onChange={onChange}
+        disabled={pending}
+        className={CONTROL}
+        aria-label="Statut"
+      >
+        {Object.entries(NC_STATUT_LABELS).map(([v, label]) => (
+          <option key={v} value={v}>
+            {label}
+          </option>
+        ))}
+      </select>
+      {dialog}
+    </>
   );
 }
 

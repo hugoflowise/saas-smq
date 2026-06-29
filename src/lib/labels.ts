@@ -96,6 +96,30 @@ export const AUDIT_STATUT_LABELS = {
   cloture: "Clôturé",
 } as const;
 
+/** Cotation d'un point de contrôle de la grille d'audit (§9.2). */
+export const COTATION_LABELS = {
+  non_evalue: "Non évalué",
+  conforme: "Conforme",
+  point_fort: "Point fort",
+  point_attention: "Point d'attention",
+  nc_mineure: "NC mineure",
+  nc_majeure: "NC majeure",
+  non_applicable: "Non applicable",
+} as const;
+
+/**
+ * Cotations sélectionnables pour une action (liste « Léa »).
+ * `non_evalue` reste l'état initial « non coté » mais n'est pas proposé au choix ;
+ * `non_applicable` est volontairement retiré des choix.
+ */
+export const COTATION_OPTIONS: Record<string, string> = {
+  conforme: COTATION_LABELS.conforme,
+  point_fort: COTATION_LABELS.point_fort,
+  point_attention: COTATION_LABELS.point_attention,
+  nc_mineure: COTATION_LABELS.nc_mineure,
+  nc_majeure: COTATION_LABELS.nc_majeure,
+};
+
 /** Statut d'un risque / opportunité. */
 export const RO_STATUT_LABELS = {
   identifie: "Identifié",
@@ -141,7 +165,7 @@ export const ROLE_LABELS = {
 
 // Secteur d'activité du client. « AT » (assistance technique) est un héritage
 // conservé pour l'affichage mais n'est plus proposé à la saisie (toutes les
-// sociétés d'ingénierie / ESN font de l'AT — ce n'est pas un secteur).
+// sociétés d'ingénierie / ESN font de l'AT - ce n'est pas un secteur).
 export const SECTEUR_LABELS = {
   SI: "Société d'ingénierie",
   ESN: "ESN",

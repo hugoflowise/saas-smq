@@ -14,6 +14,7 @@ import { formatDate } from "@/lib/format";
 import { AUDIT_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { AuditDialog } from "./audit-dialog";
 import { ProgrammeButton } from "./programme-button";
 
@@ -49,7 +50,7 @@ export default async function AuditsPage({
   let query = supabase
     .from("audits_internes")
     .select(
-      "id, reference, type_audit, organisme, perimetre, date_prevue, date_realisee, duree_prevue, statut",
+      "id, reference, type_audit, organisme, perimetre, auditeur_id, date_prevue, date_realisee, duree_prevue, statut",
     )
     .eq("tenant_id", ctx.effectiveTenantId);
   if (activeType !== "tous") {
@@ -62,6 +63,10 @@ export default async function AuditsPage({
 
   const items = audits ?? [];
 
+  // Membres du client : sélecteur d'auditeur + résolution des noms en liste.
+  const auditeurs = await listTenantMembers(ctx.effectiveTenantId);
+  const nomAuditeurParId = new Map(auditeurs.map((u) => [u.id, u.nom]));
+
   return (
     <div className="w-full">
       <PageHeader
@@ -71,7 +76,7 @@ export default async function AuditsPage({
         help="Programmez des audits internes à intervalles planifiés (chaque processus audité sur le cycle) pour vérifier la conformité et l'efficacité du SMQ ; les écarts alimentent le plan d'actions."
       >
         <ProgrammeButton annee={new Date().getFullYear()} />
-        <AuditDialog />
+        <AuditDialog auditeurs={auditeurs} />
       </PageHeader>
 
       <div className="mb-4 flex gap-1 rounded-lg border bg-card p-1">
@@ -103,6 +108,7 @@ export default async function AuditsPage({
                 <TableHead>Réf.</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Périmètre / Organisme</TableHead>
+                <TableHead>Auditeur</TableHead>
                 <TableHead>Date prévue</TableHead>
                 <TableHead>Statut</TableHead>
               </TableRow>
@@ -129,6 +135,9 @@ export default async function AuditsPage({
                     <Link href={`/audits/${a.id}`} className="hover:text-primary hover:underline">
                       {a.perimetre ?? a.organisme ?? "À renseigner"}
                     </Link>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {a.auditeur_id ? (nomAuditeurParId.get(a.auditeur_id) ?? "-") : "-"}
                   </TableCell>
                   <TableCell>{formatDate(a.date_prevue)}</TableCell>
                   <TableCell>

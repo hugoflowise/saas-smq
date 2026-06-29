@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { COTATION_LABELS } from "@/app/(tenant)/conformite/cotation-meta";
 import { BackLink } from "@/components/back-link";
@@ -39,7 +40,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, commentaires, constat, cause_fondamentale, recommandation, cotation",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -56,6 +57,24 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const processusNom = action.processus_concerne
     ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
     : "-";
+
+  // Non-conformité(s) liée(s) via la table pivot nc_actions → on permet de
+  // remonter à la NC d'origine depuis la fiche action.
+  const { data: ncLinks } = await supabase
+    .from("nc_actions")
+    .select("nc_id")
+    .eq("action_id", id)
+    .eq("tenant_id", tid);
+
+  const ncIds = (ncLinks ?? []).map((l) => l.nc_id);
+  const { data: ncLiees } = ncIds.length
+    ? await supabase
+        .from("non_conformites")
+        .select("id, reference, intitule")
+        .in("id", ncIds)
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+    : { data: [] };
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -82,6 +101,26 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           </span>
         ) : null}
       </div>
+
+      {(ncLiees ?? []).length > 0 ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Non-conformité liée</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {(ncLiees ?? []).map((nc) => (
+              <Link
+                key={nc.id}
+                href={`/nc/${nc.id}`}
+                className="text-sm hover:text-primary hover:underline"
+              >
+                <span className="font-mono text-muted-foreground text-xs">{nc.reference}</span>{" "}
+                {nc.intitule}
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -111,6 +150,22 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           <Field label="Échéance" value={formatDate(action.date_prevue)} />
           <Field label="Date effective" value={formatDate(action.date_effective)} />
           <Field label="Indicateur d'efficacité" value={action.indicateur_efficacite} />
+          <Field
+            label="Vérification d'efficacité (date)"
+            value={formatDate(action.date_verification_efficacite)}
+          />
+          <div className="sm:col-span-2">
+            <Field
+              label="Résultat de la vérification d'efficacité"
+              value={action.resultat_verification}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Field
+              label="Résultats mesurés / Efficacité de l'action corrective"
+              value={action.resultat_efficacite}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Field label="Constat" value={action.constat} />
           </div>

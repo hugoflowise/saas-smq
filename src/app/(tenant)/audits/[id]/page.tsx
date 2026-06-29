@@ -1,10 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ACTION_STATUT_LABELS, AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { AuditActions } from "./audit-actions";
 import { AuditEditForm } from "./audit-edit-form";
 import { AuditGrille } from "./audit-grille";
@@ -20,7 +22,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
   const { data: audit } = await supabase
     .from("audits_internes")
     .select(
-      "id, reference, type_audit, organisme, perimetre, processus_audites, date_prevue, date_realisee, duree_prevue, statut, rapport, ecarts_constates",
+      "id, reference, type_audit, organisme, perimetre, processus_audites, auditeur_id, date_prevue, date_realisee, duree_prevue, statut, rapport, ecarts_constates",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -33,6 +35,12 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
     .select("id, nom")
     .eq("tenant_id", tid)
     .order("ordre_affichage", { ascending: true });
+
+  // Membres du client : sélecteur d'auditeur + résolution du nom affiché.
+  const auditeurs = await listTenantMembers(tid);
+  const auditeurNom = audit.auditeur_id
+    ? (auditeurs.find((u) => u.id === audit.auditeur_id)?.nom ?? null)
+    : null;
 
   const { data: questions } = await supabase
     .from("audit_questions")
@@ -63,12 +71,14 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
         title={`Audit ${audit.reference}`}
         description={`Audit ${AUDIT_TYPE_LABELS[audit.type_audit as keyof typeof AUDIT_TYPE_LABELS]?.toLowerCase() ?? ""}${
           audit.organisme ? ` · ${audit.organisme}` : ""
-        }`}
-      />
+        }${auditeurNom ? ` · Auditeur : ${auditeurNom}` : ""}`}
+      >
+        <DownloadPdfButton printHref={`/print/audit/${id}`} label="Rapport d'audit (PDF)" />
+      </PageHeader>
 
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <AuditEditForm audit={audit} processusOptions={processus ?? []} />
+          <AuditEditForm audit={audit} processusOptions={processus ?? []} auditeurs={auditeurs} />
         </CardContent>
       </Card>
 

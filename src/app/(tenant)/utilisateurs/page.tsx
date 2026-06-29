@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { canManageUsers, ROLE_MEMBRE_LABELS } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
-import { getTenantContext } from "@/lib/tenant-context";
+import { getTenantContext, IS_STAGING } from "@/lib/tenant-context";
+import { IdentitesTestButton } from "./identites-test-button";
 import { InviteDialog } from "./invite-dialog";
 import { MembreRoleSelect, RemoveMembreButton } from "./membre-actions";
 
@@ -58,6 +59,7 @@ export default async function UtilisateursPage() {
         description="Invitez vos collègues et gérez leurs accès à l'espace qualité."
         help="Le dirigeant invite des utilisateurs par e-mail et leur attribue un rôle : dirigeant (tout, y compris validation), manager (contribue sans valider) ou auditeur (lecture seule). Le retrait révoque l'accès sans supprimer le compte."
       >
+        {IS_STAGING && ctx.realIsAdmin ? <IdentitesTestButton /> : null}
         <InviteDialog />
       </PageHeader>
 
