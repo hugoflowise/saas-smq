@@ -238,12 +238,14 @@ const objBase = {
   unite: z.string().trim().optional(),
   sens: z.enum(["hausse", "baisse"]).optional(),
   processusId: z.string().uuid().optional(),
-  indicateurId: z.string().uuid().optional(),
+  // Un objectif peut être mesuré par plusieurs indicateurs (liaison N–N).
+  indicateurIds: z.array(z.string().uuid()).optional(),
 };
 const objCreate = z.object(objBase);
 const objUpdate = z.object({ id: z.string().uuid(), ...objBase });
 
 function objPayload(d: z.infer<typeof objCreate>) {
+  const ids = d.indicateurIds ?? [];
   return {
     intitule: d.intitule,
     description: d.description ?? null,
@@ -257,8 +259,38 @@ function objPayload(d: z.infer<typeof objCreate>) {
     unite: d.unite ?? null,
     sens: d.sens ?? "hausse",
     processus_id: d.processusId ?? null,
-    indicateur_id: d.indicateurId ?? null,
+    // Colonne historique : pilote la progression « tête de liste » quand
+    // l'objectif n'a qu'un seul indicateur. La table de liaison reste la
+    // source de vérité pour l'ensemble des indicateurs.
+    indicateur_id: ids.length === 1 ? ids[0] : null,
   };
+}
+
+/**
+ * Synchronise les indicateurs liés à un objectif (table objectif_indicateurs).
+ * Stratégie simple et idempotente : on supprime puis on réinsère l'ensemble.
+ */
+async function syncObjectifIndicateurs(
+  c: NonNullable<Awaited<ReturnType<typeof tenantWrite>>>,
+  objectifId: string,
+  indicateurIds: string[],
+): Promise<string | null> {
+  const ids = [...new Set(indicateurIds)];
+  const { error: delErr } = await c.supabase
+    .from("objectif_indicateurs")
+    .delete()
+    .eq("objectif_id", objectifId)
+    .eq("tenant_id", c.tenantId);
+  if (delErr) return delErr.message;
+  if (ids.length === 0) return null;
+  const { error: insErr } = await c.supabase.from("objectif_indicateurs").insert(
+    ids.map((indicateurId) => ({
+      tenant_id: c.tenantId,
+      objectif_id: objectifId,
+      indicateur_id: indicateurId,
+    })),
+  );
+  return insErr?.message ?? null;
 }
 
 export async function createObjectifAction(input: unknown): Promise<ActionResult> {
@@ -266,11 +298,16 @@ export async function createObjectifAction(input: unknown): Promise<ActionResult
   if (!c) return { ok: false, error: "Sélectionnez d'abord un client." };
   const parsed = objCreate.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
-  const { error } = await c.supabase
+  const { data: created, error } = await c.supabase
     .from("objectifs_qualite")
-    .insert({ tenant_id: c.tenantId, ...objPayload(parsed.data), created_by: c.userId });
+    .insert({ tenant_id: c.tenantId, ...objPayload(parsed.data), created_by: c.userId })
+    .select("id")
+    .single();
   if (error) return { ok: false, error: error.message };
+  const syncErr = await syncObjectifIndicateurs(c, created.id, parsed.data.indicateurIds ?? []);
+  if (syncErr) return { ok: false, error: syncErr };
   revalidatePath("/strategie/objectifs");
+  revalidatePath("/indicateurs");
   return { ok: true };
 }
 
@@ -317,7 +354,10 @@ export async function updateObjectifAction(input: unknown): Promise<ActionResult
     .eq("id", parsed.data.id)
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
+  const syncErr = await syncObjectifIndicateurs(c, parsed.data.id, parsed.data.indicateurIds ?? []);
+  if (syncErr) return { ok: false, error: syncErr };
   revalidatePath("/strategie/objectifs");
+  revalidatePath("/indicateurs");
   return { ok: true };
 }
 
