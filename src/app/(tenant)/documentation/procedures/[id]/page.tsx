@@ -218,6 +218,7 @@ export default async function ProcedureDetailPage({
             onSaveReference={saveProcedureCodeAction.bind(null, procedure.id)}
             metaExtra={metaExtra}
             beforeContent={<ProcedureSections {...sectionsData} />}
+            hideSignataireMeta
             structuredEditor={<ProcedureInfosEditor initial={infosInitial} />}
             numberContentHeadingsFrom={7}
             initialContenu={(procedure.contenu ?? null) as JSONContent | null}
