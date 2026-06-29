@@ -1427,6 +1427,92 @@ export type Database = {
           },
         ]
       }
+      modifications_smq: {
+        Row: {
+          commentaire: string | null
+          consequences: string | null
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisee: string | null
+          deleted_at: string | null
+          finalite: string | null
+          id: string
+          objet: string
+          responsable_id: string | null
+          ressources: string | null
+          statut: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          finalite?: string | null
+          id?: string
+          objet: string
+          responsable_id?: string | null
+          ressources?: string | null
+          statut?: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          consequences?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          deleted_at?: string | null
+          finalite?: string | null
+          id?: string
+          objet?: string
+          responsable_id?: string | null
+          ressources?: string | null
+          statut?: Database["public"]["Enums"]["modification_smq_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modifications_smq_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modifications_smq_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nc_actions: {
         Row: {
           action_id: string
@@ -4136,6 +4222,11 @@ export type Database = {
         | "audit_surveillance"
         | "revue"
         | "autre"
+      modification_smq_statut:
+        | "planifiee"
+        | "en_cours"
+        | "realisee"
+        | "abandonnee"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_origine:
         | "audit_interne"
@@ -4439,6 +4530,12 @@ export const Constants = {
         "audit_surveillance",
         "revue",
         "autre",
+      ],
+      modification_smq_statut: [
+        "planifiee",
+        "en_cours",
+        "realisee",
+        "abandonnee",
       ],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_origine: [
