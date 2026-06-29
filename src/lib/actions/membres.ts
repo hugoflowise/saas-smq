@@ -53,7 +53,7 @@ export async function inviteMembreAction(input: unknown): Promise<ActionResult> 
   if (existant?.tenant_id === c.tenantId) {
     return { ok: false, error: "Cette personne fait déjà partie de vos utilisateurs." };
   }
-  if (existant && existant.tenant_id && existant.tenant_id !== c.tenantId) {
+  if (existant?.tenant_id && existant.tenant_id !== c.tenantId) {
     return { ok: false, error: "Cet e-mail est déjà rattaché à une autre organisation." };
   }
 

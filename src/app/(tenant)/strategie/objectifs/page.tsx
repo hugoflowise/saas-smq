@@ -1,3 +1,4 @@
+import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { EmptyState } from "@/components/empty-state";
@@ -61,6 +62,7 @@ export default async function ObjectifsPage() {
       .from("processus")
       .select("id, nom")
       .eq("tenant_id", tid)
+      .is("deleted_at", null)
       .order("ordre_affichage", { ascending: true }),
     supabase
       .from("indicateurs")
@@ -73,11 +75,27 @@ export default async function ObjectifsPage() {
   const items = objectifs ?? [];
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
-  const processusNom = new Map(processusOptions.map((p) => [p.id, p.nom]));
   const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
 
-  // Dernière valeur mesurée de chaque indicateur piloté par un objectif.
-  const linkedIndIds = [...new Set(items.map((o) => o.indicateur_id).filter(Boolean))] as string[];
+  // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
+  // indicateurs rattachés à chaque objectif).
+  const objIds = items.map((o) => o.id);
+  const indicateurIdsByObjectif = new Map<string, string[]>();
+  if (objIds.length) {
+    const { data: liens } = await supabase
+      .from("objectif_indicateurs")
+      .select("objectif_id, indicateur_id")
+      .eq("tenant_id", tid)
+      .in("objectif_id", objIds);
+    for (const l of liens ?? []) {
+      const list = indicateurIdsByObjectif.get(l.objectif_id) ?? [];
+      list.push(l.indicateur_id);
+      indicateurIdsByObjectif.set(l.objectif_id, list);
+    }
+  }
+
+  // Dernière valeur mesurée de tous les indicateurs rattachés à un objectif.
+  const linkedIndIds = [...new Set([...indicateurIdsByObjectif.values()].flat())];
   const lastVal = new Map<string, number>();
   if (linkedIndIds.length) {
     const { data: valeurs } = await supabase
@@ -91,22 +109,30 @@ export default async function ObjectifsPage() {
   }
 
   const withProgress = items.map((o) => {
-    const ind = o.indicateur_id ? indicateurById.get(o.indicateur_id) : null;
-    // Si un indicateur pilote l'objectif, sa dernière valeur prime sur la saisie manuelle.
+    const liens = indicateurIdsByObjectif.get(o.id) ?? [];
+    const indicateursLies = liens
+      .map((id) => indicateurById.get(id))
+      .filter((i): i is { id: string; nom: string; unite: string | null } => Boolean(i))
+      .map((i) => ({ ...i, derniere: lastVal.get(i.id) ?? null }));
+    // Si un seul indicateur pilote l'objectif, sa dernière valeur prime sur la
+    // saisie manuelle (comportement historique conservé).
     const valeurEffective =
       o.indicateur_id && lastVal.has(o.indicateur_id)
         ? (lastVal.get(o.indicateur_id) ?? null)
         : o.valeur_actuelle;
     const pct = objectifProgress(valeurEffective, o.valeur_cible, o.sens);
     const atteint = o.statut === "atteint" || (pct !== null && pct >= 100);
-    return { ...o, pct, atteint, valeurEffective, indicateurNom: ind?.nom ?? null };
+    return { ...o, pct, atteint, valeurEffective, indicateursLies };
   });
   const total = withProgress.length;
   const atteints = withProgress.filter((o) => o.atteint).length;
   const tauxGlobal = total > 0 ? Math.round((atteints / total) * 100) : 0;
 
+  // Détection d'orphelins (intégrité relationnelle, recommandée et non bloquante).
+  const sansProcessus = withProgress.filter((o) => !o.processus_id).length;
+  const sansIndicateur = withProgress.filter((o) => o.indicateursLies.length === 0).length;
+
   // §6.2.2 : actions de mise en œuvre rattachées aux objectifs.
-  const objIds = items.map((o) => o.id);
   const actionsByObjectif = new Map<
     string,
     { id: string; reference: string; description_courte: string; statut: string }[]
@@ -146,6 +172,15 @@ export default async function ObjectifsPage() {
   // Seule la direction (dirigeant / admin) peut établir un objectif.
   const canApprove = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
 
+  // Regroupement par processus (dans l'ordre d'affichage), orphelins en dernier.
+  type ObjItem = (typeof withProgress)[number];
+  const groupes: { id: string | null; nom: string; objs: ObjItem[] }[] = [];
+  for (const p of processusOptions) {
+    const objs = withProgress.filter((o) => o.processus_id === p.id);
+    if (objs.length) groupes.push({ id: p.id, nom: p.nom, objs });
+  }
+  const orphelins = withProgress.filter((o) => !o.processus_id);
+
   return (
     <div className="w-full">
       <ModuleTabs tabs={PERFORMANCE_TABS} />
@@ -183,116 +218,176 @@ export default async function ObjectifsPage() {
         </Card>
       ) : null}
 
+      {/* Intégrité relationnelle : signale (sans bloquer) les objectifs non
+          rattachés à un processus ou sans indicateur de mesure. */}
+      {sansProcessus > 0 || sansIndicateur > 0 ? (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-status-pa/40 bg-status-pa/5 px-4 py-3 text-sm">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-status-pa" />
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium">À rattacher pour une traçabilité complète</span>
+            <span className="text-muted-foreground">
+              {sansProcessus > 0 ? (
+                <>
+                  {sansProcessus} objectif{sansProcessus > 1 ? "s" : ""} sans processus
+                  {sansIndicateur > 0 ? " · " : ""}
+                </>
+              ) : null}
+              {sansIndicateur > 0 ? (
+                <>
+                  {sansIndicateur} objectif{sansIndicateur > 1 ? "s" : ""} sans indicateur de mesure
+                </>
+              ) : null}
+              . Ouvrez l'objectif pour le rattacher à son processus et à ses indicateurs.
+            </span>
+          </div>
+        </div>
+      ) : null}
+
       {total === 0 ? (
         <EmptyState
           title="Aucun objectif"
           description="Définissez les objectifs qualité (SMART) alignés sur la politique."
         />
       ) : (
-        <div className="rounded-2xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Objectif</TableHead>
-                <TableHead>Processus</TableHead>
-                <TableHead className="w-56">Progression</TableHead>
-                <TableHead>Échéance</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="w-12" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {withProgress.map((o) => (
-                <Fragment key={o.id}>
-                  <TableRow>
-                    <TableCell className="font-medium">
-                      {o.intitule}
-                      {o.indicateur_id && o.indicateurNom ? (
-                        <Link
-                          href={`/indicateurs/${o.indicateur_id}?from=/strategie/objectifs`}
-                          className="mt-0.5 block text-primary text-xs hover:underline"
-                        >
-                          ↳ Indicateur : {o.indicateurNom}
-                        </Link>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      <ProcessusLink
-                        id={o.processus_id}
-                        nom={o.processus_id ? (processusNom.get(o.processus_id) ?? null) : null}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {o.valeur_cible !== null ? (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between gap-2 text-xs">
-                            <span className="flex items-center gap-1">
-                              {o.indicateur_id ? (
-                                <span className="font-medium">{o.valeurEffective ?? "-"}</span>
+        <div className="flex flex-col gap-8">
+          {[...groupes, ...(orphelins.length ? [{ id: null, nom: "", objs: orphelins }] : [])].map(
+            (g) => (
+              <section key={g.id ?? "orphelins"}>
+                <h2 className="mb-2 flex items-center gap-2 font-medium text-sm">
+                  {g.id ? (
+                    <ProcessusLink id={g.id} nom={g.nom} />
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-status-pa">
+                      <AlertTriangle className="size-3.5" />
+                      Non rattachés à un processus
+                    </span>
+                  )}
+                  <span className="text-muted-foreground text-xs">({g.objs.length})</span>
+                </h2>
+                <div className="rounded-2xl border bg-card">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Objectif</TableHead>
+                        <TableHead className="w-56">Progression</TableHead>
+                        <TableHead>Échéance</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead className="w-12" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {g.objs.map((o) => (
+                        <Fragment key={o.id}>
+                          <TableRow>
+                            <TableCell className="font-medium">
+                              {o.intitule}
+                              {o.indicateursLies.length > 0 ? (
+                                <span className="mt-0.5 flex flex-col gap-0.5">
+                                  {o.indicateursLies.map((ind) => (
+                                    <Link
+                                      key={ind.id}
+                                      href={`/indicateurs/${ind.id}?from=/strategie/objectifs`}
+                                      className="block text-primary text-xs hover:underline"
+                                    >
+                                      ↳ {ind.nom}
+                                      {ind.derniere !== null ? (
+                                        <span className="text-muted-foreground">
+                                          {" "}
+                                          : {ind.derniere}
+                                          {ind.unite ? ` ${ind.unite}` : ""}
+                                        </span>
+                                      ) : null}
+                                    </Link>
+                                  ))}
+                                </span>
                               ) : (
-                                <ObjValeurActuelleCell
-                                  id={o.id}
-                                  value={o.valeur_actuelle}
-                                  unite={o.unite}
-                                />
+                                <span className="mt-0.5 block text-status-pa text-xs">
+                                  Aucun indicateur de mesure
+                                </span>
                               )}
-                              <span className="text-muted-foreground">
-                                / {o.valeur_cible} {o.unite ?? ""}
-                              </span>
-                            </span>
-                            {o.pct !== null ? <span className="font-medium">{o.pct}%</span> : null}
-                          </div>
-                          {o.pct !== null ? (
-                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                              <div
-                                className={`h-full rounded-full ${progressClass(o.pct)}`}
-                                style={{ width: `${o.pct}%` }}
+                            </TableCell>
+                            <TableCell>
+                              {o.valeur_cible !== null ? (
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center justify-between gap-2 text-xs">
+                                    <span className="flex items-center gap-1">
+                                      {o.indicateur_id ? (
+                                        <span className="font-medium">
+                                          {o.valeurEffective ?? "-"}
+                                        </span>
+                                      ) : (
+                                        <ObjValeurActuelleCell
+                                          id={o.id}
+                                          value={o.valeur_actuelle}
+                                          unite={o.unite}
+                                        />
+                                      )}
+                                      <span className="text-muted-foreground">
+                                        / {o.valeur_cible} {o.unite ?? ""}
+                                      </span>
+                                    </span>
+                                    {o.pct !== null ? (
+                                      <span className="font-medium">{o.pct}%</span>
+                                    ) : null}
+                                  </div>
+                                  {o.pct !== null ? (
+                                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                      <div
+                                        className={`h-full rounded-full ${progressClass(o.pct)}`}
+                                        style={{ width: `${o.pct}%` }}
+                                      />
+                                    </div>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                <div className="flex flex-col gap-0.5 text-xs">
+                                  {o.cible_chiffree ? (
+                                    <span className="text-muted-foreground">
+                                      Cible : {o.cible_chiffree}
+                                    </span>
+                                  ) : null}
+                                  <span className="text-status-pa">
+                                    À chiffrer · ouvrez l'objectif pour définir la cible
+                                  </span>
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <ObjEcheanceCell id={o.id} value={o.echeance} />
+                            </TableCell>
+                            <TableCell>
+                              <ObjStatutCell id={o.id} value={o.statut} />
+                            </TableCell>
+                            <TableCell>
+                              <ObjectifDialog
+                                objectif={o}
+                                processusOptions={processusOptions}
+                                indicateurOptions={indicateurOptions}
+                                linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
                               />
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-0.5 text-xs">
-                          {o.cible_chiffree ? (
-                            <span className="text-muted-foreground">
-                              Cible : {o.cible_chiffree}
-                            </span>
-                          ) : null}
-                          <span className="text-status-pa">
-                            À chiffrer · ouvrez l'objectif pour définir la cible
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <ObjEcheanceCell id={o.id} value={o.echeance} />
-                    </TableCell>
-                    <TableCell>
-                      <ObjStatutCell id={o.id} value={o.statut} />
-                    </TableCell>
-                    <TableCell>
-                      <ObjectifDialog
-                        objectif={o}
-                        processusOptions={processusOptions}
-                        indicateurOptions={indicateurOptions}
-                      />
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b-0 hover:bg-transparent">
-                    <TableCell colSpan={6} className="bg-muted/20 pt-0">
-                      <ObjectifActions
-                        objectifId={o.id}
-                        linked={actionsByObjectif.get(o.id) ?? []}
-                        valideLe={o.valide_le}
-                        valideurNom={o.valide_par ? (valideurNom.get(o.valide_par) ?? null) : null}
-                        canApprove={canApprove}
-                      />
-                    </TableCell>
-                  </TableRow>
-                </Fragment>
-              ))}
-            </TableBody>
-          </Table>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow className="border-b-0 hover:bg-transparent">
+                            <TableCell colSpan={5} className="bg-muted/20 pt-0">
+                              <ObjectifActions
+                                objectifId={o.id}
+                                linked={actionsByObjectif.get(o.id) ?? []}
+                                valideLe={o.valide_le}
+                                valideurNom={
+                                  o.valide_par ? (valideurNom.get(o.valide_par) ?? null) : null
+                                }
+                                canApprove={canApprove}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        </Fragment>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </section>
+            ),
+          )}
         </div>
       )}
     </div>
