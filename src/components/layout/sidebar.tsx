@@ -5,10 +5,12 @@ export function Sidebar({
   isAdmin = false,
   canManageUsers = false,
   showOnboarding = true,
+  normesActives = ["9001"],
 }: {
   isAdmin?: boolean;
   canManageUsers?: boolean;
   showOnboarding?: boolean;
+  normesActives?: string[];
 }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r bg-card md:flex print:hidden">
@@ -27,6 +29,7 @@ export function Sidebar({
           isAdmin={isAdmin}
           canManageUsers={canManageUsers}
           showOnboarding={showOnboarding}
+          normesActives={normesActives}
         />
       </div>
     </aside>

@@ -46,7 +46,7 @@ export default async function AdminClientsPage() {
   const { data: tenants } = await admin
     .from("tenants")
     .select(
-      "id, nom_societe, formule, statut, effectif_tranche, secteur, bureau_etudes, logo_url, responsable_flowise_id, created_at",
+      "id, nom_societe, formule, statut, effectif_tranche, secteur, bureau_etudes, logo_url, responsable_flowise_id, normes_actives, created_at",
     )
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
@@ -131,13 +131,18 @@ export default async function AdminClientsPage() {
                     </TableCell>
                     <TableCell>{t.effectif_tranche ?? "-"}</TableCell>
                     <TableCell>
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex flex-wrap items-center gap-1.5">
                         {secteurLabel(t.secteur)}
                         {t.bureau_etudes ? (
                           <Badge variant="outline" className="text-xs">
                             BE
                           </Badge>
                         ) : null}
+                        {(t.normes_actives ?? ["9001"]).map((n) => (
+                          <Badge key={n} variant="outline" className="text-xs">
+                            {n}
+                          </Badge>
+                        ))}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -160,6 +165,7 @@ export default async function AdminClientsPage() {
                             bureau_etudes: t.bureau_etudes,
                             logo_url: t.logo_url,
                             responsable_flowise_id: t.responsable_flowise_id,
+                            normes_actives: t.normes_actives ?? ["9001"],
                           }}
                         />
                         <DeleteTenantDialog tenantId={t.id} nomSociete={t.nom_societe} />
