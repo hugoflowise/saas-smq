@@ -16,6 +16,9 @@ export type ProcedureSectionsData = {
   // Versions publiées pour le tableau de révision en tête (optionnel : absent à
   // l'impression d'un instantané figé).
   versions?: RevisionLigne[];
+  // Ligne provisoire « version en cours » : affichée en dernier dans le tableau
+  // de révision tant que la procédure n'est pas publiée à jour.
+  versionEnCours?: RevisionLigne | null;
 };
 
 const HEAD: React.CSSProperties = {
@@ -88,7 +91,9 @@ export function ProcedureSections(d: ProcedureSectionsData) {
   const aGlossaire = d.glossaireSigles || d.glossaireSymboles || d.glossaireAbreviations;
   return (
     <div className="flex flex-col">
-      {d.versions?.length ? <ProcedureRevisionTable versions={d.versions} /> : null}
+      {d.versions?.length || d.versionEnCours ? (
+        <ProcedureRevisionTable versions={d.versions ?? []} versionEnCours={d.versionEnCours} />
+      ) : null}
       {d.resume?.trim() || d.diffusion?.trim() ? (
         <div className="mb-6 overflow-hidden rounded-md border text-sm">
           {d.resume?.trim() ? (

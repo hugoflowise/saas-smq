@@ -19,6 +19,9 @@ export type RevisionLigne = {
   verificateurSignature: string | null;
   approverName: string | null;
   approverSignature: string | null;
+  // Vrai pour la ligne provisoire « version en cours » (non encore figée) :
+  // rendue en dernier, atténuée, avec « (en cours) » sur l'indice.
+  enCours?: boolean;
 };
 
 const HEAD: React.CSSProperties = {
@@ -49,11 +52,21 @@ function Visa({
   );
 }
 
-export function ProcedureRevisionTable({ versions }: { versions: RevisionLigne[] }) {
-  if (versions.length === 0) return null;
+export function ProcedureRevisionTable({
+  versions,
+  versionEnCours = null,
+}: {
+  versions: RevisionLigne[];
+  // Ligne provisoire « version en cours » (procédure non encore publiée à jour),
+  // ajoutée en dernier après les versions figées. Le tableau s'affiche dès qu'il
+  // y a au moins une version publiée OU une ligne en cours.
+  versionEnCours?: RevisionLigne | null;
+}) {
+  if (versions.length === 0 && !versionEnCours) return null;
   // Ordre chronologique croissant (A, B, C…) : le tableau de révision se lit du
-  // plus ancien au plus récent.
+  // plus ancien au plus récent. La ligne « en cours » se place tout à la fin.
   const lignes = [...versions].reverse();
+  if (versionEnCours) lignes.push({ ...versionEnCours, enCours: true });
   return (
     <section className="mb-6">
       <table className="w-full border-collapse text-sm">
@@ -70,8 +83,16 @@ export function ProcedureRevisionTable({ versions }: { versions: RevisionLigne[]
         </thead>
         <tbody>
           {lignes.map((v) => (
-            <tr key={v.id} className="align-top">
-              <td className="border px-3 py-2 font-medium">{v.version?.trim() || "-"}</td>
+            <tr
+              key={v.id}
+              // Ligne « en cours » : atténuée + fond léger pour montrer qu'elle
+              // n'est pas encore figée (provisoire).
+              className={v.enCours ? "bg-muted/40 align-top text-muted-foreground" : "align-top"}
+            >
+              <td className="border px-3 py-2 font-medium">
+                {v.version?.trim() || "-"}
+                {v.enCours ? " (en cours)" : null}
+              </td>
               <td className="border px-3 py-2">
                 <p className="font-medium">{formatDate(v.approvedAt)}</p>
                 <p className="mt-0.5 whitespace-pre-wrap">
