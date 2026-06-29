@@ -69,9 +69,16 @@ export async function sendEmail(opts: {
  * l'URL n'est pas configurée (les clients mail chargent les images à la demande).
  */
 function emailLogo(): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
-  return base
-    ? `<img src="${base}/logo.png" alt="flowise" width="132" style="width:132px;height:auto;display:block;margin:0 0 12px" />`
+  // URL absolue de l'image. On accepte une URL dédiée `EMAIL_LOGO_URL` (utile
+  // pour pointer un hébergement public bulletproof, ex. bucket Supabase, quand
+  // le domaine de l'app n'est pas joignable par le proxy d'images de Gmail), à
+  // défaut `${NEXT_PUBLIC_APP_URL}/logo.png`. On retire tout slash final pour
+  // éviter un `//logo.png` selon la valeur de l'URL de base.
+  const explicit = process.env.EMAIL_LOGO_URL?.trim();
+  const appBase = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
+  const src = explicit || (appBase ? `${appBase}/logo.png` : "");
+  return src
+    ? `<img src="${src}" alt="flowise" width="132" style="width:132px;height:auto;display:block;margin:0 0 12px" />`
     : `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.04em;color:#ff6b5e;font-weight:700">flowise.</p>`;
 }
 
@@ -84,7 +91,7 @@ export function notificationEmailHtml(opts: {
   body?: string;
   link?: string;
 }): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
   const href = opts.link
     ? opts.link.startsWith("http")
       ? opts.link
@@ -187,7 +194,7 @@ export function digestEmailHtml(opts: {
   sections: DigestSection[];
   dateFr: (iso: string) => string;
 }): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
   const lien = (href?: string) =>
     href ? (href.startsWith("http") ? href : `${base}${href}`) : null;
 
