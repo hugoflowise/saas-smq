@@ -5,6 +5,7 @@ import { BackLink } from "@/components/back-link";
 import type { Societe } from "@/components/document-paper";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
+import type { RevisionLigne } from "@/components/procedure-revision-table";
 import { type ProcDef, ProcedureSections, type ProcRef } from "@/components/procedure-sections";
 import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +16,10 @@ import {
   saveProcedureContenuAction,
   transitionProcedureStatutAction,
 } from "@/lib/actions/procedures";
+import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { versionLettre } from "@/lib/versions";
 import { ProcedureInfosEditor } from "./procedure-infos-editor";
 
 export default async function ProcedureDetailPage({
@@ -109,6 +112,38 @@ export default async function ProcedureDetailPage({
   }));
 
   const current = versions.find((v) => v.id === procedure.version_actuelle_id) ?? null;
+
+  // Ligne provisoire « version en cours » : visible dès la rédaction (habitude
+  // client), tant que la procédure n'est pas publiée à jour. Indice = prochain
+  // indice, date = aujourd'hui, objet = note de révision courante, signataires =
+  // signataires courants de la procédure (visa si déjà signé).
+  const versionEnCours: RevisionLigne | null =
+    procedure.statut !== "publiee"
+      ? {
+          id: "en-cours",
+          version: versionLettre(versions.length),
+          approvedAt: todayISO(),
+          noteRevision: procedure.note_revision,
+          redacteur: procedure.soumis_par ? (nameById.get(procedure.soumis_par) ?? null) : null,
+          redacteurSignature: procedure.soumis_par
+            ? (signatureById.get(procedure.soumis_par) ?? null)
+            : null,
+          verificateur: procedure.verifie_par
+            ? (nameById.get(procedure.verifie_par) ?? null)
+            : null,
+          verificateurSignature: procedure.verifie_par
+            ? (signatureById.get(procedure.verifie_par) ?? null)
+            : null,
+          approverName: procedure.approved_by
+            ? (nameById.get(procedure.approved_by) ?? null)
+            : null,
+          approverSignature: procedure.approved_by
+            ? (signatureById.get(procedure.approved_by) ?? null)
+            : null,
+          enCours: true,
+        }
+      : null;
+
   const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
   const canWrite = isApprover || ctx.role === "manager";
 
@@ -141,6 +176,7 @@ export default async function ProcedureDetailPage({
     definitions,
     referencesDoc: refsDoc,
     versions,
+    versionEnCours,
   };
   const infosInitial = {
     id: procedure.id,
