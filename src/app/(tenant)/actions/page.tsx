@@ -53,12 +53,20 @@ export default async function ActionsPage({
 
   const supabase = await createClient();
 
-  const { data: processusOptions } = await supabase
-    .from("processus")
-    .select("id, nom")
-    .eq("tenant_id", ctx.effectiveTenantId)
-    .is("deleted_at", null)
-    .order("ordre_affichage", { ascending: true });
+  const [{ data: processusOptions }, { data: objectifOptions }] = await Promise.all([
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("ordre_affichage", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+  ]);
 
   let query = supabase
     .from("actions")
@@ -103,6 +111,7 @@ export default async function ActionsPage({
 
   const items = actions ?? [];
   const options = processusOptions ?? [];
+  const objectifs = objectifOptions ?? [];
   const aValider = items.filter((a) => a.propose && !a.valide_le).length;
 
   return (
@@ -114,7 +123,7 @@ export default async function ActionsPage({
         help="Colonne vertébrale du SMQ : toutes les actions convergent ici, quelle que soit leur origine (audit, non-conformité, réclamation, revue, risque…). Une seule liste, filtrable par origine."
       >
         <ViewToggle />
-        <ActionDialog processusOptions={options} />
+        <ActionDialog processusOptions={options} objectifOptions={objectifs} />
       </PageHeader>
 
       <ProposeBanner table="actions" count={aValider} libelle="actions de démarrage" />
@@ -177,6 +186,7 @@ export default async function ActionsPage({
                     <div className="flex flex-wrap items-center gap-2">
                       <ActionDialog
                         processusOptions={options}
+                        objectifOptions={objectifs}
                         action={a}
                         trigger={
                           <button type="button" className={ROW_NAME_BUTTON}>

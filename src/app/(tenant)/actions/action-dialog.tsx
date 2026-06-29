@@ -43,10 +43,15 @@ export type ActionRow = {
   cause_fondamentale?: string | null;
   recommandation?: string | null;
   cotation?: string | null;
+  objectif_id?: string | null;
 };
 
 type Props = {
   processusOptions: { id: string; nom: string }[];
+  /** Objectifs qualité du client (lien §6.2.2). */
+  objectifOptions?: { id: string; intitule: string }[];
+  /** Objectif présélectionné (création d'une action depuis un objectif). */
+  presetObjectifId?: string;
   action?: ActionRow;
   /**
    * Déclencheur personnalisé (ex. nom de la ligne cliquable dans la liste).
@@ -68,7 +73,13 @@ function Options({ map }: { map: Record<string, string> }) {
   );
 }
 
-export function ActionDialog({ processusOptions, action, trigger }: Props) {
+export function ActionDialog({
+  processusOptions,
+  objectifOptions = [],
+  presetObjectifId,
+  action,
+  trigger,
+}: Props) {
   const isEdit = Boolean(action);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
@@ -84,6 +95,7 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
           priorite: form.get("priorite"),
           statut: form.get("statut"),
           processusConcerne: form.get("processusConcerne") || undefined,
+          objectifId: form.get("objectifId") || undefined,
           datePrevue: form.get("datePrevue") || undefined,
           indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
           resultatEfficacite: form.get("resultatEfficacite") || undefined,
@@ -210,6 +222,22 @@ export function ActionDialog({ processusOptions, action, trigger }: Props) {
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="objectifId">Objectif lié</Label>
+              <select
+                id="objectifId"
+                name="objectifId"
+                className={SELECT_CLASS}
+                defaultValue={action?.objectif_id ?? presetObjectifId ?? ""}
+              >
+                <option value="">Aucun</option>
+                {objectifOptions.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.intitule}
                   </option>
                 ))}
               </select>

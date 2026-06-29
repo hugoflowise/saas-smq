@@ -40,7 +40,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -48,15 +48,28 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
 
   if (!action) notFound();
 
-  const { data: processusOptions } = await supabase
-    .from("processus")
-    .select("id, nom")
-    .eq("tenant_id", tid)
-    .order("ordre_affichage", { ascending: true });
+  const [{ data: processusOptions }, { data: objectifOptions }] = await Promise.all([
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", tid)
+      .order("ordre_affichage", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+  ]);
 
   const processusNom = action.processus_concerne
     ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
     : "-";
+
+  // §6.2.2 : objectif qualité auquel cette action contribue (lien direct).
+  const objectifLie = action.objectif_id
+    ? ((objectifOptions ?? []).find((o) => o.id === action.objectif_id) ?? null)
+    : null;
 
   // Non-conformité(s) liée(s) via la table pivot nc_actions → on permet de
   // remonter à la NC d'origine depuis la fiche action.
@@ -81,7 +94,11 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
       <BackLink href="/actions" label="Plan d'actions" />
 
       <PageHeader title={action.description_courte}>
-        <ActionDialog processusOptions={processusOptions ?? []} action={action} />
+        <ActionDialog
+          processusOptions={processusOptions ?? []}
+          objectifOptions={objectifOptions ?? []}
+          action={action}
+        />
         <SupprimerButton
           action={deleteActionAction}
           id={action.id}
@@ -137,6 +154,20 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
                 id={action.processus_concerne}
                 nom={action.processus_concerne ? processusNom : null}
               />
+            </p>
+          </div>
+          <div>
+            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+              Objectif lié
+            </p>
+            <p className="mt-1 text-sm">
+              {objectifLie ? (
+                <Link href="/strategie/objectifs" className="text-primary hover:underline">
+                  {objectifLie.intitule}
+                </Link>
+              ) : (
+                "-"
+              )}
             </p>
           </div>
           <Field

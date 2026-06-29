@@ -33,6 +33,7 @@ export const ACTION_ORIGINE_LABELS = {
   dysfonctionnement: "Dysfonctionnement",
   incident: "Incident",
   accident: "Accident",
+  objectif: "Objectif qualité",
 } as const;
 
 /** Types de remontée (module Remontées, ex-Réclamations). */
