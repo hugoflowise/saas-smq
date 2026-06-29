@@ -30,9 +30,7 @@ export default async function DomainePage() {
   const tid = ctx.effectiveTenantId;
   const { data: domaine } = await supabase
     .from("domaine_application")
-    .select(
-      "perimetre, sites, exclusions, date_etablissement, prochaine_revue, valide_par, valide_le",
-    )
+    .select("perimetre, sites, exclusions, date_etablissement, prochaine_revue")
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -61,17 +59,6 @@ export default async function DomainePage() {
     snapshot: v.snapshot as unknown as DomaineSnapshot | null,
   }));
   const current = versions[0] ?? null;
-
-  // Nom du validateur (preuve d'approbation direction)
-  let validateurNom: string | null = null;
-  if (domaine?.valide_par) {
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", domaine.valide_par)
-      .maybeSingle();
-    validateurNom = p?.full_name ?? null;
-  }
 
   const exclusionsRaw = Array.isArray(domaine?.exclusions) ? domaine.exclusions : [];
   const exclusions = (exclusionsRaw as Record<string, unknown>[]).map((e) => ({
@@ -115,8 +102,6 @@ export default async function DomainePage() {
           dateEtablissement: domaine?.date_etablissement ?? "",
           prochaineRevue: domaine?.prochaine_revue ?? "",
         }}
-        valideLe={domaine?.valide_le ?? null}
-        validateurNom={validateurNom}
       />
 
       {/* Historique des versions figées (consultables en lecture seule). */}
