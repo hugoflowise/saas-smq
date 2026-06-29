@@ -73,15 +73,16 @@ export async function getTenantContext(): Promise<TenantContext> {
       ) {
         const { data: personas } = await supabase
           .from("profiles")
-          .select("id, full_name")
+          .select("id, full_name, email")
           .eq("tenant_id", effectiveTenantId)
           .eq("role", simulatedRole)
           .limit(50);
-        // On privilégie un profil dédié « … flowise » s'il existe, sinon le
-        // premier utilisateur réel de ce rôle dans le tenant.
+        // On privilégie un profil dédié « … flowise » (par nom ou e-mail) s'il
+        // existe, sinon le premier utilisateur réel de ce rôle dans le tenant.
         const persona =
-          (personas ?? []).find((p) => (p.full_name ?? "").toLowerCase().includes("flowise")) ??
-          (personas ?? [])[0];
+          (personas ?? []).find((p) =>
+            `${p.full_name ?? ""} ${p.email ?? ""}`.toLowerCase().includes("flowise"),
+          ) ?? (personas ?? [])[0];
         if (persona) userId = persona.id;
       }
     }
