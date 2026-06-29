@@ -29,6 +29,26 @@ export type RevueStructureInitial = {
   sortieRessources: string;
 };
 
+// Aide à la saisie des entrées (§9.3.2 a et e), calculée côté serveur.
+export type RevuePrefillAction = {
+  id: string;
+  reference: string;
+  description: string;
+  statutLabel: string;
+  revueAnnee: number;
+};
+export type RevuePrefillRo = {
+  id: string;
+  intitule: string;
+  criticite: number | null;
+  criticiteResiduelle: number | null;
+  statutLabel: string;
+};
+export type RevueStructurePrefill = {
+  actionsAnterieures: RevuePrefillAction[];
+  roCritiques: RevuePrefillRo[];
+};
+
 type ChampKey = Exclude<keyof RevueStructureInitial, "id" | "participants">;
 
 const ENTREES: { name: ChampKey; label: string }[] = [
@@ -52,11 +72,28 @@ const SORTIES: { name: ChampKey; label: string }[] = [
   { name: "sortieRessources", label: "Besoins en ressources" },
 ];
 
-export function RevueStructureEditor({ initial }: { initial: RevueStructureInitial }) {
+export function RevueStructureEditor({
+  initial,
+  prefill,
+}: {
+  initial: RevueStructureInitial;
+  prefill: RevueStructurePrefill;
+}) {
   const router = useRouter();
   const readOnly = useReadOnly();
   const [pending, setPending] = useState(false);
   const [participants, setParticipants] = useState<RevueParticipant[]>(initial.participants);
+
+  // Pré-remplissage du champ (a) si vide : synthèse des actions des revues N-1.
+  const actionsAnterieuresDefaut =
+    initial.entreeActionsAnterieures ||
+    (prefill.actionsAnterieures.length > 0
+      ? prefill.actionsAnterieures
+          .map(
+            (a) => `- ${a.reference} (revue ${a.revueAnnee}) : ${a.description} — ${a.statutLabel}`,
+          )
+          .join("\n")
+      : "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -107,6 +144,15 @@ export function RevueStructureEditor({ initial }: { initial: RevueStructureIniti
                 ))}
               </ul>
             )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Données d'aide à la revue (§9.3.2 a et e)</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <PrefillActions actions={prefill.actionsAnterieures} />
+            <PrefillRo roCritiques={prefill.roCritiques} />
           </CardContent>
         </Card>
         <ReadOnlyBloc titre="Éléments d'entrée (§9.3.2)" champs={ENTREES} initial={initial} />
@@ -187,7 +233,21 @@ export function RevueStructureEditor({ initial }: { initial: RevueStructureIniti
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {ENTREES.map((c) => (
-            <Champ key={c.name} name={c.name} label={c.label} defaultValue={initial[c.name]} />
+            <div key={c.name} className="flex flex-col gap-2">
+              {c.name === "entreeActionsAnterieures" ? (
+                <PrefillActions actions={prefill.actionsAnterieures} />
+              ) : null}
+              {c.name === "entreeEfficaciteActions" ? (
+                <PrefillRo roCritiques={prefill.roCritiques} />
+              ) : null}
+              <Champ
+                name={c.name}
+                label={c.label}
+                defaultValue={
+                  c.name === "entreeActionsAnterieures" ? actionsAnterieuresDefaut : initial[c.name]
+                }
+              />
+            </div>
           ))}
         </CardContent>
       </Card>
@@ -222,6 +282,60 @@ export function RevueStructureEditor({ initial }: { initial: RevueStructureIniti
         </Button>
       </div>
     </form>
+  );
+}
+
+/** Encart d'aide (a) : actions décidées lors des revues de direction antérieures. */
+function PrefillActions({ actions }: { actions: RevuePrefillAction[] }) {
+  return (
+    <div className="rounded-lg border border-dashed bg-muted/30 p-3">
+      <p className="font-medium text-sm">Actions des revues précédentes</p>
+      {actions.length === 0 ? (
+        <p className="mt-1 text-muted-foreground text-xs">
+          Aucune action décidée lors d'une revue antérieure.
+        </p>
+      ) : (
+        <ul className="mt-2 flex flex-col gap-1 text-sm">
+          {actions.map((a) => (
+            <li key={a.id} className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0">
+                <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
+                <span className="text-muted-foreground text-xs">(revue {a.revueAnnee})</span>{" "}
+                {a.description}
+              </span>
+              <span className="shrink-0 text-muted-foreground text-xs">{a.statutLabel}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Encart d'aide (e) : risques & opportunités critiques du client. */
+function PrefillRo({ roCritiques }: { roCritiques: RevuePrefillRo[] }) {
+  return (
+    <div className="rounded-lg border border-dashed bg-muted/30 p-3">
+      <p className="font-medium text-sm">Risques &amp; opportunités critiques</p>
+      {roCritiques.length === 0 ? (
+        <p className="mt-1 text-muted-foreground text-xs">
+          Aucun risque critique enregistré. Vérifiez l'efficacité des actions face aux R&amp;O.
+        </p>
+      ) : (
+        <ul className="mt-2 flex flex-col gap-1 text-sm">
+          {roCritiques.map((r) => (
+            <li key={r.id} className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0">{r.intitule}</span>
+              <span className="shrink-0 text-muted-foreground text-xs">
+                criticité {r.criticite ?? "—"}
+                {r.criticiteResiduelle != null ? ` → ${r.criticiteResiduelle}` : ""} ·{" "}
+                {r.statutLabel}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

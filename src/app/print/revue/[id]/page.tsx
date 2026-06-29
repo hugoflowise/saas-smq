@@ -34,13 +34,24 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
   const { data: revue } = await supabase
     .from("revues_direction")
     .select(
-      "id, annee, date_realisation, statut, donnees_performance, donnees_capturees_le, participants, points_specifiques, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources",
+      "id, annee, date_realisation, statut, donnees_performance, donnees_capturees_le, participants, points_specifiques, entree_actions_anterieures, entree_evolution_contexte, entree_performance_synthese, entree_ressources, entree_efficacite_actions, entree_opportunites, sortie_amelioration, sortie_changements, sortie_ressources, approuve_par, approuve_le",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
     .maybeSingle();
   if (!revue) {
     return <p className="p-8 text-sm">Revue introuvable.</p>;
+  }
+
+  // Approbation (§9.3) : nom de l'approbateur pour le compte rendu.
+  let approuveParNom: string | null = null;
+  if (revue.approuve_par) {
+    const { data: approbateur } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", revue.approuve_par)
+      .maybeSingle();
+    approuveParNom = approbateur?.full_name || approbateur?.email || null;
   }
 
   const snapshot = revue.donnees_performance as RevuePerformance | null;
@@ -82,6 +93,12 @@ export default async function RevuePrintPage({ params }: { params: Promise<{ id:
     { label: "Année", value: String(revue.annee) },
     { label: "Date", value: revue.date_realisation ? formatDate(revue.date_realisation) : "-" },
     { label: "Statut", value: STATUT_LABELS[revue.statut] ?? revue.statut },
+    {
+      label: "Approbation",
+      value: revue.approuve_le
+        ? `${approuveParNom ?? "—"} le ${formatDate(revue.approuve_le)}`
+        : "Non approuvée",
+    },
   ];
 
   return (

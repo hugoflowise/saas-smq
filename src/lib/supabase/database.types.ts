@@ -3598,6 +3598,7 @@ export type Database = {
       revues_direction: {
         Row: {
           annee: number
+          approuve_le: string | null
           approuve_par: string | null
           conclusions: string | null
           created_at: string
@@ -3627,6 +3628,7 @@ export type Database = {
         }
         Insert: {
           annee: number
+          approuve_le?: string | null
           approuve_par?: string | null
           conclusions?: string | null
           created_at?: string
@@ -3656,6 +3658,7 @@ export type Database = {
         }
         Update: {
           annee?: number
+          approuve_le?: string | null
           approuve_par?: string | null
           conclusions?: string | null
           created_at?: string
