@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -90,8 +91,10 @@ export function NcActionsLink({
                 className="flex items-start justify-between gap-3 rounded-md border bg-surface px-3 py-2 text-sm"
               >
                 <span>
-                  <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
-                  {a.description_courte}
+                  <Link href={`/actions/${a.id}`} className="hover:text-primary hover:underline">
+                    <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
+                    {a.description_courte}
+                  </Link>
                   <span className="ml-2 text-muted-foreground text-xs">
                     ({ACTION_STATUT_LABELS[a.statut]})
                   </span>
