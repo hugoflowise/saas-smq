@@ -19,6 +19,7 @@ import {
   MessagesSquare,
   Milestone,
   Presentation,
+  Replace,
   Rocket,
   Scale,
   ScrollText,
@@ -67,6 +68,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Domaine d'application", href: "/strategie/domaine", icon: Milestone },
       { label: "Parties prenantes", href: "/strategie/parties-prenantes", icon: Users },
       { label: "Risques & opportunités", href: "/risques", icon: ShieldCheck },
+      { label: "Modifications du SMQ", href: "/modifications-smq", icon: Replace },
     ],
   },
   {

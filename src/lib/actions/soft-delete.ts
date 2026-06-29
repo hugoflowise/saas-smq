@@ -18,6 +18,7 @@ export type SoftDeletableTable =
   | "fournisseurs"
   | "indicateurs"
   | "jalons_certification"
+  | "modifications_smq"
   | "parties_interessees"
   | "pi_attentes"
   | "procedures"
