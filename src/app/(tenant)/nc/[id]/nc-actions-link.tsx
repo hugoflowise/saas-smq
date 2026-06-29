@@ -19,6 +19,9 @@ type LinkedAction = {
   reference: string;
   description_courte: string;
   statut: keyof typeof ACTION_STATUT_LABELS;
+  type?: string;
+  date_verification_efficacite?: string | null;
+  resultat_verification?: string | null;
 };
 
 export function NcActionsLink({
@@ -75,29 +78,48 @@ export function NcActionsLink({
         <p className="text-muted-foreground text-sm">Aucune action corrective liée.</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {linked.map((a) => (
-            <li
-              key={a.id}
-              className="flex items-center justify-between gap-3 rounded-md border bg-surface px-3 py-2 text-sm"
-            >
-              <span>
-                <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
-                {a.description_courte}
-                <span className="ml-2 text-muted-foreground text-xs">
-                  ({ACTION_STATUT_LABELS[a.statut]})
-                </span>
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Délier"
-                disabled={pending}
-                onClick={() => run(() => unlinkActionFromNcAction(ncId, a.id), "Action déliée.")}
+          {linked.map((a) => {
+            // §10.2 — la vérification d'efficacité ne concerne que les correctives.
+            const estCorrective = a.type === "corrective";
+            const verifiee = Boolean(
+              a.date_verification_efficacite && a.resultat_verification?.trim(),
+            );
+            return (
+              <li
+                key={a.id}
+                className="flex items-start justify-between gap-3 rounded-md border bg-surface px-3 py-2 text-sm"
               >
-                <X className="size-4" />
-              </Button>
-            </li>
-          ))}
+                <span>
+                  <span className="font-mono text-muted-foreground text-xs">{a.reference}</span>{" "}
+                  {a.description_courte}
+                  <span className="ml-2 text-muted-foreground text-xs">
+                    ({ACTION_STATUT_LABELS[a.statut]})
+                  </span>
+                  {estCorrective ? (
+                    verifiee ? (
+                      <span className="mt-1 block text-status-conforme text-xs">
+                        Efficacité vérifiée le {a.date_verification_efficacite} —{" "}
+                        {a.resultat_verification}
+                      </span>
+                    ) : (
+                      <span className="mt-1 block text-status-nc-mineure text-xs">
+                        Efficacité non encore vérifiée (date + résultat requis pour clôturer).
+                      </span>
+                    )
+                  ) : null}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Délier"
+                  disabled={pending}
+                  onClick={() => run(() => unlinkActionFromNcAction(ncId, a.id), "Action déliée.")}
+                >
+                  <X className="size-4" />
+                </Button>
+              </li>
+            );
+          })}
         </ul>
       )}
 
