@@ -74,7 +74,7 @@ export default async function ParametresPage() {
       </Card>
 
       {/*
-        Intégration BoondManager — section DÉSACTIVÉE (préparation).
+        Intégration Boond — section DÉSACTIVÉE (préparation).
         Aucune action réseau : on affiche seulement l'état de connexion lu en base
         (boond_account_id / boond_sync_status). Le bouton « Connecter » est inactif
         tant que le partenariat technique n'est pas en place.
@@ -82,12 +82,12 @@ export default async function ParametresPage() {
       */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Intégration BoondManager</CardTitle>
+          <CardTitle className="text-base">Intégration Boond</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <p className="text-muted-foreground text-sm">
-            Connectez votre compte BoondManager pour alimenter automatiquement l'effectif, les
-            indicateurs et la revue d'engagement. Chaque client reste isolé sur son propre compte.
+            Connectez votre compte Boond pour alimenter automatiquement l'effectif, les indicateurs
+            et la revue d'engagement. Chaque client reste isolé sur son propre compte.
           </p>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Statut :</span>
