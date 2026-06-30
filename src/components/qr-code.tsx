@@ -14,8 +14,8 @@ export function QrCode({ value, size = 160 }: { value: string; size?: number }) 
 
   if (!dataUrl)
     return <div style={{ width: size, height: size }} className="rounded-lg bg-muted" />;
-  // biome-ignore lint/performance/noImgElement: image générée localement (data URL), next/image inadapté.
   return (
+    // biome-ignore lint/performance/noImgElement: image générée localement (data URL), next/image inadapté.
     <img
       src={dataUrl}
       alt="QR code du questionnaire"

@@ -214,6 +214,7 @@ const updateTenantSchema = z.object({
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
   responsableFlowiseId: z.string().uuid().optional().or(z.literal("")),
+  normesActives: z.array(z.enum(["9001", "14001", "45001", "MASE", "CEFRI"])).optional(),
 });
 
 export async function updateTenantAction(input: unknown): Promise<ActionResult> {
@@ -227,6 +228,11 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
   const data = parsed.data;
   const admin = createAdminClient();
 
+  // Au moins une norme reste active (par défaut 9001) : un client sans aucune
+  // norme n'aurait plus que le socle, on évite cet état involontaire.
+  const normes =
+    data.normesActives && data.normesActives.length > 0 ? data.normesActives : ["9001"];
+
   const { error: tenantError } = await admin
     .from("tenants")
     .update({
@@ -235,6 +241,7 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
       secteur: data.secteur ?? null,
       bureau_etudes: data.bureauEtudes ?? false,
       responsable_flowise_id: data.responsableFlowiseId ? data.responsableFlowiseId : null,
+      normes_actives: normes,
     })
     .eq("id", data.tenantId);
 

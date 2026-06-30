@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { updateTenantAction, uploadTenantLogoAction } from "@/lib/actions/tenants";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
+import { NORMES, type NormeCode } from "@/lib/modules";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Tenant = {
@@ -28,6 +29,7 @@ type Tenant = {
   bureau_etudes: boolean;
   logo_url: string | null;
   responsable_flowise_id: string | null;
+  normes_actives: string[];
 };
 
 export function EditTenantDialog({
@@ -40,6 +42,13 @@ export function EditTenantDialog({
   const router = useRouter();
   const { open, setOpen, pending, submit } = useDialogForm();
   const [uploading, setUploading] = useState(false);
+  const [normes, setNormes] = useState<NormeCode[]>(
+    NORMES.map((n) => n.code).filter((c) => tenant.normes_actives.includes(c)),
+  );
+
+  function toggleNorme(code: NormeCode) {
+    setNormes((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+  }
 
   async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -68,6 +77,7 @@ export function EditTenantDialog({
           secteur: form.get("secteur") || undefined,
           bureauEtudes: form.get("bureauEtudes") === "on",
           responsableFlowiseId: form.get("responsableFlowiseId") || "",
+          normesActives: normes,
         }),
       success: "Client mis à jour.",
     });
@@ -187,6 +197,27 @@ export function EditTenantDialog({
             />
             Activité bureau d'études / conception (§8.3)
           </label>
+
+          <div className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
+            <Label>Normes / référentiels activés</Label>
+            <p className="text-muted-foreground text-xs">
+              Pilote les modules visibles chez le client. Au moins une norme reste active (par
+              défaut ISO 9001).
+            </p>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {NORMES.map((n) => (
+                <label key={n.code} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-4"
+                    checked={normes.includes(n.code)}
+                    onChange={() => toggleNorme(n.code)}
+                  />
+                  {n.label}
+                </label>
+              ))}
+            </div>
+          </div>
 
           <Button type="submit" disabled={pending} className="mt-2">
             {pending ? "Enregistrement…" : "Enregistrer"}

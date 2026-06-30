@@ -4249,6 +4249,7 @@ export type Database = {
           logo_url: string | null
           mentions_legales: string | null
           nom_societe: string
+          normes_actives: string[]
           parties_prenantes_reference: string | null
           responsable_flowise_id: string | null
           secteur: Database["public"]["Enums"]["secteur_activite"] | null
@@ -4281,6 +4282,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe: string
+          normes_actives?: string[]
           parties_prenantes_reference?: string | null
           responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
@@ -4313,6 +4315,7 @@ export type Database = {
           logo_url?: string | null
           mentions_legales?: string | null
           nom_societe?: string
+          normes_actives?: string[]
           parties_prenantes_reference?: string | null
           responsable_flowise_id?: string | null
           secteur?: Database["public"]["Enums"]["secteur_activite"] | null
