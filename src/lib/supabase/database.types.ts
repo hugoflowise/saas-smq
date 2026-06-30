@@ -1273,20 +1273,20 @@ export type Database = {
       duerp_risques: {
         Row: {
           action_id: string | null
+          actions_a_mettre: string | null
+          actions_existantes: string | null
           created_at: string
           created_by: string | null
           danger: string
           deleted_at: string | null
+          dommages: string | null
           famille_id: string | null
-          frequence_brute: number
-          frequence_residuelle: number | null
-          gravite_brute: number
-          gravite_residuelle: number | null
+          frequence: number
+          gravite: number
           id: string
-          mesures_existantes: string | null
-          niveau_brut: number | null
-          niveau_residuel: number | null
-          situation_exposition: string | null
+          maitrise: number
+          ri: number | null
+          rr: number | null
           statut: Database["public"]["Enums"]["duerp_risque_statut"]
           tenant_id: string
           unite_id: string
@@ -1295,20 +1295,20 @@ export type Database = {
         }
         Insert: {
           action_id?: string | null
+          actions_a_mettre?: string | null
+          actions_existantes?: string | null
           created_at?: string
           created_by?: string | null
           danger: string
           deleted_at?: string | null
+          dommages?: string | null
           famille_id?: string | null
-          frequence_brute?: number
-          frequence_residuelle?: number | null
-          gravite_brute?: number
-          gravite_residuelle?: number | null
+          frequence?: number
+          gravite?: number
           id?: string
-          mesures_existantes?: string | null
-          niveau_brut?: number | null
-          niveau_residuel?: number | null
-          situation_exposition?: string | null
+          maitrise?: number
+          ri?: number | null
+          rr?: number | null
           statut?: Database["public"]["Enums"]["duerp_risque_statut"]
           tenant_id: string
           unite_id: string
@@ -1317,20 +1317,20 @@ export type Database = {
         }
         Update: {
           action_id?: string | null
+          actions_a_mettre?: string | null
+          actions_existantes?: string | null
           created_at?: string
           created_by?: string | null
           danger?: string
           deleted_at?: string | null
+          dommages?: string | null
           famille_id?: string | null
-          frequence_brute?: number
-          frequence_residuelle?: number | null
-          gravite_brute?: number
-          gravite_residuelle?: number | null
+          frequence?: number
+          gravite?: number
           id?: string
-          mesures_existantes?: string | null
-          niveau_brut?: number | null
-          niveau_residuel?: number | null
-          situation_exposition?: string | null
+          maitrise?: number
+          ri?: number | null
+          rr?: number | null
           statut?: Database["public"]["Enums"]["duerp_risque_statut"]
           tenant_id?: string
           unite_id?: string

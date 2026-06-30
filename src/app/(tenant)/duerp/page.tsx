@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteRisqueAction, deleteUniteAction } from "@/lib/actions/duerp";
-import { duerpNiveauClasse } from "@/lib/duerp";
+import { duerpPriorite, duerpRiClasse } from "@/lib/duerp";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
@@ -49,10 +49,10 @@ export default async function DuerpPage() {
     supabase
       .from("duerp_risques")
       .select(
-        "id, unite_id, famille_id, danger, situation_exposition, gravite_brute, frequence_brute, niveau_brut, mesures_existantes, gravite_residuelle, frequence_residuelle, niveau_residuel, statut",
+        "id, unite_id, famille_id, danger, dommages, gravite, frequence, ri, actions_existantes, maitrise, rr, actions_a_mettre, statut",
       )
       .eq("tenant_id", ctx.effectiveTenantId)
-      .order("niveau_brut", { ascending: false }),
+      .order("ri", { ascending: false }),
     supabase
       .from("duerp_familles")
       .select("id, libelle")
@@ -64,14 +64,13 @@ export default async function DuerpPage() {
   const unitesList = unites ?? [];
   const risquesList = risques ?? [];
   const famillesList = familles ?? [];
-  const familleLabel = new Map(famillesList.map((f) => [f.id, f.libelle]));
 
-  const critiques = risquesList.filter((r) => (r.niveau_brut ?? 0) >= 9).length;
+  const critiques = risquesList.filter((r) => duerpPriorite(r.rr).code === "p1").length;
   const nonMaitrises = risquesList.filter((r) => r.statut !== "maitrise").length;
   const tiles = [
     { label: "Unités de travail", value: unitesList.length, cls: "text-foreground" },
     { label: "Risques évalués", value: risquesList.length, cls: "text-foreground" },
-    { label: "Risques critiques", value: critiques, cls: "text-status-nc-majeure" },
+    { label: "Priorité 1 (résiduel)", value: critiques, cls: "text-status-nc-majeure" },
     { label: "Non maîtrisés", value: nonMaitrises, cls: "text-status-pa" },
   ];
 
@@ -81,7 +80,7 @@ export default async function DuerpPage() {
         title="Document unique (DUERP)"
         description="Évaluation des risques professionnels par unité de travail."
         isoClause="Code du travail L4121-3 · R4121-1"
-        help="Le DUERP est obligatoire dès le premier salarié. Décrivez vos unités de travail (poste, atelier, chantier…), recensez les risques par famille, cotez gravité × fréquence (avant et après mesures), puis pilotez les actions de prévention. À mettre à jour au moins une fois par an et à chaque changement notable."
+        help="Le DUERP est obligatoire dès le premier salarié. Décrivez vos unités de travail (poste, agence, intervenants sites clients, RPS, pénibilité…), recensez les situations dangereuses, cotez le risque initial (Ri = Gravité × Fréquence), évaluez le niveau de maîtrise (risque résiduel Rr = Ri ÷ M) puis pilotez les actions de prévention. À mettre à jour au moins une fois par an et à chaque changement notable."
       >
         <div className="flex flex-wrap gap-2">
           <FamillesDialog familles={famillesList} />
@@ -94,7 +93,7 @@ export default async function DuerpPage() {
       {unitesList.length === 0 ? (
         <EmptyState
           title="Aucune unité de travail"
-          description="Commencez par créer une unité de travail (poste, atelier, chantier…), puis recensez ses risques."
+          description="Commencez par créer une unité de travail (poste, agence, intervenants sites clients…), puis recensez ses risques."
         />
       ) : (
         <div className="flex flex-col gap-6">
@@ -134,73 +133,80 @@ export default async function DuerpPage() {
                   </div>
                 ) : (
                   <>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Danger</TableHead>
-                          <TableHead>Famille</TableHead>
-                          <TableHead className="w-28">Niveau brut</TableHead>
-                          <TableHead className="w-28">Résiduel</TableHead>
-                          <TableHead className="w-36">Statut</TableHead>
-                          <TableHead className="w-16" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {items.map((r) => {
-                          const brut = duerpNiveauClasse(r.niveau_brut);
-                          const resid = duerpNiveauClasse(r.niveau_residuel);
-                          return (
-                            <TableRow key={r.id}>
-                              <TableCell>
-                                <RisqueDialog
-                                  uniteId={unite.id}
-                                  risque={r as RisqueRow}
-                                  familles={famillesList}
-                                  trigger={
-                                    <button type="button" className={ROW_NAME_BUTTON}>
-                                      {r.danger}
-                                    </button>
-                                  }
-                                />
-                                {r.situation_exposition ? (
-                                  <span className="block text-muted-foreground text-xs">
-                                    {r.situation_exposition}
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Situation dangereuse</TableHead>
+                            <TableHead className="w-14 text-center">G</TableHead>
+                            <TableHead className="w-14 text-center">F</TableHead>
+                            <TableHead className="w-16 text-center">Ri</TableHead>
+                            <TableHead className="w-14 text-center">M</TableHead>
+                            <TableHead className="w-16 text-center">Rr</TableHead>
+                            <TableHead className="w-20">Priorité</TableHead>
+                            <TableHead className="w-36">Statut</TableHead>
+                            <TableHead className="w-12" />
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {items.map((r) => {
+                            const prio = duerpPriorite(r.rr);
+                            return (
+                              <TableRow key={r.id}>
+                                <TableCell>
+                                  <RisqueDialog
+                                    uniteId={unite.id}
+                                    risque={r as RisqueRow}
+                                    familles={famillesList}
+                                    trigger={
+                                      <button type="button" className={ROW_NAME_BUTTON}>
+                                        {r.danger}
+                                      </button>
+                                    }
+                                  />
+                                  {r.dommages ? (
+                                    <span className="block text-muted-foreground text-xs">
+                                      {r.dommages}
+                                    </span>
+                                  ) : null}
+                                </TableCell>
+                                <TableCell className="text-center text-sm">{r.gravite}</TableCell>
+                                <TableCell className="text-center text-sm">{r.frequence}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className={`font-semibold ${duerpRiClasse(r.ri)}`}>
+                                    {r.ri}
                                   </span>
-                                ) : null}
-                              </TableCell>
-                              <TableCell className="text-sm">
-                                {r.famille_id ? (familleLabel.get(r.famille_id) ?? "—") : "—"}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className={`font-medium ${brut.cls}`}>
-                                  {r.niveau_brut} · {brut.label}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                {r.niveau_residuel != null ? (
-                                  <Badge variant="outline" className={`font-medium ${resid.cls}`}>
-                                    {r.niveau_residuel} · {resid.label}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-muted-foreground text-sm">—</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <RisqueStatutCell id={r.id} value={r.statut} />
-                              </TableCell>
-                              <TableCell>
-                                <SupprimerButton
-                                  action={deleteRisqueAction}
-                                  id={r.id}
-                                  libelle={`le risque « ${r.danger} »`}
-                                  iconOnly
-                                />
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                                </TableCell>
+                                <TableCell className="text-center text-sm">{r.maitrise}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className={`font-semibold ${prio.cls}`}>{r.rr}</span>
+                                </TableCell>
+                                <TableCell>
+                                  {prio.code ? (
+                                    <Badge variant="outline" className={`font-medium ${prio.cls}`}>
+                                      {prio.label}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-muted-foreground text-sm">—</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <RisqueStatutCell id={r.id} value={r.statut} />
+                                </TableCell>
+                                <TableCell>
+                                  <SupprimerButton
+                                    action={deleteRisqueAction}
+                                    id={r.id}
+                                    libelle={`le risque « ${r.danger} »`}
+                                    iconOnly
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
                     <div className="px-4 py-3">
                       <RisqueDialog uniteId={unite.id} familles={famillesList} />
                     </div>

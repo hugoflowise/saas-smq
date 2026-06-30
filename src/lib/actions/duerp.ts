@@ -70,11 +70,15 @@ export async function deleteUniteAction(id: string): Promise<ActionResult> {
 }
 
 // ---------------------------------------------------------------------- Risques
-const cote = z.coerce.number().int().min(1).max(4);
-const coteOpt = z
-  .union([z.literal(""), cote])
-  .optional()
-  .transform((v) => (v === "" || v === undefined ? null : v));
+const gravite = z.coerce
+  .number()
+  .int()
+  .refine((v) => [2, 4, 8, 16].includes(v), "Gravité invalide.");
+const frequence = z.coerce
+  .number()
+  .int()
+  .refine((v) => [0, 2, 4, 6, 8].includes(v), "Fréquence invalide.");
+const maitrise = z.coerce.number().int().min(1).max(4);
 
 const risqueBase = {
   uniteId: z.string().uuid(),
@@ -82,13 +86,13 @@ const risqueBase = {
     .union([z.literal(""), z.string().uuid()])
     .optional()
     .transform((v) => (v ? v : null)),
-  danger: z.string().trim().min(2, "Danger requis."),
-  situationExposition: z.string().trim().optional(),
-  graviteBrute: cote,
-  frequenceBrute: cote,
-  mesuresExistantes: z.string().trim().optional(),
-  graviteResiduelle: coteOpt,
-  frequenceResiduelle: coteOpt,
+  danger: z.string().trim().min(2, "Situation dangereuse requise."),
+  dommages: z.string().trim().optional(),
+  gravite,
+  frequence,
+  actionsExistantes: z.string().trim().optional(),
+  maitrise,
+  actionsAMettre: z.string().trim().optional(),
   statut: z.enum(["a_traiter", "en_cours", "maitrise"]),
 };
 const risqueCreate = z.object(risqueBase);
@@ -99,12 +103,12 @@ function risquePayload(d: z.infer<typeof risqueCreate>) {
     unite_id: d.uniteId,
     famille_id: d.familleId,
     danger: d.danger,
-    situation_exposition: d.situationExposition ?? null,
-    gravite_brute: d.graviteBrute,
-    frequence_brute: d.frequenceBrute,
-    mesures_existantes: d.mesuresExistantes ?? null,
-    gravite_residuelle: d.graviteResiduelle,
-    frequence_residuelle: d.frequenceResiduelle,
+    dommages: d.dommages ?? null,
+    gravite: d.gravite,
+    frequence: d.frequence,
+    actions_existantes: d.actionsExistantes ?? null,
+    maitrise: d.maitrise,
+    actions_a_mettre: d.actionsAMettre ?? null,
     statut: d.statut,
   };
 }
