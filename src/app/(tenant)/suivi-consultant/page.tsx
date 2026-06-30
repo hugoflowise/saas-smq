@@ -1,9 +1,11 @@
+import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
 import { StatTiles } from "@/components/stat-tiles";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -134,6 +136,15 @@ export default async function SuiviConsultantPage() {
         isoClause="ISO 9001 §7.1 / §9.1"
         help="Lien à partager aux consultants (mail, QR code) : ils remplissent leur point de suivi sans connexion. Les réponses alimentent les KPIs QSSE (droit de retrait, plan de prévention, point de rassemblement, EPI), la cohérence à l'Ordre De Mission, la satisfaction et l'eNPS, et signalent les alertes santé/RPS. eNPS = % promoteurs (9-10) − % détracteurs (0-6)."
       >
+        {ctx.role !== "auditeur" ? (
+          <Link
+            href="/suivi-consultant/formulaire"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <SlidersHorizontal className="size-4" />
+            Personnaliser le formulaire
+          </Link>
+        ) : null}
         <ExportButton
           champs={champsExport}
           rows={items.map((s) => ({
