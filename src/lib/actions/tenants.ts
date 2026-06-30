@@ -41,9 +41,6 @@ const createTenantSchema = z.object({
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
-  // Préremplissage des modèles de démarrage (processus, actions, parties
-  // prenantes). Décoché = « app vide » (offre licence seule). Par défaut activé.
-  preremplir: z.boolean().optional(),
 });
 
 export async function createTenantAction(input: unknown): Promise<ActionResult> {
@@ -55,9 +52,10 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
   const data = parsed.data;
-  // Par défaut on prérenseigne (rétro-compatible) ; l'offre « licence seule »
-  // (app vide) passe preremplir = false.
-  const preremplir = data.preremplir ?? true;
+  // Le préremplissage dépend de la formule souscrite : « Essentiel » (licence
+  // seule) = app vide ; « Tandem » / « Premium » (avec accompagnement) =
+  // modèles de démarrage pré-remplis.
+  const preremplir = data.formule !== "Essentiel";
   const admin = createAdminClient();
 
   // 1) Création du tenant
