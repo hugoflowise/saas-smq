@@ -30,6 +30,7 @@ export function CreateTenantDialog() {
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
           bureauEtudes: form.get("bureauEtudes") === "on",
+          preremplir: form.get("preremplir") === "on",
         }),
       success: "Client créé. Le dirigeant peut se connecter via son e-mail.",
     });
@@ -100,6 +101,18 @@ export function CreateTenantDialog() {
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="bureauEtudes" className="size-4" />
             Activité bureau d'études / conception (§8.3)
+          </label>
+
+          <label className="flex items-start gap-2 rounded-lg border bg-surface p-3 text-sm">
+            <input type="checkbox" name="preremplir" className="mt-0.5 size-4" defaultChecked />
+            <span>
+              Pré-remplir l'app avec les modèles de démarrage
+              <span className="block text-muted-foreground text-xs">
+                Processus, actions ISO et parties prenantes types (offres avec accompagnement).
+                Décochez pour une <strong>app vide</strong> (licence seule) : seule la procédure de
+                maîtrise documentaire est créée, vierge.
+              </span>
+            </span>
           </label>
 
           <Button type="submit" disabled={pending} className="mt-2">
