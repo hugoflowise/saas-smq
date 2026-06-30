@@ -10,16 +10,13 @@ const schema = z.object({
   objet: z.string().trim().min(3, "Merci de préciser l'objet en quelques mots.").max(200),
   description: z.string().trim().max(4000).optional(),
   gravite: z.enum(["mineure", "majeure", "critique"]).optional(),
-  declarantRole: z.enum(["business_manager", "consultant", "autre"]).optional(),
-  declarantNom: z.string().trim().max(160).optional(),
-  // E-mail facultatif : on accepte le champ vide.
-  declarantEmail: z
-    .string()
-    .trim()
-    .max(200)
-    .email("Adresse e-mail invalide.")
-    .optional()
-    .or(z.literal("")),
+  // Identité du déclarant : obligatoire (rôle + nom + e-mail) pour pouvoir
+  // tracer et recontacter.
+  declarantRole: z.enum(["business_manager", "consultant", "autre"], {
+    message: "Indiquez si vous êtes business manager ou consultant.",
+  }),
+  declarantNom: z.string().trim().min(2, "Indiquez votre nom."),
+  declarantEmail: z.string().trim().max(200).email("Adresse e-mail invalide."),
   // Honeypot anti-spam : champ masqué qui doit rester vide.
   website: z.string().max(0).optional().or(z.literal("")),
 });
@@ -47,7 +44,6 @@ export async function submitSignalementPublicAction(input: unknown): Promise<Act
     .maybeSingle();
   if (!tenant) return { ok: false, error: "Formulaire introuvable ou expiré." };
 
-  const email = d.declarantEmail && d.declarantEmail.length > 0 ? d.declarantEmail : null;
   const { error } = await admin.from("reclamations").insert({
     tenant_id: tenant.id,
     type: d.type ?? "reclamation",
@@ -56,10 +52,10 @@ export async function submitSignalementPublicAction(input: unknown): Promise<Act
     gravite: d.gravite ?? "mineure",
     canal: "enquete",
     statut: "recue",
-    client: d.declarantNom ?? null,
-    declarant_nom: d.declarantNom ?? null,
-    declarant_email: email,
-    declarant_role: d.declarantRole ?? null,
+    client: d.declarantNom,
+    declarant_nom: d.declarantNom,
+    declarant_email: d.declarantEmail,
+    declarant_role: d.declarantRole,
   });
   if (error) return { ok: false, error: error.message };
   return { ok: true };

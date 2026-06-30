@@ -8,12 +8,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { submitSignalementPublicAction } from "@/lib/actions/signalement-public";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
-function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
+function Section({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="flex flex-col gap-4 rounded-2xl border bg-surface p-4">
-      <legend className="px-1 font-medium text-sm">{titre}</legend>
+    <section className="flex flex-col gap-4 border-border border-t pt-6 first:border-t-0 first:pt-0">
+      <h2 className="font-semibold text-base">
+        <span className="text-muted-foreground">{n}.</span> {title}
+      </h2>
       {children}
-    </fieldset>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>
+        {label} {required ? <span className="text-status-nc-mineure">*</span> : null}
+      </Label>
+      {children}
+    </div>
   );
 }
 
@@ -30,8 +51,8 @@ export function SignalementForm({ token, nomSociete }: { token: string; nomSocie
     const result = await submitSignalementPublicAction({
       token,
       declarantRole: f.get("declarantRole") || undefined,
-      declarantNom: f.get("declarantNom") || undefined,
-      declarantEmail: f.get("declarantEmail") || undefined,
+      declarantNom: f.get("declarantNom"),
+      declarantEmail: f.get("declarantEmail"),
       type: f.get("type") || undefined,
       gravite: f.get("gravite") || undefined,
       objet: f.get("objet"),
@@ -59,11 +80,16 @@ export function SignalementForm({ token, nomSociete }: { token: string; nomSocie
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <Section titre="Vous">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="declarantRole">Vous êtes</Label>
-          <select id="declarantRole" name="declarantRole" className={SELECT_CLASS} defaultValue="">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <Section n={1} title="Vous">
+        <Field label="Vous êtes" required>
+          <select
+            id="declarantRole"
+            name="declarantRole"
+            required
+            className={SELECT_CLASS}
+            defaultValue=""
+          >
             <option value="" disabled>
               Sélectionnez…
             </option>
@@ -71,61 +97,41 @@ export function SignalementForm({ token, nomSociete }: { token: string; nomSocie
             <option value="consultant">Consultant</option>
             <option value="autre">Autre</option>
           </select>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="declarantNom">Votre nom (optionnel)</Label>
-            <Input id="declarantNom" name="declarantNom" maxLength={160} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="declarantEmail">Votre e-mail (optionnel)</Label>
-            <Input id="declarantEmail" name="declarantEmail" type="email" maxLength={200} />
-          </div>
-        </div>
-        <p className="text-muted-foreground text-xs">
-          Vos coordonnées sont facultatives ; elles permettent à la qualité de vous recontacter.
-        </p>
+        </Field>
+        <Field label="Votre nom (Prénom NOM)" required>
+          <Input name="declarantNom" required maxLength={160} />
+        </Field>
+        <Field label="Votre e-mail" required>
+          <Input name="declarantEmail" type="email" required maxLength={200} />
+        </Field>
       </Section>
 
-      <Section titre="Le signalement">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="type">Nature</Label>
-            <select id="type" name="type" className={SELECT_CLASS} defaultValue="reclamation">
-              <option value="reclamation">Réclamation</option>
-              <option value="dysfonctionnement">Dysfonctionnement</option>
-              <option value="incident">Incident</option>
-              <option value="accident">Accident</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="gravite">Gravité ressentie</Label>
-            <select id="gravite" name="gravite" className={SELECT_CLASS} defaultValue="mineure">
-              <option value="mineure">Mineure</option>
-              <option value="majeure">Majeure</option>
-              <option value="critique">Critique</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="objet">Objet</Label>
-          <Input
-            id="objet"
-            name="objet"
-            required
-            maxLength={200}
-            placeholder="Résumé en quelques mots"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="description">Description</Label>
+      <Section n={2} title="Le signalement">
+        <Field label="Nature" required>
+          <select id="type" name="type" className={SELECT_CLASS} defaultValue="reclamation">
+            <option value="reclamation">Réclamation</option>
+            <option value="dysfonctionnement">Dysfonctionnement</option>
+            <option value="incident">Incident</option>
+            <option value="accident">Accident</option>
+          </select>
+        </Field>
+        <Field label="Gravité ressentie">
+          <select id="gravite" name="gravite" className={SELECT_CLASS} defaultValue="mineure">
+            <option value="mineure">Mineure</option>
+            <option value="majeure">Majeure</option>
+            <option value="critique">Critique</option>
+          </select>
+        </Field>
+        <Field label="Objet" required>
+          <Input name="objet" required maxLength={200} placeholder="Résumé en quelques mots" />
+        </Field>
+        <Field label="Description">
           <Textarea
-            id="description"
             name="description"
             rows={5}
             placeholder="Décrivez ce qui s'est passé : dates, lieu, mission/client concerné, conséquences…"
           />
-        </div>
+        </Field>
       </Section>
 
       {/* Honeypot anti-spam : masqué aux humains, ignoré côté serveur s'il est rempli. */}
