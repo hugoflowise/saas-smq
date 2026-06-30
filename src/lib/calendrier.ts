@@ -42,8 +42,9 @@ export async function loadCalendarEvents(tid: string): Promise<CalEvent[]> {
         .not("date_prevue", "is", null),
       supabase
         .from("jalons_certification")
-        .select("id, libelle, date_jalon")
+        .select("id, libelle, date_jalon, audit_id")
         .eq("tenant_id", tid)
+        .is("deleted_at", null)
         .not("date_jalon", "is", null),
       supabase
         .from("reunions")
@@ -102,6 +103,9 @@ export async function loadCalendarEvents(tid: string): Promise<CalEvent[]> {
     });
   }
   for (const j of jalons.data ?? []) {
+    // Jalon rattaché à un audit : déjà listé via audits_internes ci-dessus, on
+    // évite le doublon dans le calendrier.
+    if (j.audit_id) continue;
     events.push({
       date: j.date_jalon as string,
       label: j.libelle,

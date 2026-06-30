@@ -1644,6 +1644,7 @@ export type Database = {
       }
       jalons_certification: {
         Row: {
+          audit_id: string | null
           created_at: string
           created_by: string | null
           date_jalon: string | null
@@ -1658,6 +1659,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          audit_id?: string | null
           created_at?: string
           created_by?: string | null
           date_jalon?: string | null
@@ -1672,6 +1674,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          audit_id?: string | null
           created_at?: string
           created_by?: string | null
           date_jalon?: string | null
@@ -1686,6 +1689,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "jalons_certification_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits_internes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "jalons_certification_created_by_fkey"
             columns: ["created_by"]
@@ -4594,6 +4604,7 @@ export type Database = {
       jalon_statut: "planifie" | "realise"
       jalon_type:
         | "audit_blanc"
+        | "audit_interne"
         | "audit_certification"
         | "audit_surveillance"
         | "revue"
@@ -4903,6 +4914,7 @@ export const Constants = {
       jalon_statut: ["planifie", "realise"],
       jalon_type: [
         "audit_blanc",
+        "audit_interne",
         "audit_certification",
         "audit_surveillance",
         "revue",

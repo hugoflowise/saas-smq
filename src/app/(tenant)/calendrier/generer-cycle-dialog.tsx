@@ -38,9 +38,10 @@ export function GenererCycleDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
-            À partir de la date de l'audit de certification, on crée les jalons types : audit blanc
-            (−2 mois), certification, surveillances N+1 et N+2, renouvellement (N+3). Ils restent
-            modifiables et supprimables.
+            À partir de la date de l'audit de certification, on crée les audits du cycle :
+            certification, surveillances N+1 et N+2, renouvellement (N+3), chacun précédé d'un audit
+            interne 2 mois avant. Chaque audit est créé dans le module Audits et lié au jalon. Tout
+            reste modifiable et supprimable.
           </p>
           <div className="flex flex-col gap-2">
             <Label htmlFor="dateCertification">Date de l'audit de certification</Label>

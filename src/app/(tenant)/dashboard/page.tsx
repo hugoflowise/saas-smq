@@ -244,7 +244,7 @@ export default async function DashboardPage() {
         .lte("date_prevue", horizon),
       supabase
         .from("jalons_certification")
-        .select("id, libelle, date_jalon")
+        .select("id, libelle, date_jalon, audit_id")
         .eq("tenant_id", tid)
         .is("deleted_at", null)
         .neq("statut", "realise")
@@ -292,6 +292,8 @@ export default async function DashboardPage() {
     });
   }
   for (const j of jalonsAvenir.data ?? []) {
+    // Rattaché à un audit : déjà listé via les audits à venir, on évite le doublon.
+    if (j.audit_id) continue;
     echeances.push({
       date: j.date_jalon as string,
       label: `Certification · ${j.libelle}`,

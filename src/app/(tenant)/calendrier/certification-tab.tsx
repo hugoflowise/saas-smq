@@ -10,6 +10,7 @@ import { JalonDelete } from "./jalon-delete";
 import { JALON_TYPE_LABELS, JalonDialog, type JalonRow } from "./jalon-dialog";
 
 const TYPE_BADGE: Record<string, string> = {
+  audit_interne: "bg-status-pa/15 text-status-pa",
   audit_blanc: "bg-status-pa/15 text-status-pa",
   audit_certification: "bg-status-conforme/15 text-status-conforme",
   audit_surveillance: "bg-status-pf/15 text-status-pf",
@@ -46,8 +47,9 @@ export function CertificationTab({ jalons }: { jalons: JalonRow[] }) {
     <div className="w-full">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
-          Cycle ISO 9001 sur 3 ans : audit blanc, certification, surveillances annuelles,
-          renouvellement.
+          Cycle ISO 9001 sur 3 ans : un audit interne 2 mois avant chaque audit de l'organisme
+          (certification, surveillances annuelles, renouvellement). Chaque jalon crée l'audit
+          correspondant dans le module Audits.
         </p>
         <div className="flex flex-wrap gap-2">
           {jalons.length === 0 ? <GenererCycleDialog /> : null}
@@ -117,10 +119,10 @@ export function CertificationTab({ jalons }: { jalons: JalonRow[] }) {
                           <p className="mt-1 text-muted-foreground text-sm">{j.description}</p>
                         ) : null}
                         <Link
-                          href="/audits"
+                          href={j.audit_id ? `/audits/${j.audit_id}` : "/audits"}
                           className="mt-2 inline-flex items-center gap-1 text-primary text-xs hover:underline"
                         >
-                          Voir les audits
+                          {j.audit_id ? "Voir l'audit" : "Voir les audits"}
                           <ArrowUpRight className="size-3" />
                         </Link>
                       </div>
