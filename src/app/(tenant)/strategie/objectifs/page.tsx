@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -14,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteObjectifAction } from "@/lib/actions/registres";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
@@ -359,12 +361,20 @@ export default async function ObjectifsPage() {
                               <ObjStatutCell id={o.id} value={o.statut} />
                             </TableCell>
                             <TableCell>
-                              <ObjectifDialog
-                                objectif={o}
-                                processusOptions={processusOptions}
-                                indicateurOptions={indicateurOptions}
-                                linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
-                              />
+                              <div className="flex items-center justify-end gap-1">
+                                <ObjectifDialog
+                                  objectif={o}
+                                  processusOptions={processusOptions}
+                                  indicateurOptions={indicateurOptions}
+                                  linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
+                                />
+                                <SupprimerButton
+                                  action={deleteObjectifAction}
+                                  id={o.id}
+                                  libelle={`l'objectif « ${o.intitule} »`}
+                                  iconOnly
+                                />
+                              </div>
                             </TableCell>
                           </TableRow>
                           <TableRow className="border-b-0 hover:bg-transparent">

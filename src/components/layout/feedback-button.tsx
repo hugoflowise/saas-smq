@@ -16,8 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createRetourAction } from "@/lib/actions/retours";
+import { compresserImage } from "@/lib/compress-image";
 import { RETOUR_TYPE_LABELS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
+
+// Limite de corps de requête de la plateforme (~4,5 Mo sur Vercel) : on garde une
+// marge sous ce seuil pour éviter un échec silencieux côté Server Action.
+const MAX_ENVOI = 4 * 1024 * 1024;
 
 /**
  * Bouton de retour accessible depuis toutes les pages (topbar). Permet à tout
@@ -33,13 +38,39 @@ export function FeedbackButton() {
     // Contexte : page d'où le retour est envoyé.
     form.set("pageUrl", typeof window !== "undefined" ? window.location.pathname : "");
     setPending(true);
-    const result = await createRetourAction(form);
-    setPending(false);
-    if (result.ok) {
-      toast.success("Merci ! Votre retour a bien été transmis.");
-      setOpen(false);
-    } else {
-      toast.error(result.error);
+    try {
+      // Compression des images (captures d'écran surtout) avant envoi, pour
+      // rester sous la limite de corps de requête de la plateforme.
+      const fichiers = form
+        .getAll("fichiers")
+        .filter((f): f is File => f instanceof File && f.size > 0);
+      if (fichiers.length > 0) {
+        const compresses = await Promise.all(fichiers.map((f) => compresserImage(f)));
+        const trop = compresses.find((f) => f.size > MAX_ENVOI);
+        if (trop) {
+          toast.error(
+            `« ${trop.name} » est trop lourd même après compression. Joignez un fichier plus léger (max ~4 Mo).`,
+          );
+          setPending(false);
+          return;
+        }
+        form.delete("fichiers");
+        for (const f of compresses) form.append("fichiers", f);
+      }
+
+      const result = await createRetourAction(form);
+      if (result.ok) {
+        toast.success("Merci ! Votre retour a bien été transmis.");
+        setOpen(false);
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error(
+        "L'envoi a échoué (fichier trop volumineux ou réseau). Réessayez sans la pièce jointe.",
+      );
+    } finally {
+      setPending(false);
     }
   }
 
@@ -101,7 +132,8 @@ export function FeedbackButton() {
               className="cursor-pointer file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm"
             />
             <p className="text-muted-foreground text-xs">
-              Jusqu'à 4 fichiers, 5 Mo chacun. Une capture aide beaucoup à comprendre.
+              Jusqu'à 4 fichiers. Les images sont automatiquement compressées. Une capture aide
+              beaucoup à comprendre.
             </p>
           </div>
           <Button type="submit" disabled={pending} className="mt-1">
