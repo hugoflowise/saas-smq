@@ -320,7 +320,7 @@ export default async function DashboardPage() {
     {
       label: `NPS (${npsLabel(nps)})`,
       value: nps ?? "-",
-      href: "/satisfaction",
+      href: "/suivi-prestation",
       cls: npsClass(nps),
     },
     { label: "Actions en retard", value: retard.length, href: "/actions", cls: "text-status-pa" },
