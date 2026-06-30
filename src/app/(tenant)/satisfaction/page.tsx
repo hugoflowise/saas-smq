@@ -1,7 +1,9 @@
+import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
 import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QrCode } from "@/components/qr-code";
 import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,6 +17,7 @@ import {
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import { computeNps, npsLabel, trimestre } from "@/lib/nps";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
@@ -44,18 +47,22 @@ export default async function SatisfactionPage() {
   }
 
   const supabase = await createClient();
-  const [{ data: enquetes }, { data: tenant }] = await Promise.all([
-    supabase
-      .from("enquetes_satisfaction")
-      .select(
-        "id, client, date_reponse, note_recommandation, note_satisfaction, commentaire, est_reclamation, source",
-      )
-      .eq("tenant_id", ctx.effectiveTenantId)
-      .order("date_reponse", { ascending: false }),
-    supabase.from("tenants").select("survey_token").eq("id", ctx.effectiveTenantId).maybeSingle(),
-  ]);
+  const { data: enquetes } = await supabase
+    .from("enquetes_satisfaction")
+    .select(
+      "id, client, date_reponse, note_recommandation, note_satisfaction, commentaire, est_reclamation, source",
+    )
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .order("date_reponse", { ascending: false });
 
-  // Lien public du questionnaire : à partager aux clients (e-mail, signature, QR).
+  // Lien public du questionnaire (même mécanique que les autres formulaires) :
+  // token lu via le client admin pour rester fiable même en vue admin.
+  const admin = createAdminClient();
+  const { data: tenant } = await admin
+    .from("tenants")
+    .select("survey_token")
+    .eq("id", ctx.effectiveTenantId)
+    .maybeSingle();
   const h = await headers();
   const host = h.get("host") ?? "app.flowise.fr";
   const proto = host.includes("localhost") ? "http" : "https";
@@ -118,14 +125,26 @@ export default async function SatisfactionPage() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Lien public du questionnaire</CardTitle>
+          <CardTitle className="text-base">Partager le formulaire</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <p className="text-muted-foreground text-sm">
-            Partagez ce lien à vos clients (e-mail, signature, QR code…). Chaque réponse alimente
-            automatiquement ce module, en temps réel · sans aucune licence.
-          </p>
-          <CopyField label="Lien public du questionnaire" value={surveyUrl} />
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <QrCode value={surveyUrl} />
+          <div className="min-w-0 flex-1">
+            <CopyField label="Lien public du questionnaire" value={surveyUrl} />
+            <a
+              href={surveyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex h-9 items-center gap-2 rounded-lg border px-3 font-medium text-sm transition-colors hover:bg-muted"
+            >
+              <ExternalLink className="size-4" />
+              Ouvrir le formulaire
+            </a>
+            <p className="mt-2 text-muted-foreground text-xs">
+              Aucune connexion requise : le client ouvre le lien (ou scanne le QR) et évalue sa
+              satisfaction. Chaque réponse alimente ce module en temps réel.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
