@@ -295,7 +295,7 @@ export default async function DashboardPage() {
     echeances.push({
       date: j.date_jalon as string,
       label: `Certification · ${j.libelle}`,
-      href: "/certification",
+      href: "/calendrier",
     });
   }
   echeances.sort((a, b) => a.date.localeCompare(b.date));

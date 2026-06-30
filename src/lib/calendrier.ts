@@ -106,7 +106,7 @@ export async function loadCalendarEvents(tid: string): Promise<CalEvent[]> {
       date: j.date_jalon as string,
       label: j.libelle,
       type: "Certification",
-      href: "/certification",
+      href: "/calendrier",
     });
   }
   for (const r of reunions.data ?? []) {

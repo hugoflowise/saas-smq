@@ -96,7 +96,6 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Auto-diagnostic", href: "/conformite", icon: ClipboardCheck },
       { label: "Veille réglementaire", href: "/veille", icon: Scale },
       { label: "Revues de direction", href: "/revues/direction", icon: ClipboardCheck },
-      { label: "Cycle de certification", href: "/certification", icon: Milestone },
     ],
   },
   {
