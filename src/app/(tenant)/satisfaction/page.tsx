@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
-import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
-import { SATISFACTION_TABS } from "@/lib/module-tabs";
 import { computeNps, npsLabel, trimestre } from "@/lib/nps";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -93,7 +91,6 @@ export default async function SatisfactionPage() {
 
   return (
     <div className="w-full">
-      <ModuleTabs tabs={SATISFACTION_TABS} />
       <PageHeader
         title="Satisfaction client"
         description="Mesure de la perception client (NPS, notes, réclamations)."

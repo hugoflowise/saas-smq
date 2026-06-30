@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
-import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { QrCode } from "@/components/qr-code";
 import { StatTiles } from "@/components/stat-tiles";
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
-import { SATISFACTION_TABS } from "@/lib/module-tabs";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -96,7 +94,6 @@ export default async function SuiviPrestationPage() {
 
   return (
     <div className="w-full">
-      <ModuleTabs tabs={SATISFACTION_TABS} />
       <PageHeader
         title="Suivi de prestation client"
         description="Comptes rendus de visite client, remplis par les Business Managers."
