@@ -43,7 +43,7 @@ export default async function CalendrierPage() {
       .order("date_evenement", { ascending: false }),
     supabase
       .from("jalons_certification")
-      .select("id, libelle, type, date_jalon, statut, description")
+      .select("id, libelle, type, date_jalon, statut, description, audit_id")
       .eq("tenant_id", tid)
       .order("date_jalon", { ascending: true, nullsFirst: false }),
   ]);
@@ -55,7 +55,7 @@ export default async function CalendrierPage() {
       <PageHeader
         title="Planning qualité"
         description="Échéances agrégées (audits, revues, actions, R&O, communications, réunions, révisions) et cycle de certification."
-        help="Vue consolidée des échéances de tous les modules. Les audits, revues, réunions, actions… se créent dans leur module (bouton « Planifier ») et apparaissent ici automatiquement. L'onglet « Cycle de certification » pilote les jalons (audit blanc, certification, surveillances)."
+        help="Vue consolidée des échéances de tous les modules. Les audits, revues, réunions, actions… se créent dans leur module (bouton « Planifier ») et apparaissent ici automatiquement. L'onglet « Cycle de certification » génère le cycle (audits internes + certification, surveillances, renouvellement) et crée les audits liés."
       />
 
       <Tabs defaultValue="calendrier">

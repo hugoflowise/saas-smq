@@ -18,9 +18,10 @@ import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export const JALON_TYPE_LABELS: Record<string, string> = {
-  audit_blanc: "Audit blanc",
+  audit_interne: "Audit interne",
   audit_certification: "Audit de certification",
   audit_surveillance: "Audit de surveillance",
+  audit_blanc: "Audit blanc",
   revue: "Revue",
   autre: "Autre",
 };
@@ -32,6 +33,7 @@ export type JalonRow = {
   date_jalon: string | null;
   statut: string;
   description: string | null;
+  audit_id: string | null;
 };
 
 export function JalonDialog({
