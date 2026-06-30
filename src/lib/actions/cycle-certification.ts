@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { canWrite } from "@/lib/permissions";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -74,6 +76,53 @@ export async function deleteJalonAction(id: string): Promise<ActionResult> {
   const r = await softDeleteRow("jalons_certification", id);
   if (r.ok) revalidatePath("/calendrier");
   return r;
+}
+
+/**
+ * Réinitialise le cycle : met à la corbeille tous les jalons du cycle ET les
+ * audits qu'ils ont générés (audit_id), afin de pouvoir regénérer proprement
+ * sans laisser d'audits orphelins dans le module Audits. Réversible (corbeille).
+ */
+export async function reinitialiserCycleAction(): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+  const tenantId = ctx.effectiveTenantId;
+  const userId = ctx.userId;
+
+  // Service-role : la policy SELECT filtre deleted_at, donc l'UPDATE par le
+  // client utilisateur serait rejeté (cf. softDeleteRow).
+  const admin = createAdminClient();
+  const { data: jalons, error: readErr } = await admin
+    .from("jalons_certification")
+    .select("audit_id")
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null);
+  if (readErr) return { ok: false, error: readErr.message };
+
+  const auditIds = (jalons ?? []).map((j) => j.audit_id).filter((v): v is string => v != null);
+  const now = new Date().toISOString();
+
+  const { error: jErr } = await admin
+    .from("jalons_certification")
+    .update({ deleted_at: now, updated_by: userId })
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null);
+  if (jErr) return { ok: false, error: jErr.message };
+
+  if (auditIds.length > 0) {
+    const { error: aErr } = await admin
+      .from("audits_internes")
+      .update({ deleted_at: now, updated_by: userId })
+      .eq("tenant_id", tenantId)
+      .in("id", auditIds);
+    if (aErr) return { ok: false, error: aErr.message };
+  }
+
+  revalidatePath("/calendrier");
+  revalidatePath("/audits");
+  return { ok: true };
 }
 
 /** Décale une date ISO (YYYY-MM-DD) de N mois et renvoie l'ISO. */

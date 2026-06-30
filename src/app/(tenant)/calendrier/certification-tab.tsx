@@ -2,12 +2,14 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { StatTiles } from "@/components/stat-tiles";
+import { SupprimerButton } from "@/components/supprimer-button";
+import { deleteJalonAction } from "@/lib/actions/cycle-certification";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { GenererCycleDialog } from "./generer-cycle-dialog";
-import { JalonDelete } from "./jalon-delete";
 import { JALON_TYPE_LABELS, JalonDialog, type JalonRow } from "./jalon-dialog";
+import { ReinitialiserCycleButton } from "./reinitialiser-cycle-button";
 
 const TYPE_BADGE: Record<string, string> = {
   audit_interne: "bg-status-pa/15 text-status-pa",
@@ -52,7 +54,7 @@ export function CertificationTab({ jalons }: { jalons: JalonRow[] }) {
           correspondant dans le module Audits.
         </p>
         <div className="flex flex-wrap gap-2">
-          {jalons.length === 0 ? <GenererCycleDialog /> : null}
+          {jalons.length === 0 ? <GenererCycleDialog /> : <ReinitialiserCycleButton />}
           <JalonDialog />
         </div>
       </div>
@@ -127,7 +129,12 @@ export function CertificationTab({ jalons }: { jalons: JalonRow[] }) {
                         </Link>
                       </div>
                       <div className="flex shrink-0 items-center">
-                        <JalonDelete id={j.id} />
+                        <SupprimerButton
+                          action={deleteJalonAction}
+                          id={j.id}
+                          libelle="ce jalon"
+                          iconOnly
+                        />
                       </div>
                     </div>
                   </div>
