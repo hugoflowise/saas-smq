@@ -1,11 +1,8 @@
-import { ExternalLink } from "lucide-react";
 import { headers } from "next/headers";
-import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { QrCode } from "@/components/qr-code";
+import { ShareFormCard } from "@/components/share-form-card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -99,31 +96,18 @@ export default async function ReclamationsPage() {
         <ReclamationDialog processusOptions={processusOptions} />
       </PageHeader>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-base">Partager le formulaire</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <QrCode value={lien} />
-          <div className="min-w-0 flex-1">
-            <CopyField label="Lien à partager aux BM et consultants" value={lien} />
-            <a
-              href={lien}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex h-9 items-center gap-2 rounded-lg border px-3 font-medium text-sm transition-colors hover:bg-muted"
-            >
-              <ExternalLink className="size-4" />
-              Ouvrir le formulaire
-            </a>
-            <p className="mt-2 text-muted-foreground text-xs">
-              Aucune connexion requise : le BM ou le consultant ouvre le lien (ou scanne le QR) et
-              remonte une réclamation, un dysfonctionnement, un incident ou un accident. La remontée
-              arrive ici au statut « reçue ».
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <ShareFormCard
+        lien={lien}
+        copyLabel="Lien à partager aux BM et consultants"
+        emailSubject="Remonter une réclamation, un dysfonctionnement ou un incident"
+        emailIntro={
+          "Bonjour,\n\n" +
+          "Pour remonter une réclamation client, un dysfonctionnement, un incident ou un accident, " +
+          "ouvrez ce lien (aucune connexion requise) et remplissez le formulaire. " +
+          "Pensez à l'ajouter à l'écran d'accueil de votre téléphone pour l'avoir toujours sous la main :"
+        }
+        hint="Aucune connexion requise : le BM ou le consultant ouvre le lien (ou scanne le QR) et remonte une réclamation, un dysfonctionnement, un incident ou un accident. La remontée arrive ici au statut « reçue »."
+      />
 
       {items.length === 0 ? (
         <EmptyState
