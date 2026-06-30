@@ -361,6 +361,16 @@ export async function updateObjectifAction(input: unknown): Promise<ActionResult
   return { ok: true };
 }
 
+/** Met un objectif qualité à la corbeille (soft-delete, réversible). */
+export async function deleteObjectifAction(id: string): Promise<ActionResult> {
+  const r = await softDeleteRow("objectifs_qualite", id);
+  if (r.ok) {
+    revalidatePath("/strategie/objectifs");
+    revalidatePath("/indicateurs");
+  }
+  return r;
+}
+
 const objValiderSchema = z.object({ id: z.string().uuid(), valider: z.boolean() });
 
 /**
