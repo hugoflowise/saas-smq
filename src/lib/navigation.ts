@@ -102,7 +102,9 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Parties externes",
     items: [
-      { label: "Satisfaction client", href: "/satisfaction", icon: Smile },
+      // « Suivi de prestation » est le module unique côté client : le compte
+      // rendu BM alimente directement la satisfaction (NPS, notes, réclamations).
+      { label: "Suivi de prestation", href: "/suivi-prestation", icon: Smile },
       { label: "Fournisseurs", href: "/fournisseurs", icon: Truck },
     ],
   },

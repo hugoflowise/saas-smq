@@ -335,7 +335,7 @@ export default async function ModeAuditPage() {
           label: "Satisfaction client mesurée (NPS)",
           value: `${count(satisfaction)} réponse(s)`,
           ok: count(satisfaction) > 0,
-          href: "/satisfaction",
+          href: "/suivi-prestation",
         },
         {
           label: "Processus à réviser (≤ 60 j ou échus)",
