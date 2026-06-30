@@ -41,6 +41,9 @@ const createTenantSchema = z.object({
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
+  // Préremplissage des modèles de démarrage (processus, actions, parties
+  // prenantes). Décoché = « app vide » (offre licence seule). Par défaut activé.
+  preremplir: z.boolean().optional(),
 });
 
 export async function createTenantAction(input: unknown): Promise<ActionResult> {
@@ -52,6 +55,9 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
   const data = parsed.data;
+  // Par défaut on prérenseigne (rétro-compatible) ; l'offre « licence seule »
+  // (app vide) passe preremplir = false.
+  const preremplir = data.preremplir ?? true;
   const admin = createAdminClient();
 
   // 1) Création du tenant
@@ -125,75 +131,85 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
   // Provisioning : tous les éléments préremplis sont marqués « proposés »
   // (propose: true, valide_le: null). Le client doit les revoir et les valider :
   // tant qu'ils ne le sont pas, ils sont signalés et exclus des compteurs.
+  // L'offre « licence seule » (preremplir = false) saute ce préremplissage :
+  // l'app arrive vide, le client construit son SMQ de A à Z.
 
-  // 4) Cartographie processus standard SI/ESN (Annexe B)
-  const { error: seedError } = await admin.from("processus").insert(
-    PROCESSUS_STANDARDS.map((p, index) => ({
-      tenant_id: tenant.id,
-      nom: p.nom,
-      type: p.type,
-      ordre_affichage: index,
-      propose: true,
-    })),
-  );
-  if (seedError) {
-    return { ok: false, error: `Initialisation des processus impossible : ${seedError.message}` };
-  }
+  if (preremplir) {
+    // 4) Cartographie processus standard SI/ESN (Annexe B)
+    const { error: seedError } = await admin.from("processus").insert(
+      PROCESSUS_STANDARDS.map((p, index) => ({
+        tenant_id: tenant.id,
+        nom: p.nom,
+        type: p.type,
+        ordre_affichage: index,
+        propose: true,
+      })),
+    );
+    if (seedError) {
+      return { ok: false, error: `Initialisation des processus impossible : ${seedError.message}` };
+    }
 
-  // 5) 80 actions standards ISO 9001 (démarrage SMQ)
-  const year = new Date().getFullYear();
-  const { error: actionsError } = await admin.from("actions").insert(
-    ACTIONS_STANDARDS.map((a) => ({
-      tenant_id: tenant.id,
-      reference: `ACT-${year}-${String(a.ordre).padStart(3, "0")}`,
-      description_courte: a.descriptionCourte,
-      description_detail: a.actionAMener || null,
-      origine: "demarrage_smq" as const,
-      type: a.type,
-      priorite: a.priorite,
-      reference_iso: a.referenceIso.length > 0 ? a.referenceIso : null,
-      indicateur_efficacite: a.indicateur,
-      statut: "a_faire" as const,
-      propose: true,
-    })),
-  );
-  if (actionsError) {
-    return { ok: false, error: `Initialisation des actions impossible : ${actionsError.message}` };
-  }
+    // 5) 80 actions standards ISO 9001 (démarrage SMQ)
+    const year = new Date().getFullYear();
+    const { error: actionsError } = await admin.from("actions").insert(
+      ACTIONS_STANDARDS.map((a) => ({
+        tenant_id: tenant.id,
+        reference: `ACT-${year}-${String(a.ordre).padStart(3, "0")}`,
+        description_courte: a.descriptionCourte,
+        description_detail: a.actionAMener || null,
+        origine: "demarrage_smq" as const,
+        type: a.type,
+        priorite: a.priorite,
+        reference_iso: a.referenceIso.length > 0 ? a.referenceIso : null,
+        indicateur_efficacite: a.indicateur,
+        statut: "a_faire" as const,
+        propose: true,
+      })),
+    );
+    if (actionsError) {
+      return {
+        ok: false,
+        error: `Initialisation des actions impossible : ${actionsError.message}`,
+      };
+    }
 
-  // 6) Parties prenantes types pour une société d'ingénierie / ESN
-  const { error: partiesError } = await admin.from("parties_interessees").insert(
-    PARTIES_PRENANTES_STANDARDS.map((p) => ({
-      tenant_id: tenant.id,
-      nom: p.nom,
-      type: p.type,
-      sphere: p.sphere,
-      niveau_interaction: p.niveauInteraction,
-      pouvoir: p.pouvoir,
-      legitimite: p.legitimite,
-      urgence: p.urgence,
-      propose: true,
-    })),
-  );
-  if (partiesError) {
-    return {
-      ok: false,
-      error: `Initialisation des parties prenantes impossible : ${partiesError.message}`,
-    };
+    // 6) Parties prenantes types pour une société d'ingénierie / ESN
+    const { error: partiesError } = await admin.from("parties_interessees").insert(
+      PARTIES_PRENANTES_STANDARDS.map((p) => ({
+        tenant_id: tenant.id,
+        nom: p.nom,
+        type: p.type,
+        sphere: p.sphere,
+        niveau_interaction: p.niveauInteraction,
+        pouvoir: p.pouvoir,
+        legitimite: p.legitimite,
+        urgence: p.urgence,
+        propose: true,
+      })),
+    );
+    if (partiesError) {
+      return {
+        ok: false,
+        error: `Initialisation des parties prenantes impossible : ${partiesError.message}`,
+      };
+    }
   }
 
   // 7) Procédure de maîtrise de l'information documentée (§7.5) : présente par
-  // défaut chez tous les clients (clé stable), pour que la liste maîtresse
-  // pointe toujours vers elle. Créée en brouillon, à compléter par le client.
+  // défaut chez TOUS les clients, même en app vide (clé stable), pour que la
+  // liste maîtresse pointe toujours vers elle. En app vide elle est créée sans
+  // contenu (objet/domaine vides), à rédiger par le client.
   const { error: procMaitriseError } = await admin.from("procedures").insert({
     tenant_id: tenant.id,
     titre: "Maîtrise de l'information documentée",
     statut: "brouillon",
     cle: "maitrise_documentaire",
-    objet:
-      "Définir les règles de création, de validation, d'identification, de diffusion, de conservation et de maîtrise des informations documentées du SMQ (documents et enregistrements), conformément à l'exigence ISO 9001 §7.5.",
-    domaine_application:
-      "S'applique à l'ensemble des informations documentées du système de management de la qualité : documents internes (politique, procédures, instructions, formulaires) et externes, ainsi qu'aux enregistrements constituant des preuves.",
+    objet: preremplir
+      ? "Définir les règles de création, de validation, d'identification, de diffusion, de conservation et de maîtrise des informations documentées du SMQ (documents et enregistrements), conformément à l'exigence ISO 9001 §7.5."
+      : null,
+    domaine_application: preremplir
+      ? "S'applique à l'ensemble des informations documentées du système de management de la qualité : documents internes (politique, procédures, instructions, formulaires) et externes, ainsi qu'aux enregistrements constituant des preuves."
+      : null,
     reference_iso: ["7.5"],
   });
   if (procMaitriseError) {
