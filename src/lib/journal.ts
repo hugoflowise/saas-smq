@@ -30,7 +30,7 @@ export const AUDIT_ENTITY: Record<string, { label: string; href: string | null }
   revues_direction: { label: "Revue de direction", href: "/revues/direction" },
   fournisseurs: { label: "Fournisseur", href: "/fournisseurs" },
   communications: { label: "Communication", href: "/communications" },
-  jalons_certification: { label: "Jalon de certification", href: "/certification" },
+  jalons_certification: { label: "Jalon de certification", href: "/calendrier" },
   processus: { label: "Processus", href: "/processus" },
   contexte_organisme: { label: "Contexte", href: "/strategie/contexte" },
   parties_interessees: { label: "Partie intéressée", href: "/strategie/parties-prenantes" },
