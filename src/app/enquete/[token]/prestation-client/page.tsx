@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AddToHomeScreenHint } from "@/components/add-to-home-screen-hint";
+import { RgpdNotice } from "@/components/rgpd-notice";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SuiviForm } from "./suivi-form";
 
@@ -47,6 +48,7 @@ export default async function SuiviPrestationPublicPage({
           </div>
         </div>
         <SuiviForm token={token} nomSociete={tenant.nom_societe} />
+        <RgpdNotice nomSociete={tenant.nom_societe} />
         <AddToHomeScreenHint />
       </div>
     </div>
