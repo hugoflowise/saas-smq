@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { AddToHomeScreenHint } from "@/components/add-to-home-screen-hint";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SignalementForm } from "./signalement-form";
 
@@ -46,6 +47,7 @@ export default async function SignalementPublicPage({
           </div>
         </div>
         <SignalementForm token={token} nomSociete={tenant.nom_societe} />
+        <AddToHomeScreenHint />
       </div>
     </div>
   );
