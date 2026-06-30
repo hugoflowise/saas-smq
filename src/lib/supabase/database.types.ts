@@ -1212,6 +1212,240 @@ export type Database = {
           },
         ]
       }
+      duerp_familles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          libelle: string
+          ordre: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle: string
+          ordre?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle?: string
+          ordre?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duerp_familles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_familles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_familles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duerp_risques: {
+        Row: {
+          action_id: string | null
+          actions_a_mettre: string | null
+          actions_existantes: string | null
+          created_at: string
+          created_by: string | null
+          danger: string
+          deleted_at: string | null
+          dommages: string | null
+          famille_id: string | null
+          frequence: number
+          gravite: number
+          id: string
+          maitrise: number
+          ri: number | null
+          rr: number | null
+          statut: Database["public"]["Enums"]["duerp_risque_statut"]
+          tenant_id: string
+          unite_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          action_id?: string | null
+          actions_a_mettre?: string | null
+          actions_existantes?: string | null
+          created_at?: string
+          created_by?: string | null
+          danger: string
+          deleted_at?: string | null
+          dommages?: string | null
+          famille_id?: string | null
+          frequence?: number
+          gravite?: number
+          id?: string
+          maitrise?: number
+          ri?: number | null
+          rr?: number | null
+          statut?: Database["public"]["Enums"]["duerp_risque_statut"]
+          tenant_id: string
+          unite_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          action_id?: string | null
+          actions_a_mettre?: string | null
+          actions_existantes?: string | null
+          created_at?: string
+          created_by?: string | null
+          danger?: string
+          deleted_at?: string | null
+          dommages?: string | null
+          famille_id?: string | null
+          frequence?: number
+          gravite?: number
+          id?: string
+          maitrise?: number
+          ri?: number | null
+          rr?: number | null
+          statut?: Database["public"]["Enums"]["duerp_risque_statut"]
+          tenant_id?: string
+          unite_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duerp_risques_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_risques_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_risques_famille_id_fkey"
+            columns: ["famille_id"]
+            isOneToOne: false
+            referencedRelation: "duerp_familles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_risques_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_risques_unite_id_fkey"
+            columns: ["unite_id"]
+            isOneToOne: false
+            referencedRelation: "duerp_unites_travail"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_risques_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duerp_unites_travail: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          effectif_concerne: number | null
+          id: string
+          libelle: string
+          ordre: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          effectif_concerne?: number | null
+          id?: string
+          libelle: string
+          ordre?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          effectif_concerne?: number | null
+          id?: string
+          libelle?: string
+          ordre?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duerp_unites_travail_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_unites_travail_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duerp_unites_travail_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enquetes_satisfaction: {
         Row: {
           client: string | null
@@ -4517,6 +4751,7 @@ export type Database = {
         | "incident"
         | "accident"
         | "objectif"
+        | "duerp"
       action_priorite: "p1" | "p2" | "p3"
       action_statut:
         | "a_faire"
@@ -4579,6 +4814,7 @@ export type Database = {
         | "realisation"
         | "evaluation"
         | "amelioration"
+      duerp_risque_statut: "a_traiter" | "en_cours" | "maitrise"
       effectif_tranche: "1-9" | "10-49" | "50-99" | "100-299" | "300+"
       fournisseur_criticite: "faible" | "moyenne" | "critique"
       fournisseur_statut: "actif" | "inactif"
@@ -4816,6 +5052,7 @@ export const Constants = {
         "incident",
         "accident",
         "objectif",
+        "duerp",
       ],
       action_priorite: ["p1", "p2", "p3"],
       action_statut: [
@@ -4887,6 +5124,7 @@ export const Constants = {
         "evaluation",
         "amelioration",
       ],
+      duerp_risque_statut: ["a_traiter", "en_cours", "maitrise"],
       effectif_tranche: ["1-9", "10-49", "50-99", "100-299", "300+"],
       fournisseur_criticite: ["faible", "moyenne", "critique"],
       fournisseur_statut: ["actif", "inactif"],

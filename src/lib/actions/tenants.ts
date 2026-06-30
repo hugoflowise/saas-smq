@@ -10,6 +10,7 @@ import { todayISO } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIONS_STANDARDS } from "@/lib/templates/actions-standards";
+import { DUERP_FAMILLES_STANDARDS } from "@/lib/templates/duerp-familles";
 import { PARTIES_PRENANTES_STANDARDS } from "@/lib/templates/parties-prenantes";
 import { PROCESSUS_STANDARDS } from "@/lib/templates/processus";
 
@@ -214,6 +215,22 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return {
       ok: false,
       error: `Initialisation de la procédure de maîtrise documentaire impossible : ${procMaitriseError.message}`,
+    };
+  }
+
+  // 8) Familles de risques INRS du DUERP : présentes par défaut chez TOUS les
+  // clients (obligation légale indépendante des normes), éditables ensuite.
+  const { error: duerpError } = await admin.from("duerp_familles").insert(
+    DUERP_FAMILLES_STANDARDS.map((f) => ({
+      tenant_id: tenant.id,
+      libelle: f.libelle,
+      ordre: f.ordre,
+    })),
+  );
+  if (duerpError) {
+    return {
+      ok: false,
+      error: `Initialisation des familles de risques DUERP impossible : ${duerpError.message}`,
     };
   }
 
