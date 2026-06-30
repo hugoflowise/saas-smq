@@ -4109,6 +4109,47 @@ export type Database = {
           },
         ]
       }
+      formulaire_modeles: {
+        Row: {
+          actif: boolean
+          created_at: string
+          definition: Json
+          id: string
+          tenant_id: string
+          type: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          definition: Json
+          id?: string
+          tenant_id: string
+          type: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          definition?: Json
+          id?: string
+          tenant_id?: string
+          type?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formulaire_modeles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suivis_consultant: {
         Row: {
           alerte: boolean
@@ -4120,6 +4161,7 @@ export type Database = {
           email: string | null
           habilitations: boolean | null
           id: string
+          modele_version: number | null
           nom: string | null
           note_qualite_suivi_manager: number | null
           nps: number | null
@@ -4141,6 +4183,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
           nps?: number | null
@@ -4162,6 +4205,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
           nps?: number | null

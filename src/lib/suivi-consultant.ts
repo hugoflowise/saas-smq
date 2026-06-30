@@ -20,6 +20,17 @@ export type Champ = {
   allowAutre?: boolean;
   /** Affiché seulement si le champ `key` vaut `equals`. */
   showIf?: { key: string; equals: string };
+  /**
+   * Question « socle » : non supprimable par le client (verrouillée). Le client
+   * peut la réordonner et reformuler son libellé, mais sa `key` reste figée car
+   * elle alimente une colonne dénormalisée, un indicateur ou une alerte.
+   */
+  verrou?: boolean;
+  /**
+   * Indicateur alimenté par cette question (info pour l'éditeur de formulaire).
+   * Ex. `nps`, `satisfaction`, `alerte`, `qsse_conformite`. Implique `verrou`.
+   */
+  roleStat?: string;
 };
 
 export type SectionConfig = { n: number; title: string; champs: Champ[] };
@@ -45,11 +56,17 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
     n: 1,
     title: "Identification",
     champs: [
-      { key: "nom", label: "Nom (Prénom NOM)", type: "text", required: true },
-      { key: "email", label: "Adresse mail", type: "email", required: true },
-      { key: "client", label: "Client actuel", type: "text", required: true },
-      { key: "poste", label: "Poste / mission", type: "text", required: true },
-      { key: "site_intervention", label: "Site d'intervention", type: "text", required: true },
+      { key: "nom", label: "Nom (Prénom NOM)", type: "text", required: true, verrou: true },
+      { key: "email", label: "Adresse mail", type: "email", required: true, verrou: true },
+      { key: "client", label: "Client actuel", type: "text", required: true, verrou: true },
+      { key: "poste", label: "Poste / mission", type: "text", required: true, verrou: true },
+      {
+        key: "site_intervention",
+        label: "Site d'intervention",
+        type: "text",
+        required: true,
+        verrou: true,
+      },
       { key: "date_demarrage", label: "Date de démarrage", type: "date" },
       { key: "date_fin_prevue", label: "Date de fin prévue", type: "date" },
     ],
@@ -87,6 +104,7 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
       },
       {
         key: "coherence_odm_details",
@@ -128,6 +146,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "qsse_conformite",
       },
     ],
   },
@@ -141,6 +161,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "qsse_conformite",
       },
       {
         key: "point_rassemblement",
@@ -148,6 +170,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "qsse_conformite",
       },
       {
         key: "consignes_environnement",
@@ -168,6 +192,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "qsse_conformite",
       },
       {
         key: "epi_fournis_par",
@@ -193,6 +219,7 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         label: "Intervenez-vous dans le secteur nucléaire ?",
         type: "single",
         options: OUI_NON,
+        verrou: true,
       },
       {
         key: "radio_categorie",
@@ -233,6 +260,7 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
       },
       {
         key: "habilitations_details",
@@ -246,6 +274,7 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
       },
       {
         key: "accompagnement_details",
@@ -273,6 +302,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "alerte",
       },
       {
         key: "harcelement",
@@ -280,6 +311,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "alerte",
       },
       {
         key: "stress_repetition",
@@ -287,6 +320,8 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         type: "single",
         options: OUI_NON,
         required: true,
+        verrou: true,
+        roleStat: "alerte",
       },
       { key: "commentaires_bienetre", label: "Commentaires", type: "textarea" },
     ],
@@ -300,18 +335,24 @@ export const SUIVI_CONSULTANT_SECTIONS: SectionConfig[] = [
         label: "Qualité du suivi avec votre manager",
         type: "note5",
         required: true,
+        verrou: true,
+        roleStat: "satisfaction",
       },
       {
         key: "satisfaction_globale",
         label: "Satisfaction globale de votre expérience consultant",
         type: "note5",
         required: true,
+        verrou: true,
+        roleStat: "satisfaction",
       },
       {
         key: "nps",
         label: "Recommanderiez-vous votre entreprise à un proche ? (0 à 10)",
         type: "nps",
         required: true,
+        verrou: true,
+        roleStat: "nps",
       },
       {
         key: "satisfaction_details",

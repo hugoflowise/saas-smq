@@ -9,6 +9,7 @@ import type { Json } from "@/lib/supabase/database.types";
 const schema = z.object({
   token: z.string().uuid(),
   reponses: z.record(z.string(), z.unknown()),
+  modeleVersion: z.number().int().nullable().optional(),
 });
 
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
@@ -21,7 +22,7 @@ export async function submitSuiviConsultantAction(input: unknown): Promise<Actio
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   }
-  const { token, reponses: r } = parsed.data;
+  const { token, reponses: r, modeleVersion } = parsed.data;
 
   const admin = createAdminClient();
   const { data: tenant } = await admin
@@ -48,6 +49,7 @@ export async function submitSuiviConsultantAction(input: unknown): Promise<Actio
     besoin_accompagnement: ouiNon(r.besoin_accompagnement),
     habilitations: ouiNon(r.habilitations),
     alerte,
+    modele_version: modeleVersion ?? null,
     reponses: r as unknown as Json,
   });
   if (error) return { ok: false, error: error.message };

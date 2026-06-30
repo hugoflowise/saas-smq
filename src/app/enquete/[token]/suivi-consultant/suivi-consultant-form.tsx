@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitSuiviConsultantAction } from "@/lib/actions/suivi-consultant";
-import { type Champ, SUIVI_CONSULTANT_SECTIONS } from "@/lib/suivi-consultant";
+import type { Champ, SectionConfig } from "@/lib/suivi-consultant";
 
 function Section({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
@@ -56,7 +56,17 @@ function Scale({
   );
 }
 
-export function SuiviConsultantForm({ token, nomSociete }: { token: string; nomSociete: string }) {
+export function SuiviConsultantForm({
+  token,
+  nomSociete,
+  sections,
+  modeleVersion,
+}: {
+  token: string;
+  nomSociete: string;
+  sections: SectionConfig[];
+  modeleVersion: number | null;
+}) {
   const [singles, setSingles] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, number>>({});
   const [pending, setPending] = useState(false);
@@ -70,7 +80,7 @@ export function SuiviConsultantForm({ token, nomSociete }: { token: string; nomS
     const f = new FormData(event.currentTarget);
     const reponses: Record<string, unknown> = {};
 
-    for (const section of SUIVI_CONSULTANT_SECTIONS) {
+    for (const section of sections) {
       for (const c of section.champs) {
         if (!visible(c)) continue;
         if (c.type === "single") {
@@ -87,7 +97,7 @@ export function SuiviConsultantForm({ token, nomSociete }: { token: string; nomS
     }
 
     // Validation des champs requis non gérés nativement (multi, notes).
-    for (const section of SUIVI_CONSULTANT_SECTIONS) {
+    for (const section of sections) {
       for (const c of section.champs) {
         if (!c.required || !visible(c)) continue;
         if (c.type === "multi" && (reponses[c.key] as string[]).length === 0) {
@@ -103,7 +113,7 @@ export function SuiviConsultantForm({ token, nomSociete }: { token: string; nomS
 
     setError(null);
     setPending(true);
-    const result = await submitSuiviConsultantAction({ token, reponses });
+    const result = await submitSuiviConsultantAction({ token, reponses, modeleVersion });
     setPending(false);
     if (result.ok) setDone(true);
     else setError(result.error);
@@ -125,7 +135,7 @@ export function SuiviConsultantForm({ token, nomSociete }: { token: string; nomS
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-      {SUIVI_CONSULTANT_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <Section key={section.n} n={section.n} title={section.title}>
           {section.champs.filter(visible).map((c) => (
             <div key={c.key} className="flex flex-col gap-1.5">
