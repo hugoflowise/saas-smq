@@ -65,8 +65,8 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   "/corbeille": "socle",
   "/utilisateurs": "socle",
   // DUERP (document unique) : obligation légale dès 1 salarié, indépendante de
-  // toute certification → socle (à brancher quand le module sera livré).
-  // "/duerp": "socle",
+  // toute certification → socle.
+  "/duerp": "socle",
   //
   // Modules métier (à venir) — exemples du gating ciblé :
   // "/sst/plans-prevention": { normes: ["MASE", "45001"] },

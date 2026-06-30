@@ -9,6 +9,7 @@ import {
   FileStack,
   FolderTree,
   Gauge,
+  HardHat,
   History,
   Inbox,
   LayoutDashboard,
@@ -86,6 +87,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Plan d'actions", href: "/actions", icon: ListChecks },
       { label: "Non-conformités", href: "/nc", icon: AlertTriangle },
       { label: "Remontées", href: "/reclamations", icon: MessageSquareWarning },
+    ],
+  },
+  {
+    title: "Santé & sécurité",
+    items: [
+      // DUERP : obligation légale (Code du travail) dès 1 salarié → socle,
+      // toujours visible. Cette section accueillera les modules SST (MASE/45001).
+      { label: "Document unique (DUERP)", href: "/duerp", icon: HardHat },
     ],
   },
   {
