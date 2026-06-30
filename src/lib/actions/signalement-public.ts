@@ -10,6 +10,7 @@ const schema = z.object({
   objet: z.string().trim().min(3, "Merci de préciser l'objet en quelques mots.").max(200),
   description: z.string().trim().max(4000).optional(),
   gravite: z.enum(["mineure", "majeure", "critique"]).optional(),
+  declarantRole: z.enum(["business_manager", "consultant", "autre"]).optional(),
   declarantNom: z.string().trim().max(160).optional(),
   // E-mail facultatif : on accepte le champ vide.
   declarantEmail: z
@@ -58,6 +59,7 @@ export async function submitSignalementPublicAction(input: unknown): Promise<Act
     client: d.declarantNom ?? null,
     declarant_nom: d.declarantNom ?? null,
     declarant_email: email,
+    declarant_role: d.declarantRole ?? null,
   });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
