@@ -34,6 +34,7 @@ export const ACTION_ORIGINE_LABELS = {
   incident: "Incident",
   accident: "Accident",
   objectif: "Objectif qualité",
+  duerp: "DUERP (risque professionnel)",
 } as const;
 
 /** Types de remontée (module Remontées, ex-Réclamations). */
