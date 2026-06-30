@@ -1,6 +1,11 @@
+import { ExternalLink } from "lucide-react";
+import { headers } from "next/headers";
+import { CopyField } from "@/components/copy-field";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { QrCode } from "@/components/qr-code";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
 import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
@@ -23,6 +29,12 @@ const CANAL_LABELS: Record<string, string> = {
   visio: "Visio",
   audit: "Audit",
   enquete: "Enquête",
+  autre: "Autre",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  business_manager: "Business manager",
+  consultant: "Consultant",
   autre: "Autre",
 };
 
@@ -48,7 +60,7 @@ export default async function ReclamationsPage() {
     supabase
       .from("reclamations")
       .select(
-        "id, type, objet, client, date_reception, canal, gravite, description, traitement, statut",
+        "id, type, objet, client, declarant_email, declarant_role, date_reception, canal, gravite, description, traitement, statut",
       )
       .eq("tenant_id", ctx.effectiveTenantId)
       .order("date_reception", { ascending: false }),
@@ -63,6 +75,19 @@ export default async function ReclamationsPage() {
   const items = reclamations ?? [];
   const processusOptions = processus ?? [];
 
+  // Lien public de signalement (même mécanique que les formulaires de suivi) :
+  // porté par le survey_token, à diffuser aux BM et consultants sans compte.
+  const admin = createAdminClient();
+  const { data: tenant } = await admin
+    .from("tenants")
+    .select("survey_token")
+    .eq("id", ctx.effectiveTenantId)
+    .maybeSingle();
+  const h = await headers();
+  const host = h.get("host") ?? "app.flowise.fr";
+  const proto = host.includes("localhost") ? "http" : "https";
+  const lien = `${proto}://${host}/enquete/${tenant?.survey_token ?? ""}/signalement`;
+
   return (
     <div className="w-full">
       <PageHeader
@@ -73,6 +98,32 @@ export default async function ReclamationsPage() {
       >
         <ReclamationDialog processusOptions={processusOptions} />
       </PageHeader>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Partager le formulaire</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <QrCode value={lien} />
+          <div className="min-w-0 flex-1">
+            <CopyField label="Lien à partager aux BM et consultants" value={lien} />
+            <a
+              href={lien}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex h-9 items-center gap-2 rounded-lg border px-3 font-medium text-sm transition-colors hover:bg-muted"
+            >
+              <ExternalLink className="size-4" />
+              Ouvrir le formulaire
+            </a>
+            <p className="mt-2 text-muted-foreground text-xs">
+              Aucune connexion requise : le BM ou le consultant ouvre le lien (ou scanne le QR) et
+              remonte une réclamation, un dysfonctionnement, un incident ou un accident. La remontée
+              arrive ici au statut « reçue ».
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {items.length === 0 ? (
         <EmptyState
@@ -111,7 +162,22 @@ export default async function ReclamationsPage() {
                       }
                     />
                   </TableCell>
-                  <TableCell>{r.client ?? "-"}</TableCell>
+                  <TableCell>
+                    {r.client ?? "-"}
+                    {r.declarant_role ? (
+                      <span className="block text-muted-foreground text-xs">
+                        {ROLE_LABELS[r.declarant_role] ?? r.declarant_role}
+                      </span>
+                    ) : null}
+                    {r.declarant_email ? (
+                      <a
+                        href={`mailto:${r.declarant_email}`}
+                        className="block text-primary text-xs hover:underline"
+                      >
+                        {r.declarant_email}
+                      </a>
+                    ) : null}
+                  </TableCell>
                   <TableCell>{CANAL_LABELS[r.canal] ?? r.canal}</TableCell>
                   <TableCell>
                     <RecGraviteCell id={r.id} value={r.gravite} />

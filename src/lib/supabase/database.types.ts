@@ -3467,6 +3467,9 @@ export type Database = {
           created_by: string | null
           date_reception: string
           date_reponse: string | null
+          declarant_email: string | null
+          declarant_nom: string | null
+          declarant_role: string | null
           deleted_at: string | null
           description: string | null
           gravite: Database["public"]["Enums"]["nc_gravite"]
@@ -3489,6 +3492,9 @@ export type Database = {
           created_by?: string | null
           date_reception?: string
           date_reponse?: string | null
+          declarant_email?: string | null
+          declarant_nom?: string | null
+          declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
@@ -3511,6 +3517,9 @@ export type Database = {
           created_by?: string | null
           date_reception?: string
           date_reponse?: string | null
+          declarant_email?: string | null
+          declarant_nom?: string | null
+          declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
