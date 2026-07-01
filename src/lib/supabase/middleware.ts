@@ -5,7 +5,9 @@ import type { Database } from "./database.types";
 /**
  * Préfixes de routes accessibles sans authentification.
  * `/api/cron` n'a pas de session (déclenché par le Cron Vercel) et se protège
- * lui-même via `CRON_SECRET`.
+ * lui-même via `CRON_SECRET`. `/api/hors-ligne` reçoit la synchro des suivis
+ * remplis hors-ligne (fichier autonome, sans session) et s'authentifie par le
+ * `survey_token` du client.
  */
 const PUBLIC_PATHS = [
   "/login",
@@ -16,6 +18,7 @@ const PUBLIC_PATHS = [
   "/auth",
   "/api/ingest",
   "/api/cron",
+  "/api/hors-ligne",
   "/enquete",
 ];
 
