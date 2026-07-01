@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isModuleVisible } from "@/lib/modules";
 import { ADMIN_NAV_SECTION, NAV_ITEMS_GESTION_UTILISATEURS, NAV_SECTIONS } from "@/lib/navigation";
+import { navLabel } from "@/lib/normes-libelles";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, href: string) {
@@ -65,7 +66,9 @@ export function NavLinks({
                     )}
                   >
                     <item.icon className="size-4 shrink-0" aria-hidden />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate">
+                      {navLabel(item.href, item.label, normesActives)}
+                    </span>
                   </Link>
                 </li>
               );
