@@ -21,7 +21,17 @@ async function tenantWrite() {
 
 // ------------------------------------------------------------------ Remontées
 const recBase = {
-  type: z.enum(["reclamation", "dysfonctionnement", "incident", "accident"]),
+  type: z.enum([
+    "reclamation",
+    "dysfonctionnement",
+    "incident",
+    "accident",
+    // Types SSE (MASE Axe 4).
+    "situation_dangereuse",
+    "presqu_accident",
+    "maladie_professionnelle",
+    "impact_environnemental",
+  ]),
   objet: z.string().trim().min(2, "Objet requis."),
   client: z.string().trim().optional(),
   dateReception: z.string().optional(),
@@ -30,6 +40,10 @@ const recBase = {
   description: z.string().trim().optional(),
   traitement: z.string().trim().optional(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]),
+  // SSE (MASE Axe 4) : domaine concerné + analyse des causes.
+  domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
+  analyseMethode: z.enum(["5_pourquoi", "arbre_causes", "autre"]).optional(),
+  analyseCauses: z.string().trim().optional(),
 };
 // Champs de l'action liée, saisis directement dans le formulaire de remontée
 // (tout est facultatif : on retombe sur des valeurs déduites du sujet si vide).
@@ -60,6 +74,9 @@ function recPayload(d: z.infer<typeof recCreate>) {
     description: d.description ?? null,
     traitement: d.traitement ?? null,
     statut: d.statut,
+    domaine: d.domaine ?? null,
+    analyse_methode: d.analyseMethode ?? null,
+    analyse_causes: d.analyseCauses ?? null,
   };
 }
 

@@ -35,6 +35,10 @@ export const ACTION_ORIGINE_LABELS = {
   accident: "Accident",
   objectif: "Objectif qualité",
   duerp: "DUERP (risque professionnel)",
+  situation_dangereuse: "Situation dangereuse",
+  presqu_accident: "Presqu'accident",
+  maladie_professionnelle: "Maladie professionnelle",
+  impact_environnemental: "Impact environnemental",
 } as const;
 
 /** Types de remontée (module Remontées, ex-Réclamations). */
@@ -43,6 +47,35 @@ export const REMONTEE_TYPE_LABELS = {
   dysfonctionnement: "Dysfonctionnement",
   incident: "Incident",
   accident: "Accident",
+  // Types santé-sécurité-environnement (MASE Axe 4).
+  situation_dangereuse: "Situation dangereuse",
+  presqu_accident: "Presqu'accident",
+  maladie_professionnelle: "Maladie professionnelle",
+  impact_environnemental: "Impact environnemental",
+} as const;
+
+/** Types proposés à la saisie selon la norme (qualité vs SSE / MASE). */
+export const REMONTEE_TYPES_QUALITE = [
+  "reclamation",
+  "dysfonctionnement",
+  "incident",
+  "accident",
+] as const;
+
+export const REMONTEE_TYPES_SSE = [
+  "situation_dangereuse",
+  "presqu_accident",
+  "accident",
+  "maladie_professionnelle",
+  "impact_environnemental",
+  "dysfonctionnement",
+] as const;
+
+/** Méthodes d'analyse des causes d'un événement SSE (MASE Axe 4). */
+export const REMONTEE_ANALYSE_LABELS = {
+  "5_pourquoi": "5 pourquoi",
+  arbre_causes: "Arbre des causes",
+  autre: "Autre",
 } as const;
 
 export const ACTION_STATUTS = Object.keys(

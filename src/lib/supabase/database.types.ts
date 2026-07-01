@@ -3915,6 +3915,8 @@ export type Database = {
       reclamations: {
         Row: {
           action_id: string | null
+          analyse_causes: string | null
+          analyse_methode: string | null
           canal: Database["public"]["Enums"]["reclamation_canal"]
           client: string | null
           created_at: string
@@ -3926,6 +3928,7 @@ export type Database = {
           declarant_role: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           gravite: Database["public"]["Enums"]["nc_gravite"]
           id: string
           nc_associee: string | null
@@ -3940,6 +3943,8 @@ export type Database = {
         }
         Insert: {
           action_id?: string | null
+          analyse_causes?: string | null
+          analyse_methode?: string | null
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -3951,6 +3956,7 @@ export type Database = {
           declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
           nc_associee?: string | null
@@ -3965,6 +3971,8 @@ export type Database = {
         }
         Update: {
           action_id?: string | null
+          analyse_causes?: string | null
+          analyse_methode?: string | null
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -3976,6 +3984,7 @@ export type Database = {
           declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
           nc_associee?: string | null
@@ -5063,6 +5072,10 @@ export type Database = {
         | "accident"
         | "objectif"
         | "duerp"
+        | "situation_dangereuse"
+        | "presqu_accident"
+        | "maladie_professionnelle"
+        | "impact_environnemental"
       action_priorite: "p1" | "p2" | "p3"
       action_statut:
         | "a_faire"
@@ -5204,7 +5217,15 @@ export type Database = {
         | "enquete"
         | "autre"
       reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
-      remontee_type: "reclamation" | "dysfonctionnement" | "incident" | "accident"
+      remontee_type:
+        | "reclamation"
+        | "dysfonctionnement"
+        | "incident"
+        | "accident"
+        | "situation_dangereuse"
+        | "presqu_accident"
+        | "maladie_professionnelle"
+        | "impact_environnemental"
       reunion_statut: "planifiee" | "terminee"
       reunion_type: "comite_qhse" | "reunion_echange" | "revue" | "autre"
       retour_statut: "nouveau" | "en_cours" | "traite" | "rejete"
@@ -5369,6 +5390,10 @@ export const Constants = {
         "accident",
         "objectif",
         "duerp",
+        "situation_dangereuse",
+        "presqu_accident",
+        "maladie_professionnelle",
+        "impact_environnemental",
       ],
       action_priorite: ["p1", "p2", "p3"],
       action_statut: [
@@ -5520,7 +5545,16 @@ export const Constants = {
       processus_type: ["pilotage", "realisation", "support"],
       reclamation_canal: ["mail", "tel", "visio", "audit", "enquete", "autre"],
       reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
-      remontee_type: ["reclamation", "dysfonctionnement", "incident", "accident"],
+      remontee_type: [
+        "reclamation",
+        "dysfonctionnement",
+        "incident",
+        "accident",
+        "situation_dangereuse",
+        "presqu_accident",
+        "maladie_professionnelle",
+        "impact_environnemental",
+      ],
       reunion_statut: ["planifiee", "terminee"],
       reunion_type: ["comite_qhse", "reunion_echange", "revue", "autre"],
       retour_statut: ["nouveau", "en_cours", "traite", "rejete"],
