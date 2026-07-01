@@ -14,6 +14,7 @@ import { chargerMesuresObjectifs } from "@/lib/objectifs-mesure";
 import { loadOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { SseDashboardSection } from "./sse-dashboard-section";
 
 const NC_OUVERTES = ["ouverte", "analysee", "action_definie"] as (
   | "ouverte"
@@ -44,6 +45,7 @@ export default async function DashboardPage() {
   const ctx = await getTenantContext();
   const normes = await getNormesActives();
   const systeme = systemeLabel(normes);
+  const afficherSse = normes.includes("MASE");
 
   if (!ctx.effectiveTenantId) {
     return (
@@ -401,6 +403,8 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {afficherSse ? <SseDashboardSection tenantId={tid} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
