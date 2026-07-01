@@ -2,6 +2,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { ModuleTabs } from "@/components/module-tabs";
 import { OfflineFormButton } from "@/components/offline-form-button";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
@@ -18,6 +19,7 @@ import {
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import { resoudreDefinitionFormulaire } from "@/lib/formulaire-modeles";
+import { SUIVI_PRESTATION_TABS } from "@/lib/module-tabs";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -102,6 +104,7 @@ export default async function SuiviPrestationPage() {
 
   return (
     <div className="w-full">
+      <ModuleTabs tabs={SUIVI_PRESTATION_TABS} />
       <PageHeader
         title="Suivi de prestation client"
         description="Comptes rendus de visite client, remplis par les Business Managers."
