@@ -10,6 +10,22 @@
 
 export type CotationType = "B" | "V" | "VD";
 
+/** Intitulés des 5 axes du référentiel MASE 2024. */
+export const MASE_AXE_LABELS: Record<number, string> = {
+  1: "Axe 1 - Engagement de la Direction",
+  2: "Axe 2 - Compétences et qualifications professionnelles",
+  3: "Axe 3 - Organisation du travail",
+  4: "Axe 4 - Efficacité du système de management",
+  5: "Axe 5 - Bilan et amélioration continue",
+};
+
+/** Libellé court d'un type de cotation, pour l'aide à la saisie. */
+export const COTATION_TYPE_LABELS: Record<CotationType, string> = {
+  B: "Binaire (0 ou maximum)",
+  V: "Variable (0, partiel ou maximum)",
+  VD: "Variable doublée (jusqu'au double en renouvellement)",
+};
+
 export type MaseQuestion = {
   /** Numéro de question, ex. « 1.1.1 ». */
   chapitre: string;
