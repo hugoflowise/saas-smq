@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      controles_obligatoires: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_dernier: string | null
+          date_prochain: string | null
+          deleted_at: string | null
+          domaine: string | null
+          equipement: string | null
+          id: string
+          intitule: string
+          observations: string | null
+          organisme: string | null
+          periodicite_mois: number | null
+          reference: string | null
+          statut: Database["public"]["Enums"]["controle_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_dernier?: string | null
+          date_prochain?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          equipement?: string | null
+          id?: string
+          intitule: string
+          observations?: string | null
+          organisme?: string | null
+          periodicite_mois?: number | null
+          reference?: string | null
+          statut?: Database["public"]["Enums"]["controle_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_dernier?: string | null
+          date_prochain?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          equipement?: string | null
+          id?: string
+          intitule?: string
+          observations?: string | null
+          organisme?: string | null
+          periodicite_mois?: number | null
+          reference?: string | null
+          statut?: Database["public"]["Enums"]["controle_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       analyses_risques: {
         Row: {
           created_at: string
@@ -4798,6 +4858,7 @@ export type Database = {
     Enums: {
       adr_domaine: "securite" | "sante" | "environnement"
       adr_statut: "brouillon" | "validee" | "a_reviser" | "archivee"
+      controle_statut: "a_planifier" | "conforme" | "non_conforme"
       action_origine:
         | "manuelle"
         | "demarrage_smq"
@@ -5112,6 +5173,7 @@ export const Constants = {
     Enums: {
       adr_domaine: ["securite", "sante", "environnement"],
       adr_statut: ["brouillon", "validee", "a_reviser", "archivee"],
+      controle_statut: ["a_planifier", "conforme", "non_conforme"],
       action_origine: [
         "manuelle",
         "demarrage_smq",

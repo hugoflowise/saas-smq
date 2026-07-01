@@ -13,6 +13,7 @@ export type SoftDeletableTable =
   | "competences"
   | "competences_personnes"
   | "consultants"
+  | "controles_obligatoires"
   | "documents_maitrise"
   | "enquetes_satisfaction"
   | "evenements_qualite"
