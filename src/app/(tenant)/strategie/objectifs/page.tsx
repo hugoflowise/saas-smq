@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { deleteObjectifAction } from "@/lib/actions/registres";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
-import { objectifProgress } from "@/lib/objectifs";
+import { chargerMesuresObjectifs, mesureVide } from "@/lib/objectifs-mesure";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ObjEcheanceCell, ObjStatutCell } from "./inline-cells";
@@ -77,7 +77,6 @@ export default async function ObjectifsPage() {
   const items = objectifs ?? [];
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
-  const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
 
   // Engagements de la politique qualité (§6.2), pour la matrice de couverture.
   const { data: engagements } = await supabase
@@ -88,59 +87,21 @@ export default async function ObjectifsPage() {
     .order("ordre", { ascending: true });
   const engagementOptions = engagements ?? [];
 
-  // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
-  // indicateurs rattachés à chaque objectif).
+  // Mesure de chaque objectif via ses indicateurs liés (source unique partagée
+  // avec le dashboard, la fiche processus et la revue de direction).
   const objIds = items.map((o) => o.id);
-  const indicateurIdsByObjectif = new Map<string, string[]>();
-  if (objIds.length) {
-    const { data: liens } = await supabase
-      .from("objectif_indicateurs")
-      .select("objectif_id, indicateur_id")
-      .eq("tenant_id", tid)
-      .in("objectif_id", objIds);
-    for (const l of liens ?? []) {
-      const list = indicateurIdsByObjectif.get(l.objectif_id) ?? [];
-      list.push(l.indicateur_id);
-      indicateurIdsByObjectif.set(l.objectif_id, list);
-    }
-  }
-
-  // Dernière valeur mesurée de tous les indicateurs rattachés à un objectif.
-  const linkedIndIds = [...new Set([...indicateurIdsByObjectif.values()].flat())];
-  const lastVal = new Map<string, number>();
-  if (linkedIndIds.length) {
-    const { data: valeurs } = await supabase
-      .from("indicateurs_valeurs")
-      .select("indicateur_id, valeur, date_mesure")
-      .in("indicateur_id", linkedIndIds)
-      .order("date_mesure", { ascending: false });
-    for (const v of valeurs ?? []) {
-      if (!lastVal.has(v.indicateur_id)) lastVal.set(v.indicateur_id, Number(v.valeur));
-    }
-  }
-
+  const mesures = await chargerMesuresObjectifs(supabase, tid, objIds);
   const withProgress = items.map((o) => {
-    const liens = indicateurIdsByObjectif.get(o.id) ?? [];
-    // Chaque indicateur porte SA cible et SON sens (définis dans Indicateurs) :
-    // l'objectif est mesuré par ses indicateurs, pas par une valeur ressaisie.
-    const indicateursLies = liens
-      .map((id) => indicateurById.get(id))
-      .filter((i): i is (typeof indicateurOptions)[number] => Boolean(i))
-      .map((i) => {
-        const derniere = lastVal.get(i.id) ?? null;
-        const pct = objectifProgress(derniere, i.cible, i.sens);
-        return { ...i, derniere, pct, atteint: pct !== null && pct >= 100 };
-      });
-    // Progression globale de l'objectif = moyenne des indicateurs mesurés.
-    const mesures = indicateursLies.filter((i) => i.pct !== null);
-    const pctMoyen = mesures.length
-      ? Math.round(mesures.reduce((s, i) => s + (i.pct ?? 0), 0) / mesures.length)
-      : null;
+    const m = mesures.get(o.id) ?? mesureVide();
     // Atteint si la direction l'a acté, ou si tous ses indicateurs atteignent leur cible.
-    const atteint =
-      o.statut === "atteint" ||
-      (indicateursLies.length > 0 && indicateursLies.every((i) => i.atteint));
-    return { ...o, indicateursLies, pctMoyen, atteint };
+    const atteint = o.statut === "atteint" || m.indicateursAtteints;
+    return {
+      ...o,
+      indicateursLies: m.indicateurs,
+      linkedIds: m.indicateurs.map((i) => i.id),
+      pctMoyen: m.pctMoyen,
+      atteint,
+    };
   });
   const total = withProgress.length;
   const atteints = withProgress.filter((o) => o.atteint).length;
@@ -377,7 +338,7 @@ export default async function ObjectifsPage() {
                                   processusOptions={processusOptions}
                                   indicateurOptions={indicateurOptions}
                                   engagementOptions={engagementOptions}
-                                  linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
+                                  linkedIndicateurIds={o.linkedIds}
                                 />
                                 <SupprimerButton
                                   action={deleteObjectifAction}

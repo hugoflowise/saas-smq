@@ -1,6 +1,6 @@
 import { horsCible } from "@/lib/indicateurs";
 import { computeNps } from "@/lib/nps";
-import { objectifProgress } from "@/lib/objectifs";
+import { chargerMesuresObjectifs } from "@/lib/objectifs-mesure";
 import type { createClient } from "@/lib/supabase/server";
 
 /**
@@ -112,7 +112,7 @@ export async function computeRevuePerformance(
       .is("deleted_at", null),
     supabase
       .from("objectifs_qualite")
-      .select("statut, valeur_cible, valeur_actuelle, sens, indicateur_id")
+      .select("id, statut")
       .eq("tenant_id", tenantId)
       .is("deleted_at", null),
     supabase
@@ -216,16 +216,16 @@ export async function computeRevuePerformance(
     return v !== undefined && horsCible(v, i.cible, i.sens);
   }).length;
 
-  // Objectifs qualité (taux d'atteinte)
+  // Objectifs qualité (taux d'atteinte, piloté par les indicateurs liés)
   const objectifs = (objectifsRes.data ?? []).filter((o) => o.statut !== "abandonne");
-  const objectifsAtteints = objectifs.filter((o) => {
-    const valeurEffective =
-      o.indicateur_id && lastVal.has(o.indicateur_id)
-        ? (lastVal.get(o.indicateur_id) ?? null)
-        : o.valeur_actuelle;
-    const pct = objectifProgress(valeurEffective, o.valeur_cible, o.sens);
-    return o.statut === "atteint" || (pct !== null && pct >= 100);
-  }).length;
+  const objMesures = await chargerMesuresObjectifs(
+    supabase,
+    tenantId,
+    objectifs.map((o) => o.id),
+  );
+  const objectifsAtteints = objectifs.filter(
+    (o) => o.statut === "atteint" || (objMesures.get(o.id)?.indicateursAtteints ?? false),
+  ).length;
   const tauxObjectifs =
     objectifs.length > 0 ? Math.round((objectifsAtteints / objectifs.length) * 100) : null;
 
