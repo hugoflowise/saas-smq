@@ -4236,6 +4236,7 @@ export type Database = {
           email: string | null
           habilitations: boolean | null
           id: string
+          idempotency_key: string | null
           modele_version: number | null
           nom: string | null
           note_qualite_suivi_manager: number | null
@@ -4258,6 +4259,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          idempotency_key?: string | null
           modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
@@ -4280,6 +4282,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          idempotency_key?: string | null
           modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
@@ -4311,6 +4314,7 @@ export type Database = {
           deleted_at: string | null
           est_reclamation: boolean
           id: string
+          idempotency_key: string | null
           manager: string | null
           mission: string | null
           modele_version: number | null
@@ -4329,6 +4333,7 @@ export type Database = {
           deleted_at?: string | null
           est_reclamation?: boolean
           id?: string
+          idempotency_key?: string | null
           manager?: string | null
           mission?: string | null
           modele_version?: number | null
@@ -4347,6 +4352,7 @@ export type Database = {
           deleted_at?: string | null
           est_reclamation?: boolean
           id?: string
+          idempotency_key?: string | null
           manager?: string | null
           mission?: string | null
           modele_version?: number | null
