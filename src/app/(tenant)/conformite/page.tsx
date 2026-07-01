@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { dateLimiteReevaluation, estAReevaluer } from "@/lib/conformite";
 import { todayISO } from "@/lib/format";
-import { normalizeNormes, REFERENTIEL_NORME } from "@/lib/modules";
+import { normalizeNormes, REFERENTIEL_NORMES } from "@/lib/modules";
 import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -35,7 +35,7 @@ export default async function ConformitePage() {
   // ne montre au client que le(s) référentiel(s) de ses normes actives. Sans ce
   // filtre, un client 9001 verrait aussi les questions MASE (et inversement).
   const normes = await getNormesActives();
-  const normesReferentiel = normalizeNormes(normes).map((c) => REFERENTIEL_NORME[c]);
+  const normesReferentiel = normalizeNormes(normes).flatMap((c) => REFERENTIEL_NORMES[c]);
 
   const { data: referentiel } = await supabase
     .from("referentiel_iso")
