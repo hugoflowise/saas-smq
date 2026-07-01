@@ -21,6 +21,7 @@ export type SoftDeletableTable =
   | "modifications_smq"
   | "parties_interessees"
   | "pi_attentes"
+  | "politique_engagements"
   | "procedures"
   | "processus"
   | "reunions"
