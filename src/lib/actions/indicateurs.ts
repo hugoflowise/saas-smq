@@ -1,9 +1,11 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { ActionResult } from "@/lib/actions/types";
+import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
+import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
@@ -18,9 +20,39 @@ const baseSchema = z.object({
   cible: z.coerce.number().optional(),
   sens: z.enum(["hausse", "baisse"]),
   frequence: z.enum(["quotidien", "hebdo", "mensuel", "trimestriel", "annuel"]),
+  // Objectifs qualité mesurés par cet indicateur (liaison N–N objectif_indicateurs).
+  objectifIds: z.array(z.string().uuid()).optional(),
 });
 
-export async function createIndicateurAction(input: unknown): Promise<ActionResult> {
+/**
+ * Synchronise les objectifs rattachés à un indicateur (table objectif_indicateurs,
+ * côté indicateur). Idempotent : on remplace l'ensemble des liens de l'indicateur.
+ */
+async function syncIndicateurObjectifs(
+  supabase: SupabaseClient<Database>,
+  tenantId: string,
+  indicateurId: string,
+  objectifIds: string[],
+): Promise<string | null> {
+  const ids = [...new Set(objectifIds)];
+  const { error: delErr } = await supabase
+    .from("objectif_indicateurs")
+    .delete()
+    .eq("indicateur_id", indicateurId)
+    .eq("tenant_id", tenantId);
+  if (delErr) return delErr.message;
+  if (ids.length === 0) return null;
+  const { error: insErr } = await supabase.from("objectif_indicateurs").insert(
+    ids.map((objectifId) => ({
+      tenant_id: tenantId,
+      objectif_id: objectifId,
+      indicateur_id: indicateurId,
+    })),
+  );
+  return insErr?.message ?? null;
+}
+
+export async function createIndicateurAction(input: unknown): Promise<CreateResult> {
   const ctx = await getTenantContext();
   if (!ctx.userId) return { ok: false, error: "Non authentifié." };
   if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
@@ -32,24 +64,40 @@ export async function createIndicateurAction(input: unknown): Promise<ActionResu
   const d = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.from("indicateurs").insert({
-    tenant_id: ctx.effectiveTenantId,
-    nom: d.nom,
-    description: d.description ?? null,
-    processus_id: d.processusId ? d.processusId : null,
-    type: d.type,
-    unite: d.unite ?? null,
-    formule_calcul: d.formule ?? null,
-    cible: d.cible ?? null,
-    sens: d.sens,
-    frequence_mesure: d.frequence,
-    source: "manuel",
-    created_by: ctx.userId,
-  });
+  const { data: created, error } = await supabase
+    .from("indicateurs")
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      nom: d.nom,
+      description: d.description ?? null,
+      processus_id: d.processusId ? d.processusId : null,
+      type: d.type,
+      unite: d.unite ?? null,
+      formule_calcul: d.formule ?? null,
+      cible: d.cible ?? null,
+      sens: d.sens,
+      frequence_mesure: d.frequence,
+      source: "manuel",
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
 
-  if (error) return { ok: false, error: error.message };
+  if (error || !created) return { ok: false, error: error?.message ?? "Création impossible." };
+
+  if (d.objectifIds?.length) {
+    const syncErr = await syncIndicateurObjectifs(
+      supabase,
+      ctx.effectiveTenantId,
+      created.id,
+      d.objectifIds,
+    );
+    if (syncErr) return { ok: false, error: syncErr };
+  }
+
   revalidatePath("/indicateurs");
-  return { ok: true };
+  revalidatePath("/strategie/objectifs");
+  return { ok: true, id: created.id };
 }
 
 const updateSchema = baseSchema.extend({ id: z.string().uuid() });
@@ -84,8 +132,20 @@ export async function updateIndicateurAction(input: unknown): Promise<ActionResu
     .eq("tenant_id", ctx.effectiveTenantId);
 
   if (error) return { ok: false, error: error.message };
+
+  if (d.objectifIds !== undefined) {
+    const syncErr = await syncIndicateurObjectifs(
+      supabase,
+      ctx.effectiveTenantId,
+      d.id,
+      d.objectifIds,
+    );
+    if (syncErr) return { ok: false, error: syncErr };
+  }
+
   revalidatePath(`/indicateurs/${d.id}`);
   revalidatePath("/indicateurs");
+  revalidatePath("/strategie/objectifs");
   return { ok: true };
 }
 

@@ -50,21 +50,32 @@ export default async function IndicateurDetailPage({
 
   if (!ind) notFound();
 
-  const [{ data: valeurs }, { data: objectifs }, { data: processusOptions }] = await Promise.all([
-    supabase
-      .from("indicateurs_valeurs")
-      .select("id, valeur, date_mesure, commentaire")
-      .eq("indicateur_id", id)
-      .order("date_mesure", { ascending: true }),
-    supabase
-      .from("objectifs_qualite")
-      .select("id, intitule, statut")
-      .eq("tenant_id", tid)
-      .eq("indicateur_id", id)
-      .is("deleted_at", null)
-      .order("created_at"),
-    supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
-  ]);
+  const [{ data: valeurs }, { data: allObjectifs }, { data: liens }, { data: processusOptions }] =
+    await Promise.all([
+      supabase
+        .from("indicateurs_valeurs")
+        .select("id, valeur, date_mesure, commentaire")
+        .eq("indicateur_id", id)
+        .order("date_mesure", { ascending: true }),
+      supabase
+        .from("objectifs_qualite")
+        .select("id, intitule, statut")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .order("created_at"),
+      supabase
+        .from("objectif_indicateurs")
+        .select("objectif_id")
+        .eq("tenant_id", tid)
+        .eq("indicateur_id", id),
+      supabase.from("processus").select("id, nom").eq("tenant_id", tid).order("ordre_affichage"),
+    ]);
+
+  // Objectifs mesurés par cet indicateur via la liaison N–N (objectif_indicateurs).
+  const objectifOptions = (allObjectifs ?? []).map((o) => ({ id: o.id, intitule: o.intitule }));
+  const linkedObjectifIds = (liens ?? []).map((l) => l.objectif_id);
+  const linkedSet = new Set(linkedObjectifIds);
+  const objectifs = (allObjectifs ?? []).filter((o) => linkedSet.has(o.id));
 
   const points = (valeurs ?? []).map((v) => ({
     date: formatDate(v.date_mesure),
@@ -76,7 +87,12 @@ export default async function IndicateurDetailPage({
       <BackLink href={backHref} label={backLabel} />
 
       <PageHeader title={ind.nom} description={ind.description ?? undefined}>
-        <IndicateurDialog indicateur={ind} processusOptions={processusOptions ?? []} />
+        <IndicateurDialog
+          indicateur={ind}
+          processusOptions={processusOptions ?? []}
+          objectifOptions={objectifOptions}
+          linkedObjectifIds={linkedObjectifIds}
+        />
         <SupprimerButton
           action={deleteIndicateurAction}
           id={ind.id}
