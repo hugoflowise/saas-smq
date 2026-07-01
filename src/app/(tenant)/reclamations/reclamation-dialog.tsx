@@ -41,6 +41,8 @@ export type ReclamationRow = {
   domaine?: string | null;
   analyse_methode?: string | null;
   analyse_causes?: string | null;
+  avec_arret?: boolean | null;
+  jours_arret?: number | null;
 };
 
 export function ReclamationDialog({
@@ -60,6 +62,8 @@ export function ReclamationDialog({
   const readOnly = useReadOnly();
   // À la création : la case « créer une action » révèle les champs de l'action.
   const [creerAction, setCreerAction] = useState(true);
+  // Accident avec arrêt de travail : révèle le nombre de jours d'arrêt (TF/TG).
+  const [avecArret, setAvecArret] = useState(reclamation?.avec_arret ?? false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -77,6 +81,8 @@ export function ReclamationDialog({
           domaine: f.get("domaine") || undefined,
           analyseMethode: f.get("analyseMethode") || undefined,
           analyseCauses: f.get("analyseCauses") || undefined,
+          avecArret,
+          joursArret: avecArret ? f.get("joursArret") || undefined : undefined,
         };
         if (isEdit) return updateReclamationAction({ id: reclamation?.id, ...data });
         const withAction = f.get("creerAction") === "on";
@@ -275,6 +281,33 @@ export function ReclamationDialog({
                   placeholder="Causes profondes (5 pourquoi, arbre des causes…)"
                 />
               </div>
+            </div>
+          ) : null}
+          {afficherSse ? (
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-3">
+              <label className="flex items-center gap-2 font-medium text-sm">
+                <input
+                  type="checkbox"
+                  name="avecArret"
+                  checked={avecArret}
+                  onChange={(e) => setAvecArret(e.target.checked)}
+                  className="size-4 rounded border-input"
+                />
+                Accident avec arrêt de travail
+              </label>
+              {avecArret ? (
+                <div className="flex flex-col gap-2 sm:max-w-xs">
+                  <Label htmlFor="joursArret">Nombre de journées d'arrêt</Label>
+                  <Input
+                    id="joursArret"
+                    name="joursArret"
+                    type="number"
+                    min={0}
+                    defaultValue={reclamation?.jours_arret ?? ""}
+                    placeholder="Base du taux de gravité"
+                  />
+                </div>
+              ) : null}
             </div>
           ) : null}
           {!isEdit ? (
