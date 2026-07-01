@@ -19,7 +19,7 @@ export type SuiviPrestationRow = {
   reponses: Record<string, unknown> | null;
 };
 
-/** Une barre « part de satisfaits » (top box) pour un axe de satisfaction. */
+/** Parts de satisfaction / insatisfaction pour un axe (matrice 1-4). */
 export type AxeStat = {
   key: string;
   label: string;
@@ -27,6 +27,8 @@ export type AxeStat = {
   moyenne: number | null;
   /** % de réponses « satisfait ou très satisfait » (note >= 3). */
   pct: number | null;
+  /** % de réponses « insatisfait ou très insatisfait » (note <= 2). */
+  pctInsatisfait: number | null;
   /** Nombre de réponses prises en compte. */
   count: number;
 };
@@ -156,6 +158,8 @@ export function analyserSuivisPrestation(rows: SuiviPrestationRow[]): AnalyseSui
       label: axe.label,
       moyenne: count > 0 ? Math.round((vals.reduce((a, b) => a + b, 0) / count) * 100) / 100 : null,
       pct: count > 0 ? Math.round((vals.filter((n) => n >= 3).length / count) * 100) : null,
+      pctInsatisfait:
+        count > 0 ? Math.round((vals.filter((n) => n <= 2).length / count) * 100) : null,
       count,
     };
   });
@@ -260,6 +264,58 @@ export function analyserSuivisPrestation(rows: SuiviPrestationRow[]): AnalyseSui
     vigilance,
     verbatims,
   };
+}
+
+/**
+ * Synthèse textuelle de l'écoute client, destinée à alimenter l'élément
+ * d'entrée « Synthèse de la performance » de la revue de direction (§9.3.2 c).
+ * Texte simple (puces «-»), lisible tel quel dans le champ de la revue.
+ */
+export function syntheseEcouteClient(a: AnalyseSuiviPrestation, periodeLabel: string): string {
+  if (a.nbSuivis === 0) {
+    return `Écoute client (${periodeLabel}) : aucun suivi de prestation sur la période.`;
+  }
+  const l: string[] = [];
+  l.push(`Écoute client - suivis de prestation (${periodeLabel})`);
+  l.push(
+    `- ${a.nbSuivis} suivi(s) réalisé(s) auprès de ${a.nbClients} client(s), ${a.nbConsultants} consultant(s).`,
+  );
+  if (a.satPct != null) {
+    l.push(
+      `- Satisfaction : ${a.satPct}% de clients satisfaits${
+        a.satMoyenne != null ? ` (note moyenne ${a.satMoyenne}/5)` : ""
+      }.`,
+    );
+  }
+  if (a.nps != null) {
+    l.push(
+      `- Recommandation : NPS ${a.nps} (${a.npsLabel}) - ${a.npsRepartition.promoteurs} promoteur(s), ${a.npsRepartition.passifs} passif(s), ${a.npsRepartition.detracteurs} détracteur(s).`,
+    );
+  }
+  if (a.conformiteQsse != null) {
+    l.push(`- Conformité sécurité (QSSE) : ${a.conformiteQsse}%.`);
+  }
+  // Axes les plus faibles (par part de satisfaits croissante), pour éclairer la revue.
+  const axesNotes = a.axes.filter((x) => x.pct != null);
+  if (axesNotes.length > 0) {
+    const faibles = [...axesNotes]
+      .sort((x, y) => (x.pct ?? 0) - (y.pct ?? 0))
+      .slice(0, 3)
+      .map((x) => `${x.label} ${x.pct}%`)
+      .join(" ; ");
+    l.push(`- Axes de satisfaction les plus faibles : ${faibles}.`);
+  }
+  l.push(`- Besoins de développement détectés sur ${a.nbBesoinsDetectes} suivi(s).`);
+  if (a.besoins.length > 0) {
+    l.push(
+      `  Principaux : ${a.besoins
+        .slice(0, 3)
+        .map((b) => `${b.label} (${b.count})`)
+        .join(" ; ")}.`,
+    );
+  }
+  l.push(`- Points de vigilance : ${a.vigilance.length} (réclamation(s) et/ou note(s) basse(s)).`);
+  return l.join("\n");
 }
 
 /** Années (décroissantes) présentes dans les dates de suivi. */

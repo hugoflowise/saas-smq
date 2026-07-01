@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
-import type { ActionResult } from "@/lib/actions/types";
+import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import {
   messageImpartialite,
   type ProcessusPilotage,
@@ -12,6 +12,11 @@ import {
 import { canApprove, canWrite } from "@/lib/permissions";
 import { messageRevueIncomplete, type RevueChamps, revueComplete } from "@/lib/revue-circuit";
 import { computeRevuePerformance } from "@/lib/revue-perf";
+import {
+  analyserSuivisPrestation,
+  type SuiviPrestationRow,
+  syntheseEcouteClient,
+} from "@/lib/suivi-prestation-analyse";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -545,6 +550,87 @@ export async function captureRevuePerformanceAction(id: unknown): Promise<Action
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/revues/direction/${revueId.data}`);
   return { ok: true };
+}
+
+/**
+ * Alimente la revue de direction « à venir » (statut planifiée) avec une
+ * synthèse de l'écoute client (suivis de prestation), ajoutée à l'élément
+ * d'entrée « Synthèse de la performance » (§9.3.2 c). Crée une revue planifiée
+ * pour l'année courante si aucune n'existe. Renvoie l'id de la revue alimentée.
+ */
+export async function alimenterRevueEcouteClientAction(input: unknown): Promise<CreateResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Sélectionnez d'abord un client." };
+  const parsed = z.object({ annee: z.string().trim().optional() }).safeParse(input ?? {});
+  if (!parsed.success) return { ok: false, error: "Paramètre invalide." };
+  const anneeParam = parsed.data.annee;
+
+  // Analyse de l'écoute client sur la période demandée.
+  const { data: suivis } = await c.supabase
+    .from("suivis_prestation")
+    .select(
+      "consultant, client, mission, date_suivi, satisfaction_globale, nps, est_reclamation, reponses",
+    )
+    .eq("tenant_id", c.tenantId)
+    .order("date_suivi", { ascending: false, nullsFirst: false });
+  const tous = (suivis ?? []) as SuiviPrestationRow[];
+  const anneeNum = anneeParam && anneeParam !== "toutes" ? Number(anneeParam) : null;
+  const rows =
+    anneeNum == null || !Number.isFinite(anneeNum)
+      ? tous
+      : tous.filter((r) => Number((r.date_suivi ?? "").slice(0, 4)) === anneeNum);
+  if (rows.length === 0) {
+    return { ok: false, error: "Aucun suivi de prestation à remonter sur cette période." };
+  }
+  const analyse = analyserSuivisPrestation(rows);
+  const periodeLabel =
+    anneeNum == null || !Number.isFinite(anneeNum) ? "toutes années" : anneeParam;
+  const synthese = syntheseEcouteClient(analyse, periodeLabel ?? "toutes années");
+
+  // Cible : la revue planifiée la plus récente ; sinon on en crée une pour l'année courante.
+  const { data: planifiee } = await c.supabase
+    .from("revues_direction")
+    .select("id, entree_performance_synthese")
+    .eq("tenant_id", c.tenantId)
+    .eq("statut", "planifiee")
+    .is("deleted_at", null)
+    .order("annee", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let revueId = planifiee?.id ?? null;
+  let ancienne = planifiee?.entree_performance_synthese ?? null;
+  if (!revueId) {
+    const anneeCourante = new Date().getFullYear();
+    const { data: creee, error: createErr } = await c.supabase
+      .from("revues_direction")
+      .insert({
+        tenant_id: c.tenantId,
+        annee: anneeCourante,
+        statut: "planifiee",
+        created_by: c.userId,
+      })
+      .select("id, entree_performance_synthese")
+      .single();
+    if (createErr || !creee) {
+      return { ok: false, error: createErr?.message ?? "Impossible de créer la revue." };
+    }
+    revueId = creee.id;
+    ancienne = creee.entree_performance_synthese;
+  }
+
+  // On complète sans écraser une saisie existante.
+  const nouvelle = ancienne?.trim() ? `${ancienne.trim()}\n\n${synthese}` : synthese;
+  const { error } = await c.supabase
+    .from("revues_direction")
+    .update({ entree_performance_synthese: nouvelle, updated_by: c.userId })
+    .eq("id", revueId)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/revues/direction/${revueId}`);
+  revalidatePath("/revues/direction");
+  return { ok: true, id: revueId };
 }
 
 // ------------------------------------------------------ Circuit de validation
