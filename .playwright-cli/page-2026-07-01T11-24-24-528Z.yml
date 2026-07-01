@@ -1,0 +1,512 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e2]:
+    - complementary [ref=f8e3]:
+      - img "Flowise" [ref=f8e5]
+      - navigation [ref=f8e7]:
+        - generic [ref=f8e8]:
+          - paragraph [ref=f8e9]: Pilotage
+          - list [ref=f8e10]:
+            - listitem [ref=f8e11]:
+              - link "Tableau de bord" [ref=f8e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f8e13]
+                - generic [ref=f8e18]: Tableau de bord
+            - listitem [ref=f8e19]:
+              - link "Mise en route" [ref=f8e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f8e21]
+                - generic [ref=f8e26]: Mise en route
+            - listitem [ref=f8e27]:
+              - link "Calendrier qualité" [ref=f8e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f8e29]
+                - generic [ref=f8e31]: Calendrier qualité
+            - listitem [ref=f8e32]:
+              - link "Réunions QHSE" [ref=f8e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f8e34]
+                - generic [ref=f8e37]: Réunions QHSE
+            - listitem [ref=f8e38]:
+              - link "Mode audit" [ref=f8e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f8e40]
+                - generic [ref=f8e43]: Mode audit
+            - listitem [ref=f8e44]:
+              - link "Effectif & couverture" [ref=f8e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f8e46]
+                - generic [ref=f8e50]: Effectif & couverture
+            - listitem [ref=f8e51]:
+              - link "Suivi consultant" [ref=f8e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f8e53]
+                - generic [ref=f8e56]: Suivi consultant
+        - generic [ref=f8e57]:
+          - paragraph [ref=f8e58]: Stratégie
+          - list [ref=f8e59]:
+            - listitem [ref=f8e60]:
+              - link "Politique qualité" [ref=f8e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f8e62]
+                - generic [ref=f8e65]: Politique qualité
+            - listitem [ref=f8e66]:
+              - link "Contexte" [ref=f8e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f8e68]
+                - generic [ref=f8e70]: Contexte
+            - listitem [ref=f8e71]:
+              - link "Domaine d'application" [ref=f8e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f8e73]
+                - generic [ref=f8e75]: Domaine d'application
+            - listitem [ref=f8e76]:
+              - link "Parties prenantes" [ref=f8e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f8e78]
+                - generic [ref=f8e83]: Parties prenantes
+            - listitem [ref=f8e84]:
+              - link "Risques & opportunités" [ref=f8e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f8e86]
+                - generic [ref=f8e89]: Risques & opportunités
+            - listitem [ref=f8e90]:
+              - link "Modifications du SMQ" [ref=f8e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f8e92]
+                - generic [ref=f8e100]: Modifications du SMQ
+        - generic [ref=f8e101]:
+          - paragraph [ref=f8e102]: Organisation
+          - list [ref=f8e103]:
+            - listitem [ref=f8e104]:
+              - link "Processus" [ref=f8e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f8e106]
+                - generic [ref=f8e111]: Processus
+            - listitem [ref=f8e112]:
+              - link "Documentation" [ref=f8e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f8e114]
+                - generic [ref=f8e118]: Documentation
+            - listitem [ref=f8e119]:
+              - link "Communications" [ref=f8e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f8e121]
+                - generic [ref=f8e124]: Communications
+        - generic [ref=f8e125]:
+          - paragraph [ref=f8e126]: Amélioration
+          - list [ref=f8e127]:
+            - listitem [ref=f8e128]:
+              - link "Plan d'actions" [ref=f8e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f8e130]
+                - generic [ref=f8e133]: Plan d'actions
+            - listitem [ref=f8e134]:
+              - link "Non-conformités" [ref=f8e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f8e136]
+                - generic [ref=f8e138]: Non-conformités
+            - listitem [ref=f8e139]:
+              - link "Remontées" [ref=f8e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f8e141]
+                - generic [ref=f8e143]: Remontées
+        - generic [ref=f8e144]:
+          - paragraph [ref=f8e145]: Évaluation
+          - list [ref=f8e146]:
+            - listitem [ref=f8e147]:
+              - link "Objectifs & indicateurs" [ref=f8e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f8e149]
+                - generic [ref=f8e153]: Objectifs & indicateurs
+            - listitem [ref=f8e154]:
+              - link "Audits" [ref=f8e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f8e156]
+                - generic [ref=f8e159]: Audits
+            - listitem [ref=f8e160]:
+              - link "Auto-diagnostic" [ref=f8e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f8e162]
+                - generic [ref=f8e166]: Auto-diagnostic
+            - listitem [ref=f8e167]:
+              - link "Veille réglementaire" [ref=f8e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f8e169]
+                - generic [ref=f8e173]: Veille réglementaire
+            - listitem [ref=f8e174]:
+              - link "Revues de direction" [ref=f8e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f8e176]
+                - generic [ref=f8e180]: Revues de direction
+        - generic [ref=f8e181]:
+          - paragraph [ref=f8e182]: Parties externes
+          - list [ref=f8e183]:
+            - listitem [ref=f8e184]:
+              - link "Suivi de prestation" [ref=f8e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f8e186]
+                - generic [ref=f8e189]: Suivi de prestation
+            - listitem [ref=f8e190]:
+              - link "Fournisseurs" [ref=f8e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f8e192]
+                - generic [ref=f8e197]: Fournisseurs
+        - generic [ref=f8e198]:
+          - paragraph [ref=f8e199]: Configuration
+          - list [ref=f8e200]:
+            - listitem [ref=f8e201]:
+              - link "Utilisateurs" [ref=f8e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f8e203]
+                - generic [ref=f8e215]: Utilisateurs
+            - listitem [ref=f8e216]:
+              - link "Main courante" [ref=f8e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f8e218]
+                - generic [ref=f8e222]: Main courante
+            - listitem [ref=f8e223]:
+              - link "Paramètres" [ref=f8e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f8e225]
+                - generic [ref=f8e228]: Paramètres
+            - listitem [ref=f8e229]:
+              - link "Corbeille" [ref=f8e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f8e231]
+                - generic [ref=f8e234]: Corbeille
+        - generic [ref=f8e235]:
+          - paragraph [ref=f8e236]: Admin Flowise
+          - list [ref=f8e237]:
+            - listitem [ref=f8e238]:
+              - link "Clients" [ref=f8e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f8e240]
+                - generic [ref=f8e244]: Clients
+            - listitem [ref=f8e245]:
+              - link "Signalements & suggestions" [ref=f8e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f8e247]
+                - generic [ref=f8e250]: Signalements & suggestions
+    - generic [ref=f8e251]:
+      - banner [ref=f8e252]:
+        - generic [ref=f8e253]:
+          - button "Acme Inge" [ref=f8e254]:
+            - img
+            - generic [ref=f8e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f8e256]:
+            - img
+            - generic [ref=f8e257]: Affichage
+        - generic [ref=f8e258]:
+          - button "Signaler ou suggérer" [ref=f8e259]:
+            - img
+            - generic [ref=f8e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f8e261]:
+            - img
+            - generic [ref=f8e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f8e263]:
+            - generic [ref=f8e264]: hu
+            - generic [ref=f8e265]: hugo.piovesan@flowise.fr
+      - main [ref=f8e266]:
+        - generic [ref=f8e267]:
+          - generic [ref=f8e268]:
+            - generic [ref=f8e269]:
+              - generic [ref=f8e270]:
+                - generic [ref=f8e271]:
+                  - generic [ref=f8e272]:
+                    - heading "Parties prenantes" [level=1] [ref=f8e273]
+                    - generic [ref=f8e274]: ISO 9001 §4.2
+                  - paragraph [ref=f8e275]: Cartographie, cotation de saillance et registre des attentes.
+                - generic [ref=f8e276]:
+                  - button "Publier une version" [ref=f8e277]:
+                    - img
+                    - text: Publier une version
+                  - button "Nouvelle partie prenante" [ref=f8e278]
+              - group [ref=f8e279]:
+                - generic "Aide & exigence Afficher" [ref=f8e280] [cursor=pointer]:
+                  - img [ref=f8e281]
+                  - generic [ref=f8e283]: Aide & exigence
+                  - generic [ref=f8e284]: Afficher
+            - generic [ref=f8e285]:
+              - generic [ref=f8e286]:
+                - generic [ref=f8e287]: Référence
+                - textbox "Référence" [ref=f8e288]:
+                  - /placeholder: ex. DG_SMQ_005
+                  - text: DG_SMQ_005
+              - generic [ref=f8e289]: ·
+              - generic [ref=f8e290]: Version A · figée le 28/06/2026 par Hugo Piovesan
+            - generic [ref=f8e291]:
+              - generic [ref=f8e292]:
+                - generic [ref=f8e294]:
+                  - paragraph [ref=f8e295]: "16"
+                  - paragraph [ref=f8e296]: Parties prenantes
+                - generic [ref=f8e298]:
+                  - paragraph [ref=f8e299]: "4"
+                  - paragraph [ref=f8e300]: Priorité haute
+                - generic [ref=f8e302]:
+                  - paragraph [ref=f8e303]: "2"
+                  - paragraph [ref=f8e304]: Sphère interne
+                - generic [ref=f8e306]:
+                  - paragraph [ref=f8e307]: "14"
+                  - paragraph [ref=f8e308]: Sphère externe
+              - generic [ref=f8e309]:
+                - generic [ref=f8e311]: Cartographie des parties prenantes
+                - generic [ref=f8e313]:
+                  - generic [ref=f8e315]:
+                    - generic [ref=f8e318]: Sphère interne
+                    - generic [ref=f8e319]: Sphère externe
+                    - generic [ref=f8e321]: Acme Inge
+                    - link "Collaborateurs" [ref=f8e322] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/68aa542b-553e-49d2-be8f-ac2eac0ee166
+                      - generic [ref=f8e324]: Collaborateurs
+                    - link "Dirigeants & associés" [ref=f8e325] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/de55892b-02de-4272-9405-60c5f4452b4e
+                      - generic [ref=f8e327]: Dirigeants & associés
+                    - link "[TEST PW] PP suppr" [ref=f8e328] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/29648db9-aba3-4ca1-ae6c-085aa52a56d5
+                      - generic [ref=f8e330]: "[TEST PW] PP suppr"
+                    - link "Acquisitions (rachats d'entreprises par le groupe)" [ref=f8e331] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/81dcf477-e1cd-480b-a426-64baafcf1995
+                      - generic [ref=f8e333]: Acquisitions (rachats d'entreprises par le groupe)
+                    - link "Associations" [ref=f8e334] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/3c5b3f67-c606-4aa7-adca-9578d62193f6
+                      - generic [ref=f8e336]: Associations
+                    - link "Autorité de contrôle" [ref=f8e337] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/4770e19d-6cb9-4166-ad22-6d0eb06a3c11
+                      - generic [ref=f8e339]: Autorité de contrôle
+                    - link "Candidats" [ref=f8e340] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/b5196c7a-e09a-4617-80ff-d0be0ddecd30
+                      - generic [ref=f8e342]: Candidats
+                    - link "Clients" [ref=f8e343] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/38bbcb18-fff7-4d4a-bad0-dbe8aab19dea
+                      - generic [ref=f8e345]: Clients
+                    - link "Concurrence" [ref=f8e346] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/a2ad70d9-1788-446c-9159-4910d256f64b
+                      - generic [ref=f8e348]: Concurrence
+                    - link "État / Collectivités territoriales" [ref=f8e349] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/5275013a-e110-4e15-86cf-0e2908e884d0
+                      - generic [ref=f8e351]: État / Collectivités territoriales
+                    - link "Fournisseurs / sous-traitants" [ref=f8e352] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/6e707515-a5cc-4969-aa33-dd1faa7c51c8
+                      - generic [ref=f8e354]: Fournisseurs / sous-traitants
+                    - link "Institutions financières" [ref=f8e355] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/255e972c-9fff-4445-9adf-3ba8f518afed
+                      - generic [ref=f8e357]: Institutions financières
+                    - link "Médias" [ref=f8e358] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/9a481811-e1f2-42b3-a635-f22f0f7dc1f5
+                      - generic [ref=f8e360]: Médias
+                    - link "Partenaires" [ref=f8e361] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/25092770-4e6a-4e3e-992b-51758af933c9
+                      - generic [ref=f8e363]: Partenaires
+                    - link "Prestataires externes" [ref=f8e364] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/e51b009c-fd21-4852-bf8b-33d8b47b57d5
+                      - generic [ref=f8e366]: Prestataires externes
+                    - link "Prospects" [ref=f8e367] [cursor=pointer]:
+                      - /url: /strategie/parties-prenantes/3053ad28-ea17-41f7-93bd-05300ae451bc
+                      - generic [ref=f8e369]: Prospects
+                  - generic [ref=f8e370]:
+                    - generic [ref=f8e371]: "Priorité :"
+                    - generic [ref=f8e372]: Haute
+                    - generic [ref=f8e374]: Moyenne
+                    - generic [ref=f8e376]: Basse
+              - table [ref=f8e380]:
+                - rowgroup [ref=f8e381]:
+                  - row "Partie prenante Sphère Interaction P / L / U Total Priorité Attentes" [ref=f8e382]:
+                    - columnheader "Partie prenante" [ref=f8e383]
+                    - columnheader "Sphère" [ref=f8e384]
+                    - columnheader "Interaction" [ref=f8e385]
+                    - columnheader "P / L / U" [ref=f8e386]
+                    - columnheader "Total" [ref=f8e387]
+                    - columnheader "Priorité" [ref=f8e388]
+                    - columnheader "Attentes" [ref=f8e389]
+                - rowgroup [ref=f8e390]:
+                  - row "Dirigeants & associés Interne Forte 3 / 3 / 3 5.25 Haute 11" [ref=f8e391]:
+                    - cell "Dirigeants & associés" [ref=f8e392]:
+                      - link "Dirigeants & associés" [ref=f8e394] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/de55892b-02de-4272-9405-60c5f4452b4e
+                    - cell "Interne" [ref=f8e395]
+                    - cell "Forte" [ref=f8e396]
+                    - cell "3 / 3 / 3" [ref=f8e397]
+                    - cell "5.25" [ref=f8e398]
+                    - cell "Haute" [ref=f8e399]:
+                      - generic [ref=f8e400]: Haute
+                    - cell "11" [ref=f8e401]
+                  - row "Institutions financières Externe Moyenne 3 / 3 / 3 5.25 Haute 1" [ref=f8e402]:
+                    - cell "Institutions financières" [ref=f8e403]:
+                      - link "Institutions financières" [ref=f8e405] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/255e972c-9fff-4445-9adf-3ba8f518afed
+                    - cell "Externe" [ref=f8e406]
+                    - cell "Moyenne" [ref=f8e407]
+                    - cell "3 / 3 / 3" [ref=f8e408]
+                    - cell "5.25" [ref=f8e409]
+                    - cell "Haute" [ref=f8e410]:
+                      - generic [ref=f8e411]: Haute
+                    - cell "1" [ref=f8e412]
+                  - row "Autorité de contrôle Externe Élevée 3 / 2 / 3 4.75 Haute 1" [ref=f8e413]:
+                    - cell "Autorité de contrôle" [ref=f8e414]:
+                      - link "Autorité de contrôle" [ref=f8e416] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/4770e19d-6cb9-4166-ad22-6d0eb06a3c11
+                    - cell "Externe" [ref=f8e417]
+                    - cell "Élevée" [ref=f8e418]
+                    - cell "3 / 2 / 3" [ref=f8e419]
+                    - cell "4.75" [ref=f8e420]
+                    - cell "Haute" [ref=f8e421]:
+                      - generic [ref=f8e422]: Haute
+                    - cell "1" [ref=f8e423]
+                  - row "Collaborateurs Interne Forte 2 / 3 / 3 4.25 Haute 6" [ref=f8e424]:
+                    - cell "Collaborateurs" [ref=f8e425]:
+                      - link "Collaborateurs" [ref=f8e427] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/68aa542b-553e-49d2-be8f-ac2eac0ee166
+                    - cell "Interne" [ref=f8e428]
+                    - cell "Forte" [ref=f8e429]
+                    - cell "2 / 3 / 3" [ref=f8e430]
+                    - cell "4.25" [ref=f8e431]
+                    - cell "Haute" [ref=f8e432]:
+                      - generic [ref=f8e433]: Haute
+                    - cell "6" [ref=f8e434]
+                  - row "Clients Externe Forte 2 / 2 / 3 3.75 Moyenne 5" [ref=f8e435]:
+                    - cell "Clients" [ref=f8e436]:
+                      - link "Clients" [ref=f8e438] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/38bbcb18-fff7-4d4a-bad0-dbe8aab19dea
+                    - cell "Externe" [ref=f8e439]
+                    - cell "Forte" [ref=f8e440]
+                    - cell "2 / 2 / 3" [ref=f8e441]
+                    - cell "3.75" [ref=f8e442]
+                    - cell "Moyenne" [ref=f8e443]:
+                      - generic [ref=f8e444]: Moyenne
+                    - cell "5" [ref=f8e445]
+                  - row "État / Collectivités territoriales Externe Moyenne 2 / 2 / 3 3.75 Moyenne 4" [ref=f8e446]:
+                    - cell "État / Collectivités territoriales" [ref=f8e447]:
+                      - link "État / Collectivités territoriales" [ref=f8e449] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/5275013a-e110-4e15-86cf-0e2908e884d0
+                    - cell "Externe" [ref=f8e450]
+                    - cell "Moyenne" [ref=f8e451]
+                    - cell "2 / 2 / 3" [ref=f8e452]
+                    - cell "3.75" [ref=f8e453]
+                    - cell "Moyenne" [ref=f8e454]:
+                      - generic [ref=f8e455]: Moyenne
+                    - cell "4" [ref=f8e456]
+                  - row "[TEST PW] PP suppr Externe Moyenne 2 / 2 / 2 3.5 Moyenne 0" [ref=f8e457]:
+                    - cell "[TEST PW] PP suppr" [ref=f8e458]:
+                      - link "[TEST PW] PP suppr" [ref=f8e460] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/29648db9-aba3-4ca1-ae6c-085aa52a56d5
+                    - cell "Externe" [ref=f8e461]
+                    - cell "Moyenne" [ref=f8e462]
+                    - cell "2 / 2 / 2" [ref=f8e463]
+                    - cell "3.5" [ref=f8e464]
+                    - cell "Moyenne" [ref=f8e465]:
+                      - generic [ref=f8e466]: Moyenne
+                    - cell "0" [ref=f8e467]
+                  - row "Acquisitions (rachats d'entreprises par le groupe) Externe Élevée 2 / 2 / 2 3.5 Moyenne 2" [ref=f8e468]:
+                    - cell "Acquisitions (rachats d'entreprises par le groupe)" [ref=f8e469]:
+                      - link "Acquisitions (rachats d'entreprises par le groupe)" [ref=f8e471] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/81dcf477-e1cd-480b-a426-64baafcf1995
+                    - cell "Externe" [ref=f8e472]
+                    - cell "Élevée" [ref=f8e473]
+                    - cell "2 / 2 / 2" [ref=f8e474]
+                    - cell "3.5" [ref=f8e475]
+                    - cell "Moyenne" [ref=f8e476]:
+                      - generic [ref=f8e477]: Moyenne
+                    - cell "2" [ref=f8e478]
+                  - row "Médias Externe Moyenne 2 / 2 / 2 3.5 Moyenne 2" [ref=f8e479]:
+                    - cell "Médias" [ref=f8e480]:
+                      - link "Médias" [ref=f8e482] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/9a481811-e1f2-42b3-a635-f22f0f7dc1f5
+                    - cell "Externe" [ref=f8e483]
+                    - cell "Moyenne" [ref=f8e484]
+                    - cell "2 / 2 / 2" [ref=f8e485]
+                    - cell "3.5" [ref=f8e486]
+                    - cell "Moyenne" [ref=f8e487]:
+                      - generic [ref=f8e488]: Moyenne
+                    - cell "2" [ref=f8e489]
+                  - row "Prospects Externe Forte 2 / 2 / 2 3.5 Moyenne 3" [ref=f8e490]:
+                    - cell "Prospects" [ref=f8e491]:
+                      - link "Prospects" [ref=f8e493] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/3053ad28-ea17-41f7-93bd-05300ae451bc
+                    - cell "Externe" [ref=f8e494]
+                    - cell "Forte" [ref=f8e495]
+                    - cell "2 / 2 / 2" [ref=f8e496]
+                    - cell "3.5" [ref=f8e497]
+                    - cell "Moyenne" [ref=f8e498]:
+                      - generic [ref=f8e499]: Moyenne
+                    - cell "3" [ref=f8e500]
+                  - row "Associations Externe Faible 2 / 1 / 2 3 Moyenne 2" [ref=f8e501]:
+                    - cell "Associations" [ref=f8e502]:
+                      - link "Associations" [ref=f8e504] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/3c5b3f67-c606-4aa7-adca-9578d62193f6
+                    - cell "Externe" [ref=f8e505]
+                    - cell "Faible" [ref=f8e506]
+                    - cell "2 / 1 / 2" [ref=f8e507]
+                    - cell "3" [ref=f8e508]
+                    - cell "Moyenne" [ref=f8e509]:
+                      - generic [ref=f8e510]: Moyenne
+                    - cell "2" [ref=f8e511]
+                  - row "Fournisseurs / sous-traitants Externe Faible 2 / 1 / 2 3 Moyenne 1" [ref=f8e512]:
+                    - cell "Fournisseurs / sous-traitants" [ref=f8e513]:
+                      - link "Fournisseurs / sous-traitants" [ref=f8e515] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/6e707515-a5cc-4969-aa33-dd1faa7c51c8
+                    - cell "Externe" [ref=f8e516]
+                    - cell "Faible" [ref=f8e517]
+                    - cell "2 / 1 / 2" [ref=f8e518]
+                    - cell "3" [ref=f8e519]
+                    - cell "Moyenne" [ref=f8e520]:
+                      - generic [ref=f8e521]: Moyenne
+                    - cell "1" [ref=f8e522]
+                  - row "Prestataires externes Externe Forte 2 / 1 / 2 3 Moyenne 2" [ref=f8e523]:
+                    - cell "Prestataires externes" [ref=f8e524]:
+                      - link "Prestataires externes" [ref=f8e526] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/e51b009c-fd21-4852-bf8b-33d8b47b57d5
+                    - cell "Externe" [ref=f8e527]
+                    - cell "Forte" [ref=f8e528]
+                    - cell "2 / 1 / 2" [ref=f8e529]
+                    - cell "3" [ref=f8e530]
+                    - cell "Moyenne" [ref=f8e531]:
+                      - generic [ref=f8e532]: Moyenne
+                    - cell "2" [ref=f8e533]
+                  - row "Candidats Externe Forte 1 / 2 / 2 2.5 Moyenne 5" [ref=f8e534]:
+                    - cell "Candidats" [ref=f8e535]:
+                      - link "Candidats" [ref=f8e537] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/b5196c7a-e09a-4617-80ff-d0be0ddecd30
+                    - cell "Externe" [ref=f8e538]
+                    - cell "Forte" [ref=f8e539]
+                    - cell "1 / 2 / 2" [ref=f8e540]
+                    - cell "2.5" [ref=f8e541]
+                    - cell "Moyenne" [ref=f8e542]:
+                      - generic [ref=f8e543]: Moyenne
+                    - cell "5" [ref=f8e544]
+                  - row "Partenaires Externe Moyenne 1 / 1 / 2 2 Basse 1" [ref=f8e545]:
+                    - cell "Partenaires" [ref=f8e546]:
+                      - link "Partenaires" [ref=f8e548] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/25092770-4e6a-4e3e-992b-51758af933c9
+                    - cell "Externe" [ref=f8e549]
+                    - cell "Moyenne" [ref=f8e550]
+                    - cell "1 / 1 / 2" [ref=f8e551]
+                    - cell "2" [ref=f8e552]
+                    - cell "Basse" [ref=f8e553]:
+                      - generic [ref=f8e554]: Basse
+                    - cell "1" [ref=f8e555]
+                  - row "Concurrence Externe Faible 1 / 1 / 1 1.75 Basse 1" [ref=f8e556]:
+                    - cell "Concurrence" [ref=f8e557]:
+                      - link "Concurrence" [ref=f8e559] [cursor=pointer]:
+                        - /url: /strategie/parties-prenantes/a2ad70d9-1788-446c-9159-4910d256f64b
+                    - cell "Externe" [ref=f8e560]
+                    - cell "Faible" [ref=f8e561]
+                    - cell "1 / 1 / 1" [ref=f8e562]
+                    - cell "1.75" [ref=f8e563]
+                    - cell "Basse" [ref=f8e564]:
+                      - generic [ref=f8e565]: Basse
+                    - cell "1" [ref=f8e566]
+            - group [ref=f8e567]:
+              - generic "Historique des versions (1) Afficher" [ref=f8e568] [cursor=pointer]:
+                - generic [ref=f8e569]: Historique des versions (1)
+                - generic [ref=f8e570]: Afficher
+          - generic [ref=f8e571]:
+            - link "flowise." [ref=f8e572] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f8e573] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f8e574] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f8e575] [cursor=pointer]:
+              - /url: /confidentialite
+  - region "Notifications alt+T"
