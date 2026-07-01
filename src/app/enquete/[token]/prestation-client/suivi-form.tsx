@@ -6,15 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { submitSuiviPrestationAction } from "@/lib/actions/suivi-prestation";
-import {
-  AXE_NOTE_LABELS,
-  BESOINS_OPTIONS,
-  BILAN_OPTIONS,
-  OUI_NON_SO,
-  PLAN_ACTIONS_OPTIONS,
-  QSSE_FIELDS,
-  SATISFACTION_AXES,
-} from "@/lib/suivi-prestation";
+import type { Champ, SectionConfig } from "@/lib/suivi-consultant";
 
 function Section({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
@@ -27,35 +19,24 @@ function Section({ n, title, children }: { n: number; title: string; children: R
   );
 }
 
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
+function FieldLabel({ label, required }: { label: string; required?: boolean }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <Label>
-        {label} {required ? <span className="text-status-nc-mineure">*</span> : null}
-      </Label>
-      {children}
-    </div>
+    <Label>
+      {label} {required ? <span className="text-status-nc-mineure">*</span> : null}
+    </Label>
   );
 }
 
 function Scale({
   value,
   onChange,
+  min,
   max,
-  min = 0,
 }: {
   value: number | null;
   onChange: (n: number) => void;
+  min: number;
   max: number;
-  min?: number;
 }) {
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -75,102 +56,126 @@ function Scale({
   );
 }
 
-function CheckGroup({ name, options }: { name: string; options: string[] }) {
+/** Grille « matrice » : chaque ligne notée sur une même échelle de boutons. */
+function Matrice({
+  champ,
+  values,
+  onChange,
+}: {
+  champ: Champ;
+  values: Record<string, number>;
+  onChange: (ligneKey: string, n: number) => void;
+}) {
+  const min = champ.echelle?.min ?? 1;
+  const max = champ.echelle?.max ?? 4;
+  const labels = champ.echelle?.labels ?? {};
+  const notes = Array.from({ length: max - min + 1 }, (_, i) => i + min);
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {options.map((o) => (
-        <label key={o} className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name={name} value={o} className="size-4 shrink-0" />
-          {o}
-        </label>
-      ))}
+    <div className="flex flex-col gap-3">
+      {champ.label ? <p className="text-muted-foreground text-sm">{champ.label}</p> : null}
+      <div className="flex flex-col gap-3">
+        {(champ.lignes ?? []).map((ligne) => (
+          <div key={ligne.key} className="flex flex-col gap-1.5">
+            <span className="text-sm">
+              {ligne.label}{" "}
+              {champ.required ? <span className="text-status-nc-mineure">*</span> : null}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {notes.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  title={labels[n]}
+                  onClick={() => onChange(ligne.key, n)}
+                  className={`h-9 rounded-lg border px-3 font-medium text-sm transition-colors ${
+                    values[ligne.key] === n
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-export function SuiviForm({ token, nomSociete }: { token: string; nomSociete: string }) {
-  const [perimetre, setPerimetre] = useState<string>("");
-  const [axes, setAxes] = useState<Record<string, number>>({});
-  const [satisfaction, setSatisfaction] = useState<number | null>(null);
-  const [nps, setNps] = useState<number | null>(null);
+export function SuiviForm({
+  token,
+  nomSociete,
+  sections,
+  modeleVersion,
+}: {
+  token: string;
+  nomSociete: string;
+  sections: SectionConfig[];
+  modeleVersion: number | null;
+}) {
+  const [singles, setSingles] = useState<Record<string, string>>({});
+  const [notes, setNotes] = useState<Record<string, number>>({});
+  const [matrices, setMatrices] = useState<Record<string, Record<string, number>>>({});
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const visible = (c: Champ) => !c.showIf || singles[c.showIf.key] === c.showIf.equals;
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const f = new FormData(event.currentTarget);
-    const get = (k: string) => (f.get(k) as string) || "";
-    const getAll = (k: string) => f.getAll(k).map(String);
+    const reponses: Record<string, unknown> = {};
 
-    if (SATISFACTION_AXES.some((a) => axes[a.key] == null)) {
-      setError("Merci de noter chaque axe de satisfaction (section 3).");
-      return;
+    for (const section of sections) {
+      for (const c of section.champs) {
+        if (!visible(c)) continue;
+        if (c.type === "single") {
+          reponses[c.key] = singles[c.key] ?? "";
+        } else if (c.type === "note5" || c.type === "nps") {
+          reponses[c.key] = notes[c.key] ?? null;
+        } else if (c.type === "matrice") {
+          reponses[c.key] = matrices[c.key] ?? {};
+        } else if (c.type === "multi") {
+          reponses[c.key] = f.getAll(c.key).map(String);
+          if (c.allowAutre) reponses[`${c.key}_autre`] = (f.get(`${c.key}_autre`) as string) || "";
+        } else {
+          reponses[c.key] = (f.get(c.key) as string) || "";
+        }
+      }
     }
-    if (satisfaction === null) {
-      setError("Merci d'indiquer la satisfaction globale (section 6).");
-      return;
+
+    // Validation des champs requis non gérés nativement (multi, notes, matrice).
+    for (const section of sections) {
+      for (const c of section.champs) {
+        if (!c.required || !visible(c)) continue;
+        if (c.type === "multi" && (reponses[c.key] as string[]).length === 0) {
+          setError(`Merci de répondre : « ${c.label} » (section ${section.n}).`);
+          return;
+        }
+        if ((c.type === "note5" || c.type === "nps") && reponses[c.key] == null) {
+          setError(`Merci de répondre : « ${c.label} » (section ${section.n}).`);
+          return;
+        }
+        if (c.type === "matrice") {
+          const vals = (reponses[c.key] ?? {}) as Record<string, number>;
+          if ((c.lignes ?? []).some((l) => vals[l.key] == null)) {
+            setError(`Merci de noter chaque ligne (section ${section.n}).`);
+            return;
+          }
+        }
+      }
     }
-    if (nps === null) {
-      setError("Merci d'indiquer la note de recommandation (section 6).");
-      return;
-    }
-    if (getAll("plan_actions").length === 0) {
-      setError("Merci d'indiquer au moins une action à prévoir (section 8).");
-      return;
-    }
+
     setError(null);
     setPending(true);
-
-    const reponses = {
-      consultant: get("consultant"),
-      client: get("client"),
-      mission: get("mission"),
-      date_suivi: get("date_suivi"),
-      manager: get("manager"),
-      realisations_passees: get("realisations_passees"),
-      realisations_a_venir: get("realisations_a_venir"),
-      perimetre_evolue: perimetre,
-      ecarts_details: get("ecarts_details"),
-      satisfaction_axes: axes,
-      points_forts: getAll("points_forts"),
-      points_forts_autre: get("points_forts_autre"),
-      axes_amelioration: getAll("axes_amelioration"),
-      axes_amelioration_autre: get("axes_amelioration_autre"),
-      commentaire_bilan: get("commentaire_bilan"),
-      securite_consignes: get("securite_consignes"),
-      securite_epi: get("securite_epi"),
-      plan_prevention: get("plan_prevention"),
-      satisfaction_globale: satisfaction,
-      nps,
-      commentaire_satisfaction: get("commentaire_satisfaction"),
-      besoins_futurs: getAll("besoins_futurs"),
-      besoins_futurs_autre: get("besoins_futurs_autre"),
-      amelioration_prestations: get("amelioration_prestations"),
-      plan_actions: getAll("plan_actions"),
-      plan_actions_autre: get("plan_actions_autre"),
-      delais_actions: get("delais_actions"),
-      nouvelle_date_suivi: get("nouvelle_date_suivi"),
-      commentaire_plan: get("commentaire_plan"),
-      nom_representant: get("nom_representant"),
-      mail_representant: get("mail_representant"),
-    };
-
     const result = await submitSuiviPrestationAction({
       token,
-      consultant: get("consultant"),
-      client: get("client"),
-      mission: get("mission"),
-      manager: get("manager"),
-      dateSuivi: get("date_suivi"),
-      perimetreEvolue: perimetre,
-      satisfactionGlobale: satisfaction,
-      nps,
-      nouvelleDateSuivi: get("nouvelle_date_suivi"),
-      attestation: f.get("attestation") === "on",
-      nomRepresentant: get("nom_representant"),
-      mailRepresentant: get("mail_representant"),
       reponses,
+      modeleVersion,
+      attestation: f.get("attestation") === "on",
     });
     setPending(false);
     if (result.ok) setDone(true);
@@ -191,172 +196,104 @@ export function SuiviForm({ token, nomSociete }: { token: string; nomSociete: st
     );
   }
 
+  // La section « Validation » reçoit la case d'attestation sur l'honneur (hors modèle).
+  const derniereSectionN = sections[sections.length - 1]?.n;
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-      <Section n={1} title="Contexte de la visite">
-        <Field label="Consultant (Prénom NOM)" required>
-          <Input name="consultant" required />
-        </Field>
-        <Field label="Client / entité" required>
-          <Input name="client" required />
-        </Field>
-        <Field label="Mission / poste occupé" required>
-          <Input name="mission" required />
-        </Field>
-        <Field label="Date du suivi" required>
-          <Input name="date_suivi" type="date" required />
-        </Field>
-        <Field label="Manager (Prénom NOM)" required>
-          <Input name="manager" required />
-        </Field>
-      </Section>
-
-      <Section n={2} title="Activité et périmètre">
-        <Field label="Réalisations passées (depuis le dernier point)">
-          <Textarea name="realisations_passees" rows={3} />
-        </Field>
-        <Field label="Réalisations à venir">
-          <Textarea name="realisations_a_venir" rows={3} />
-        </Field>
-        <Field
-          label="Le périmètre de la mission a-t-il évolué par rapport au contrat signé ?"
-          required
-        >
-          <div className="flex gap-4 text-sm">
-            {["Oui", "Non"].map((o) => (
-              <label key={o} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="perimetre_evolue"
-                  value={o}
-                  required
-                  checked={perimetre === o}
-                  onChange={() => setPerimetre(o)}
+      {sections.map((section) => (
+        <Section key={section.n} n={section.n} title={section.title}>
+          {section.n === derniereSectionN ? (
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="attestation"
+                required
+                className="mt-0.5 size-4 shrink-0"
+              />
+              Je certifie sur l'honneur l'exactitude des renseignements de ce compte rendu, rédigé
+              avec le client.
+            </label>
+          ) : null}
+          {section.champs.filter(visible).map((c) => (
+            <div key={c.key} className="flex flex-col gap-1.5">
+              {c.type !== "matrice" ? <FieldLabel label={c.label} required={c.required} /> : null}
+              {c.type === "text" || c.type === "email" ? (
+                <Input
+                  name={c.key}
+                  type={c.type === "email" ? "email" : "text"}
+                  required={c.required}
                 />
-                {o}
-              </label>
-            ))}
-          </div>
-        </Field>
-        {perimetre === "Oui" ? (
-          <Field label="Si oui, lesquels ?">
-            <Textarea name="ecarts_details" rows={3} />
-          </Field>
-        ) : null}
-      </Section>
-
-      <Section n={3} title="Satisfaction sur la prestation">
-        <p className="text-muted-foreground text-sm">
-          Notez de 1 (très insatisfait) à 4 (très satisfait).
-        </p>
-        <div className="flex flex-col gap-3">
-          {SATISFACTION_AXES.map((axe) => (
-            <div key={axe.key} className="flex flex-col gap-1.5">
-              <span className="text-sm">
-                {axe.label} <span className="text-status-nc-mineure">*</span>
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {[1, 2, 3, 4].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    title={AXE_NOTE_LABELS[n]}
-                    onClick={() => setAxes((a) => ({ ...a, [axe.key]: n }))}
-                    className={`h-9 rounded-lg border px-3 font-medium text-sm transition-colors ${
-                      axes[axe.key] === n
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+              ) : null}
+              {c.type === "date" ? <Input name={c.key} type="date" required={c.required} /> : null}
+              {c.type === "textarea" ? (
+                <Textarea name={c.key} rows={3} required={c.required} />
+              ) : null}
+              {c.type === "single" ? (
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  {(c.options ?? []).map((o) => (
+                    <label key={o} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name={c.key}
+                        value={o}
+                        required={c.required}
+                        checked={singles[c.key] === o}
+                        onChange={() => setSingles((s) => ({ ...s, [c.key]: o }))}
+                      />
+                      {o}
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+              {c.type === "multi" ? (
+                <>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {(c.options ?? []).map((o) => (
+                      <label key={o} className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name={c.key} value={o} className="size-4 shrink-0" />
+                        {o}
+                      </label>
+                    ))}
+                  </div>
+                  {c.allowAutre ? (
+                    <Input
+                      name={`${c.key}_autre`}
+                      placeholder="Autre (préciser)"
+                      className="mt-2"
+                    />
+                  ) : null}
+                </>
+              ) : null}
+              {c.type === "note5" ? (
+                <Scale
+                  value={notes[c.key] ?? null}
+                  onChange={(n) => setNotes((s) => ({ ...s, [c.key]: n }))}
+                  min={1}
+                  max={5}
+                />
+              ) : null}
+              {c.type === "nps" ? (
+                <Scale
+                  value={notes[c.key] ?? null}
+                  onChange={(n) => setNotes((s) => ({ ...s, [c.key]: n }))}
+                  min={0}
+                  max={10}
+                />
+              ) : null}
+              {c.type === "matrice" ? (
+                <Matrice
+                  champ={c}
+                  values={matrices[c.key] ?? {}}
+                  onChange={(ligneKey, n) =>
+                    setMatrices((m) => ({ ...m, [c.key]: { ...(m[c.key] ?? {}), [ligneKey]: n } }))
+                  }
+                />
+              ) : null}
             </div>
           ))}
-        </div>
-      </Section>
-
-      <Section n={4} title="Bilan qualitatif">
-        <Field label="Points forts / succès" required>
-          <CheckGroup name="points_forts" options={BILAN_OPTIONS} />
-          <Input name="points_forts_autre" placeholder="Autre (préciser)" className="mt-2" />
-        </Field>
-        <Field label="Axes d'amélioration / difficultés" required>
-          <CheckGroup name="axes_amelioration" options={BILAN_OPTIONS} />
-          <Input name="axes_amelioration_autre" placeholder="Autre (préciser)" className="mt-2" />
-        </Field>
-        <Field label="Commentaire">
-          <Textarea name="commentaire_bilan" rows={3} />
-        </Field>
-      </Section>
-
-      <Section n={5} title="Sécurité (QSSE)">
-        {QSSE_FIELDS.map((q) => (
-          <Field key={q.key} label={q.label} required>
-            <div className="flex flex-wrap gap-4 text-sm">
-              {OUI_NON_SO.map((o) => (
-                <label key={o} className="flex items-center gap-2">
-                  <input type="radio" name={q.key} value={o} required />
-                  {o}
-                </label>
-              ))}
-            </div>
-          </Field>
-        ))}
-      </Section>
-
-      <Section n={6} title="Satisfaction globale et recommandation">
-        <Field label="Quelle est votre satisfaction globale ? (1 à 5)" required>
-          <Scale value={satisfaction} onChange={setSatisfaction} min={1} max={5} />
-        </Field>
-        <Field label="Sur une échelle de 0 à 10, recommanderiez-vous nos prestations ?" required>
-          <Scale value={nps} onChange={setNps} min={0} max={10} />
-        </Field>
-        <Field label="Commentaire">
-          <Textarea name="commentaire_satisfaction" rows={3} />
-        </Field>
-      </Section>
-
-      <Section n={7} title="Développement et suite">
-        <Field label="Quels sont vos futurs projets / autres besoins ?">
-          <CheckGroup name="besoins_futurs" options={BESOINS_OPTIONS} />
-          <Input name="besoins_futurs_autre" placeholder="Autre (préciser)" className="mt-2" />
-        </Field>
-        <Field label="Comment pourrions-nous améliorer nos prestations ?">
-          <Textarea name="amelioration_prestations" rows={3} />
-        </Field>
-      </Section>
-
-      <Section n={8} title="Plan d'actions">
-        <Field label="Action à prévoir" required>
-          <CheckGroup name="plan_actions" options={PLAN_ACTIONS_OPTIONS} />
-          <Input name="plan_actions_autre" placeholder="Autre (préciser)" className="mt-2" />
-        </Field>
-        <Field label="Délais de réalisation des actions">
-          <Input name="delais_actions" />
-        </Field>
-        <Field label="Nouvelle date de suivi" required>
-          <Input name="nouvelle_date_suivi" type="date" required />
-        </Field>
-        <Field label="Commentaire">
-          <Textarea name="commentaire_plan" rows={3} />
-        </Field>
-      </Section>
-
-      <Section n={9} title="Validation">
-        <label className="flex items-start gap-2 text-sm">
-          <input type="checkbox" name="attestation" required className="mt-0.5 size-4 shrink-0" />
-          Je certifie sur l'honneur l'exactitude des renseignements de ce compte rendu, rédigé avec
-          le client.
-        </label>
-        <Field label="Nom du représentant client" required>
-          <Input name="nom_representant" required />
-        </Field>
-        <Field label="Adresse mail du représentant client" required>
-          <Input name="mail_representant" type="email" required />
-        </Field>
-      </Section>
+        </Section>
+      ))}
 
       {error ? <p className="text-sm text-status-nc-mineure">{error}</p> : null}
 

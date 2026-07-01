@@ -1,9 +1,11 @@
+import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
 import { StatTiles } from "@/components/stat-tiles";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -14,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
+import { resoudreDefinitionFormulaire } from "@/lib/formulaire-modeles";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -46,6 +49,13 @@ export default async function SuiviPrestationPage() {
     .order("date_suivi", { ascending: false, nullsFirst: false });
 
   const items = suivis ?? [];
+
+  const { sections } = await resoudreDefinitionFormulaire(
+    supabase,
+    ctx.effectiveTenantId,
+    "suivi_prestation",
+  );
+  const champsExport = sections.flatMap((s) => s.champs);
 
   const admin = createAdminClient();
   const { data: tenant } = await admin
@@ -97,7 +107,17 @@ export default async function SuiviPrestationPage() {
         isoClause="ISO 9001 §9.1.2 / §8"
         help="Lien à partager aux BM (mail, signature, QR code) : ils remplissent le compte rendu sur le terrain, sans connexion. Les réponses alimentent la satisfaction et les réclamations. NPS = % promoteurs (9-10) − % détracteurs (0-6), les notes 7-8 étant neutres (une note de 8 donne donc un NPS de 0)."
       >
+        {ctx.role !== "auditeur" ? (
+          <Link
+            href="/suivi-prestation/formulaire"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <SlidersHorizontal className="size-4" />
+            Personnaliser le formulaire
+          </Link>
+        ) : null}
         <ExportButton
+          champs={champsExport}
           rows={items.map((s) => ({
             est_reclamation: s.est_reclamation,
             reponses: (s.reponses ?? null) as Record<string, unknown> | null,

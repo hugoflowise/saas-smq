@@ -8,7 +8,8 @@ export type ChampType =
   | "single"
   | "multi"
   | "note5"
-  | "nps";
+  | "nps"
+  | "matrice";
 
 export type Champ = {
   key: string;
@@ -20,6 +21,13 @@ export type Champ = {
   allowAutre?: boolean;
   /** Affiché seulement si le champ `key` vaut `equals`. */
   showIf?: { key: string; equals: string };
+  /**
+   * Type « matrice » : plusieurs lignes notées sur une même échelle. Chaque
+   * ligne stocke sa valeur sous `reponses[champ.key][ligne.key]`.
+   */
+  lignes?: { key: string; label: string }[];
+  /** Échelle de notation d'une matrice (bornes + libellés facultatifs par note). */
+  echelle?: { min: number; max: number; labels?: Record<number, string> };
   /**
    * Question « socle » : non supprimable par le client (verrouillée). Le client
    * peut la réordonner et reformuler son libellé, mais sa `key` reste figée car
