@@ -2,6 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { formatDate } from "@/lib/format";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -59,32 +60,39 @@ export default async function IndicateursPage() {
     .order("nom", { ascending: true });
   const items = indicateurs ?? [];
 
-  // Valeurs (les plus récentes d'abord) → dernière valeur + valeurs par mois.
+  // Valeurs (les plus récentes d'abord) → dernière valeur + valeurs par mois + série.
+  // NB : indicateurs_valeurs n'a PAS de colonne deleted_at → ne pas filtrer dessus.
   const { data: valeurs } = await supabase
     .from("indicateurs_valeurs")
     .select("indicateur_id, valeur, date_mesure")
     .eq("tenant_id", tid)
-    .is("deleted_at", null)
     .order("date_mesure", { ascending: false });
 
   const periodes = douzeDerniersMois();
   const periodeKeys = new Set(periodes.map((p) => p.cle));
   const lastByInd = new Map<string, { valeur: number; date: string }>();
   const parMoisByInd = new Map<string, Record<string, number>>();
+  const serieByInd = new Map<string, { date: string; valeur: number }[]>();
   for (const v of valeurs ?? []) {
+    const valeur = Number(v.valeur);
     if (!lastByInd.has(v.indicateur_id)) {
-      lastByInd.set(v.indicateur_id, { valeur: v.valeur, date: v.date_mesure });
+      lastByInd.set(v.indicateur_id, { valeur, date: v.date_mesure });
     }
     const mois = (v.date_mesure ?? "").slice(0, 7);
     if (periodeKeys.has(mois)) {
       const rec = parMoisByInd.get(v.indicateur_id) ?? {};
       // Valeurs triées desc : la première rencontrée pour un mois est la plus récente.
       if (rec[mois] === undefined) {
-        rec[mois] = v.valeur;
+        rec[mois] = valeur;
         parMoisByInd.set(v.indicateur_id, rec);
       }
     }
+    const serie = serieByInd.get(v.indicateur_id) ?? [];
+    serie.push({ date: formatDate(v.date_mesure), valeur });
+    serieByInd.set(v.indicateur_id, serie);
   }
+  // Ordre chronologique pour les graphes (les valeurs ont été empilées en desc).
+  for (const s of serieByInd.values()) s.reverse();
 
   // Objectif(s) rattaché(s) à chaque indicateur (§6.2/§9.1).
   const { data: liens } = await supabase
@@ -120,6 +128,7 @@ export default async function IndicateursPage() {
     objectifs: objectifsByInd.get(ind.id) ?? [],
     last: lastByInd.get(ind.id) ?? null,
     valeursParPeriode: parMoisByInd.get(ind.id) ?? {},
+    serie: serieByInd.get(ind.id) ?? [],
     lieAObjectif: lieAObjectif.has(ind.id),
   }));
 

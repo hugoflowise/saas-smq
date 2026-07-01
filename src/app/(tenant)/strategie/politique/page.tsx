@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
+import { EngagementsCard } from "@/app/(tenant)/strategie/objectifs/engagements-card";
 import { BackLink } from "@/components/back-link";
 import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
@@ -106,6 +107,54 @@ export default async function PolitiquePage({
 
   const current = versions.find((v) => v.id === politique?.version_actuelle_id) ?? null;
 
+  // Engagements de la politique (§6.2) + matrice de couverture engagement → objectif → KPI.
+  const [{ data: engagements }, { data: objectifsEng }, { data: liensEng }] = await Promise.all([
+    supabase
+      .from("politique_engagements")
+      .select("id, libelle")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("ordre", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule, engagement_id")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+    supabase.from("objectif_indicateurs").select("objectif_id, indicateur_id").eq("tenant_id", tid),
+  ]);
+  const objsEng = objectifsEng ?? [];
+  const indIds = [...new Set((liensEng ?? []).map((l) => l.indicateur_id))];
+  const indNomById = new Map<string, string>();
+  if (indIds.length) {
+    const { data: inds } = await supabase
+      .from("indicateurs")
+      .select("id, nom")
+      .in("id", indIds)
+      .is("deleted_at", null);
+    for (const i of inds ?? []) indNomById.set(i.id, i.nom);
+  }
+  const indsByObjectif = new Map<string, { id: string; nom: string }[]>();
+  for (const l of liensEng ?? []) {
+    const nom = indNomById.get(l.indicateur_id);
+    if (!nom) continue;
+    const list = indsByObjectif.get(l.objectif_id) ?? [];
+    list.push({ id: l.indicateur_id, nom });
+    indsByObjectif.set(l.objectif_id, list);
+  }
+  const engagementsCouverture = (engagements ?? []).map((e) => ({
+    id: e.id,
+    libelle: e.libelle,
+    objectifs: objsEng
+      .filter((o) => o.engagement_id === e.id)
+      .map((o) => ({
+        id: o.id,
+        intitule: o.intitule,
+        indicateurs: indsByObjectif.get(o.id) ?? [],
+      })),
+  }));
+  const tousObjectifs = objsEng.map((o) => ({ id: o.id, intitule: o.intitule }));
+
   const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
   const canWrite = isApprover || ctx.role === "manager";
   // Rédacteur du document = la personne qui a soumis la version (signature de
@@ -138,6 +187,10 @@ export default async function PolitiquePage({
           />
         ) : null}
       </PageHeader>
+
+      <div className="mb-6">
+        <EngagementsCard engagements={engagementsCouverture} tousObjectifs={tousObjectifs} />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">

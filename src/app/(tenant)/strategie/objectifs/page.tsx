@@ -20,7 +20,6 @@ import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { EngagementsCard } from "./engagements-card";
 import { ObjEcheanceCell, ObjStatutCell, ObjValeurActuelleCell } from "./inline-cells";
 import { ObjectifActions } from "./objectif-actions";
 import { ObjectifDialog } from "./objectif-dialog";
@@ -144,19 +143,6 @@ export default async function ObjectifsPage() {
   const sansProcessus = withProgress.filter((o) => !o.processus_id).length;
   const sansIndicateur = withProgress.filter((o) => o.indicateursLies.length === 0).length;
 
-  // Matrice de couverture §6.2 : engagement → objectif(s) → indicateur(s).
-  const engagementsCouverture = engagementOptions.map((e) => ({
-    id: e.id,
-    libelle: e.libelle,
-    objectifs: withProgress
-      .filter((o) => o.engagement_id === e.id)
-      .map((o) => ({
-        id: o.id,
-        intitule: o.intitule,
-        indicateurs: o.indicateursLies.map((i) => ({ id: i.id, nom: i.nom })),
-      })),
-  }));
-
   // §6.2.2 : actions de mise en œuvre rattachées aux objectifs.
   const actionsByObjectif = new Map<
     string,
@@ -221,8 +207,6 @@ export default async function ObjectifsPage() {
           engagementOptions={engagementOptions}
         />
       </PageHeader>
-
-      <EngagementsCard engagements={engagementsCouverture} />
 
       {total > 0 ? (
         <Card className="mb-6">

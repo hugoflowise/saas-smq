@@ -69,6 +69,53 @@ export async function updateEngagementAction(input: unknown): Promise<ActionResu
 /** Met un engagement à la corbeille (les objectifs liés sont simplement déliés). */
 export async function deleteEngagementAction(id: string): Promise<ActionResult> {
   const r = await softDeleteRow("politique_engagements", id);
-  if (r.ok) revalidatePath("/strategie/objectifs");
+  if (r.ok) {
+    revalidatePath("/strategie/objectifs");
+    revalidatePath("/strategie/politique");
+  }
   return r;
+}
+
+const setObjectifsSchema = z.object({
+  engagementId: z.string().uuid(),
+  objectifIds: z.array(z.string().uuid()),
+});
+
+/**
+ * Définit la liste des objectifs rattachés à un engagement (liaison depuis
+ * l'engagement). Un objectif n'a qu'un engagement : les objectifs cochés
+ * pointent vers cet engagement, ceux décochés (précédemment liés) sont déliés.
+ */
+export async function setEngagementObjectifsAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Droits insuffisants ou aucun client actif." };
+  const parsed = setObjectifsSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const { engagementId, objectifIds } = parsed.data;
+
+  // Rattache les objectifs cochés à cet engagement.
+  if (objectifIds.length > 0) {
+    const { error } = await c.supabase
+      .from("objectifs_qualite")
+      .update({ engagement_id: engagementId, updated_by: c.userId })
+      .eq("tenant_id", c.tenantId)
+      .in("id", objectifIds);
+    if (error) return { ok: false, error: error.message };
+  }
+
+  // Délie ceux qui pointaient vers cet engagement mais ne sont plus cochés.
+  let delie = c.supabase
+    .from("objectifs_qualite")
+    .update({ engagement_id: null, updated_by: c.userId })
+    .eq("tenant_id", c.tenantId)
+    .eq("engagement_id", engagementId);
+  if (objectifIds.length > 0) {
+    delie = delie.not("id", "in", `(${objectifIds.join(",")})`);
+  }
+  const { error: delErr } = await delie;
+  if (delErr) return { ok: false, error: delErr.message };
+
+  revalidatePath("/strategie/politique");
+  revalidatePath("/strategie/objectifs");
+  return { ok: true };
 }
