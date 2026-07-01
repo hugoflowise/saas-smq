@@ -21,7 +21,10 @@ export default async function UtilisateursPage() {
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
-        <PageHeader title="Utilisateurs" description="Gérez les accès à votre espace {{domaine}}." />
+        <PageHeader
+          title="Utilisateurs"
+          description="Gérez les accès à votre espace {{domaine}}."
+        />
         <EmptyState
           title="Aucun client sélectionné"
           description="Choisissez un client dans le sélecteur en haut de la page."
@@ -33,7 +36,10 @@ export default async function UtilisateursPage() {
   if (!canManageUsers(ctx.role)) {
     return (
       <div className="w-full">
-        <PageHeader title="Utilisateurs" description="Gérez les accès à votre espace {{domaine}}." />
+        <PageHeader
+          title="Utilisateurs"
+          description="Gérez les accès à votre espace {{domaine}}."
+        />
         <EmptyState
           title="Accès réservé"
           description="Seul le dirigeant peut gérer les utilisateurs de l'organisation."

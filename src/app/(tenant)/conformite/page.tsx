@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { dateLimiteReevaluation, estAReevaluer } from "@/lib/conformite";
 import { todayISO } from "@/lib/format";
+import { normalizeNormes, REFERENTIEL_NORME } from "@/lib/modules";
+import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ChapterRow } from "./chapter-row";
@@ -15,7 +17,7 @@ export default async function ConformitePage() {
     return (
       <div className="w-full">
         <PageHeader
-          title="Auto-diagnostic ISO 9001"
+          title="Auto-diagnostic"
           description="Auto-évaluation de la conformité par chapitre."
         />
         <EmptyState
@@ -29,9 +31,16 @@ export default async function ConformitePage() {
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
 
+  // Filtre par norme : le référentiel est global (toutes normes confondues), on
+  // ne montre au client que le(s) référentiel(s) de ses normes actives. Sans ce
+  // filtre, un client 9001 verrait aussi les questions MASE (et inversement).
+  const normes = await getNormesActives();
+  const normesReferentiel = normalizeNormes(normes).map((c) => REFERENTIEL_NORME[c]);
+
   const { data: referentiel } = await supabase
     .from("referentiel_iso")
     .select("id, chapitre, intitule, preuves_attendues, domaine, ordre_affichage")
+    .in("norme", normesReferentiel)
     .order("ordre_affichage", { ascending: true });
 
   const { data: evals } = await supabase
@@ -78,7 +87,7 @@ export default async function ConformitePage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Auto-diagnostic ISO 9001:2015"
+        title="Auto-diagnostic"
         description="Auto-évaluation de la conformité, chapitre par chapitre."
         concept="referentiels"
         help="Auto-évaluez la conformité chapitre par chapitre pour mesurer votre taux de couverture et identifier les écarts à traiter avant l'audit de certification. Chaque cotation conforme est à réévaluer au bout de 12 mois (badge « À réévaluer ») : un diagnostic n'est jamais acquis définitivement."
