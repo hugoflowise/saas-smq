@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      heures_travaillees: {
+        Row: {
+          annee: number
+          created_at: string
+          created_by: string | null
+          heures: number
+          id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          annee: number
+          created_at?: string
+          created_by?: string | null
+          heures: number
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          annee?: number
+          created_at?: string
+          created_by?: string | null
+          heures?: number
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       controles_obligatoires: {
         Row: {
           created_at: string
@@ -3977,6 +4010,7 @@ export type Database = {
           action_id: string | null
           analyse_causes: string | null
           analyse_methode: string | null
+          avec_arret: boolean
           canal: Database["public"]["Enums"]["reclamation_canal"]
           client: string | null
           created_at: string
@@ -3991,6 +4025,7 @@ export type Database = {
           domaine: string | null
           gravite: Database["public"]["Enums"]["nc_gravite"]
           id: string
+          jours_arret: number | null
           nc_associee: string | null
           objet: string
           satisfait_client: boolean | null
@@ -4005,6 +4040,7 @@ export type Database = {
           action_id?: string | null
           analyse_causes?: string | null
           analyse_methode?: string | null
+          avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -4019,6 +4055,7 @@ export type Database = {
           domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
+          jours_arret?: number | null
           nc_associee?: string | null
           objet: string
           satisfait_client?: boolean | null
@@ -4033,6 +4070,7 @@ export type Database = {
           action_id?: string | null
           analyse_causes?: string | null
           analyse_methode?: string | null
+          avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -4047,6 +4085,7 @@ export type Database = {
           domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
+          jours_arret?: number | null
           nc_associee?: string | null
           objet?: string
           satisfait_client?: boolean | null

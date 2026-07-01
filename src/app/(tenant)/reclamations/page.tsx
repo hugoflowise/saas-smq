@@ -62,7 +62,7 @@ export default async function ReclamationsPage() {
     supabase
       .from("reclamations")
       .select(
-        "id, type, objet, client, declarant_email, declarant_role, date_reception, canal, gravite, description, traitement, statut, domaine, analyse_methode, analyse_causes",
+        "id, type, objet, client, declarant_email, declarant_role, date_reception, canal, gravite, description, traitement, statut, domaine, analyse_methode, analyse_causes, avec_arret, jours_arret",
       )
       .eq("tenant_id", ctx.effectiveTenantId)
       .order("date_reception", { ascending: false }),

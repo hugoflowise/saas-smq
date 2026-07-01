@@ -6,6 +6,8 @@ import { formatDate, todayISO } from "@/lib/format";
 import { type CotationType, calculerScoreMase } from "@/lib/mase-score";
 import { REFERENTIEL_NORMES } from "@/lib/modules";
 import { createClient } from "@/lib/supabase/server";
+import { formatTaux, tauxFrequence, tauxGravite } from "@/lib/tf-tg";
+import { HeuresEditor } from "./heures-editor";
 
 // Types de remontée relevant du SSE (MASE Axe 4).
 const REMONTEES_SSE = [
@@ -28,37 +30,56 @@ export async function SseDashboardSection({ tenantId }: { tenantId: string }) {
   const supabase = await createClient();
   const tid = tenantId;
   const today = todayISO();
+  const annee = Number(today.slice(0, 4));
+  const debutAnnee = `${annee}-01-01`;
+  const finAnnee = `${annee}-12-31`;
 
-  const [refRows, evalsMase, controles, analyses, remonteesSse] = await Promise.all([
-    supabase
-      .from("referentiel_iso")
-      .select("id, chapitre, axe, points_max, cotation_type, neutralisable")
-      .in("norme", REFERENTIEL_NORMES.MASE)
-      .not("axe", "is", null),
-    supabase
-      .from("conformite_evaluation")
-      .select("referentiel_iso_id, points_obtenus, neutralisee")
-      .eq("tenant_id", tid),
-    supabase
-      .from("controles_obligatoires")
-      .select("id, intitule, date_prochain, statut")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .not("date_prochain", "is", null)
-      .order("date_prochain", { ascending: true }),
-    supabase
-      .from("analyses_risques")
-      .select("id, intitule, statut, date_revision")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null),
-    supabase
-      .from("reclamations")
-      .select("id", { count: "exact", head: true })
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .neq("statut", "cloturee")
-      .in("type", REMONTEES_SSE),
-  ]);
+  const [refRows, evalsMase, controles, analyses, remonteesSse, accidents, heures] =
+    await Promise.all([
+      supabase
+        .from("referentiel_iso")
+        .select("id, chapitre, axe, points_max, cotation_type, neutralisable")
+        .in("norme", REFERENTIEL_NORMES.MASE)
+        .not("axe", "is", null),
+      supabase
+        .from("conformite_evaluation")
+        .select("referentiel_iso_id, points_obtenus, neutralisee")
+        .eq("tenant_id", tid),
+      supabase
+        .from("controles_obligatoires")
+        .select("id, intitule, date_prochain, statut")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .not("date_prochain", "is", null)
+        .order("date_prochain", { ascending: true }),
+      supabase
+        .from("analyses_risques")
+        .select("id, intitule, statut, date_revision")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null),
+      supabase
+        .from("reclamations")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .neq("statut", "cloturee")
+        .in("type", REMONTEES_SSE),
+      // Accidents avec arrêt de l'année (base TF/TG).
+      supabase
+        .from("reclamations")
+        .select("jours_arret")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .eq("avec_arret", true)
+        .gte("date_reception", debutAnnee)
+        .lte("date_reception", finAnnee),
+      supabase
+        .from("heures_travaillees")
+        .select("heures")
+        .eq("tenant_id", tid)
+        .eq("annee", annee)
+        .maybeSingle(),
+    ]);
 
   // Score MASE (même calcul que l'auto-diagnostic).
   const rows = refRows.data ?? [];
@@ -95,6 +116,14 @@ export async function SseDashboardSection({ tenantId }: { tenantId: string }) {
       (a.statut !== "archivee" && a.date_revision != null && a.date_revision <= today),
   );
 
+  // Taux de fréquence / gravité de l'année (accidents avec arrêt / heures travaillées).
+  const accidentsList = accidents.data ?? [];
+  const nbAccidentsArret = accidentsList.length;
+  const joursArret = accidentsList.reduce((s, a) => s + (a.jours_arret ?? 0), 0);
+  const heuresAnnee = heures.data?.heures ?? 0;
+  const tf = tauxFrequence(nbAccidentsArret, heuresAnnee);
+  const tg = tauxGravite(joursArret, heuresAnnee);
+
   const stats = [
     {
       label: "Score MASE",
@@ -120,17 +149,32 @@ export async function SseDashboardSection({ tenantId }: { tenantId: string }) {
       href: "/reclamations",
       cls: (remonteesSse.count ?? 0) > 0 ? "text-status-pa" : "text-foreground",
     },
+    {
+      label: `Taux de fréquence ${annee}`,
+      value: formatTaux(tf),
+      href: "/reclamations",
+      cls: "text-foreground",
+    },
+    {
+      label: `Taux de gravité ${annee}`,
+      value: formatTaux(tg),
+      href: "/reclamations",
+      cls: "text-foreground",
+    },
   ];
 
   const controlesAlerte = [...controlesEnRetard, ...controlesProches].slice(0, 6);
 
   return (
     <section className="mb-6">
-      <h2 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wide">
-        Santé, sécurité & environnement
-      </h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-semibold text-muted-foreground text-sm uppercase tracking-wide">
+          Santé, sécurité & environnement
+        </h2>
+        <HeuresEditor annee={annee} initial={heures.data?.heures ?? null} />
+      </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
           <Link key={s.label} href={s.href}>
             <Card className="h-full transition-colors hover:border-primary/40">

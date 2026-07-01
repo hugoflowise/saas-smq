@@ -44,6 +44,9 @@ const recBase = {
   domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
   analyseMethode: z.enum(["5_pourquoi", "arbre_causes", "autre"]).optional(),
   analyseCauses: z.string().trim().optional(),
+  // Accident du travail (MASE) : avec arrêt + jours d'arrêt (base TF/TG).
+  avecArret: z.boolean().optional(),
+  joursArret: z.coerce.number().int().min(0).optional(),
 };
 // Champs de l'action liée, saisis directement dans le formulaire de remontée
 // (tout est facultatif : on retombe sur des valeurs déduites du sujet si vide).
@@ -77,6 +80,8 @@ function recPayload(d: z.infer<typeof recCreate>) {
     domaine: d.domaine ?? null,
     analyse_methode: d.analyseMethode ?? null,
     analyse_causes: d.analyseCauses ?? null,
+    avec_arret: d.avecArret ?? false,
+    jours_arret: d.joursArret ?? null,
   };
 }
 

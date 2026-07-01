@@ -4,6 +4,7 @@ import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
 import { type CotationType, calculerScoreMase, MASE_AXE_LABELS } from "@/lib/mase-score";
 import { REFERENTIEL_NORMES } from "@/lib/modules";
 import type { createClient } from "@/lib/supabase/server";
+import { formatTaux, tauxFrequence, tauxGravite } from "@/lib/tf-tg";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
@@ -40,35 +41,51 @@ export async function RevueSseBilan({
   const debutAnnee = `${annee}-01-01`;
   const finAnnee = `${annee}-12-31`;
 
-  const [refRows, evalsMase, controles, analyses, remontees] = await Promise.all([
-    supabase
-      .from("referentiel_iso")
-      .select("id, chapitre, axe, points_max, cotation_type, neutralisable")
-      .in("norme", REFERENTIEL_NORMES.MASE)
-      .not("axe", "is", null),
-    supabase
-      .from("conformite_evaluation")
-      .select("referentiel_iso_id, points_obtenus, neutralisee")
-      .eq("tenant_id", tid),
-    supabase
-      .from("controles_obligatoires")
-      .select("statut, date_prochain")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null),
-    supabase
-      .from("analyses_risques")
-      .select("statut, date_revision")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null),
-    supabase
-      .from("reclamations")
-      .select("type")
-      .eq("tenant_id", tid)
-      .is("deleted_at", null)
-      .in("type", REMONTEES_SSE)
-      .gte("date_reception", debutAnnee)
-      .lte("date_reception", finAnnee),
-  ]);
+  const [refRows, evalsMase, controles, analyses, remontees, accidents, heures] = await Promise.all(
+    [
+      supabase
+        .from("referentiel_iso")
+        .select("id, chapitre, axe, points_max, cotation_type, neutralisable")
+        .in("norme", REFERENTIEL_NORMES.MASE)
+        .not("axe", "is", null),
+      supabase
+        .from("conformite_evaluation")
+        .select("referentiel_iso_id, points_obtenus, neutralisee")
+        .eq("tenant_id", tid),
+      supabase
+        .from("controles_obligatoires")
+        .select("statut, date_prochain")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null),
+      supabase
+        .from("analyses_risques")
+        .select("statut, date_revision")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null),
+      supabase
+        .from("reclamations")
+        .select("type")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .in("type", REMONTEES_SSE)
+        .gte("date_reception", debutAnnee)
+        .lte("date_reception", finAnnee),
+      supabase
+        .from("reclamations")
+        .select("jours_arret")
+        .eq("tenant_id", tid)
+        .is("deleted_at", null)
+        .eq("avec_arret", true)
+        .gte("date_reception", debutAnnee)
+        .lte("date_reception", finAnnee),
+      supabase
+        .from("heures_travaillees")
+        .select("heures")
+        .eq("tenant_id", tid)
+        .eq("annee", annee)
+        .maybeSingle(),
+    ],
+  );
 
   // Score MASE par axe (même calcul que l'auto-diagnostic).
   const rows = refRows.data ?? [];
@@ -106,8 +123,19 @@ export async function RevueSseBilan({
   const parType = new Map<string, number>();
   for (const r of remonteesList) parType.set(r.type, (parType.get(r.type) ?? 0) + 1);
 
+  // Taux de fréquence / gravité de l'année de la revue.
+  const accidentsList = accidents.data ?? [];
+  const heuresAnnee = heures.data?.heures ?? 0;
+  const tf = tauxFrequence(accidentsList.length, heuresAnnee);
+  const tg = tauxGravite(
+    accidentsList.reduce((s, a) => s + (a.jours_arret ?? 0), 0),
+    heuresAnnee,
+  );
+
   const cells = [
     { label: "Score MASE global", value: score.pct == null ? "-" : `${score.pct}%` },
+    { label: "Taux de fréquence", value: formatTaux(tf) },
+    { label: "Taux de gravité", value: formatTaux(tg) },
     { label: "Contrôles conformes", value: `${controlesConformes}/${controlesList.length}` },
     { label: "Contrôles en retard", value: controlesEnRetard },
     { label: "Analyses validées", value: `${analysesValidees}/${analysesList.length}` },
