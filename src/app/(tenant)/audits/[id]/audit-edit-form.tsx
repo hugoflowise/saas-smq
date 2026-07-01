@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { updateAuditAction } from "@/lib/actions/audits-revues";
 import { IMPARTIALITE_MARQUEUR } from "@/lib/audit-impartialite";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
@@ -56,8 +55,6 @@ export function AuditEditForm({
       dateRealisee: f.get("dateRealisee") || undefined,
       dureePrevue: f.get("dureePrevue") || undefined,
       statut: f.get("statut"),
-      rapport: f.get("rapport") || undefined,
-      ecartsConstates: f.get("ecartsConstates") || undefined,
     };
 
     setPending(true);
@@ -199,29 +196,10 @@ export function AuditEditForm({
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="rapport">Rapport d'audit</Label>
-        <Textarea id="rapport" name="rapport" rows={12} defaultValue={audit.rapport ?? ""} />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="ecartsConstates">Écarts constatés</Label>
-        <Textarea
-          id="ecartsConstates"
-          name="ecartsConstates"
-          rows={6}
-          defaultValue={audit.ecarts_constates ?? ""}
-        />
-        <p className="text-muted-foreground text-xs">
-          Décrivez les écarts ici, puis créez les actions correctives associées dans l'encart
-          ci-dessous.
-        </p>
-      </div>
-
       {readOnly ? null : (
         <div>
           <Button type="submit" disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer l'audit"}
+            {pending ? "Enregistrement…" : "Enregistrer le contexte"}
           </Button>
         </div>
       )}
