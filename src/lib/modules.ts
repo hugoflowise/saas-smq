@@ -73,7 +73,7 @@ type Requirement = "socle" | "systeme" | { normes: NormeCode[] };
 // domaine §4.3, approche processus §4.4, R&O §6.1, modifications §6.3,
 // non-conformités §10.2…). MASE n'est PAS une norme Annexe SL (structure en
 // 5 axes) : ces modules-là doivent être masqués pour un client MASE seul.
-const ISO_ANNEXE_SL: NormeCode[] = ["9001", "14001", "45001"];
+export const ISO_ANNEXE_SL: NormeCode[] = ["9001", "14001", "45001"];
 
 // Modules transverses / obligations légales : toujours visibles, indépendamment
 // des normes (un client a toujours au moins ces entrées).
