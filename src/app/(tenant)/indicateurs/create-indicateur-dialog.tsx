@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createIndicateurAction, updateIndicateurAction } from "@/lib/actions/indicateurs";
+import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
@@ -29,6 +30,7 @@ export type IndicateurRow = {
   cible: number | null;
   sens: string;
   frequence_mesure: string;
+  domaine?: string | null;
 };
 
 /** Création et modification d'un indicateur (champs alignés sur la fiche de référence). */
@@ -38,12 +40,15 @@ export function IndicateurDialog({
   presetProcessusId,
   objectifOptions = [],
   linkedObjectifIds = [],
+  afficherDomaine = false,
 }: {
   indicateur?: IndicateurRow;
   processusOptions: { id: string; nom: string }[];
   presetProcessusId?: string;
   objectifOptions?: { id: string; intitule: string }[];
   linkedObjectifIds?: string[];
+  /** Affiche le sélecteur de domaine SSE (MASE §1.4). */
+  afficherDomaine?: boolean;
 }) {
   const isEdit = Boolean(indicateur);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -67,6 +72,7 @@ export function IndicateurDialog({
           cible: form.get("cible") || undefined,
           sens: form.get("sens"),
           frequence: form.get("frequence"),
+          domaine: form.get("domaine") || undefined,
           objectifIds,
         };
         return isEdit
@@ -175,6 +181,24 @@ export function IndicateurDialog({
                 ))}
               </select>
             </div>
+            {afficherDomaine ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="domaine">Domaine SSE</Label>
+                <select
+                  id="domaine"
+                  name="domaine"
+                  className={SELECT_CLASS}
+                  defaultValue={indicateur?.domaine ?? ""}
+                >
+                  <option value="">-</option>
+                  {DOMAINES_SSE.map((d) => (
+                    <option key={d} value={d}>
+                      {DOMAINE_SSE_LABELS[d]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-2">
               <Label htmlFor="cible">Cible</Label>
               <Input
@@ -252,6 +276,7 @@ export function CreateIndicateurDialog(props: {
   processusOptions: { id: string; nom: string }[];
   presetProcessusId?: string;
   objectifOptions?: { id: string; intitule: string }[];
+  afficherDomaine?: boolean;
 }) {
   return <IndicateurDialog {...props} />;
 }
