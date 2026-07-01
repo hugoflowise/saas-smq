@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
 import { Jauge } from "@/components/jauge";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { SatisfactionBars } from "@/components/satisfaction-bars";
 import { StatTiles } from "@/components/stat-tiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
@@ -136,11 +138,17 @@ export default async function AnalyseSuiviPrestationPage({
         isoClause="ISO 9001 §9.1.2 / §9.3"
         help="Le tableau agrège les comptes rendus de suivi de prestation : satisfaction, recommandation (NPS), axes de satisfaction, sécurité (QSSE), besoins détectés, points de vigilance et verbatims. Filtrez par année pour la revue de direction."
       >
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <FiltreAnnee label="Toutes" value="toutes" actif={anneeActive == null} />
           {annees.map((y) => (
             <FiltreAnnee key={y} label={String(y)} value={String(y)} actif={anneeActive === y} />
           ))}
+          {a.nbSuivis > 0 ? (
+            <DownloadPdfButton
+              printHref={`/print/suivi-prestation-analyse/${anneeActive ?? "toutes"}`}
+              label="Export revue de direction"
+            />
+          ) : null}
         </div>
       </PageHeader>
 
@@ -254,15 +262,8 @@ export default async function AnalyseSuiviPrestationPage({
                 Zoom sur les items qui composent la satisfaction
               </CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {a.axes.map((axe) => (
-                <BarreRow
-                  key={axe.key}
-                  label={axe.label}
-                  pct={axe.pct}
-                  valeur={axe.pct != null ? `${axe.pct}%` : "-"}
-                />
-              ))}
+            <CardContent>
+              <SatisfactionBars items={a.axes.map((axe) => ({ label: axe.label, pct: axe.pct }))} />
             </CardContent>
           </Card>
 
