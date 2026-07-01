@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AddToHomeScreenHint } from "@/components/add-to-home-screen-hint";
 import { RgpdNotice } from "@/components/rgpd-notice";
+import { resoudreDefinitionFormulaire } from "@/lib/formulaire-modeles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SuiviForm } from "./suivi-form";
 
@@ -17,11 +18,17 @@ export default async function SuiviPrestationPublicPage({
   const admin = createAdminClient();
   const { data: tenant } = await admin
     .from("tenants")
-    .select("nom_societe, logo_url")
+    .select("id, nom_societe, logo_url")
     .eq("survey_token", token)
     .maybeSingle();
 
   if (!tenant) notFound();
+
+  const { sections, version } = await resoudreDefinitionFormulaire(
+    admin,
+    tenant.id,
+    "suivi_prestation",
+  );
 
   return (
     <div className="app-bg flex min-h-screen justify-center px-4 py-10">
@@ -47,7 +54,12 @@ export default async function SuiviPrestationPublicPage({
             </p>
           </div>
         </div>
-        <SuiviForm token={token} nomSociete={tenant.nom_societe} />
+        <SuiviForm
+          token={token}
+          nomSociete={tenant.nom_societe}
+          sections={sections}
+          modeleVersion={version}
+        />
         <RgpdNotice nomSociete={tenant.nom_societe} />
         <AddToHomeScreenHint />
       </div>
