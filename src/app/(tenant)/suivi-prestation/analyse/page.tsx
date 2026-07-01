@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { EmptyState } from "@/components/empty-state";
 import { Jauge } from "@/components/jauge";
 import { ModuleTabs } from "@/components/module-tabs";
@@ -18,6 +17,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { cn } from "@/lib/utils";
+import { AlimenterRevueButton } from "./alimenter-revue-button";
 
 /** Barre horizontale « part de satisfaits » ou décompte, en CSS pur. */
 function BarreRow({
@@ -126,9 +126,6 @@ export default async function AnalyseSuiviPrestationPage({
     { label: "Besoins détectés", value: a.nbBesoinsDetectes, cls: "text-status-conforme" },
   ];
 
-  // NPS (-100..100) projeté sur 0..100 pour l'anneau de jauge.
-  const npsRing = a.nps == null ? null : Math.round((a.nps + 100) / 2);
-
   return (
     <div className="w-full">
       <ModuleTabs tabs={SUIVI_PRESTATION_TABS} />
@@ -144,10 +141,7 @@ export default async function AnalyseSuiviPrestationPage({
             <FiltreAnnee key={y} label={String(y)} value={String(y)} actif={anneeActive === y} />
           ))}
           {a.nbSuivis > 0 ? (
-            <DownloadPdfButton
-              printHref={`/print/suivi-prestation-analyse/${anneeActive ?? "toutes"}`}
-              label="Export revue de direction"
-            />
+            <AlimenterRevueButton annee={anneeActive != null ? String(anneeActive) : "toutes"} />
           ) : null}
         </div>
       </PageHeader>
@@ -189,49 +183,41 @@ export default async function AnalyseSuiviPrestationPage({
                 <CardTitle className="text-base">Recommandation (NPS)</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                <div className="flex items-center gap-5">
-                  <Jauge
-                    pct={npsRing}
-                    value={a.nps != null ? String(a.nps) : "-"}
-                    sub={a.npsLabel}
-                    tone="pf"
-                  />
-                  <div className="text-sm text-muted-foreground">
-                    <p>
-                      <span className="font-medium text-status-conforme">
-                        {a.npsRepartition.promoteurs}
-                      </span>{" "}
-                      promoteurs ({a.npsRepartition.pctPromoteurs}%)
-                    </p>
-                    <p>
-                      <span className="font-medium text-foreground">
-                        {a.npsRepartition.passifs}
-                      </span>{" "}
-                      passifs ({a.npsRepartition.pctPassifs}%)
-                    </p>
-                    <p>
-                      <span className="font-medium text-status-nc-mineure">
-                        {a.npsRepartition.detracteurs}
-                      </span>{" "}
-                      détracteurs ({a.npsRepartition.pctDetracteurs}%)
-                    </p>
-                  </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-semibold text-4xl text-status-pf">
+                    {a.nps != null ? a.nps : "-"}
+                  </span>
+                  <span className="text-muted-foreground text-sm">{a.npsLabel}</span>
                 </div>
                 {a.npsRepartition.total > 0 ? (
-                  <div className="flex h-2.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full bg-status-conforme"
-                      style={{ width: `${a.npsRepartition.pctPromoteurs}%` }}
-                    />
-                    <div
-                      className="h-full bg-muted-foreground/40"
-                      style={{ width: `${a.npsRepartition.pctPassifs}%` }}
-                    />
-                    <div
-                      className="h-full bg-status-nc-mineure"
-                      style={{ width: `${a.npsRepartition.pctDetracteurs}%` }}
-                    />
-                  </div>
+                  <>
+                    <div className="flex h-3 overflow-hidden rounded-full">
+                      <div
+                        className="h-full bg-status-conforme"
+                        style={{ width: `${a.npsRepartition.pctPromoteurs}%` }}
+                      />
+                      <div
+                        className="h-full bg-muted-foreground/40"
+                        style={{ width: `${a.npsRepartition.pctPassifs}%` }}
+                      />
+                      <div
+                        className="h-full bg-status-nc-mineure"
+                        style={{ width: `${a.npsRepartition.pctDetracteurs}%` }}
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                      <span className="text-status-conforme">
+                        {a.npsRepartition.promoteurs} promoteurs ({a.npsRepartition.pctPromoteurs}%)
+                      </span>
+                      <span className="text-muted-foreground">
+                        {a.npsRepartition.passifs} passifs ({a.npsRepartition.pctPassifs}%)
+                      </span>
+                      <span className="text-status-nc-mineure">
+                        {a.npsRepartition.detracteurs} détracteurs (
+                        {a.npsRepartition.pctDetracteurs}%)
+                      </span>
+                    </div>
+                  </>
                 ) : null}
               </CardContent>
             </Card>
@@ -263,7 +249,13 @@ export default async function AnalyseSuiviPrestationPage({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SatisfactionBars items={a.axes.map((axe) => ({ label: axe.label, pct: axe.pct }))} />
+              <SatisfactionBars
+                items={a.axes.map((axe) => ({
+                  label: axe.label,
+                  pctSat: axe.pct,
+                  pctInsat: axe.pctInsatisfait,
+                }))}
+              />
             </CardContent>
           </Card>
 

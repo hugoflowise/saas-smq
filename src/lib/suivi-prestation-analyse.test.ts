@@ -3,6 +3,7 @@ import {
   analyserSuivisPrestation,
   anneesDisponibles,
   type SuiviPrestationRow,
+  syntheseEcouteClient,
 } from "./suivi-prestation-analyse";
 
 /** Fabrique une ligne de suivi avec des valeurs par défaut neutres. */
@@ -81,7 +82,9 @@ describe("analyserSuivisPrestation", () => {
     expect(qualite?.count).toBe(2);
     expect(qualite?.moyenne).toBeCloseTo(3.5, 5);
     expect(qualite?.pct).toBe(100); // 4 et 3 sont tous >= 3
+    expect(qualite?.pctInsatisfait).toBe(0);
     expect(implication?.pct).toBe(0); // 2 et 1 sont < 3
+    expect(implication?.pctInsatisfait).toBe(100);
   });
 
   it("tolère des notes d'axe en chaîne et ignore les valeurs hors bornes", () => {
@@ -157,6 +160,31 @@ describe("analyserSuivisPrestation", () => {
     expect(a.verbatims[0]?.client).toBe("Beta"); // plus récent d'abord
     expect(a.verbatims[1]?.texte).toBe("Très pro"); // trimé
     expect(a.verbatims[1]?.origine).toBe("Satisfaction");
+  });
+});
+
+describe("syntheseEcouteClient", () => {
+  it("signale l'absence de suivi", () => {
+    const a = analyserSuivisPrestation([]);
+    expect(syntheseEcouteClient(a, "2026")).toContain("aucun suivi");
+  });
+
+  it("produit une synthèse texte lisible avec les indicateurs clés", () => {
+    const a = analyserSuivisPrestation([
+      suivi({
+        client: "Acme",
+        consultant: "Jean",
+        date_suivi: "2026-02-01",
+        satisfaction_globale: 5,
+        nps: 10,
+        reponses: { besoins_futurs: ["Besoin de formation"], securite_consignes: "Oui" },
+      }),
+    ]);
+    const t = syntheseEcouteClient(a, "2026");
+    expect(t).toContain("Écoute client");
+    expect(t).toContain("NPS 100");
+    expect(t).toContain("100% de clients satisfaits");
+    expect(t.split("\n").length).toBeGreaterThan(3);
   });
 });
 
