@@ -30,7 +30,7 @@ export default async function CommunicationsPage() {
       <div className="w-full">
         <PageHeader
           title="Communications"
-          description="Modèles d'e-mails et communication interne sur le SMQ."
+          description="Modèles d'e-mails et communication interne sur le {{sigle}}."
         />
         <EmptyState
           title="Aucun client sélectionné"

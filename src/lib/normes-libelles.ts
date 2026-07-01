@@ -80,6 +80,24 @@ export function objectifsLabel(normes: readonly string[]): string {
   return `Objectifs ${domaineLabel(normes)}`;
 }
 
+/**
+ * Remplace les jetons de libellé dans un texte, selon les normes actives :
+ *   {{domaine}} → qualité / SSE / QSSE
+ *   {{sigle}}   → SMQ / SSE / QSSE
+ *   {{systeme}} → « système de management de la qualité » (…SSE / …QSSE)
+ *   {{Systeme}} → idem, première lettre en majuscule
+ * Permet d'écrire les titres/descriptions/aides sans plomberie par page (le
+ * PageHeader applique la substitution).
+ */
+export function appliquerLibelles(texte: string, normes: readonly string[]): string {
+  const systeme = systemeLabel(normes);
+  return texte
+    .replaceAll("{{domaine}}", domaineLabel(normes))
+    .replaceAll("{{sigle}}", systemeSigle(normes))
+    .replaceAll("{{systeme}}", systeme)
+    .replaceAll("{{Systeme}}", systeme.charAt(0).toUpperCase() + systeme.slice(1));
+}
+
 // Libellés de navigation dépendant des normes : quand l'intitulé du menu porte
 // le domaine (« Politique qualité »), on le recompose. Les autres restent tels
 // quels (retour du libellé par défaut).

@@ -14,7 +14,7 @@ export default async function MiseEnRoutePage() {
       <div className="w-full">
         <PageHeader
           title="Mise en route"
-          description="Suivez les étapes pour configurer votre espace qualité."
+          description="Suivez les étapes pour configurer votre espace {{domaine}}."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -33,7 +33,7 @@ export default async function MiseEnRoutePage() {
     <div className="mx-auto w-full max-w-3xl">
       <PageHeader
         title="Mise en route"
-        description="Suivez ces étapes pour configurer votre espace qualité. Avancez à votre rythme, dans l'ordre proposé."
+        description="Suivez ces étapes pour configurer votre espace {{domaine}}. Avancez à votre rythme, dans l'ordre proposé."
       />
 
       {complete ? (

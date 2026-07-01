@@ -8,7 +8,7 @@ import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
 import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { getNormesActives } from "@/lib/normes-actives";
-import { systemeLabel, systemeSigle } from "@/lib/normes-libelles";
+import { objectifsLabel, systemeLabel, systemeSigle } from "@/lib/normes-libelles";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { chargerMesuresObjectifs } from "@/lib/objectifs-mesure";
 import { loadOnboarding } from "@/lib/onboarding";
@@ -473,7 +473,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Objectifs qualité</CardTitle>
+            <CardTitle className="text-base">{objectifsLabel(normes)}</CardTitle>
           </CardHeader>
           <CardContent>
             {objActifs.length === 0 ? (

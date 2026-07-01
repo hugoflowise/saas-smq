@@ -73,7 +73,7 @@ export default async function AuditsPage({
         title="Audits"
         description="Audits internes, externes (certification/client) et fournisseurs."
         concept="audits"
-        help="Programmez des audits internes à intervalles planifiés (chaque processus audité sur le cycle) pour vérifier la conformité et l'efficacité du SMQ ; les écarts alimentent le plan d'actions."
+        help="Programmez des audits internes à intervalles planifiés (chaque processus audité sur le cycle) pour vérifier la conformité et l'efficacité du {{sigle}} ; les écarts alimentent le plan d'actions."
       >
         <ProgrammeButton annee={new Date().getFullYear()} />
         <AuditDialog auditeurs={auditeurs} />
