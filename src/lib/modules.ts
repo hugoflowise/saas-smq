@@ -25,21 +25,21 @@ export type NormeInfo = {
 };
 
 export const NORMES: NormeInfo[] = [
-  { code: "9001", label: "ISO 9001 — Qualité", court: "9001", famille: "qualite" },
-  { code: "14001", label: "ISO 14001 — Environnement", court: "14001", famille: "environnement" },
+  { code: "9001", label: "ISO 9001 - Qualité", court: "9001", famille: "qualite" },
+  { code: "14001", label: "ISO 14001 - Environnement", court: "14001", famille: "environnement" },
   {
     code: "45001",
-    label: "ISO 45001 — Santé & sécurité au travail",
+    label: "ISO 45001 - Santé & sécurité au travail",
     court: "45001",
     famille: "sst",
   },
   {
     code: "MASE",
-    label: "MASE — Sécurité (santé, sécurité, environnement)",
+    label: "MASE - Sécurité (santé, sécurité, environnement)",
     court: "MASE",
     famille: "sst",
   },
-  { code: "CEFRI", label: "CEFRI — Radioprotection", court: "CEFRI", famille: "radioprotection" },
+  { code: "CEFRI", label: "CEFRI - Radioprotection", court: "CEFRI", famille: "radioprotection" },
 ];
 
 const NORME_CODES = new Set<string>(NORMES.map((n) => n.code));
@@ -68,7 +68,7 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   // toute certification → socle (à brancher quand le module sera livré).
   // "/duerp": "socle",
   //
-  // Modules métier (à venir) — exemples du gating ciblé :
+  // Modules métier (à venir) - exemples du gating ciblé :
   // "/sst/plans-prevention": { normes: ["MASE", "45001"] },
   // "/sst/accidents": { normes: ["MASE", "45001"] },
   // "/environnement/aspects": { normes: ["14001"] },

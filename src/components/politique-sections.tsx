@@ -1,3 +1,14 @@
+import Link from "next/link";
+
+/** Engagements-types de la direction (ISO 9001), pré-remplis tant que non modifiés. */
+export const ENGAGEMENTS_DIRECTION_DEFAUT = [
+  "Allouer les ressources humaines, financières et techniques nécessaires à la mise en œuvre de cette politique",
+  "Désigner un Responsable du Système de Management (RSMQ) chargé de coordonner la démarche",
+  "Piloter l'efficacité du système au travers d'une revue de direction annuelle",
+  "Veiller à la conformité aux exigences légales, réglementaires et normatives applicables",
+  "Améliorer en continu la pertinence, l'adéquation et l'efficacité du Système de Management",
+].join("\n");
+
 export type PolitiqueSectionsData = {
   presentation: string | null;
   valeurs: string | null;
@@ -5,6 +16,8 @@ export type PolitiqueSectionsData = {
   engagements: { libelle: string }[];
   objectifsTexte: string | null;
   engagementDirection: string | null;
+  /** true à l'impression : le lien vers les objectifs n'est pas cliquable. */
+  print?: boolean;
 };
 
 function Section({ n, titre, children }: { n: number; titre: string; children: React.ReactNode }) {
@@ -70,17 +83,39 @@ export function PolitiqueSections(d: PolitiqueSectionsData) {
           </ul>
         ) : (
           <p className="text-[#0b1120]/50 text-sm">
-            À compléter (ajoutez vos engagements dans l'encart « Engagements de la politique »).
+            À compléter : modifiez le document et ajoutez vos engagements dans la section « Nos
+            engagements ».
           </p>
         )}
       </Section>
 
       <Section n={4} titre="Nos objectifs">
-        <Texte valeur={d.objectifsTexte} />
+        {d.objectifsTexte?.trim() ? (
+          <p className="mb-2 whitespace-pre-wrap text-sm">{d.objectifsTexte}</p>
+        ) : (
+          <p className="mb-2 text-sm">
+            Nos objectifs qualité sont définis, déclinés par processus et suivis dans un tableau de
+            bord dédié, revus annuellement en revue de direction.
+          </p>
+        )}
+        {d.print ? (
+          <p className="text-[#0b1120]/60 text-sm">
+            Voir les objectifs qualité dans l'application.
+          </p>
+        ) : (
+          <Link href="/strategie/objectifs" className="text-primary text-sm hover:underline">
+            → Voir les objectifs qualité
+          </Link>
+        )}
       </Section>
 
       <Section n={5} titre="Engagement de la Direction">
-        <Puces valeur={d.engagementDirection} />
+        <p className="mb-1 text-[#0b1120]/60 text-xs">La Direction s'engage à :</p>
+        <Puces
+          valeur={
+            d.engagementDirection?.trim() ? d.engagementDirection : ENGAGEMENTS_DIRECTION_DEFAUT
+          }
+        />
       </Section>
     </div>
   );

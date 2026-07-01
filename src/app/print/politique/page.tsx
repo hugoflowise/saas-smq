@@ -91,6 +91,7 @@ export default async function PolitiquePrintPage() {
       genereLe={formatDate(todayISO())}
     >
       <PolitiqueSections
+        print
         presentation={politique?.presentation ?? null}
         valeurs={politique?.valeurs ?? null}
         engagementsIntro={politique?.engagements_intro ?? null}

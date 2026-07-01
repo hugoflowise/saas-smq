@@ -70,9 +70,9 @@ export function CreateTenantDialog() {
             <div className="flex flex-col gap-2">
               <Label htmlFor="formule">Formule</Label>
               <select id="formule" name="formule" className={SELECT_CLASS} defaultValue="Essentiel">
-                <option value="Essentiel">Essentiel — licence seule</option>
-                <option value="Tandem">Tandem — accompagnement</option>
-                <option value="Premium">Premium — externalisé</option>
+                <option value="Essentiel">Essentiel - licence seule</option>
+                <option value="Tandem">Tandem - accompagnement</option>
+                <option value="Premium">Premium - externalisé</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">

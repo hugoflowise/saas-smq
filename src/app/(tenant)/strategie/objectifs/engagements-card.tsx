@@ -194,7 +194,7 @@ export function EngagementsCard({
                   <div className="pl-6">
                     {e.objectifs.length === 0 ? (
                       <span className="text-status-pa text-xs">
-                        Aucun objectif rattaché — ouvrez un objectif pour le relier à cet
+                        Aucun objectif rattaché - ouvrez un objectif pour le relier à cet
                         engagement.
                       </span>
                     ) : (

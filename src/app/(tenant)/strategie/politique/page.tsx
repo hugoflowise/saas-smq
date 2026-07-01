@@ -190,10 +190,6 @@ export default async function PolitiquePage({
         ) : null}
       </PageHeader>
 
-      <div className="mb-6">
-        <EngagementsCard engagements={engagementsCouverture} tousObjectifs={tousObjectifs} />
-      </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="min-w-0">
           <MaitriseDocument
@@ -214,15 +210,22 @@ export default async function PolitiquePage({
               />
             }
             structuredEditor={
-              <PolitiqueInfosEditor
-                initial={{
-                  presentation: politique?.presentation ?? "",
-                  valeurs: politique?.valeurs ?? "",
-                  engagementsIntro: politique?.engagements_intro ?? "",
-                  objectifsTexte: politique?.objectifs_texte ?? "",
-                  engagementDirection: politique?.engagement_direction ?? "",
-                }}
-              />
+              <div className="flex flex-col gap-5">
+                <PolitiqueInfosEditor
+                  initial={{
+                    presentation: politique?.presentation ?? "",
+                    valeurs: politique?.valeurs ?? "",
+                    engagementsIntro: politique?.engagements_intro ?? "",
+                    objectifsTexte: politique?.objectifs_texte ?? "",
+                    engagementDirection: politique?.engagement_direction ?? "",
+                  }}
+                />
+                {/* Section 3 - la liste des engagements (reliée aux objectifs/KPI). */}
+                <EngagementsCard
+                  engagements={engagementsCouverture}
+                  tousObjectifs={tousObjectifs}
+                />
+              </div>
             }
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}

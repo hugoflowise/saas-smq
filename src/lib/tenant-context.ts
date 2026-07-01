@@ -3,8 +3,8 @@ import { createClient } from "./supabase/server";
 import { getSimulatedRole } from "./view-as-cookie";
 
 // Environnement de staging (identifié par le projet Supabase). Certaines aides
-// au test — comme l'identité simulée (agir sous un vrai utilisateur du tenant en
-// vue manager/dirigeant) — n'y sont activées QUE là, jamais en production.
+// au test - comme l'identité simulée (agir sous un vrai utilisateur du tenant en
+// vue manager/dirigeant) - n'y sont activées QUE là, jamais en production.
 export const IS_STAGING = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").includes(
   "bsiwwzfundeueiirufmn",
 );

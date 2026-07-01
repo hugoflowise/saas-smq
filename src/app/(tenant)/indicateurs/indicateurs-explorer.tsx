@@ -87,13 +87,13 @@ export function IndicateursExplorer({
                       </Link>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {ind.processusNom ?? "—"}
+                      {ind.processusNom ?? "-"}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {ind.objectifs.length ? ind.objectifs.join(", ") : "—"}
+                      {ind.objectifs.length ? ind.objectifs.join(", ") : "-"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right text-sm">
-                      {ind.cible !== null ? cibleAffichee(ind.cible, ind.sens, ind.unite) : "—"}
+                      {ind.cible !== null ? cibleAffichee(ind.cible, ind.sens, ind.unite) : "-"}
                     </TableCell>
                     {periodes.map((p) => {
                       const v = ind.valeursParPeriode[p.cle];
