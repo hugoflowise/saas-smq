@@ -68,6 +68,11 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   // toute certification → socle (à brancher quand le module sera livré).
   // "/duerp": "socle",
   //
+  // Modules métier ISO 9001 : satisfaction client (§9.1.2) et achats/fournisseurs
+  // (§8.4). Masqués pour un client qui n'a QUE des normes SST/environnement.
+  "/suivi-prestation": { normes: ["9001"] },
+  "/fournisseurs": { normes: ["9001"] },
+  //
   // Modules métier (à venir) - exemples du gating ciblé :
   // "/sst/plans-prevention": { normes: ["MASE", "45001"] },
   // "/sst/accidents": { normes: ["MASE", "45001"] },
