@@ -1,48 +1,49 @@
 export type SatBar = { label: string; pctSat: number | null; pctInsat: number | null };
 
 /**
- * Graphe à barres horizontales par item, façon écoute client : chaque item
- * montre côte à côte sa part de satisfaits (vert) et sa part d'insatisfaits
- * (rouge), sur une même barre 100%. Rendu CSS pur (imprimable, sans JS).
+ * Liste fine et épurée « part de satisfaits » par item : chaque ligne aligne
+ * l'intitulé, une barre mince dont le remplissage vert représente les
+ * satisfaits (le fond rosé restant = insatisfaits), et le pourcentage.
+ * Rendu CSS pur (imprimable, sans JS ni dépendance graphique).
  */
 export function SatisfactionBars({ items }: { items: SatBar[] }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3.5">
       {items.map((item) => {
         const sat = Math.max(0, Math.min(100, item.pctSat ?? 0));
-        const insat = Math.max(0, Math.min(100, item.pctInsat ?? 0));
         const vide = item.pctSat == null && item.pctInsat == null;
         return (
-          <div key={item.label} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="min-w-0 truncate">{item.label}</span>
-              {vide ? (
-                <span className="shrink-0 text-muted-foreground">-</span>
-              ) : (
-                <span className="shrink-0 font-medium tabular-nums">
-                  <span className="text-status-conforme">{item.pctSat ?? 0}% satisfaits</span>
-                  <span className="text-muted-foreground"> · </span>
-                  <span className="text-status-nc-mineure">{item.pctInsat ?? 0}% insatisfaits</span>
-                </span>
-              )}
+          <div key={item.label} className="flex items-center gap-4">
+            <span
+              className="w-40 shrink-0 truncate text-muted-foreground text-sm sm:w-64"
+              title={item.label}
+            >
+              {item.label}
+            </span>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-status-nc-mineure/15">
+              {!vide ? (
+                <div
+                  className="h-full rounded-full bg-status-conforme"
+                  style={{ width: `${sat}%` }}
+                />
+              ) : null}
             </div>
-            <div className="flex h-5 overflow-hidden rounded-md bg-muted">
-              <div className="h-full bg-status-conforme" style={{ width: `${sat}%` }} />
-              <div className="h-full bg-status-nc-mineure" style={{ width: `${insat}%` }} />
-            </div>
+            <span className="w-9 shrink-0 text-right font-medium text-sm tabular-nums">
+              {item.pctSat != null ? `${item.pctSat}%` : "-"}
+            </span>
           </div>
         );
       })}
-      <div className="flex items-center gap-4 text-muted-foreground text-xs">
+      <p className="flex items-center gap-4 pt-1 text-muted-foreground text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-status-conforme" />
-          Satisfaits (note 3-4)
+          <span className="inline-block h-1.5 w-4 rounded-full bg-status-conforme" />
+          Satisfaits
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-status-nc-mineure" />
-          Insatisfaits (note 1-2)
+          <span className="inline-block h-1.5 w-4 rounded-full bg-status-nc-mineure/25" />
+          Insatisfaits
         </span>
-      </div>
+      </p>
     </div>
   );
 }
