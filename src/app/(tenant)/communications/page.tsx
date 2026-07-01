@@ -47,7 +47,7 @@ export default async function CommunicationsPage() {
     supabase.from("tenants").select("nom_societe, liste_diffusion").eq("id", tid).maybeSingle(),
     supabase
       .from("communication_modeles")
-      .select("id, categorie, titre, objet, corps, pieces_jointes")
+      .select("id, categorie, titre, objet, corps, pieces_jointes, modele_source")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("titre"),
@@ -62,16 +62,23 @@ export default async function CommunicationsPage() {
   const societe = tenant?.nom_societe ?? "votre société";
   const listeDiffusion = tenant?.liste_diffusion ?? null;
 
-  // Modèles fournis + personnalisés, regroupés par catégorie.
-  const customModeles: Modele[] = (customs ?? []).map((m) => {
-    const { pieces_jointes, ...rest } = m;
-    return {
+  // Modèles personnalisés : ceux matérialisés depuis un modèle fourni remplacent
+  // le fourni correspondant ; les autres sont des créations propres au client.
+  const materialiseParSource = new Map<string, Modele>();
+  const customsPropres: Modele[] = [];
+  for (const m of customs ?? []) {
+    const { pieces_jointes, modele_source, ...rest } = m;
+    const modele: Modele = {
       ...rest,
       integre: false,
       pieces: (pieces_jointes ?? []) as Modele["pieces"],
     };
-  });
-  const tousModeles = [...MODELES_INTEGRES, ...customModeles];
+    if (modele_source) materialiseParSource.set(modele_source, modele);
+    else customsPropres.push(modele);
+  }
+  // Modèles fournis : remplacés par leur copie éditable si elle existe.
+  const fournisEffectifs = MODELES_INTEGRES.map((b) => materialiseParSource.get(b.id) ?? b);
+  const tousModeles = [...fournisEffectifs, ...customsPropres];
   const categoriesPresentes = Object.keys(MODELE_CATEGORIES).filter((cat) =>
     tousModeles.some((m) => m.categorie === cat),
   );
@@ -126,14 +133,8 @@ export default async function CommunicationsPage() {
                           societe={societe}
                           listeDiffusion={listeDiffusion}
                         />
-                        {m.integre ? (
-                          <ModeleDialog mode="dupliquer" modele={m} />
-                        ) : (
-                          <>
-                            <ModeleDialog mode="modifier" modele={m} />
-                            <ModeleDelete id={m.id} titre={m.titre} />
-                          </>
-                        )}
+                        <ModeleDialog mode="modifier" modele={m} />
+                        {m.integre ? null : <ModeleDelete id={m.id} titre={m.titre} />}
                       </div>
                     </CardContent>
                   </Card>
