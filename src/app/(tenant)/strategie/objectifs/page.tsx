@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/table";
 import { deleteObjectifAction } from "@/lib/actions/registres";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
-import { objectifProgress } from "@/lib/objectifs";
+import { chargerMesuresObjectifs, mesureVide } from "@/lib/objectifs-mesure";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
-import { ObjEcheanceCell, ObjStatutCell, ObjValeurActuelleCell } from "./inline-cells";
+import { ObjEcheanceCell, ObjStatutCell } from "./inline-cells";
 import { ObjectifActions } from "./objectif-actions";
 import { ObjectifDialog } from "./objectif-dialog";
 
@@ -68,7 +68,7 @@ export default async function ObjectifsPage() {
       .order("ordre_affichage", { ascending: true }),
     supabase
       .from("indicateurs")
-      .select("id, nom, unite")
+      .select("id, nom, unite, cible, sens")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("nom", { ascending: true }),
@@ -77,7 +77,6 @@ export default async function ObjectifsPage() {
   const items = objectifs ?? [];
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
-  const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
 
   // Engagements de la politique qualité (§6.2), pour la matrice de couverture.
   const { data: engagements } = await supabase
@@ -87,53 +86,23 @@ export default async function ObjectifsPage() {
     .is("deleted_at", null)
     .order("ordre", { ascending: true });
   const engagementOptions = engagements ?? [];
+  const engagementById = new Map(engagementOptions.map((e) => [e.id, e.libelle]));
 
-  // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
-  // indicateurs rattachés à chaque objectif).
+  // Mesure de chaque objectif via ses indicateurs liés (source unique partagée
+  // avec le dashboard, la fiche processus et la revue de direction).
   const objIds = items.map((o) => o.id);
-  const indicateurIdsByObjectif = new Map<string, string[]>();
-  if (objIds.length) {
-    const { data: liens } = await supabase
-      .from("objectif_indicateurs")
-      .select("objectif_id, indicateur_id")
-      .eq("tenant_id", tid)
-      .in("objectif_id", objIds);
-    for (const l of liens ?? []) {
-      const list = indicateurIdsByObjectif.get(l.objectif_id) ?? [];
-      list.push(l.indicateur_id);
-      indicateurIdsByObjectif.set(l.objectif_id, list);
-    }
-  }
-
-  // Dernière valeur mesurée de tous les indicateurs rattachés à un objectif.
-  const linkedIndIds = [...new Set([...indicateurIdsByObjectif.values()].flat())];
-  const lastVal = new Map<string, number>();
-  if (linkedIndIds.length) {
-    const { data: valeurs } = await supabase
-      .from("indicateurs_valeurs")
-      .select("indicateur_id, valeur, date_mesure")
-      .in("indicateur_id", linkedIndIds)
-      .order("date_mesure", { ascending: false });
-    for (const v of valeurs ?? []) {
-      if (!lastVal.has(v.indicateur_id)) lastVal.set(v.indicateur_id, Number(v.valeur));
-    }
-  }
-
+  const mesures = await chargerMesuresObjectifs(supabase, tid, objIds);
   const withProgress = items.map((o) => {
-    const liens = indicateurIdsByObjectif.get(o.id) ?? [];
-    const indicateursLies = liens
-      .map((id) => indicateurById.get(id))
-      .filter((i): i is { id: string; nom: string; unite: string | null } => Boolean(i))
-      .map((i) => ({ ...i, derniere: lastVal.get(i.id) ?? null }));
-    // Si un seul indicateur pilote l'objectif, sa dernière valeur prime sur la
-    // saisie manuelle (comportement historique conservé).
-    const valeurEffective =
-      o.indicateur_id && lastVal.has(o.indicateur_id)
-        ? (lastVal.get(o.indicateur_id) ?? null)
-        : o.valeur_actuelle;
-    const pct = objectifProgress(valeurEffective, o.valeur_cible, o.sens);
-    const atteint = o.statut === "atteint" || (pct !== null && pct >= 100);
-    return { ...o, pct, atteint, valeurEffective, indicateursLies };
+    const m = mesures.get(o.id) ?? mesureVide();
+    // Atteint si la direction l'a acté, ou si tous ses indicateurs atteignent leur cible.
+    const atteint = o.statut === "atteint" || m.indicateursAtteints;
+    return {
+      ...o,
+      indicateursLies: m.indicateurs,
+      linkedIds: m.indicateurs.map((i) => i.id),
+      pctMoyen: m.pctMoyen,
+      atteint,
+    };
   });
   const total = withProgress.length;
   const atteints = withProgress.filter((o) => o.atteint).length;
@@ -284,7 +253,7 @@ export default async function ObjectifsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Objectif</TableHead>
-                        <TableHead className="w-56">Progression</TableHead>
+                        <TableHead className="w-[44%]">Indicateurs & mesure</TableHead>
                         <TableHead>Échéance</TableHead>
                         <TableHead>Statut</TableHead>
                         <TableHead className="w-12" />
@@ -294,77 +263,72 @@ export default async function ObjectifsPage() {
                       {g.objs.map((o) => (
                         <Fragment key={o.id}>
                           <TableRow>
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium align-top">
                               {o.intitule}
-                              {o.indicateursLies.length > 0 ? (
-                                <span className="mt-0.5 flex flex-col gap-0.5">
-                                  {o.indicateursLies.map((ind) => (
-                                    <Link
-                                      key={ind.id}
-                                      href={`/indicateurs/${ind.id}?from=/strategie/objectifs`}
-                                      className="block text-primary text-xs hover:underline"
-                                    >
-                                      ↳ {ind.nom}
-                                      {ind.derniere !== null ? (
-                                        <span className="text-muted-foreground">
-                                          {" "}
-                                          : {ind.derniere}
-                                          {ind.unite ? ` ${ind.unite}` : ""}
-                                        </span>
-                                      ) : null}
-                                    </Link>
-                                  ))}
+                              {o.engagement_id && engagementById.has(o.engagement_id) ? (
+                                <span className="mt-0.5 block text-xs text-primary">
+                                  ↳ Engagement : {engagementById.get(o.engagement_id)}
                                 </span>
-                              ) : (
-                                <span className="mt-0.5 block text-status-pa text-xs">
-                                  Aucun indicateur de mesure
+                              ) : null}
+                              {o.pctMoyen !== null ? (
+                                <span className="mt-0.5 block text-muted-foreground text-xs">
+                                  Progression globale : {o.pctMoyen}%
                                 </span>
-                              )}
+                              ) : null}
                             </TableCell>
-                            <TableCell>
-                              {o.valeur_cible !== null ? (
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex items-center justify-between gap-2 text-xs">
-                                    <span className="flex items-center gap-1">
-                                      {o.indicateur_id ? (
-                                        <span className="font-medium">
-                                          {o.valeurEffective ?? "-"}
+                            <TableCell className="align-top">
+                              {o.indicateursLies.length > 0 ? (
+                                <div className="flex flex-col gap-2">
+                                  {o.indicateursLies.map((ind) => (
+                                    <div key={ind.id} className="flex flex-col gap-0.5">
+                                      <div className="flex items-center justify-between gap-2 text-xs">
+                                        <Link
+                                          href={`/indicateurs/${ind.id}?from=/strategie/objectifs`}
+                                          className="text-primary hover:underline"
+                                        >
+                                          {ind.nom}
+                                        </Link>
+                                        <span className="flex shrink-0 items-center gap-1.5">
+                                          <span
+                                            className={
+                                              ind.atteint
+                                                ? "font-medium text-status-conforme"
+                                                : "font-medium"
+                                            }
+                                          >
+                                            {ind.derniere ?? "-"}
+                                            {ind.unite ? ` ${ind.unite}` : ""}
+                                          </span>
+                                          {ind.cible !== null ? (
+                                            <span className="text-muted-foreground">
+                                              / {ind.cible}
+                                              {ind.unite ? ` ${ind.unite}` : ""}
+                                            </span>
+                                          ) : null}
+                                          {ind.pct !== null ? (
+                                            <span className="font-medium">{ind.pct}%</span>
+                                          ) : null}
                                         </span>
+                                      </div>
+                                      {ind.pct !== null ? (
+                                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                          <div
+                                            className={`h-full rounded-full ${progressClass(ind.pct)}`}
+                                            style={{ width: `${ind.pct}%` }}
+                                          />
+                                        </div>
                                       ) : (
-                                        <ObjValeurActuelleCell
-                                          id={o.id}
-                                          value={o.valeur_actuelle}
-                                          unite={o.unite}
-                                        />
+                                        <span className="text-muted-foreground text-xs">
+                                          Pas encore de valeur mesurée
+                                        </span>
                                       )}
-                                      <span className="text-muted-foreground">
-                                        / {o.valeur_cible} {o.unite ?? ""}
-                                      </span>
-                                    </span>
-                                    {o.pct !== null ? (
-                                      <span className="font-medium">{o.pct}%</span>
-                                    ) : null}
-                                  </div>
-                                  {o.pct !== null ? (
-                                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                                      <div
-                                        className={`h-full rounded-full ${progressClass(o.pct)}`}
-                                        style={{ width: `${o.pct}%` }}
-                                      />
                                     </div>
-                                  ) : null}
+                                  ))}
                                 </div>
                               ) : (
-                                <div className="flex flex-col gap-0.5 text-xs">
-                                  {o.cible_chiffree ? (
-                                    <span className="text-muted-foreground">
-                                      Cible : {o.cible_chiffree}
-                                    </span>
-                                  ) : null}
-                                  <span className="text-status-pa">
-                                    À chiffrer · ouvrez l'objectif pour définir la cible
-                                  </span>
-                                </div>
+                                <span className="block text-status-pa text-xs">
+                                  Aucun indicateur de mesure · ouvrez l'objectif pour en rattacher
+                                </span>
                               )}
                             </TableCell>
                             <TableCell>
@@ -380,7 +344,7 @@ export default async function ObjectifsPage() {
                                   processusOptions={processusOptions}
                                   indicateurOptions={indicateurOptions}
                                   engagementOptions={engagementOptions}
-                                  linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
+                                  linkedIndicateurIds={o.linkedIds}
                                 />
                                 <SupprimerButton
                                   action={deleteObjectifAction}
