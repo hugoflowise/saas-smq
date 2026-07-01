@@ -39,6 +39,7 @@ export default async function FormulairePrestationPage() {
       <PageHeader
         title="Personnaliser le formulaire « Suivi de prestation »"
         description="Adaptez les questions à votre organisation. Les questions essentielles (🔒) alimentent vos indicateurs : vous pouvez les reformuler et les réordonner, mais pas les supprimer."
+        help="Vos modifications créent une nouvelle version du formulaire, appliquée aux prochaines réponses (les réponses déjà enregistrées ne changent pas). Ajoutez, renommez, réordonnez ou masquez des questions ; les questions verrouillées (🔒) restent car elles nourrissent la satisfaction, le NPS et l'analyse de l'écoute client. Le lien partagé aux BM et le formulaire hors ligne reprennent automatiquement la dernière version."
       >
         <span className="text-muted-foreground text-sm">
           {version ? `Version personnalisée n°${version}` : "Modèle standard"}
