@@ -363,6 +363,8 @@ export default async function DashboardPage() {
       <PageHeader
         title="Tableau de bord"
         description="Vue d'ensemble du Système de Management de la Qualité."
+        isoClause="ISO 9001 §9.1"
+        help="Cette page réunit les indicateurs clés de votre SMQ : conformité, objectifs, indicateurs de performance, non-conformités et réclamations, actions, audits et échéances à venir. Chaque tuile renvoie au module concerné pour agir. C'est aussi le point de départ de la revue de direction (§9.3). Tant que la mise en route n'est pas terminée, un bandeau vous guide étape par étape."
       />
 
       {onboarding.complete ? null : (

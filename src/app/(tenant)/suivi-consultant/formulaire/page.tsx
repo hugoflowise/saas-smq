@@ -39,6 +39,7 @@ export default async function FormulaireConsultantPage() {
       <PageHeader
         title="Personnaliser le formulaire « Suivi consultant »"
         description="Adaptez les questions à votre organisation. Les questions essentielles (🔒) alimentent vos indicateurs : vous pouvez les reformuler et les réordonner, mais pas les supprimer."
+        help="Vos modifications créent une nouvelle version du formulaire, appliquée aux prochaines réponses (les réponses déjà enregistrées ne changent pas). Ajoutez, renommez, réordonnez ou masquez des questions ; les questions verrouillées (🔒) restent car elles nourrissent la satisfaction, le NPS et les indicateurs. Le lien partagé aux consultants et le formulaire hors ligne reprennent automatiquement la dernière version."
       >
         <span className="text-muted-foreground text-sm">
           {version ? `Version personnalisée n°${version}` : "Modèle standard"}
