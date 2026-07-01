@@ -110,7 +110,7 @@ export default async function ProceduresPage() {
       <PageHeader
         title="Procédures"
         description="Documents maîtrisés et modes opératoires."
-        isoClause="ISO 9001 §7.5"
+        concept="documents"
         help="Maîtrise des informations documentées : identification, version, approbation (rédacteur, vérificateur, approbateur) et accessibilité. Enregistrez chaque document à un emplacement unique pour éviter les versions désynchronisées."
       >
         <CreateProcedureDialog processusOptions={processus ?? []} />

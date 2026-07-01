@@ -103,7 +103,7 @@ export default async function EffectifPage() {
       <PageHeader
         title="Effectif & couverture"
         description="Effectif consultant, couverture documentaire et mouvements."
-        isoClause="ISO 9001 §7.1 / §9.1.1"
+        concept="effectif"
         help="Suivi de l'effectif et de la couverture (ordres de mission, plans de prévention, visites médicales) en % des consultants actifs. Saisie manuelle pour démarrer ; un import Boond pourra alimenter ce référentiel ensuite."
       >
         <ConsultantDialog />

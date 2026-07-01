@@ -119,7 +119,7 @@ export default async function ActionsPage({
       <PageHeader
         title="Plan d'actions"
         description="Suivi des actions d'amélioration, correctives et préventives."
-        isoClause="ISO 9001 §10"
+        concept="actions"
         help="Colonne vertébrale du SMQ : toutes les actions convergent ici, quelle que soit leur origine (audit, non-conformité, réclamation, revue, risque…). Une seule liste, filtrable par origine."
       >
         <ViewToggle />

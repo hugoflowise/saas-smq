@@ -58,7 +58,7 @@ export default async function ReunionsPage() {
       <PageHeader
         title="Réunions QHSE"
         description="Préparation, tenue, actions et comptes rendus des réunions qualité."
-        isoClause="ISO 9001 §7.4 / §9.3"
+        concept="reunions"
         help="Centralisez vos réunions QHSE : préparez l'ordre du jour, saisissez discussions et décisions en séance, générez les actions et un compte rendu PDF. Traçabilité complète."
       >
         <ReunionDialog />

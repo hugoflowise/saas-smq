@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/table";
 import { deleteObjectifAction } from "@/lib/actions/registres";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
+import { getNormesActives } from "@/lib/normes-actives";
+import { domaineLabel, objectifsLabel } from "@/lib/normes-libelles";
 import { chargerMesuresObjectifs, mesureVide } from "@/lib/objectifs-mesure";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -33,11 +35,14 @@ function progressClass(pct: number) {
 
 export default async function ObjectifsPage() {
   const ctx = await getTenantContext();
+  const normes = await getNormesActives();
+  const objTitre = objectifsLabel(normes);
+  const domaine = domaineLabel(normes);
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
         <PageHeader
-          title="Objectifs qualité"
+          title={objTitre}
           description="Objectifs SMART et leur déclinaison par fonction."
         />
         <EmptyState
@@ -165,10 +170,10 @@ export default async function ObjectifsPage() {
     <div className="w-full">
       <ModuleTabs tabs={PERFORMANCE_TABS} />
       <PageHeader
-        title="Objectifs qualité"
+        title={objTitre}
         description="Objectifs SMART et leur déclinaison par fonction."
-        isoClause="ISO 9001 §6.2"
-        help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
+        concept="objectifs"
+        help={`Les objectifs ${domaine} doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction.`}
       >
         <ObjectifDialog
           processusOptions={processusOptions}

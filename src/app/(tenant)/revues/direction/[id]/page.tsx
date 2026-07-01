@@ -96,7 +96,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
         description={`${STATUT_LABELS[revue.statut as keyof typeof STATUT_LABELS] ?? revue.statut}${
           revue.date_realisation ? ` · ${formatDate(revue.date_realisation)}` : ""
         }`}
-        isoClause="ISO 9001 §9.3"
+        concept="revue"
         help="Structurez les éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue. Les données de performance peuvent être pré-remplies depuis le pilotage."
       >
         <DownloadPdfButton printHref={`/print/revue/${id}`} label="Compte rendu (PDF)" />

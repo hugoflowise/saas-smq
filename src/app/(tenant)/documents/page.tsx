@@ -287,7 +287,7 @@ export default async function DocumentsPage({
       <PageHeader
         title="Liste maîtresse des documents"
         description="Tous les documents du système qualité, à jour."
-        isoClause="ISO 9001 §7.5"
+        concept="documents"
         help="Tenez à jour la liste de vos informations documentées : codification, version en vigueur, statut, qui approuve, et date de révision prévue. La politique et les procédures rédigées dans l'application y figurent automatiquement ; ajoutez ici vos autres documents (manuel, instructions, enregistrements, documents externes)."
       >
         <div className="flex flex-wrap items-center gap-2">

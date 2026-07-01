@@ -134,7 +134,7 @@ export default async function SuiviConsultantPage() {
       <PageHeader
         title="Suivi consultant"
         description="Points de suivi terrain remplis par les consultants (QSSE, ODM, bien-être, satisfaction)."
-        isoClause="ISO 9001 §7.1 / §9.1"
+        concept="suiviConsultant"
         help="Lien à partager aux consultants (mail, QR code) : ils remplissent leur point de suivi sans connexion. Les réponses alimentent les KPIs QSSE (droit de retrait, plan de prévention, point de rassemblement, EPI), la cohérence à l'Ordre De Mission, la satisfaction et l'eNPS, et signalent les alertes santé/RPS. eNPS = % promoteurs (9-10) − % détracteurs (0-6)."
       >
         {ctx.role !== "auditeur" ? (
