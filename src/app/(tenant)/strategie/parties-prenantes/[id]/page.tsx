@@ -3,7 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { deletePartieAction } from "@/lib/actions/parties-prenantes";
 import {
   criticiteClass,
   criticiteResiduelle,
@@ -79,6 +81,13 @@ export default async function PartieDetailPage({ params }: { params: Promise<{ i
         }`}
       >
         <PartieDialog partie={partie} />
+        <SupprimerButton
+          action={deletePartieAction}
+          id={partie.id}
+          libelle={`la partie prenante « ${partie.nom} »`}
+          successText="Partie prenante supprimée."
+          redirectTo="/strategie/parties-prenantes"
+        />
       </PageHeader>
 
       <Card className="mb-6">

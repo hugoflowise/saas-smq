@@ -1,0 +1,523 @@
+- generic [active] [ref=f18e1]:
+  - generic [ref=f18e2]:
+    - complementary [ref=f18e3]:
+      - img "Flowise" [ref=f18e5]
+      - navigation [ref=f18e7]:
+        - generic [ref=f18e8]:
+          - paragraph [ref=f18e9]: Pilotage
+          - list [ref=f18e10]:
+            - listitem [ref=f18e11]:
+              - link "Tableau de bord" [ref=f18e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f18e13]
+                - generic [ref=f18e18]: Tableau de bord
+            - listitem [ref=f18e19]:
+              - link "Mise en route" [ref=f18e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f18e21]
+                - generic [ref=f18e26]: Mise en route
+            - listitem [ref=f18e27]:
+              - link "Calendrier qualité" [ref=f18e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f18e29]
+                - generic [ref=f18e31]: Calendrier qualité
+            - listitem [ref=f18e32]:
+              - link "Réunions QHSE" [ref=f18e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f18e34]
+                - generic [ref=f18e37]: Réunions QHSE
+            - listitem [ref=f18e38]:
+              - link "Mode audit" [ref=f18e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f18e40]
+                - generic [ref=f18e43]: Mode audit
+            - listitem [ref=f18e44]:
+              - link "Effectif & couverture" [ref=f18e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f18e46]
+                - generic [ref=f18e50]: Effectif & couverture
+            - listitem [ref=f18e51]:
+              - link "Suivi consultant" [ref=f18e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f18e53]
+                - generic [ref=f18e56]: Suivi consultant
+        - generic [ref=f18e57]:
+          - paragraph [ref=f18e58]: Stratégie
+          - list [ref=f18e59]:
+            - listitem [ref=f18e60]:
+              - link "Politique qualité" [ref=f18e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f18e62]
+                - generic [ref=f18e65]: Politique qualité
+            - listitem [ref=f18e66]:
+              - link "Contexte" [ref=f18e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f18e68]
+                - generic [ref=f18e70]: Contexte
+            - listitem [ref=f18e71]:
+              - link "Domaine d'application" [ref=f18e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f18e73]
+                - generic [ref=f18e75]: Domaine d'application
+            - listitem [ref=f18e76]:
+              - link "Parties prenantes" [ref=f18e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f18e78]
+                - generic [ref=f18e83]: Parties prenantes
+            - listitem [ref=f18e84]:
+              - link "Risques & opportunités" [ref=f18e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f18e86]
+                - generic [ref=f18e89]: Risques & opportunités
+            - listitem [ref=f18e90]:
+              - link "Modifications du SMQ" [ref=f18e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f18e92]
+                - generic [ref=f18e100]: Modifications du SMQ
+        - generic [ref=f18e101]:
+          - paragraph [ref=f18e102]: Organisation
+          - list [ref=f18e103]:
+            - listitem [ref=f18e104]:
+              - link "Processus" [ref=f18e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f18e106]
+                - generic [ref=f18e111]: Processus
+            - listitem [ref=f18e112]:
+              - link "Documentation" [ref=f18e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f18e114]
+                - generic [ref=f18e118]: Documentation
+            - listitem [ref=f18e119]:
+              - link "Communications" [ref=f18e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f18e121]
+                - generic [ref=f18e124]: Communications
+        - generic [ref=f18e125]:
+          - paragraph [ref=f18e126]: Amélioration
+          - list [ref=f18e127]:
+            - listitem [ref=f18e128]:
+              - link "Plan d'actions" [ref=f18e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f18e130]
+                - generic [ref=f18e133]: Plan d'actions
+            - listitem [ref=f18e134]:
+              - link "Non-conformités" [ref=f18e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f18e136]
+                - generic [ref=f18e138]: Non-conformités
+            - listitem [ref=f18e139]:
+              - link "Remontées" [ref=f18e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f18e141]
+                - generic [ref=f18e143]: Remontées
+        - generic [ref=f18e144]:
+          - paragraph [ref=f18e145]: Évaluation
+          - list [ref=f18e146]:
+            - listitem [ref=f18e147]:
+              - link "Objectifs & indicateurs" [ref=f18e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f18e149]
+                - generic [ref=f18e153]: Objectifs & indicateurs
+            - listitem [ref=f18e154]:
+              - link "Audits" [ref=f18e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f18e156]
+                - generic [ref=f18e159]: Audits
+            - listitem [ref=f18e160]:
+              - link "Auto-diagnostic" [ref=f18e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f18e162]
+                - generic [ref=f18e166]: Auto-diagnostic
+            - listitem [ref=f18e167]:
+              - link "Veille réglementaire" [ref=f18e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f18e169]
+                - generic [ref=f18e173]: Veille réglementaire
+            - listitem [ref=f18e174]:
+              - link "Revues de direction" [ref=f18e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f18e176]
+                - generic [ref=f18e180]: Revues de direction
+        - generic [ref=f18e181]:
+          - paragraph [ref=f18e182]: Parties externes
+          - list [ref=f18e183]:
+            - listitem [ref=f18e184]:
+              - link "Suivi de prestation" [ref=f18e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f18e186]
+                - generic [ref=f18e189]: Suivi de prestation
+            - listitem [ref=f18e190]:
+              - link "Fournisseurs" [ref=f18e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f18e192]
+                - generic [ref=f18e197]: Fournisseurs
+        - generic [ref=f18e198]:
+          - paragraph [ref=f18e199]: Configuration
+          - list [ref=f18e200]:
+            - listitem [ref=f18e201]:
+              - link "Utilisateurs" [ref=f18e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f18e203]
+                - generic [ref=f18e215]: Utilisateurs
+            - listitem [ref=f18e216]:
+              - link "Main courante" [ref=f18e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f18e218]
+                - generic [ref=f18e222]: Main courante
+            - listitem [ref=f18e223]:
+              - link "Paramètres" [ref=f18e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f18e225]
+                - generic [ref=f18e228]: Paramètres
+            - listitem [ref=f18e229]:
+              - link "Corbeille" [ref=f18e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f18e231]
+                - generic [ref=f18e234]: Corbeille
+        - generic [ref=f18e235]:
+          - paragraph [ref=f18e236]: Admin Flowise
+          - list [ref=f18e237]:
+            - listitem [ref=f18e238]:
+              - link "Clients" [ref=f18e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f18e240]
+                - generic [ref=f18e244]: Clients
+            - listitem [ref=f18e245]:
+              - link "Signalements & suggestions" [ref=f18e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f18e247]
+                - generic [ref=f18e250]: Signalements & suggestions
+    - generic [ref=f18e251]:
+      - banner [ref=f18e252]:
+        - generic [ref=f18e253]:
+          - button "Acme Inge" [ref=f18e254]:
+            - img
+            - generic [ref=f18e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f18e256]:
+            - img
+            - generic [ref=f18e257]: Affichage
+        - generic [ref=f18e258]:
+          - button "Signaler ou suggérer" [ref=f18e259]:
+            - img
+            - generic [ref=f18e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f18e261]:
+            - img
+            - generic [ref=f18e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f18e263]:
+            - generic [ref=f18e264]: hu
+            - generic [ref=f18e265]: hugo.piovesan@flowise.fr
+      - main [ref=f18e266]:
+        - generic [ref=f18e267]:
+          - generic [ref=f18e268]:
+            - generic [ref=f18e269]:
+              - link "Objectifs" [ref=f18e270] [cursor=pointer]:
+                - /url: /strategie/objectifs
+              - link "Indicateurs" [ref=f18e271] [cursor=pointer]:
+                - /url: /indicateurs
+            - generic [ref=f18e272]:
+              - generic [ref=f18e273]:
+                - generic [ref=f18e274]:
+                  - generic [ref=f18e275]:
+                    - heading "Indicateurs / KPI" [level=1] [ref=f18e276]
+                    - generic [ref=f18e277]: ISO 9001 §9.1.1
+                  - paragraph [ref=f18e278]: Tableau de bord des indicateurs de performance.
+                - button "Nouvel indicateur" [ref=f18e280]
+              - group [ref=f18e281]:
+                - generic "Aide & exigence Afficher" [ref=f18e282] [cursor=pointer]:
+                  - img [ref=f18e283]
+                  - generic [ref=f18e285]: Aide & exigence
+                  - generic [ref=f18e286]: Afficher
+            - generic [ref=f18e287]:
+              - img [ref=f18e288]
+              - generic [ref=f18e290]:
+                - generic [ref=f18e291]: 5 indicateurs non rattachés à un objectif
+                - generic [ref=f18e292]: Un indicateur mesure normalement l'atteinte d'un objectif qualité. Rattachez-le depuis Pilotage → Objectifs (un objectif peut s'appuyer sur plusieurs indicateurs).
+            - generic [ref=f18e293]:
+              - generic [ref=f18e295]:
+                - button "Tableau" [ref=f18e296]:
+                  - img [ref=f18e297]
+                  - text: Tableau
+                - button "Cartes" [ref=f18e299]:
+                  - img [ref=f18e300]
+                  - text: Cartes
+              - generic [ref=f18e305]:
+                - table [ref=f18e308]:
+                  - rowgroup [ref=f18e309]:
+                    - row "Indicateur Processus Objectif Cible août 25 sept. 25 oct. 25 nov. 25 déc. 25 janv. 26 févr. 26 mars 26 avr. 26 mai 26 juin 26 juil. 26" [ref=f18e310]:
+                      - columnheader "Indicateur" [ref=f18e311]
+                      - columnheader "Processus" [ref=f18e312]
+                      - columnheader "Objectif" [ref=f18e313]
+                      - columnheader "Cible" [ref=f18e314]
+                      - columnheader "août 25" [ref=f18e315]
+                      - columnheader "sept. 25" [ref=f18e316]
+                      - columnheader "oct. 25" [ref=f18e317]
+                      - columnheader "nov. 25" [ref=f18e318]
+                      - columnheader "déc. 25" [ref=f18e319]
+                      - columnheader "janv. 26" [ref=f18e320]
+                      - columnheader "févr. 26" [ref=f18e321]
+                      - columnheader "mars 26" [ref=f18e322]
+                      - columnheader "avr. 26" [ref=f18e323]
+                      - columnheader "mai 26" [ref=f18e324]
+                      - columnheader "juin 26" [ref=f18e325]
+                      - columnheader "juil. 26" [ref=f18e326]
+                  - rowgroup [ref=f18e327]:
+                    - row "Indicateur sans processus - Améliorer la satisfaction client ≥ 80 % 76" [ref=f18e328]:
+                      - cell "Indicateur sans processus" [ref=f18e329]:
+                        - link "Indicateur sans processus" [ref=f18e330] [cursor=pointer]:
+                          - /url: /indicateurs/f3464dcb-3889-4a94-9b0d-4444ba7865cf
+                      - cell "-" [ref=f18e331]
+                      - cell "Améliorer la satisfaction client" [ref=f18e332]
+                      - cell "≥ 80 %" [ref=f18e333]
+                      - cell [ref=f18e334]
+                      - cell [ref=f18e335]
+                      - cell [ref=f18e336]
+                      - cell [ref=f18e337]
+                      - cell [ref=f18e338]
+                      - cell [ref=f18e339]
+                      - cell [ref=f18e340]
+                      - cell [ref=f18e341]
+                      - cell [ref=f18e342]
+                      - cell [ref=f18e343]
+                      - cell [ref=f18e344]
+                      - cell "76" [ref=f18e345]
+                    - row "Taux de satisfaction client - Améliorer la satisfaction client ≥ 95 % 88" [ref=f18e346]:
+                      - cell "Taux de satisfaction client" [ref=f18e347]:
+                        - link "Taux de satisfaction client" [ref=f18e348] [cursor=pointer]:
+                          - /url: /indicateurs/6f8ba265-e6eb-4d10-982d-9ca79db81828
+                      - cell "-" [ref=f18e349]
+                      - cell "Améliorer la satisfaction client" [ref=f18e350]
+                      - cell "≥ 95 %" [ref=f18e351]
+                      - cell [ref=f18e352]
+                      - cell [ref=f18e353]
+                      - cell [ref=f18e354]
+                      - cell [ref=f18e355]
+                      - cell [ref=f18e356]
+                      - cell [ref=f18e357]
+                      - cell [ref=f18e358]
+                      - cell [ref=f18e359]
+                      - cell [ref=f18e360]
+                      - cell [ref=f18e361]
+                      - cell "88" [ref=f18e362]
+                      - cell [ref=f18e363]
+                    - row "Taux de satisfaction collaborateurs Piloter le système de management de la qualité - ≥ 80 % 78" [ref=f18e364]:
+                      - cell "Taux de satisfaction collaborateurs" [ref=f18e365]:
+                        - link "Taux de satisfaction collaborateurs" [ref=f18e366] [cursor=pointer]:
+                          - /url: /indicateurs/4a1eb6bb-a615-4456-b80a-f26e7aea1333
+                      - cell "Piloter le système de management de la qualité" [ref=f18e367]
+                      - cell "-" [ref=f18e368]
+                      - cell "≥ 80 %" [ref=f18e369]
+                      - cell [ref=f18e370]
+                      - cell [ref=f18e371]
+                      - cell [ref=f18e372]
+                      - cell [ref=f18e373]
+                      - cell [ref=f18e374]
+                      - cell [ref=f18e375]
+                      - cell [ref=f18e376]
+                      - cell [ref=f18e377]
+                      - cell [ref=f18e378]
+                      - cell [ref=f18e379]
+                      - cell "78" [ref=f18e380]
+                      - cell [ref=f18e381]
+                    - row "Taux de traitement des actions SMQ Piloter le système de management de la qualité - ≥ 80 % 82" [ref=f18e382]:
+                      - cell "Taux de traitement des actions SMQ" [ref=f18e383]:
+                        - link "Taux de traitement des actions SMQ" [ref=f18e384] [cursor=pointer]:
+                          - /url: /indicateurs/bc0d8376-6b10-4082-961f-c9984c351ebe
+                      - cell "Piloter le système de management de la qualité" [ref=f18e385]
+                      - cell "-" [ref=f18e386]
+                      - cell "≥ 80 %" [ref=f18e387]
+                      - cell [ref=f18e388]
+                      - cell [ref=f18e389]
+                      - cell [ref=f18e390]
+                      - cell [ref=f18e391]
+                      - cell [ref=f18e392]
+                      - cell [ref=f18e393]
+                      - cell [ref=f18e394]
+                      - cell [ref=f18e395]
+                      - cell [ref=f18e396]
+                      - cell [ref=f18e397]
+                      - cell "82" [ref=f18e398]
+                      - cell [ref=f18e399]
+                    - row "Temps moyen d'IC Mise en mission - ≥ 2 jours 9" [ref=f18e400]:
+                      - cell "Temps moyen d'IC" [ref=f18e401]:
+                        - link "Temps moyen d'IC" [ref=f18e402] [cursor=pointer]:
+                          - /url: /indicateurs/aab163e4-b20d-4b5a-b6ba-2bf752af8f98
+                      - cell "Mise en mission" [ref=f18e403]
+                      - cell "-" [ref=f18e404]
+                      - cell "≥ 2 jours" [ref=f18e405]
+                      - cell [ref=f18e406]
+                      - cell [ref=f18e407]
+                      - cell [ref=f18e408]
+                      - cell [ref=f18e409]
+                      - cell [ref=f18e410]
+                      - cell [ref=f18e411]
+                      - cell [ref=f18e412]
+                      - cell [ref=f18e413]
+                      - cell [ref=f18e414]
+                      - cell [ref=f18e415]
+                      - cell "9" [ref=f18e416]
+                      - cell [ref=f18e417]
+                    - row "Tenue des revues de processus Piloter le système de management de la qualité - ≥ 100 %" [ref=f18e418]:
+                      - cell "Tenue des revues de processus" [ref=f18e419]:
+                        - link "Tenue des revues de processus" [ref=f18e420] [cursor=pointer]:
+                          - /url: /indicateurs/9a17bf40-5d04-4359-ba91-a434990c1a09
+                      - cell "Piloter le système de management de la qualité" [ref=f18e421]
+                      - cell "-" [ref=f18e422]
+                      - cell "≥ 100 %" [ref=f18e423]
+                      - cell [ref=f18e424]
+                      - cell [ref=f18e425]
+                      - cell [ref=f18e426]
+                      - cell [ref=f18e427]
+                      - cell [ref=f18e428]
+                      - cell [ref=f18e429]
+                      - cell [ref=f18e430]
+                      - cell [ref=f18e431]
+                      - cell [ref=f18e432]
+                      - cell [ref=f18e433]
+                      - cell [ref=f18e434]
+                      - cell [ref=f18e435]
+                    - row "Tests effectués Processus test - ≥ 50 40" [ref=f18e436]:
+                      - cell "Tests effectués" [ref=f18e437]:
+                        - link "Tests effectués" [ref=f18e438] [cursor=pointer]:
+                          - /url: /indicateurs/800a4e7b-0925-4f14-b4ef-89f8eb10324c
+                      - cell "Processus test" [ref=f18e439]
+                      - cell "-" [ref=f18e440]
+                      - cell "≥ 50" [ref=f18e441]
+                      - cell [ref=f18e442]
+                      - cell [ref=f18e443]
+                      - cell [ref=f18e444]
+                      - cell [ref=f18e445]
+                      - cell [ref=f18e446]
+                      - cell [ref=f18e447]
+                      - cell [ref=f18e448]
+                      - cell [ref=f18e449]
+                      - cell [ref=f18e450]
+                      - cell [ref=f18e451]
+                      - cell "40" [ref=f18e452]
+                      - cell [ref=f18e453]
+                - generic [ref=f18e454]:
+                  - generic [ref=f18e455]:
+                    - generic [ref=f18e456]:
+                      - link "Indicateur sans processus" [ref=f18e457] [cursor=pointer]:
+                        - /url: /indicateurs/f3464dcb-3889-4a94-9b0d-4444ba7865cf
+                      - generic [ref=f18e458]: "Cible : ≥ 80 %"
+                    - application [ref=f18e462]:
+                      - generic [ref=f18e475]:
+                        - generic [ref=f18e478]: 01/07/2026
+                        - generic [ref=f18e479]:
+                          - generic [ref=f18e481]: 0%
+                          - generic [ref=f18e483]: 20%
+                          - generic [ref=f18e485]: 40%
+                          - generic [ref=f18e487]: 60%
+                          - generic [ref=f18e489]: 80%
+                        - generic [ref=f18e490]: Cible 80
+                  - generic [ref=f18e491]:
+                    - generic [ref=f18e492]:
+                      - link "Taux de satisfaction client" [ref=f18e493] [cursor=pointer]:
+                        - /url: /indicateurs/6f8ba265-e6eb-4d10-982d-9ca79db81828
+                      - generic [ref=f18e494]: "Cible : ≥ 95 %"
+                    - application [ref=f18e498]:
+                      - generic [ref=f18e518]:
+                        - generic [ref=f18e519]:
+                          - generic [ref=f18e521]: 18/06/2026
+                          - generic [ref=f18e523]: 19/06/2026
+                        - generic [ref=f18e524]:
+                          - generic [ref=f18e526]: 0%
+                          - generic [ref=f18e528]: 25%
+                          - generic [ref=f18e530]: 50%
+                          - generic [ref=f18e532]: 75%
+                          - generic [ref=f18e534]: 100%
+                        - generic [ref=f18e535]: Cible 95
+                  - generic [ref=f18e536]:
+                    - generic [ref=f18e537]:
+                      - link "Taux de satisfaction collaborateurs" [ref=f18e538] [cursor=pointer]:
+                        - /url: /indicateurs/4a1eb6bb-a615-4456-b80a-f26e7aea1333
+                      - generic [ref=f18e539]: "Cible : ≥ 80 %"
+                    - application [ref=f18e543]:
+                      - generic [ref=f18e563]:
+                        - generic [ref=f18e564]:
+                          - generic [ref=f18e566]: 24/06/2026
+                          - generic [ref=f18e568]: 28/06/2026
+                        - generic [ref=f18e569]:
+                          - generic [ref=f18e571]: 0%
+                          - generic [ref=f18e573]: 20%
+                          - generic [ref=f18e575]: 40%
+                          - generic [ref=f18e577]: 60%
+                          - generic [ref=f18e579]: 80%
+                        - generic [ref=f18e580]: Cible 80
+                  - generic [ref=f18e581]:
+                    - generic [ref=f18e582]:
+                      - link "Taux de traitement des actions SMQ" [ref=f18e583] [cursor=pointer]:
+                        - /url: /indicateurs/bc0d8376-6b10-4082-961f-c9984c351ebe
+                      - generic [ref=f18e584]: "Cible : ≥ 80 %"
+                    - application [ref=f18e588]:
+                      - generic [ref=f18e601]:
+                        - generic [ref=f18e604]: 27/06/2026
+                        - generic [ref=f18e605]:
+                          - generic [ref=f18e607]: 0%
+                          - generic [ref=f18e609]: 25%
+                          - generic [ref=f18e611]: 50%
+                          - generic [ref=f18e613]: 75%
+                          - generic [ref=f18e615]: 100%
+                        - generic [ref=f18e616]: Cible 80
+                  - generic [ref=f18e617]:
+                    - generic [ref=f18e618]:
+                      - link "Temps moyen d'IC" [ref=f18e619] [cursor=pointer]:
+                        - /url: /indicateurs/aab163e4-b20d-4b5a-b6ba-2bf752af8f98
+                      - generic [ref=f18e620]: "Cible : ≥ 2 jours"
+                    - application [ref=f18e624]:
+                      - generic [ref=f18e637]:
+                        - generic [ref=f18e640]: 18/06/2026
+                        - generic [ref=f18e641]:
+                          - generic [ref=f18e643]: 0jours
+                          - generic [ref=f18e645]: 3jours
+                          - generic [ref=f18e647]: 6jours
+                          - generic [ref=f18e649]: 9jours
+                          - generic [ref=f18e651]: 12jours
+                        - generic [ref=f18e652]: Cible 2
+                  - generic [ref=f18e653]:
+                    - generic [ref=f18e654]:
+                      - link "Tests effectués" [ref=f18e655] [cursor=pointer]:
+                        - /url: /indicateurs/800a4e7b-0925-4f14-b4ef-89f8eb10324c
+                      - generic [ref=f18e656]: "Cible : ≥ 50"
+                    - application [ref=f18e660]:
+                      - generic [ref=f18e680]:
+                        - generic [ref=f18e681]:
+                          - generic [ref=f18e683]: 16/06/2026
+                          - generic [ref=f18e685]: 18/06/2026
+                        - generic [ref=f18e686]:
+                          - generic [ref=f18e688]: "0"
+                          - generic [ref=f18e690]: "20"
+                          - generic [ref=f18e692]: "40"
+                          - generic [ref=f18e694]: "60"
+                          - generic [ref=f18e696]: "80"
+                        - generic [ref=f18e697]: Cible 50
+          - generic [ref=f18e698]:
+            - link "flowise." [ref=f18e699] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f18e700] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f18e701] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f18e702] [cursor=pointer]:
+              - /url: /confidentialite
+    - generic [ref=f18e703]:
+      - generic [ref=f18e704]:
+        - generic [ref=f18e705]:
+          - img [ref=f18e706]
+          - text: ToDo
+        - generic [ref=f18e709]: "1"
+        - img [ref=f18e711]
+      - generic [ref=f18e712]:
+        - textbox "Ajouter une tâche…" [ref=f18e713]
+        - button "Ajouter" [disabled] [ref=f18e714]:
+          - img [ref=f18e715]
+      - list [ref=f18e716]:
+        - listitem [ref=f18e717]:
+          - button "Cocher" [ref=f18e718]
+          - generic [ref=f18e719]: Test
+          - button "Supprimer" [ref=f18e720]:
+            - img [ref=f18e721]
+  - region "Notifications alt+T"
+  - alert [ref=f18e724]
+  - generic [ref=f18e725]: 16/06/2026

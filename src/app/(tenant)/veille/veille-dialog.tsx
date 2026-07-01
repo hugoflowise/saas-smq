@@ -1,8 +1,7 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Pencil } from "lucide-react";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,25 +42,9 @@ export function VeilleDialog({
   veille?: VeilleRow;
   trigger?: React.ReactElement;
 }) {
-  const router = useRouter();
   const isEdit = Boolean(veille);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
-
-  async function handleDelete() {
-    if (!veille) return;
-    if (!confirm(`Supprimer le texte « ${veille.intitule} » ? Il sera mis à la corbeille.`)) {
-      return;
-    }
-    const r = await deleteVeilleAction(veille.id);
-    if (r.ok) {
-      toast.success("Texte supprimé.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(r.error);
-    }
-  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -201,16 +184,13 @@ export function VeilleDialog({
               {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer"}
             </Button>
             {isEdit && veille ? (
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={pending}
-                onClick={handleDelete}
-                className="gap-1.5 text-muted-foreground text-sm hover:text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Supprimer
-              </Button>
+              <SupprimerButton
+                action={deleteVeilleAction}
+                id={veille.id}
+                libelle={`le texte « ${veille.intitule} »`}
+                successText="Texte supprimé."
+                onSuccess={() => setOpen(false)}
+              />
             ) : null}
           </div>
         </form>

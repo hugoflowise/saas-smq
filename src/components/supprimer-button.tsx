@@ -35,6 +35,7 @@ export function SupprimerButton({
   iconOnly = false,
   variant = "ghost",
   className,
+  onSuccess,
 }: {
   action: (id: string) => Promise<ActionResult>;
   id: string;
@@ -48,6 +49,8 @@ export function SupprimerButton({
   iconOnly?: boolean;
   variant?: "ghost" | "outline" | "destructive";
   className?: string;
+  /** Appelé après une suppression réussie (ex. refermer un dialogue parent). */
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const readOnly = useReadOnly();
@@ -63,6 +66,7 @@ export function SupprimerButton({
     if (r.ok) {
       setOpen(false);
       toast.success(successText);
+      onSuccess?.();
       if (redirectTo) router.push(redirectTo);
       router.refresh();
     } else {
