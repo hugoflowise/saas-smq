@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Pencil, Plus, TriangleAlert, X } from "lucide-react";
+import { Check, Link2, Pencil, Plus, TriangleAlert, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import {
   createEngagementAction,
   deleteEngagementAction,
+  setEngagementObjectifsAction,
   updateEngagementAction,
 } from "@/lib/actions/engagements";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
@@ -26,18 +27,51 @@ export type EngagementCouverture = {
   }[];
 };
 
+export type ObjectifOption = { id: string; intitule: string };
+
 /** Un engagement est « couvert » s'il a ≥ 1 objectif ayant ≥ 1 indicateur de mesure. */
 function estCouvert(e: EngagementCouverture): boolean {
   return e.objectifs.some((o) => o.indicateurs.length > 0);
 }
 
-export function EngagementsCard({ engagements }: { engagements: EngagementCouverture[] }) {
+export function EngagementsCard({
+  engagements,
+  tousObjectifs = [],
+}: {
+  engagements: EngagementCouverture[];
+  tousObjectifs?: ObjectifOption[];
+}) {
   const router = useRouter();
   const readOnly = useReadOnly();
   const [nouveau, setNouveau] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [editLibelle, setEditLibelle] = useState("");
   const [pending, setPending] = useState(false);
+  // Liaison d'objectifs : id de l'engagement en cours d'édition + sélection.
+  const [lierId, setLierId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Set<string>>(new Set());
+
+  function ouvrirLiaison(e: EngagementCouverture) {
+    setLierId(e.id);
+    setSelection(new Set(e.objectifs.map((o) => o.id)));
+  }
+
+  async function enregistrerLiaison() {
+    if (!lierId) return;
+    setPending(true);
+    const r = await setEngagementObjectifsAction({
+      engagementId: lierId,
+      objectifIds: [...selection],
+    });
+    setPending(false);
+    if (r.ok) {
+      setLierId(null);
+      toast.success("Objectifs liés mis à jour.");
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
 
   async function ajouter() {
     if (!nouveau.trim()) return;
@@ -191,6 +225,57 @@ export function EngagementsCard({ engagements }: { engagements: EngagementCouver
                         ))}
                       </ul>
                     )}
+
+                    {/* Liaison des objectifs depuis l'engagement. */}
+                    {!readOnly && lierId === e.id ? (
+                      <div className="mt-2 flex flex-col gap-2 rounded-lg border bg-card p-2">
+                        {tousObjectifs.length === 0 ? (
+                          <p className="text-muted-foreground text-xs">
+                            Aucun objectif à lier. Créez d'abord des objectifs.
+                          </p>
+                        ) : (
+                          <div className="flex max-h-44 flex-col gap-1 overflow-y-auto">
+                            {tousObjectifs.map((o) => (
+                              <label
+                                key={o.id}
+                                className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-muted/50"
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="size-3.5"
+                                  checked={selection.has(o.id)}
+                                  onChange={(ev) =>
+                                    setSelection((prev) => {
+                                      const next = new Set(prev);
+                                      if (ev.target.checked) next.add(o.id);
+                                      else next.delete(o.id);
+                                      return next;
+                                    })
+                                  }
+                                />
+                                {o.intitule}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={enregistrerLiaison} disabled={pending}>
+                            Enregistrer
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setLierId(null)}>
+                            Annuler
+                          </Button>
+                        </div>
+                      </div>
+                    ) : !readOnly ? (
+                      <button
+                        type="button"
+                        onClick={() => ouvrirLiaison(e)}
+                        className="mt-1 inline-flex items-center gap-1 text-primary text-xs hover:underline"
+                      >
+                        <Link2 className="size-3" /> Lier des objectifs
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );

@@ -3,6 +3,7 @@
 import { LayoutGrid, Table as TableIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { KpiChart } from "@/components/kpi-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -24,6 +25,7 @@ export type IndicateurSuivi = {
   objectifs: string[];
   last: { valeur: number; date: string } | null;
   valeursParPeriode: Record<string, number>;
+  serie: { date: string; valeur: number }[];
   lieAObjectif: boolean;
 };
 
@@ -60,54 +62,80 @@ export function IndicateursExplorer({
       </div>
 
       {vue === "tableau" ? (
-        <div className="overflow-x-auto rounded-2xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="sticky left-0 bg-card">Indicateur</TableHead>
-                <TableHead>Processus</TableHead>
-                <TableHead>Objectif</TableHead>
-                <TableHead className="text-right">Cible</TableHead>
-                {periodes.map((p) => (
-                  <TableHead key={p.cle} className="text-right whitespace-nowrap">
-                    {p.label}
-                  </TableHead>
+        <div className="flex flex-col gap-6">
+          <div className="overflow-x-auto rounded-2xl border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="sticky left-0 bg-card">Indicateur</TableHead>
+                  <TableHead>Processus</TableHead>
+                  <TableHead>Objectif</TableHead>
+                  <TableHead className="text-right">Cible</TableHead>
+                  {periodes.map((p) => (
+                    <TableHead key={p.cle} className="text-right whitespace-nowrap">
+                      {p.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {indicateurs.map((ind) => (
+                  <TableRow key={ind.id}>
+                    <TableCell className="sticky left-0 bg-card font-medium">
+                      <Link href={`/indicateurs/${ind.id}`} className="hover:text-primary">
+                        {ind.nom}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {ind.processusNom ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {ind.objectifs.length ? ind.objectifs.join(", ") : "—"}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-right text-sm">
+                      {ind.cible !== null ? cibleAffichee(ind.cible, ind.sens, ind.unite) : "—"}
+                    </TableCell>
+                    {periodes.map((p) => {
+                      const v = ind.valeursParPeriode[p.cle];
+                      const alerte = v !== undefined && horsCible(v, ind.cible, ind.sens);
+                      return (
+                        <TableCell
+                          key={p.cle}
+                          className={`text-right text-sm ${alerte ? "font-medium text-status-nc-mineure" : ""}`}
+                        >
+                          {v !== undefined ? v : ""}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {indicateurs.map((ind) => (
-                <TableRow key={ind.id}>
-                  <TableCell className="sticky left-0 bg-card font-medium">
-                    <Link href={`/indicateurs/${ind.id}`} className="hover:text-primary">
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Graphes d'évolution sous le tableau (un par indicateur ayant des valeurs). */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {indicateurs
+              .filter((ind) => ind.serie.length > 0)
+              .map((ind) => (
+                <div key={ind.id} className="rounded-2xl border bg-card p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <Link
+                      href={`/indicateurs/${ind.id}`}
+                      className="font-medium text-sm hover:text-primary"
+                    >
                       {ind.nom}
                     </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {ind.processusNom ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {ind.objectifs.length ? ind.objectifs.join(", ") : "—"}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap text-right text-sm">
-                    {ind.cible !== null ? cibleAffichee(ind.cible, ind.sens, ind.unite) : "—"}
-                  </TableCell>
-                  {periodes.map((p) => {
-                    const v = ind.valeursParPeriode[p.cle];
-                    const alerte = v !== undefined && horsCible(v, ind.cible, ind.sens);
-                    return (
-                      <TableCell
-                        key={p.cle}
-                        className={`text-right text-sm ${alerte ? "font-medium text-status-nc-mineure" : ""}`}
-                      >
-                        {v !== undefined ? v : ""}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
+                    {ind.cible !== null ? (
+                      <span className="text-muted-foreground text-xs">
+                        Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}
+                      </span>
+                    ) : null}
+                  </div>
+                  <KpiChart data={ind.serie} cible={ind.cible} unite={ind.unite} />
+                </div>
               ))}
-            </TableBody>
-          </Table>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
