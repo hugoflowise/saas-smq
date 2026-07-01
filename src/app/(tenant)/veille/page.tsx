@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/format";
+import { VEILLE_CONFORMITE_LABELS } from "@/lib/labels";
+import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
@@ -32,6 +34,12 @@ const STATUT_LABELS: Record<string, string> = {
   integree: "Intégrée",
   sans_objet: "Sans objet",
 };
+const CONFORMITE_CLASS: Record<string, string> = {
+  conforme: "bg-status-conforme/15 text-status-conforme",
+  non_conforme: "bg-status-nc-majeure/15 text-status-nc-majeure",
+  partielle: "bg-status-pa/15 text-status-pa",
+  a_evaluer: "bg-muted text-muted-foreground",
+};
 
 export default async function VeillePage() {
   const ctx = await getTenantContext();
@@ -52,12 +60,13 @@ export default async function VeillePage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
+  const afficherSse = (await getNormesActives()).includes("MASE");
   const [{ data: textes }, { data: tenant }, { data: suggestions }, { data: historique }] =
     await Promise.all([
       supabase
         .from("veille_reglementaire")
         .select(
-          "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, lien, statut",
+          "id, reference, intitule, domaine, date_publication, date_application, impact_smq, actions_a_prevoir, lien, statut, applicabilite, conformite",
         )
         .eq("tenant_id", tid)
         .order("date_application", { ascending: false, nullsFirst: false }),
@@ -104,11 +113,21 @@ export default async function VeillePage() {
       cls: "text-status-pa",
     },
     { label: "Suggestions à examiner", value: suggs.length, cls: "text-primary" },
-    {
-      label: "Dernière collecte",
-      value: derniereCollecte ? formatDate(derniereCollecte) : "-",
-      cls: "text-foreground",
-    },
+    ...(afficherSse
+      ? [
+          {
+            label: "Non conformités",
+            value: items.filter((t) => t.conformite === "non_conforme").length,
+            cls: "text-status-nc-majeure",
+          },
+        ]
+      : [
+          {
+            label: "Dernière collecte",
+            value: derniereCollecte ? formatDate(derniereCollecte) : "-",
+            cls: "text-foreground",
+          },
+        ]),
   ];
 
   return (
@@ -119,7 +138,7 @@ export default async function VeillePage() {
         isoClause="Obligations légales & §4"
         help="Suivez les textes applicables ({{domaine}}, réglementaires) pertinents pour votre activité, évaluez leur impact et tracez les actions de mise en conformité."
       >
-        <VeilleDialog />
+        <VeilleDialog afficherSse={afficherSse} />
       </PageHeader>
 
       <StatTiles tiles={tiles} className="mb-6" />
@@ -211,6 +230,7 @@ export default async function VeillePage() {
                 <TableHead>Référence</TableHead>
                 <TableHead>Domaine</TableHead>
                 <TableHead>Application</TableHead>
+                {afficherSse ? <TableHead>Conformité</TableHead> : null}
                 <TableHead>Statut</TableHead>
               </TableRow>
             </TableHeader>
@@ -220,6 +240,7 @@ export default async function VeillePage() {
                   <TableCell>
                     <VeilleDialog
                       veille={t}
+                      afficherSse={afficherSse}
                       trigger={
                         <button type="button" className={ROW_NAME_BUTTON}>
                           {t.intitule}
@@ -242,6 +263,21 @@ export default async function VeillePage() {
                   </TableCell>
                   <TableCell>{DOMAINE_LABELS[t.domaine] ?? t.domaine}</TableCell>
                   <TableCell>{formatDate(t.date_application)}</TableCell>
+                  {afficherSse ? (
+                    <TableCell>
+                      {t.conformite ? (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${CONFORMITE_CLASS[t.conformite] ?? "bg-muted text-muted-foreground"}`}
+                        >
+                          {VEILLE_CONFORMITE_LABELS[
+                            t.conformite as keyof typeof VEILLE_CONFORMITE_LABELS
+                          ] ?? t.conformite}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
+                    </TableCell>
+                  ) : null}
                   <TableCell>{STATUT_LABELS[t.statut] ?? t.statut}</TableCell>
                 </TableRow>
               ))}

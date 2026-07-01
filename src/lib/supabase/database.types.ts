@@ -4702,6 +4702,8 @@ export type Database = {
       veille_reglementaire: {
         Row: {
           actions_a_prevoir: string | null
+          applicabilite: string | null
+          conformite: string | null
           created_at: string
           created_by: string | null
           date_application: string | null
@@ -4721,6 +4723,8 @@ export type Database = {
         }
         Insert: {
           actions_a_prevoir?: string | null
+          applicabilite?: string | null
+          conformite?: string | null
           created_at?: string
           created_by?: string | null
           date_application?: string | null
@@ -4740,6 +4744,8 @@ export type Database = {
         }
         Update: {
           actions_a_prevoir?: string | null
+          applicabilite?: string | null
+          conformite?: string | null
           created_at?: string
           created_by?: string | null
           date_application?: string | null

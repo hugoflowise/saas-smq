@@ -188,6 +188,9 @@ const veilleBase = {
   actionsAPrevoir: z.string().trim().optional(),
   lien: z.string().trim().optional(),
   statut: z.enum(["a_analyser", "analysee", "integree", "sans_objet"]),
+  // Récolement SSE (MASE Axe 4) : applicabilité + conformité.
+  applicabilite: z.enum(["applicable", "non_applicable", "a_evaluer"]).optional(),
+  conformite: z.enum(["conforme", "non_conforme", "partielle", "a_evaluer"]).optional(),
 };
 const veilleCreate = z.object(veilleBase);
 const veilleUpdate = z.object({ id: z.string().uuid(), ...veilleBase });
@@ -203,6 +206,8 @@ function veillePayload(d: z.infer<typeof veilleCreate>) {
     actions_a_prevoir: d.actionsAPrevoir ?? null,
     lien: d.lien ?? null,
     statut: d.statut,
+    applicabilite: d.applicabilite ?? null,
+    conformite: d.conformite ?? null,
   };
 }
 

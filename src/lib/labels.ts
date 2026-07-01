@@ -70,6 +70,20 @@ export const REMONTEE_TYPES_SSE = [
   "dysfonctionnement",
 ] as const;
 
+/** Récolement de la veille SSE (MASE Axe 4) : applicabilité + conformité. */
+export const VEILLE_APPLICABILITE_LABELS = {
+  applicable: "Applicable",
+  non_applicable: "Non applicable",
+  a_evaluer: "À évaluer",
+} as const;
+
+export const VEILLE_CONFORMITE_LABELS = {
+  conforme: "Conforme",
+  non_conforme: "Non conforme",
+  partielle: "Partielle",
+  a_evaluer: "À évaluer",
+} as const;
+
 /** Méthodes d'analyse des causes d'un événement SSE (MASE Axe 4). */
 export const REMONTEE_ANALYSE_LABELS = {
   "5_pourquoi": "5 pourquoi",
