@@ -15,8 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createModeleAction, updateModeleAction } from "@/lib/actions/communications-modeles";
-import { MODELE_CATEGORIES, type Modele } from "@/lib/communications";
+import {
+  createModeleAction,
+  materialiserModeleAction,
+  updateModeleAction,
+} from "@/lib/actions/communications-modeles";
+import { MODELE_CATEGORIES, type Modele, type ModelePiece } from "@/lib/communications";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 import { ModelePiecesJointes } from "./modele-pieces-jointes";
@@ -24,7 +28,7 @@ import { ModelePiecesJointes } from "./modele-pieces-jointes";
 type Mode = "creer" | "modifier";
 
 /**
- * Crée un modèle ou en modifie un (fourni OU personnalisé — même logique).
+ * Crée un modèle ou en modifie un (fourni OU personnalisé - même logique).
  * Un modèle fourni est « matérialisé » (copié en base) au premier enregistrement.
  * Après le premier enregistrement, la section Pièces jointes apparaît : on peut
  * ainsi attacher une PJ dès la création, sans devoir rouvrir en modification.
@@ -38,6 +42,7 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
   // au premier enregistrement (création ou matérialisation d'un modèle fourni).
   const existingId = modele && !modele.integre ? modele.id : null;
   const [savedId, setSavedId] = useState<string | null>(existingId);
+  const [pieces, setPieces] = useState<ModelePiece[]>(modele?.pieces ?? []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,9 +72,19 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
     toast.success("Modèle enregistré.");
   }
 
-  // Rafraîchit la liste des modèles à la fermeture (évite de perturber le dialog ouvert).
-  function handleOpenChange(next: boolean) {
+  // À l'ouverture d'un modèle fourni, on le matérialise (copie éditable) pour que
+  // la section Pièces jointes soit disponible tout de suite.
+  async function handleOpenChange(next: boolean) {
     setOpen(next);
+    if (next && !savedId && modele?.integre) {
+      const r = await materialiserModeleAction(modele.id);
+      if (r.ok) {
+        setSavedId(r.id);
+        setPieces(r.pieces);
+      } else {
+        toast.error(r.error);
+      }
+    }
     if (!next && savedId) router.refresh();
   }
 
@@ -138,7 +153,7 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
         {savedId ? (
           <div className="mt-2 flex flex-col gap-2 border-t pt-4">
             <Label>Pièces jointes</Label>
-            <ModelePiecesJointes modeleId={savedId} pieces={modele?.pieces ?? []} manage />
+            <ModelePiecesJointes modeleId={savedId} pieces={pieces} manage />
           </div>
         ) : (
           <p className="text-muted-foreground text-xs">
