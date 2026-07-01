@@ -34,6 +34,8 @@ async function requireAdmin(): Promise<{ ok: true } | { ok: false; error: string
   return { ok: true };
 }
 
+const normeEnum = z.enum(["9001", "14001", "45001", "MASE", "CEFRI"]);
+
 const createTenantSchema = z.object({
   nomSociete: z.string().trim().min(2, "Nom de société requis."),
   dirigeantEmail: z.string().trim().email("E-mail du dirigeant invalide."),
@@ -42,6 +44,7 @@ const createTenantSchema = z.object({
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
+  normesActives: z.array(normeEnum).optional(),
 });
 
 export async function createTenantAction(input: unknown): Promise<ActionResult> {
@@ -53,11 +56,20 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
   const data = parsed.data;
+  const admin = createAdminClient();
+
+  // Au moins une norme reste active (par défaut 9001) : un client sans aucune
+  // norme n'aurait accès qu'au socle. Piloté par l'admin dès la création.
+  const normes =
+    data.normesActives && data.normesActives.length > 0 ? data.normesActives : ["9001"];
+
   // Le préremplissage dépend de la formule souscrite : « Essentiel » (licence
   // seule) = app vide ; « Tandem » / « Premium » (avec accompagnement) =
-  // modèles de démarrage pré-remplis.
-  const preremplir = data.formule !== "Essentiel";
-  const admin = createAdminClient();
+  // modèles de démarrage pré-remplis. Les modèles actuels sont du 9001 pur
+  // (80 actions ISO, cartographie SI/ESN, parties prenantes types) : on ne les
+  // sème que si la norme 9001 est active, pour ne pas remplir un client d'une
+  // autre norme (ex. MASE) de contenu ISO hors sujet.
+  const preremplir = data.formule !== "Essentiel" && normes.includes("9001");
 
   // 1) Création du tenant
   const { data: tenant, error: tenantError } = await admin
@@ -68,6 +80,7 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
       bureau_etudes: data.bureauEtudes ?? false,
+      normes_actives: normes,
       date_souscription: todayISO(),
     })
     .select("id")
