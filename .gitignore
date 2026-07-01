@@ -61,3 +61,6 @@ docs/benchmark-coengi/transcript.txt
 
 # Worktrees transitoires des agents Claude Code
 .claude/worktrees/
+
+# Snapshots transitoires de playwright-cli (agent de test)
+.playwright-cli/
