@@ -17,6 +17,7 @@ import { MODELE_CATEGORIES, type Modele } from "@/lib/communications";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
+import { ModelePiecesJointes } from "./modele-pieces-jointes";
 
 type Mode = "creer" | "modifier" | "dupliquer";
 
@@ -115,6 +116,14 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
             {pending ? "Enregistrement…" : isModifier ? "Enregistrer" : "Créer le modèle"}
           </Button>
         </form>
+
+        {/* Pièces jointes : disponibles une fois le modèle personnalisé enregistré. */}
+        {isModifier && modele && !modele.integre ? (
+          <div className="mt-2 flex flex-col gap-2 border-t pt-4">
+            <Label>Pièces jointes</Label>
+            <ModelePiecesJointes modeleId={modele.id} pieces={modele.pieces ?? []} manage />
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
