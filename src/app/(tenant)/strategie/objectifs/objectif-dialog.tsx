@@ -70,10 +70,6 @@ export function ObjectifDialog({
           echeance: f.get("echeance") || undefined,
           fonctionConcernee: f.get("fonctionConcernee") || undefined,
           statut: f.get("statut"),
-          valeurCible: f.get("valeurCible") || undefined,
-          valeurActuelle: f.get("valeurActuelle") || undefined,
-          unite: f.get("unite") || undefined,
-          sens: f.get("sens") || undefined,
           processusId: f.get("processusId") || undefined,
           engagementId: f.get("engagementId") || undefined,
           indicateurIds,
@@ -112,49 +108,6 @@ export function ObjectifDialog({
             <Input id="intitule" name="intitule" required defaultValue={objectif?.intitule ?? ""} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="valeurActuelle">Valeur actuelle</Label>
-              <Input
-                id="valeurActuelle"
-                name="valeurActuelle"
-                type="number"
-                step="any"
-                defaultValue={objectif?.valeur_actuelle ?? ""}
-                placeholder="65"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="valeurCible">Valeur cible</Label>
-              <Input
-                id="valeurCible"
-                name="valeurCible"
-                type="number"
-                step="any"
-                defaultValue={objectif?.valeur_cible ?? ""}
-                placeholder="90"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="unite">Unité</Label>
-              <Input
-                id="unite"
-                name="unite"
-                defaultValue={objectif?.unite ?? ""}
-                placeholder="%, NPS, €…"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="sens">Sens</Label>
-              <select
-                id="sens"
-                name="sens"
-                className={SELECT_CLASS}
-                defaultValue={objectif?.sens ?? "hausse"}
-              >
-                <option value="hausse">Hausse (atteindre la cible)</option>
-                <option value="baisse">Baisse (ne pas dépasser)</option>
-              </select>
-            </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="processusId">Processus pilote</Label>
               <select
@@ -245,9 +198,10 @@ export function ObjectifDialog({
               </div>
             )}
             <p className="text-muted-foreground text-xs">
-              Rattachez le ou les indicateurs qui mesurent cet objectif (ISO 9001 §6.2/§9.1). Avec
-              un seul indicateur, la progression de l'objectif suit automatiquement sa dernière
-              valeur mesurée.
+              Rattachez le ou les indicateurs qui mesurent cet objectif (ISO 9001 §6.2/§9.1). La
+              progression de l'objectif est calculée à partir de ses indicateurs : chacun porte sa
+              propre cible et son sens (définis dans Pilotage → Indicateurs). L'objectif est atteint
+              quand tous ses indicateurs atteignent leur cible.
             </p>
           </div>
           <div className="flex flex-col gap-2">

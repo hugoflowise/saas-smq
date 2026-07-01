@@ -1,0 +1,363 @@
+- generic [ref=f51e1]:
+  - generic [ref=f51e2]:
+    - complementary [ref=f51e3]:
+      - img [ref=f51e573]
+      - navigation [ref=f51e7]:
+        - generic [ref=f51e8]:
+          - paragraph [ref=f51e9]: Pilotage
+          - list [ref=f51e10]:
+            - listitem [ref=f51e11]:
+              - link [ref=f51e574] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f51e13]
+                - generic [ref=f51e18]: Tableau de bord
+            - listitem [ref=f51e19]:
+              - link [ref=f51e575] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f51e21]
+                - generic [ref=f51e26]: Mise en route
+            - listitem [ref=f51e27]:
+              - link [ref=f51e576] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f51e29]
+                - generic [ref=f51e31]: Calendrier qualité
+            - listitem [ref=f51e32]:
+              - link [ref=f51e577] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f51e34]
+                - generic [ref=f51e37]: Réunions QHSE
+            - listitem [ref=f51e38]:
+              - link [ref=f51e578] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f51e40]
+                - generic [ref=f51e43]: Mode audit
+            - listitem [ref=f51e44]:
+              - link [ref=f51e579] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f51e46]
+                - generic [ref=f51e50]: Effectif & couverture
+            - listitem [ref=f51e51]:
+              - link [ref=f51e580] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f51e53]
+                - generic [ref=f51e56]: Suivi consultant
+        - generic [ref=f51e57]:
+          - paragraph [ref=f51e58]: Stratégie
+          - list [ref=f51e59]:
+            - listitem [ref=f51e60]:
+              - link [ref=f51e581] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f51e62]
+                - generic [ref=f51e65]: Politique qualité
+            - listitem [ref=f51e66]:
+              - link [ref=f51e582] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f51e68]
+                - generic [ref=f51e70]: Contexte
+            - listitem [ref=f51e71]:
+              - link [ref=f51e583] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f51e73]
+                - generic [ref=f51e75]: Domaine d'application
+            - listitem [ref=f51e76]:
+              - link [ref=f51e584] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f51e78]
+                - generic [ref=f51e83]: Parties prenantes
+            - listitem [ref=f51e84]:
+              - link [ref=f51e585] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f51e86]
+                - generic [ref=f51e89]: Risques & opportunités
+            - listitem [ref=f51e90]:
+              - link [ref=f51e586] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f51e92]
+                - generic [ref=f51e100]: Modifications du SMQ
+        - generic [ref=f51e101]:
+          - paragraph [ref=f51e102]: Organisation
+          - list [ref=f51e103]:
+            - listitem [ref=f51e104]:
+              - link [ref=f51e587] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f51e106]
+                - generic [ref=f51e111]: Processus
+            - listitem [ref=f51e112]:
+              - link [ref=f51e588] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f51e114]
+                - generic [ref=f51e118]: Documentation
+            - listitem [ref=f51e119]:
+              - link [ref=f51e589] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f51e121]
+                - generic [ref=f51e124]: Communications
+        - generic [ref=f51e125]:
+          - paragraph [ref=f51e126]: Amélioration
+          - list [ref=f51e127]:
+            - listitem [ref=f51e128]:
+              - link [ref=f51e590] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f51e130]
+                - generic [ref=f51e133]: Plan d'actions
+            - listitem [ref=f51e134]:
+              - link [ref=f51e591] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f51e136]
+                - generic [ref=f51e138]: Non-conformités
+            - listitem [ref=f51e139]:
+              - link [ref=f51e592] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f51e141]
+                - generic [ref=f51e143]: Remontées
+        - generic [ref=f51e144]:
+          - paragraph [ref=f51e145]: Évaluation
+          - list [ref=f51e146]:
+            - listitem [ref=f51e147]:
+              - link [ref=f51e593] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f51e149]
+                - generic [ref=f51e153]: Objectifs & indicateurs
+            - listitem [ref=f51e154]:
+              - link [ref=f51e594] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f51e156]
+                - generic [ref=f51e159]: Audits
+            - listitem [ref=f51e160]:
+              - link [ref=f51e595] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f51e162]
+                - generic [ref=f51e166]: Auto-diagnostic
+            - listitem [ref=f51e167]:
+              - link [ref=f51e596] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f51e169]
+                - generic [ref=f51e173]: Veille réglementaire
+            - listitem [ref=f51e174]:
+              - link [ref=f51e597] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f51e176]
+                - generic [ref=f51e180]: Revues de direction
+        - generic [ref=f51e181]:
+          - paragraph [ref=f51e182]: Parties externes
+          - list [ref=f51e183]:
+            - listitem [ref=f51e184]:
+              - link [ref=f51e598] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f51e186]
+                - generic [ref=f51e189]: Suivi de prestation
+            - listitem [ref=f51e190]:
+              - link [ref=f51e599] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f51e192]
+                - generic [ref=f51e197]: Fournisseurs
+        - generic [ref=f51e198]:
+          - paragraph [ref=f51e199]: Configuration
+          - list [ref=f51e200]:
+            - listitem [ref=f51e201]:
+              - link [ref=f51e600] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f51e203]
+                - generic [ref=f51e215]: Utilisateurs
+            - listitem [ref=f51e216]:
+              - link [ref=f51e601] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f51e218]
+                - generic [ref=f51e222]: Main courante
+            - listitem [ref=f51e223]:
+              - link [ref=f51e602] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f51e225]
+                - generic [ref=f51e228]: Paramètres
+            - listitem [ref=f51e229]:
+              - link [ref=f51e603] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f51e231]
+                - generic [ref=f51e234]: Corbeille
+        - generic [ref=f51e235]:
+          - paragraph [ref=f51e236]: Admin Flowise
+          - list [ref=f51e237]:
+            - listitem [ref=f51e238]:
+              - link [ref=f51e604] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f51e240]
+                - generic [ref=f51e244]: Clients
+            - listitem [ref=f51e245]:
+              - link [ref=f51e605] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f51e247]
+                - generic [ref=f51e250]: Signalements & suggestions
+    - generic [ref=f51e251]:
+      - banner [ref=f51e252]:
+        - generic [ref=f51e253]:
+          - button [ref=f51e606]:
+            - img
+            - generic [ref=f51e255]: Acme Inge
+            - img
+          - button [ref=f51e607]:
+            - img
+            - generic [ref=f51e257]: Affichage
+        - generic [ref=f51e258]:
+          - button [ref=f51e608]:
+            - img
+            - generic [ref=f51e260]: Signaler / Suggérer
+          - button [ref=f51e609]:
+            - img
+            - generic [ref=f51e262]: "3"
+          - button [ref=f51e610]:
+            - generic [ref=f51e264]: hu
+            - generic [ref=f51e265]: hugo.piovesan@flowise.fr
+      - main [ref=f51e266]:
+        - generic [ref=f51e267]:
+          - generic [ref=f51e268]:
+            - generic [ref=f51e269]:
+              - generic [ref=f51e270]:
+                - generic [ref=f51e271]:
+                  - generic [ref=f51e272]:
+                    - heading [level=1] [ref=f51e611]: Remontées
+                    - generic [ref=f51e274]: ISO 9001 §9.1.2 · §10.2
+                  - paragraph [ref=f51e275]: Réclamations, dysfonctionnements, incidents et accidents.
+                - button [ref=f51e612]: Nouvelle remontée
+              - group [ref=f51e278]:
+                - generic [ref=f51e613] [cursor=pointer]:
+                  - img [ref=f51e280]
+                  - generic [ref=f51e282]: Aide & exigence
+                  - generic [ref=f51e283]: Afficher
+            - generic [ref=f51e284]:
+              - generic [ref=f51e286]: Partager le formulaire
+              - generic [ref=f51e287]:
+                - img [ref=f51e614]
+                - generic [ref=f51e289]:
+                  - generic [ref=f51e290]:
+                    - generic [ref=f51e291]: Lien à partager aux BM et consultants
+                    - generic [ref=f51e292]:
+                      - code [ref=f51e293]: https://app.flowise.fr/enquete/53bbdcb2-5969-4eef-a116-4aebee11edb0/signalement
+                      - button [ref=f51e615]:
+                        - img
+                  - generic [ref=f51e295]:
+                    - link [ref=f51e616] [cursor=pointer]:
+                      - /url: https://app.flowise.fr/enquete/53bbdcb2-5969-4eef-a116-4aebee11edb0/signalement
+                      - img [ref=f51e297]
+                      - text: Ouvrir le formulaire
+                    - link [ref=f51e617] [cursor=pointer]:
+                      - /url: mailto:?subject=Remonter%20une%20r%C3%A9clamation%2C%20un%20dysfonctionnement%20ou%20un%20incident&body=Bonjour%2C%0A%0APour%20remonter%20une%20r%C3%A9clamation%20client%2C%20un%20dysfonctionnement%2C%20un%20incident%20ou%20un%20accident%2C%20ouvrez%20ce%20lien%20(aucune%20connexion%20requise)%20et%20remplissez%20le%20formulaire.%20Pensez%20%C3%A0%20l'ajouter%20%C3%A0%20l'%C3%A9cran%20d'accueil%20de%20votre%20t%C3%A9l%C3%A9phone%20pour%20l'avoir%20toujours%20sous%20la%20main%20%3A%0A%0Ahttps%3A%2F%2Fapp.flowise.fr%2Fenquete%2F53bbdcb2-5969-4eef-a116-4aebee11edb0%2Fsignalement
+                      - img [ref=f51e302]
+                      - text: Inviter par e-mail
+                  - paragraph [ref=f51e305]: "Aucune connexion requise : le BM ou le consultant ouvre le lien (ou scanne le QR) et remonte une réclamation, un dysfonctionnement, un incident ou un accident. La remontée arrive ici au statut « reçue »."
+            - table [ref=f51e308]:
+              - rowgroup [ref=f51e309]:
+                - row [ref=f51e618]:
+                  - columnheader [ref=f51e619]: Type
+                  - columnheader [ref=f51e620]: Objet
+                  - columnheader [ref=f51e621]: Client
+                  - columnheader [ref=f51e622]: Canal
+                  - columnheader [ref=f51e623]: Gravité
+                  - columnheader [ref=f51e624]: Statut
+                  - columnheader [ref=f51e625]: Reçue le
+              - rowgroup [ref=f51e318]:
+                - row [ref=f51e626]:
+                  - cell [ref=f51e627]:
+                    - generic [ref=f51e539]: Réclamation
+                  - cell [ref=f51e628]:
+                    - button [expanded] [ref=f51e629] [cursor=pointer]: "[TEST PW] Réclamation a supprimer"
+                  - cell [ref=f51e630]: Client Test
+                  - cell [ref=f51e631]: E-mail
+                  - cell [ref=f51e632]:
+                    - combobox [ref=f51e633]
+                  - cell [ref=f51e634]:
+                    - combobox [ref=f51e635]
+                  - cell [ref=f51e636]: 01/07/2026
+                - row [ref=f51e637]:
+                  - cell [ref=f51e638]:
+                    - generic [ref=f51e321]: Réclamation
+                  - cell [ref=f51e639]:
+                    - button [ref=f51e640] [cursor=pointer]: Pas de port d'EPI
+                  - cell [ref=f51e641]: SOCOMELU
+                  - cell [ref=f51e642]: Enquête
+                  - cell [ref=f51e643]:
+                    - combobox [ref=f51e644]
+                  - cell [ref=f51e645]:
+                    - combobox [ref=f51e646]
+                  - cell [ref=f51e647]: 16/06/2026
+          - generic [ref=f51e331]:
+            - link [ref=f51e648] [cursor=pointer]:
+              - /url: https://flowise.fr
+              - text: flowise.
+            - link [ref=f51e649] [cursor=pointer]:
+              - /url: /mentions-legales
+              - text: Mentions légales
+            - link [ref=f51e650] [cursor=pointer]:
+              - /url: /cgu
+              - text: Conditions d'utilisation
+            - link [ref=f51e651] [cursor=pointer]:
+              - /url: /confidentialite
+              - text: Confidentialité
+    - generic [ref=f51e336]:
+      - generic [ref=f51e337]:
+        - generic [ref=f51e338]:
+          - img [ref=f51e339]
+          - text: ToDo
+        - generic [ref=f51e342]: "0"
+        - img [ref=f51e344]
+      - generic [ref=f51e345]:
+        - textbox [ref=f51e652]:
+          - /placeholder: Ajouter une tâche…
+        - button [disabled] [ref=f51e653]:
+          - img [ref=f51e348]
+      - list [ref=f51e349]:
+        - listitem [ref=f51e350]: Rien pour l'instant.
+  - region "Notifications alt+T"
+  - alert [ref=f51e351]
+  - dialog "Modifier la remontée" [ref=f51e657]:
+    - heading "Modifier la remontée" [level=2] [ref=f51e659]
+    - generic [ref=f51e660]:
+      - generic [ref=f51e661]:
+        - generic [ref=f51e662]:
+          - generic [ref=f51e663]: Type de remontée
+          - combobox "Type de remontée" [active] [ref=f51e664]:
+            - option "Réclamation" [selected]
+            - option "Dysfonctionnement"
+            - option "Incident"
+            - option "Accident"
+        - generic [ref=f51e665]:
+          - generic [ref=f51e666]: Objet
+          - textbox "Objet" [ref=f51e667]: "[TEST PW] Réclamation a supprimer"
+      - generic [ref=f51e668]:
+        - generic [ref=f51e669]:
+          - generic [ref=f51e670]: Client
+          - textbox "Client" [ref=f51e671]: Client Test
+        - generic [ref=f51e672]:
+          - generic [ref=f51e673]: Date de réception
+          - textbox "Date de réception" [ref=f51e674]: 2026-07-01
+        - generic [ref=f51e675]:
+          - generic [ref=f51e676]: Canal
+          - combobox "Canal" [ref=f51e677]:
+            - option "E-mail" [selected]
+            - option "Téléphone"
+            - option "Visio"
+            - option "Audit"
+            - option "Enquête"
+            - option "Autre"
+        - generic [ref=f51e678]:
+          - generic [ref=f51e679]: Gravité
+          - combobox "Gravité" [ref=f51e680]:
+            - option "Mineure" [selected]
+            - option "Majeure"
+            - option "Critique"
+        - generic [ref=f51e681]:
+          - generic [ref=f51e682]: Statut
+          - combobox "Statut" [ref=f51e683]:
+            - option "Reçue" [selected]
+            - option "Analysée"
+            - option "Traitée"
+            - option "Clôturée"
+      - generic [ref=f51e684]:
+        - generic [ref=f51e685]: Description
+        - textbox "Description" [ref=f51e686]
+      - generic [ref=f51e687]:
+        - generic [ref=f51e688]: Traitement / réponse
+        - textbox "Traitement / réponse" [ref=f51e689]
+      - button "Enregistrer" [ref=f51e690]
+    - button "Close" [ref=f51e691]:
+      - img
+      - generic [ref=f51e692]: Close

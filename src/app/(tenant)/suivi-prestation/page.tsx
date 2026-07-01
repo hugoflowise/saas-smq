@@ -2,6 +2,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { OfflineFormButton } from "@/components/offline-form-button";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
 import { StatTiles } from "@/components/stat-tiles";
@@ -116,6 +117,7 @@ export default async function SuiviPrestationPage() {
             Personnaliser le formulaire
           </Link>
         ) : null}
+        {ctx.role !== "auditeur" ? <OfflineFormButton type="suivi_prestation" /> : null}
         <ExportButton
           champs={champsExport}
           rows={items.map((s) => ({

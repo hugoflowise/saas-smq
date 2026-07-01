@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { StatTiles } from "@/components/stat-tiles";
+import { SupprimerButton } from "@/components/supprimer-button";
 import {
   Table,
   TableBody,
@@ -9,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteFournisseurAction } from "@/lib/actions/fournisseurs";
 import { BADGE_BASE } from "@/lib/badges";
 import { formatDate, todayISO } from "@/lib/format";
 import type { NotesCriteres } from "@/lib/fournisseurs-criteres";
@@ -162,11 +164,20 @@ export default async function FournisseursPage() {
                     {f.statut === "actif" ? "Actif" : "Inactif"}
                   </TableCell>
                   <TableCell className="text-right">
-                    <FournisseurEvaluationDialog
-                      fournisseurId={f.id}
-                      fournisseurNom={f.nom}
-                      evaluations={evaluationsParFournisseur.get(f.id) ?? []}
-                    />
+                    <div className="flex items-center justify-end gap-1">
+                      <FournisseurEvaluationDialog
+                        fournisseurId={f.id}
+                        fournisseurNom={f.nom}
+                        evaluations={evaluationsParFournisseur.get(f.id) ?? []}
+                      />
+                      <SupprimerButton
+                        action={deleteFournisseurAction}
+                        id={f.id}
+                        iconOnly
+                        libelle={`le fournisseur « ${f.nom} »`}
+                        successText="Fournisseur supprimé."
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

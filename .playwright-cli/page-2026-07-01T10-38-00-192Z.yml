@@ -1,0 +1,286 @@
+- generic [active] [ref=f45e1]:
+  - generic [ref=f45e2]:
+    - complementary [ref=f45e3]:
+      - img "Flowise" [ref=f45e5]
+      - navigation [ref=f45e7]:
+        - generic [ref=f45e8]:
+          - paragraph [ref=f45e9]: Pilotage
+          - list [ref=f45e10]:
+            - listitem [ref=f45e11]:
+              - link "Tableau de bord" [ref=f45e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f45e13]
+                - generic [ref=f45e18]: Tableau de bord
+            - listitem [ref=f45e19]:
+              - link "Mise en route" [ref=f45e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f45e21]
+                - generic [ref=f45e26]: Mise en route
+            - listitem [ref=f45e27]:
+              - link "Calendrier qualité" [ref=f45e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f45e29]
+                - generic [ref=f45e31]: Calendrier qualité
+            - listitem [ref=f45e32]:
+              - link "Réunions QHSE" [ref=f45e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f45e34]
+                - generic [ref=f45e37]: Réunions QHSE
+            - listitem [ref=f45e38]:
+              - link "Mode audit" [ref=f45e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f45e40]
+                - generic [ref=f45e43]: Mode audit
+            - listitem [ref=f45e44]:
+              - link "Effectif & couverture" [ref=f45e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f45e46]
+                - generic [ref=f45e50]: Effectif & couverture
+            - listitem [ref=f45e51]:
+              - link "Suivi consultant" [ref=f45e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f45e53]
+                - generic [ref=f45e56]: Suivi consultant
+        - generic [ref=f45e57]:
+          - paragraph [ref=f45e58]: Stratégie
+          - list [ref=f45e59]:
+            - listitem [ref=f45e60]:
+              - link "Politique qualité" [ref=f45e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f45e62]
+                - generic [ref=f45e65]: Politique qualité
+            - listitem [ref=f45e66]:
+              - link "Contexte" [ref=f45e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f45e68]
+                - generic [ref=f45e70]: Contexte
+            - listitem [ref=f45e71]:
+              - link "Domaine d'application" [ref=f45e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f45e73]
+                - generic [ref=f45e75]: Domaine d'application
+            - listitem [ref=f45e76]:
+              - link "Parties prenantes" [ref=f45e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f45e78]
+                - generic [ref=f45e83]: Parties prenantes
+            - listitem [ref=f45e84]:
+              - link "Risques & opportunités" [ref=f45e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f45e86]
+                - generic [ref=f45e89]: Risques & opportunités
+            - listitem [ref=f45e90]:
+              - link "Modifications du SMQ" [ref=f45e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f45e92]
+                - generic [ref=f45e100]: Modifications du SMQ
+        - generic [ref=f45e101]:
+          - paragraph [ref=f45e102]: Organisation
+          - list [ref=f45e103]:
+            - listitem [ref=f45e104]:
+              - link "Processus" [ref=f45e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f45e106]
+                - generic [ref=f45e111]: Processus
+            - listitem [ref=f45e112]:
+              - link "Documentation" [ref=f45e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f45e114]
+                - generic [ref=f45e118]: Documentation
+            - listitem [ref=f45e119]:
+              - link "Communications" [ref=f45e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f45e121]
+                - generic [ref=f45e124]: Communications
+        - generic [ref=f45e125]:
+          - paragraph [ref=f45e126]: Amélioration
+          - list [ref=f45e127]:
+            - listitem [ref=f45e128]:
+              - link "Plan d'actions" [ref=f45e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f45e130]
+                - generic [ref=f45e133]: Plan d'actions
+            - listitem [ref=f45e134]:
+              - link "Non-conformités" [ref=f45e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f45e136]
+                - generic [ref=f45e138]: Non-conformités
+            - listitem [ref=f45e139]:
+              - link "Remontées" [ref=f45e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f45e141]
+                - generic [ref=f45e143]: Remontées
+        - generic [ref=f45e144]:
+          - paragraph [ref=f45e145]: Évaluation
+          - list [ref=f45e146]:
+            - listitem [ref=f45e147]:
+              - link "Objectifs & indicateurs" [ref=f45e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f45e149]
+                - generic [ref=f45e153]: Objectifs & indicateurs
+            - listitem [ref=f45e154]:
+              - link "Audits" [ref=f45e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f45e156]
+                - generic [ref=f45e159]: Audits
+            - listitem [ref=f45e160]:
+              - link "Auto-diagnostic" [ref=f45e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f45e162]
+                - generic [ref=f45e166]: Auto-diagnostic
+            - listitem [ref=f45e167]:
+              - link "Veille réglementaire" [ref=f45e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f45e169]
+                - generic [ref=f45e173]: Veille réglementaire
+            - listitem [ref=f45e174]:
+              - link "Revues de direction" [ref=f45e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f45e176]
+                - generic [ref=f45e180]: Revues de direction
+        - generic [ref=f45e181]:
+          - paragraph [ref=f45e182]: Parties externes
+          - list [ref=f45e183]:
+            - listitem [ref=f45e184]:
+              - link "Suivi de prestation" [ref=f45e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f45e186]
+                - generic [ref=f45e189]: Suivi de prestation
+            - listitem [ref=f45e190]:
+              - link "Fournisseurs" [ref=f45e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f45e192]
+                - generic [ref=f45e197]: Fournisseurs
+        - generic [ref=f45e198]:
+          - paragraph [ref=f45e199]: Configuration
+          - list [ref=f45e200]:
+            - listitem [ref=f45e201]:
+              - link "Utilisateurs" [ref=f45e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f45e203]
+                - generic [ref=f45e215]: Utilisateurs
+            - listitem [ref=f45e216]:
+              - link "Main courante" [ref=f45e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f45e218]
+                - generic [ref=f45e222]: Main courante
+            - listitem [ref=f45e223]:
+              - link "Paramètres" [ref=f45e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f45e225]
+                - generic [ref=f45e228]: Paramètres
+            - listitem [ref=f45e229]:
+              - link "Corbeille" [ref=f45e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f45e231]
+                - generic [ref=f45e234]: Corbeille
+        - generic [ref=f45e235]:
+          - paragraph [ref=f45e236]: Admin Flowise
+          - list [ref=f45e237]:
+            - listitem [ref=f45e238]:
+              - link "Clients" [ref=f45e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f45e240]
+                - generic [ref=f45e244]: Clients
+            - listitem [ref=f45e245]:
+              - link "Signalements & suggestions" [ref=f45e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f45e247]
+                - generic [ref=f45e250]: Signalements & suggestions
+    - generic [ref=f45e251]:
+      - banner [ref=f45e252]:
+        - generic [ref=f45e253]:
+          - button "Acme Inge" [ref=f45e254]:
+            - img
+            - generic [ref=f45e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f45e256]:
+            - img
+            - generic [ref=f45e257]: Affichage
+        - generic [ref=f45e258]:
+          - button "Signaler ou suggérer" [ref=f45e259]:
+            - img
+            - generic [ref=f45e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f45e261]:
+            - img
+            - generic [ref=f45e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f45e263]:
+            - generic [ref=f45e264]: hu
+            - generic [ref=f45e265]: hugo.piovesan@flowise.fr
+      - main [ref=f45e266]:
+        - generic [ref=f45e267]:
+          - generic [ref=f45e268]:
+            - generic [ref=f45e269]:
+              - generic [ref=f45e271]:
+                - generic [ref=f45e272]:
+                  - heading "Corbeille" [level=1] [ref=f45e273]
+                  - generic [ref=f45e274]: ISO 9001 §7.5
+                - paragraph [ref=f45e275]: Éléments supprimés (mis en corbeille). Restaurez-les pour les faire réapparaître dans leur module.
+              - group [ref=f45e276]:
+                - generic "Aide & exigence Afficher" [ref=f45e277] [cursor=pointer]:
+                  - img [ref=f45e278]
+                  - generic [ref=f45e280]: Aide & exigence
+                  - generic [ref=f45e281]: Afficher
+            - generic [ref=f45e282]:
+              - generic [ref=f45e284]:
+                - paragraph [ref=f45e285]: "2"
+                - paragraph [ref=f45e286]: Éléments en corbeille
+              - generic [ref=f45e288]:
+                - paragraph [ref=f45e289]: "1"
+                - paragraph [ref=f45e290]: Catégories concernées
+            - generic [ref=f45e311]:
+              - heading "Parties prenantes (2)" [level=2] [ref=f45e312]:
+                - text: Parties prenantes
+                - generic [ref=f45e313]: (2)
+              - table [ref=f45e316]:
+                - rowgroup [ref=f45e317]:
+                  - row "Référence Élément Supprimé le Action" [ref=f45e318]:
+                    - columnheader "Référence" [ref=f45e319]
+                    - columnheader "Élément" [ref=f45e320]
+                    - columnheader "Supprimé le" [ref=f45e321]
+                    - columnheader "Action" [ref=f45e322]
+                - rowgroup [ref=f45e323]:
+                  - row "- Indépendants 19/06/2026 à 16:49 Restaurer" [ref=f45e324]:
+                    - cell "-" [ref=f45e325]
+                    - cell "Indépendants" [ref=f45e326]
+                    - cell "19/06/2026 à 16:49" [ref=f45e327]
+                    - cell "Restaurer" [ref=f45e328]:
+                      - button "Restaurer" [ref=f45e329]:
+                        - img
+                        - text: Restaurer
+                  - row "- Clients grands comptes 19/06/2026 à 16:49 Restaurer" [ref=f45e330]:
+                    - cell "-" [ref=f45e331]
+                    - cell "Clients grands comptes" [ref=f45e332]
+                    - cell "19/06/2026 à 16:49" [ref=f45e333]
+                    - cell "Restaurer" [ref=f45e334]:
+                      - button "Restaurer" [ref=f45e335]:
+                        - img
+                        - text: Restaurer
+          - generic [ref=f45e336]:
+            - link "flowise." [ref=f45e337] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f45e338] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f45e339] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f45e340] [cursor=pointer]:
+              - /url: /confidentialite
+    - generic [ref=f45e341]:
+      - generic [ref=f45e342]:
+        - generic [ref=f45e343]:
+          - img [ref=f45e344]
+          - text: ToDo
+        - generic [ref=f45e347]: "1"
+        - img [ref=f45e349]
+      - generic [ref=f45e350]:
+        - textbox "Ajouter une tâche…" [ref=f45e351]
+        - button "Ajouter" [disabled] [ref=f45e352]:
+          - img [ref=f45e353]
+      - list [ref=f45e354]:
+        - listitem [ref=f45e355]:
+          - button "Cocher" [ref=f45e356]
+          - generic [ref=f45e357]: Test
+          - button "Supprimer" [ref=f45e358]:
+            - img [ref=f45e359]
+  - region "Notifications alt+T"
+  - alert [ref=f45e362]

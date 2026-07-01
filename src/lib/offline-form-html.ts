@@ -24,6 +24,11 @@ export type OfflineFormConfig = {
   genereLe: string;
   /** URL absolue de l'endpoint de synchronisation (étape B). */
   syncEndpoint: string;
+  /**
+   * Ajoute une case d'attestation sur l'honneur (requise) avant l'envoi, comme
+   * le formulaire de suivi de prestation en ligne. Hors modèle de champs.
+   */
+  attestation?: boolean;
 };
 
 /** Échappe une chaîne pour une insertion sûre dans du HTML. */
@@ -49,11 +54,30 @@ function safeJson(value: unknown): string {
 }
 
 export function buildOfflineFormHtml(config: OfflineFormConfig): string {
-  const { type, titre, sections, version, token, nomSociete, logoUrl, genereLe, syncEndpoint } =
-    config;
+  const {
+    type,
+    titre,
+    sections,
+    version,
+    token,
+    nomSociete,
+    logoUrl,
+    genereLe,
+    syncEndpoint,
+    attestation,
+  } = config;
 
   // Config embarquée, lue par le script client.
-  const embedded = safeJson({ type, titre, sections, version, token, nomSociete, syncEndpoint });
+  const embedded = safeJson({
+    type,
+    titre,
+    sections,
+    version,
+    token,
+    nomSociete,
+    syncEndpoint,
+    attestation: Boolean(attestation),
+  });
   const versionLabel = version != null ? `modèle v${version}` : "modèle standard";
 
   const logoTag = logoUrl
@@ -153,7 +177,11 @@ ${OFFLINE_RUNTIME}
 const OFFLINE_RUNTIME = String.raw`
 (function () {
   var CFG = JSON.parse(document.getElementById("cfg").textContent);
-  var QUEUE_KEY = "flowise_offline_queue_v1";
+  // Stockage cloisonné : tous les fichiers ouverts en local (file://) partagent
+  // le même localStorage. On isole donc par type + client (token) + environnement
+  // (syncEndpoint), pour qu'un fichier n'affiche et ne synchronise QUE ses propres
+  // suivis, jamais ceux d'un autre formulaire, d'un autre client ou d'un autre env.
+  var QUEUE_KEY = "flowise_hl::" + CFG.type + "::" + CFG.token + "::" + CFG.syncEndpoint;
   var app = document.getElementById("app");
 
   // --- état de saisie (choix uniques + notes, pour showIf et validation) ---
@@ -294,6 +322,11 @@ const OFFLINE_RUNTIME = String.raw`
         var c = sec.champs[j];
         if (!c.required || !visible(c)) continue;
         var v = r[c.key];
+        if (c.type === "matrice" && c.lignes) {
+          var manque = c.lignes.some(function (l) { return !v || v[l.key] == null; });
+          if (manque) return "Merci de noter chaque ligne (section " + sec.n + ").";
+          continue;
+        }
         var empty =
           (c.type === "multi" && (!v || v.length === 0)) ||
           ((c.type === "note5" || c.type === "nps") && v == null) ||
@@ -362,6 +395,7 @@ const OFFLINE_RUNTIME = String.raw`
   // --- vues ---
   function renderForm() {
     var form = el("form");
+    var lastSection = null;
     CFG.sections.forEach(function (sec) {
       var s = el("section");
       var h = el("h2");
@@ -369,7 +403,23 @@ const OFFLINE_RUNTIME = String.raw`
       s.appendChild(h);
       sec.champs.forEach(function (c) { s.appendChild(renderField(c)); });
       form.appendChild(s);
+      lastSection = s;
     });
+
+    // Attestation sur l'honneur (requise), comme le suivi de prestation en ligne.
+    var attestBox = null;
+    if (CFG.attestation && lastSection) {
+      attestBox = el("input", { type: "checkbox", class: "mt", name: "attestation" });
+      var lab = el("label", { class: "opt" }, [
+        attestBox,
+        document.createTextNode(
+          "Je certifie sur l'honneur l'exactitude des renseignements de ce compte rendu, rédigé avec le client.",
+        ),
+      ]);
+      var wrap = el("div", { class: "field" }, [lab]);
+      lastSection.appendChild(wrap);
+    }
+
     var errBox = el("div");
     var submit = el("button", { class: "btn", type: "submit", text: "Enregistrer le suivi" });
     form.appendChild(errBox);
@@ -377,6 +427,12 @@ const OFFLINE_RUNTIME = String.raw`
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       errBox.textContent = "";
+      if (attestBox && !attestBox.checked) {
+        errBox.className = "err";
+        errBox.textContent = "Merci de cocher l'attestation sur l'honneur avant d'enregistrer.";
+        errBox.scrollIntoView({ block: "center" });
+        return;
+      }
       var r = collect(form);
       var msg = validate(r);
       if (msg) { errBox.className = "err"; errBox.textContent = msg; errBox.scrollIntoView({ block: "center" }); return; }

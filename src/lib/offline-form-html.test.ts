@@ -54,6 +54,14 @@ describe("buildOfflineFormHtml", () => {
     expect(html).toContain("idempotencyKey");
   });
 
+  it("cloisonne le stockage local par type + client + environnement", () => {
+    const html = buildOfflineFormHtml(cfg());
+    // La clé de file d'attente combine type, token et endpoint (isolation).
+    expect(html).toContain(
+      '"flowise_hl::" + CFG.type + "::" + CFG.token + "::" + CFG.syncEndpoint',
+    );
+  });
+
   it("affiche « modèle standard » quand la version est nulle", () => {
     const html = buildOfflineFormHtml(cfg({ version: null }));
     expect(html).toContain("modèle standard");
@@ -63,6 +71,13 @@ describe("buildOfflineFormHtml", () => {
     const html = buildOfflineFormHtml(cfg({ nomSociete: "<script>alert(1)</script>" }));
     expect(html).not.toContain("<script>alert(1)</script>");
     expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("active l'attestation sur l'honneur quand demandé", () => {
+    const withAttest = buildOfflineFormHtml(cfg({ attestation: true }));
+    expect(withAttest).toContain('"attestation":true');
+    const without = buildOfflineFormHtml(cfg());
+    expect(without).toContain('"attestation":false');
   });
 
   it("insère le logo quand il est fourni", () => {
