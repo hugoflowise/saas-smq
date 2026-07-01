@@ -111,6 +111,7 @@ export function buildOfflineFormHtml(config: OfflineFormConfig): string {
   .qitem { display:flex; justify-content:space-between; align-items:center; gap:10px; border:1px solid var(--border); border-radius:10px; padding:8px 12px; font-size:13px; margin-bottom:8px; background:#fff; }
   .qitem .st { color:var(--muted); font-size:12px; }
   .qitem .st.pending { color:#92400e; }
+  .qitem .st.sending { color:var(--primary); }
   .qitem .st.sent { color:var(--ok); }
   .done { text-align:center; padding:32px 0; }
   .done .check { width:48px; height:48px; border-radius:999px; background:rgba(22,163,74,.15); color:var(--ok); font-size:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
@@ -321,6 +322,41 @@ const OFFLINE_RUNTIME = String.raw`
       status: "pending",
     });
     writeQueue(q);
+    sync();
+  }
+
+  // --- synchronisation vers le serveur (au retour du réseau) ---
+  var syncing = false;
+  function sync() {
+    if (syncing || !navigator.onLine) return;
+    var q = readQueue();
+    var pending = q.filter(function (i) { return i.status !== "sent"; });
+    if (!pending.length) return;
+    syncing = true;
+
+    var i = 0;
+    function next() {
+      if (i >= pending.length) { syncing = false; renderQueue(); return; }
+      var item = pending[i++];
+      item.status = "sending";
+      writeQueue(q);
+      renderQueue();
+      fetch(CFG.syncEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: item.token,
+          reponses: item.reponses,
+          modeleVersion: item.modeleVersion,
+          idempotencyKey: item.id,
+        }),
+      })
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(new Error("HTTP " + res.status)); })
+        .then(function (data) { item.status = data && data.ok ? "sent" : "pending"; })
+        .catch(function () { item.status = "pending"; })
+        .then(function () { writeQueue(q); renderQueue(); next(); });
+    }
+    next();
   }
 
   // --- vues ---
@@ -361,7 +397,7 @@ const OFFLINE_RUNTIME = String.raw`
     d.appendChild(el("h2", { text: "Suivi enregistré sur cet ordinateur" }));
     var p = el("p", { class: "sub" });
     p.textContent = navigator.onLine
-      ? "Il sera transmis automatiquement (synchronisation à venir)."
+      ? "Transmission en cours…"
       : "Il sera transmis dès le retour d'Internet.";
     d.appendChild(p);
     var again = el("button", { class: "btn sec", type: "button", text: "Saisir un autre suivi" });
@@ -376,16 +412,27 @@ const OFFLINE_RUNTIME = String.raw`
     if (old) old.remove();
     var q = readQueue();
     if (!q.length) return;
+    var nbPending = q.filter(function (i) { return i.status !== "sent"; }).length;
     var box = el("div", { class: "queue", id: "queue" });
-    box.appendChild(el("h3", { text: "Suivis enregistrés (" + q.length + ")" }));
+    var titre = nbPending
+      ? "Suivis enregistrés (" + q.length + ") · " + nbPending + " à transmettre"
+      : "Suivis enregistrés (" + q.length + ") · tout est transmis";
+    box.appendChild(el("h3", { text: titre }));
+    var labels = { sent: "envoyé", sending: "envoi…", pending: navigator.onLine ? "à transmettre" : "en attente (hors-ligne)" };
     q.slice().reverse().forEach(function (item) {
       var when = new Date(item.createdAt).toLocaleString("fr-FR");
       var nom = (item.reponses && (item.reponses.nom || item.reponses.client)) || "Suivi";
+      var st = item.status === "sent" ? "sent" : item.status === "sending" ? "sending" : "pending";
       var line = el("div", { class: "qitem" });
       line.appendChild(el("span", { text: nom + " · " + when }));
-      line.appendChild(el("span", { class: "st " + item.status, text: item.status === "sent" ? "envoyé" : "en attente" }));
+      line.appendChild(el("span", { class: "st " + st, text: labels[st] }));
       box.appendChild(line);
     });
+    if (nbPending && navigator.onLine) {
+      var retry = el("button", { class: "btn sec", type: "button", text: "Réessayer l'envoi maintenant" });
+      retry.addEventListener("click", sync);
+      box.appendChild(retry);
+    }
     var exp = el("button", { class: "link", type: "button", text: "Exporter les réponses (fichier de secours)" });
     exp.addEventListener("click", exportQueue);
     box.appendChild(exp);
@@ -403,10 +450,11 @@ const OFFLINE_RUNTIME = String.raw`
   }
 
   function setOfflineFlag() { document.body.classList.toggle("is-offline", !navigator.onLine); }
-  window.addEventListener("online", setOfflineFlag);
+  window.addEventListener("online", function () { setOfflineFlag(); sync(); });
   window.addEventListener("offline", setOfflineFlag);
   setOfflineFlag();
 
   renderForm();
+  sync();
 })();
 `;

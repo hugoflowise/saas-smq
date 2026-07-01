@@ -2,19 +2,14 @@
 
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
-import { ALERTE_KEYS } from "@/lib/suivi-consultant";
+import { ingestSuiviConsultant } from "@/lib/suivi-ingest";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Json } from "@/lib/supabase/database.types";
 
 const schema = z.object({
   token: z.string().uuid(),
   reponses: z.record(z.string(), z.unknown()),
   modeleVersion: z.number().int().nullable().optional(),
 });
-
-const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
-const num = (v: unknown): number | null => (typeof v === "number" ? v : null);
-const ouiNon = (v: unknown): boolean | null => (v === "Oui" ? true : v === "Non" ? false : null);
 
 /** Soumission publique d'un suivi consultant (terrain, sans authentification). */
 export async function submitSuiviConsultantAction(input: unknown): Promise<ActionResult> {
@@ -32,27 +27,7 @@ export async function submitSuiviConsultantAction(input: unknown): Promise<Actio
     .maybeSingle();
   if (!tenant) return { ok: false, error: "Questionnaire introuvable." };
 
-  const alerte = ALERTE_KEYS.some((k) => r[k] === "Oui");
-
-  const { error } = await admin.from("suivis_consultant").insert({
-    tenant_id: tenant.id,
-    nom: str(r.nom),
-    email: str(r.email),
-    client: str(r.client),
-    poste: str(r.poste),
-    site_intervention: str(r.site_intervention),
-    satisfaction_globale: num(r.satisfaction_globale),
-    note_qualite_suivi_manager: num(r.note_qualite_suivi_manager),
-    nps: num(r.nps),
-    coherence_odm: ouiNon(r.coherence_odm),
-    secteur_nucleaire: ouiNon(r.secteur_nucleaire),
-    besoin_accompagnement: ouiNon(r.besoin_accompagnement),
-    habilitations: ouiNon(r.habilitations),
-    alerte,
-    modele_version: modeleVersion ?? null,
-    reponses: r as unknown as Json,
-  });
-  if (error) return { ok: false, error: error.message };
-
+  const result = await ingestSuiviConsultant(admin, tenant.id, r, modeleVersion ?? null);
+  if (!result.ok) return { ok: false, error: result.error };
   return { ok: true };
 }

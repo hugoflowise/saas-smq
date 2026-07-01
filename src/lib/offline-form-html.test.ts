@@ -48,6 +48,12 @@ describe("buildOfflineFormHtml", () => {
     expect(html).toContain("Satisfaction");
   });
 
+  it("embarque l'endpoint de synchronisation", () => {
+    const html = buildOfflineFormHtml(cfg());
+    expect(html).toContain("/api/hors-ligne/suivi_consultant");
+    expect(html).toContain("idempotencyKey");
+  });
+
   it("affiche « modèle standard » quand la version est nulle", () => {
     const html = buildOfflineFormHtml(cfg({ version: null }));
     expect(html).toContain("modèle standard");
