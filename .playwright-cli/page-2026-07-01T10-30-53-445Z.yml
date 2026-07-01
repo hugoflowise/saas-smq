@@ -1,0 +1,376 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e2]:
+    - complementary [ref=f14e3]:
+      - img "Flowise" [ref=f14e5]
+      - navigation [ref=f14e7]:
+        - generic [ref=f14e8]:
+          - paragraph [ref=f14e9]: Pilotage
+          - list [ref=f14e10]:
+            - listitem [ref=f14e11]:
+              - link "Tableau de bord" [ref=f14e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f14e13]
+                - generic [ref=f14e18]: Tableau de bord
+            - listitem [ref=f14e19]:
+              - link "Mise en route" [ref=f14e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f14e21]
+                - generic [ref=f14e26]: Mise en route
+            - listitem [ref=f14e27]:
+              - link "Calendrier qualité" [ref=f14e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f14e29]
+                - generic [ref=f14e31]: Calendrier qualité
+            - listitem [ref=f14e32]:
+              - link "Réunions QHSE" [ref=f14e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f14e34]
+                - generic [ref=f14e37]: Réunions QHSE
+            - listitem [ref=f14e38]:
+              - link "Mode audit" [ref=f14e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f14e40]
+                - generic [ref=f14e43]: Mode audit
+            - listitem [ref=f14e44]:
+              - link "Effectif & couverture" [ref=f14e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f14e46]
+                - generic [ref=f14e50]: Effectif & couverture
+            - listitem [ref=f14e51]:
+              - link "Suivi consultant" [ref=f14e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f14e53]
+                - generic [ref=f14e56]: Suivi consultant
+        - generic [ref=f14e57]:
+          - paragraph [ref=f14e58]: Stratégie
+          - list [ref=f14e59]:
+            - listitem [ref=f14e60]:
+              - link "Politique qualité" [ref=f14e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f14e62]
+                - generic [ref=f14e65]: Politique qualité
+            - listitem [ref=f14e66]:
+              - link "Contexte" [ref=f14e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f14e68]
+                - generic [ref=f14e70]: Contexte
+            - listitem [ref=f14e71]:
+              - link "Domaine d'application" [ref=f14e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f14e73]
+                - generic [ref=f14e75]: Domaine d'application
+            - listitem [ref=f14e76]:
+              - link "Parties prenantes" [ref=f14e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f14e78]
+                - generic [ref=f14e83]: Parties prenantes
+            - listitem [ref=f14e84]:
+              - link "Risques & opportunités" [ref=f14e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f14e86]
+                - generic [ref=f14e89]: Risques & opportunités
+            - listitem [ref=f14e90]:
+              - link "Modifications du SMQ" [ref=f14e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f14e92]
+                - generic [ref=f14e100]: Modifications du SMQ
+        - generic [ref=f14e101]:
+          - paragraph [ref=f14e102]: Organisation
+          - list [ref=f14e103]:
+            - listitem [ref=f14e104]:
+              - link "Processus" [ref=f14e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f14e106]
+                - generic [ref=f14e111]: Processus
+            - listitem [ref=f14e112]:
+              - link "Documentation" [ref=f14e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f14e114]
+                - generic [ref=f14e118]: Documentation
+            - listitem [ref=f14e119]:
+              - link "Communications" [ref=f14e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f14e121]
+                - generic [ref=f14e124]: Communications
+        - generic [ref=f14e125]:
+          - paragraph [ref=f14e126]: Amélioration
+          - list [ref=f14e127]:
+            - listitem [ref=f14e128]:
+              - link "Plan d'actions" [ref=f14e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f14e130]
+                - generic [ref=f14e133]: Plan d'actions
+            - listitem [ref=f14e134]:
+              - link "Non-conformités" [ref=f14e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f14e136]
+                - generic [ref=f14e138]: Non-conformités
+            - listitem [ref=f14e139]:
+              - link "Remontées" [ref=f14e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f14e141]
+                - generic [ref=f14e143]: Remontées
+        - generic [ref=f14e144]:
+          - paragraph [ref=f14e145]: Évaluation
+          - list [ref=f14e146]:
+            - listitem [ref=f14e147]:
+              - link "Objectifs & indicateurs" [ref=f14e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f14e149]
+                - generic [ref=f14e153]: Objectifs & indicateurs
+            - listitem [ref=f14e154]:
+              - link "Audits" [ref=f14e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f14e156]
+                - generic [ref=f14e159]: Audits
+            - listitem [ref=f14e160]:
+              - link "Auto-diagnostic" [ref=f14e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f14e162]
+                - generic [ref=f14e166]: Auto-diagnostic
+            - listitem [ref=f14e167]:
+              - link "Veille réglementaire" [ref=f14e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f14e169]
+                - generic [ref=f14e173]: Veille réglementaire
+            - listitem [ref=f14e174]:
+              - link "Revues de direction" [ref=f14e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f14e176]
+                - generic [ref=f14e180]: Revues de direction
+        - generic [ref=f14e181]:
+          - paragraph [ref=f14e182]: Parties externes
+          - list [ref=f14e183]:
+            - listitem [ref=f14e184]:
+              - link "Suivi de prestation" [ref=f14e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f14e186]
+                - generic [ref=f14e189]: Suivi de prestation
+            - listitem [ref=f14e190]:
+              - link "Fournisseurs" [ref=f14e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f14e192]
+                - generic [ref=f14e197]: Fournisseurs
+        - generic [ref=f14e198]:
+          - paragraph [ref=f14e199]: Configuration
+          - list [ref=f14e200]:
+            - listitem [ref=f14e201]:
+              - link "Utilisateurs" [ref=f14e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f14e203]
+                - generic [ref=f14e215]: Utilisateurs
+            - listitem [ref=f14e216]:
+              - link "Main courante" [ref=f14e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f14e218]
+                - generic [ref=f14e222]: Main courante
+            - listitem [ref=f14e223]:
+              - link "Paramètres" [ref=f14e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f14e225]
+                - generic [ref=f14e228]: Paramètres
+            - listitem [ref=f14e229]:
+              - link "Corbeille" [ref=f14e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f14e231]
+                - generic [ref=f14e234]: Corbeille
+        - generic [ref=f14e235]:
+          - paragraph [ref=f14e236]: Admin Flowise
+          - list [ref=f14e237]:
+            - listitem [ref=f14e238]:
+              - link "Clients" [ref=f14e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f14e240]
+                - generic [ref=f14e244]: Clients
+            - listitem [ref=f14e245]:
+              - link "Signalements & suggestions" [ref=f14e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f14e247]
+                - generic [ref=f14e250]: Signalements & suggestions
+    - generic [ref=f14e251]:
+      - banner [ref=f14e252]:
+        - generic [ref=f14e253]:
+          - button "Acme Inge" [ref=f14e254]:
+            - img
+            - generic [ref=f14e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f14e256]:
+            - img
+            - generic [ref=f14e257]: Affichage
+        - generic [ref=f14e258]:
+          - button "Signaler ou suggérer" [ref=f14e259]:
+            - img
+            - generic [ref=f14e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f14e261]:
+            - img
+            - generic [ref=f14e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f14e263]:
+            - generic [ref=f14e264]: hu
+            - generic [ref=f14e265]: hugo.piovesan@flowise.fr
+      - main [ref=f14e266]:
+        - generic [ref=f14e267]:
+          - generic [ref=f14e268]:
+            - generic [ref=f14e269]:
+              - link "Objectifs" [ref=f14e270] [cursor=pointer]:
+                - /url: /strategie/objectifs
+              - link "Indicateurs" [ref=f14e271] [cursor=pointer]:
+                - /url: /indicateurs
+            - generic [ref=f14e272]:
+              - generic [ref=f14e273]:
+                - generic [ref=f14e274]:
+                  - generic [ref=f14e275]:
+                    - heading "Objectifs qualité" [level=1] [ref=f14e276]
+                    - generic [ref=f14e277]: ISO 9001 §6.2
+                  - paragraph [ref=f14e278]: Objectifs SMART et leur déclinaison par fonction.
+                - button "Nouvel objectif" [ref=f14e280]
+              - group [ref=f14e281]:
+                - generic "Aide & exigence Afficher" [ref=f14e282] [cursor=pointer]:
+                  - img [ref=f14e283]
+                  - generic [ref=f14e285]: Aide & exigence
+                  - generic [ref=f14e286]: Afficher
+            - generic [ref=f14e288]:
+              - generic [ref=f14e289]:
+                - paragraph [ref=f14e290]: 0%
+                - paragraph [ref=f14e291]: objectifs atteints
+              - generic [ref=f14e292]:
+                - generic [ref=f14e293]: 2 au total
+                - generic [ref=f14e294]: 0 atteints
+                - generic [ref=f14e295]: 2 en cours
+            - generic [ref=f14e296]:
+              - img [ref=f14e297]
+              - generic [ref=f14e299]:
+                - generic [ref=f14e300]: À rattacher pour une traçabilité complète
+                - generic [ref=f14e301]: 1 objectif sans indicateur de mesure. Ouvrez l'objectif pour le rattacher à son processus et à ses indicateurs.
+            - generic [ref=f14e302]:
+              - generic [ref=f14e303]:
+                - heading "Processus test (1)" [level=2] [ref=f14e304]:
+                  - link "Processus test" [ref=f14e305] [cursor=pointer]:
+                    - /url: /processus/872e7d09-3645-4967-b8ed-bf803ee403aa
+                  - generic [ref=f14e306]: (1)
+                - table [ref=f14e309]:
+                  - rowgroup [ref=f14e310]:
+                    - row "Objectif Progression Échéance Statut" [ref=f14e311]:
+                      - columnheader "Objectif" [ref=f14e312]
+                      - columnheader "Progression" [ref=f14e313]
+                      - columnheader "Échéance" [ref=f14e314]
+                      - columnheader "Statut" [ref=f14e315]
+                      - columnheader [ref=f14e316]
+                  - rowgroup [ref=f14e317]:
+                    - 'row "Améliorer la satisfaction client ↳ Indicateur sans processus : 76 % ↳ Taux de satisfaction client : 88 % 57 % / 90 % 63% 2026-08-21 Actif Modifier Supprimer" [ref=f14e318]':
+                      - 'cell "Améliorer la satisfaction client ↳ Indicateur sans processus : 76 % ↳ Taux de satisfaction client : 88 %" [ref=f14e319]':
+                        - text: Améliorer la satisfaction client
+                        - generic [ref=f14e320]:
+                          - 'link "↳ Indicateur sans processus : 76 %" [ref=f14e321] [cursor=pointer]':
+                            - /url: /indicateurs/f3464dcb-3889-4a94-9b0d-4444ba7865cf?from=/strategie/objectifs
+                            - text: ↳ Indicateur sans processus
+                            - generic [ref=f14e322]: ": 76 %"
+                          - 'link "↳ Taux de satisfaction client : 88 %" [ref=f14e323] [cursor=pointer]':
+                            - /url: /indicateurs/6f8ba265-e6eb-4d10-982d-9ca79db81828?from=/strategie/objectifs
+                            - text: ↳ Taux de satisfaction client
+                            - generic [ref=f14e324]: ": 88 %"
+                      - cell "57 % / 90 % 63%" [ref=f14e325]:
+                        - generic [ref=f14e327]:
+                          - generic [ref=f14e328]:
+                            - generic [ref=f14e329]:
+                              - spinbutton "Valeur actuelle" [ref=f14e330]: "57"
+                              - generic [ref=f14e331]: "%"
+                            - generic [ref=f14e332]: / 90 %
+                          - generic [ref=f14e333]: 63%
+                      - cell "2026-08-21" [ref=f14e336]:
+                        - textbox "Échéance" [ref=f14e337]: 2026-08-21
+                      - cell "Actif" [ref=f14e338]:
+                        - combobox "Statut" [ref=f14e339]:
+                          - option "Actif" [selected]
+                          - option "Atteint"
+                          - option "Abandonné"
+                      - cell "Modifier Supprimer" [ref=f14e340]:
+                        - generic [ref=f14e341]:
+                          - button "Modifier" [ref=f14e342]:
+                            - img
+                          - button "Supprimer" [ref=f14e343]:
+                            - img
+                    - row "Établir (direction) Aucune action planifiée pour cet objectif. Créer une action liée" [ref=f14e344]:
+                      - cell "Établir (direction) Aucune action planifiée pour cet objectif. Créer une action liée" [ref=f14e345]:
+                        - generic [ref=f14e346]:
+                          - button "Établir (direction)" [ref=f14e348]:
+                            - img
+                            - text: Établir (direction)
+                          - paragraph [ref=f14e349]: Aucune action planifiée pour cet objectif.
+                          - button "Créer une action liée" [ref=f14e350]:
+                            - img
+                            - text: Créer une action liée
+              - generic [ref=f14e351]:
+                - heading "Recrutement (1)" [level=2] [ref=f14e352]:
+                  - link "Recrutement" [ref=f14e353] [cursor=pointer]:
+                    - /url: /processus/5472174b-6244-40d6-a5d3-826e9ede672b
+                  - generic [ref=f14e354]: (1)
+                - table [ref=f14e357]:
+                  - rowgroup [ref=f14e358]:
+                    - row "Objectif Progression Échéance Statut" [ref=f14e359]:
+                      - columnheader "Objectif" [ref=f14e360]
+                      - columnheader "Progression" [ref=f14e361]
+                      - columnheader "Échéance" [ref=f14e362]
+                      - columnheader "Statut" [ref=f14e363]
+                      - columnheader [ref=f14e364]
+                  - rowgroup [ref=f14e365]:
+                    - row "Recruter en masse Aucun indicateur de mesure 1 / 2 50% Actif Modifier Supprimer" [ref=f14e366]:
+                      - cell "Recruter en masse Aucun indicateur de mesure" [ref=f14e367]:
+                        - text: Recruter en masse
+                        - generic [ref=f14e368]: Aucun indicateur de mesure
+                      - cell "1 / 2 50%" [ref=f14e369]:
+                        - generic [ref=f14e371]:
+                          - generic [ref=f14e372]:
+                            - spinbutton "Valeur actuelle" [ref=f14e374]: "1"
+                            - generic [ref=f14e375]: / 2
+                          - generic [ref=f14e376]: 50%
+                      - cell [ref=f14e379]:
+                        - textbox "Échéance" [ref=f14e380]
+                      - cell "Actif" [ref=f14e381]:
+                        - combobox "Statut" [ref=f14e382]:
+                          - option "Actif" [selected]
+                          - option "Atteint"
+                          - option "Abandonné"
+                      - cell "Modifier Supprimer" [ref=f14e383]:
+                        - generic [ref=f14e384]:
+                          - button "Modifier" [ref=f14e385]:
+                            - img
+                          - button "Supprimer" [ref=f14e386]:
+                            - img
+                    - row "Établir (direction) Aucune action planifiée pour cet objectif. Créer une action liée" [ref=f14e387]:
+                      - cell "Établir (direction) Aucune action planifiée pour cet objectif. Créer une action liée" [ref=f14e388]:
+                        - generic [ref=f14e389]:
+                          - button "Établir (direction)" [ref=f14e391]:
+                            - img
+                            - text: Établir (direction)
+                          - paragraph [ref=f14e392]: Aucune action planifiée pour cet objectif.
+                          - button "Créer une action liée" [ref=f14e393]:
+                            - img
+                            - text: Créer une action liée
+          - generic [ref=f14e394]:
+            - link "flowise." [ref=f14e395] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f14e396] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f14e397] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f14e398] [cursor=pointer]:
+              - /url: /confidentialite
+    - generic [ref=f14e399]:
+      - generic [ref=f14e400]:
+        - generic [ref=f14e401]:
+          - img [ref=f14e402]
+          - text: ToDo
+        - generic [ref=f14e405]: "1"
+        - img [ref=f14e407]
+      - generic [ref=f14e408]:
+        - textbox "Ajouter une tâche…" [ref=f14e409]
+        - button "Ajouter" [disabled] [ref=f14e410]:
+          - img [ref=f14e411]
+      - list [ref=f14e412]:
+        - listitem [ref=f14e413]:
+          - button "Cocher" [ref=f14e414]
+          - generic [ref=f14e415]: Test
+          - button "Supprimer" [ref=f14e416]:
+            - img [ref=f14e417]
+  - region "Notifications alt+T"
+  - alert [ref=f14e420]

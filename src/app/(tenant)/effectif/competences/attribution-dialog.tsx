@@ -1,9 +1,10 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -64,22 +65,6 @@ export function AttributionDialog({
   const [file, setFile] = useState<File | null>(null);
   const [justificatifNom, setJustificatifNom] = useState(attribution?.justificatif_nom ?? null);
   const readOnly = useReadOnly();
-
-  async function handleDelete() {
-    if (!attribution) return;
-    if (!confirm("Retirer cette compétence de la personne ? Elle sera mise à la corbeille."))
-      return;
-    setPending(true);
-    const r = await deleteCompetencePersonneAction(attribution.id);
-    setPending(false);
-    if (r.ok) {
-      toast.success("Compétence retirée.");
-      setOpen(false);
-      router.refresh();
-    } else {
-      toast.error(r.error);
-    }
-  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -335,16 +320,14 @@ export function AttributionDialog({
               {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Attribuer"}
             </Button>
             {isEdit && attribution ? (
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={pending}
-                onClick={handleDelete}
-                className="gap-1.5 text-muted-foreground text-sm hover:text-destructive"
-              >
-                <Trash2 className="size-4" />
-                Retirer
-              </Button>
+              <SupprimerButton
+                action={deleteCompetencePersonneAction}
+                id={attribution.id}
+                label="Retirer"
+                confirmText="Retirer cette compétence de la personne ? Elle sera mise à la corbeille."
+                successText="Compétence retirée."
+                onSuccess={() => setOpen(false)}
+              />
             ) : null}
           </div>
         </form>

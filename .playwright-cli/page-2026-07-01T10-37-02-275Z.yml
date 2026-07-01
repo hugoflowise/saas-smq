@@ -1,0 +1,485 @@
+- generic [ref=f44e1]:
+  - generic [ref=f44e2]:
+    - complementary [ref=f44e3]:
+      - img [ref=f44e536]
+      - navigation [ref=f44e7]:
+        - generic [ref=f44e8]:
+          - paragraph [ref=f44e9]: Pilotage
+          - list [ref=f44e10]:
+            - listitem [ref=f44e11]:
+              - link [ref=f44e537] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f44e13]
+                - generic [ref=f44e18]: Tableau de bord
+            - listitem [ref=f44e19]:
+              - link [ref=f44e538] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f44e21]
+                - generic [ref=f44e26]: Mise en route
+            - listitem [ref=f44e27]:
+              - link [ref=f44e539] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f44e29]
+                - generic [ref=f44e31]: Calendrier qualité
+            - listitem [ref=f44e32]:
+              - link [ref=f44e540] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f44e34]
+                - generic [ref=f44e37]: Réunions QHSE
+            - listitem [ref=f44e38]:
+              - link [ref=f44e541] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f44e40]
+                - generic [ref=f44e43]: Mode audit
+            - listitem [ref=f44e44]:
+              - link [ref=f44e542] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f44e46]
+                - generic [ref=f44e50]: Effectif & couverture
+            - listitem [ref=f44e51]:
+              - link [ref=f44e543] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f44e53]
+                - generic [ref=f44e56]: Suivi consultant
+        - generic [ref=f44e57]:
+          - paragraph [ref=f44e58]: Stratégie
+          - list [ref=f44e59]:
+            - listitem [ref=f44e60]:
+              - link [ref=f44e544] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f44e62]
+                - generic [ref=f44e65]: Politique qualité
+            - listitem [ref=f44e66]:
+              - link [ref=f44e545] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f44e68]
+                - generic [ref=f44e70]: Contexte
+            - listitem [ref=f44e71]:
+              - link [ref=f44e546] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f44e73]
+                - generic [ref=f44e75]: Domaine d'application
+            - listitem [ref=f44e76]:
+              - link [ref=f44e547] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f44e78]
+                - generic [ref=f44e83]: Parties prenantes
+            - listitem [ref=f44e84]:
+              - link [ref=f44e548] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f44e86]
+                - generic [ref=f44e89]: Risques & opportunités
+            - listitem [ref=f44e90]:
+              - link [ref=f44e549] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f44e92]
+                - generic [ref=f44e100]: Modifications du SMQ
+        - generic [ref=f44e101]:
+          - paragraph [ref=f44e102]: Organisation
+          - list [ref=f44e103]:
+            - listitem [ref=f44e104]:
+              - link [ref=f44e550] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f44e106]
+                - generic [ref=f44e111]: Processus
+            - listitem [ref=f44e112]:
+              - link [ref=f44e551] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f44e114]
+                - generic [ref=f44e118]: Documentation
+            - listitem [ref=f44e119]:
+              - link [ref=f44e552] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f44e121]
+                - generic [ref=f44e124]: Communications
+        - generic [ref=f44e125]:
+          - paragraph [ref=f44e126]: Amélioration
+          - list [ref=f44e127]:
+            - listitem [ref=f44e128]:
+              - link [ref=f44e553] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f44e130]
+                - generic [ref=f44e133]: Plan d'actions
+            - listitem [ref=f44e134]:
+              - link [ref=f44e554] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f44e136]
+                - generic [ref=f44e138]: Non-conformités
+            - listitem [ref=f44e139]:
+              - link [ref=f44e555] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f44e141]
+                - generic [ref=f44e143]: Remontées
+        - generic [ref=f44e144]:
+          - paragraph [ref=f44e145]: Évaluation
+          - list [ref=f44e146]:
+            - listitem [ref=f44e147]:
+              - link [ref=f44e556] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f44e149]
+                - generic [ref=f44e153]: Objectifs & indicateurs
+            - listitem [ref=f44e154]:
+              - link [ref=f44e557] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f44e156]
+                - generic [ref=f44e159]: Audits
+            - listitem [ref=f44e160]:
+              - link [ref=f44e558] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f44e162]
+                - generic [ref=f44e166]: Auto-diagnostic
+            - listitem [ref=f44e167]:
+              - link [ref=f44e559] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f44e169]
+                - generic [ref=f44e173]: Veille réglementaire
+            - listitem [ref=f44e174]:
+              - link [ref=f44e560] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f44e176]
+                - generic [ref=f44e180]: Revues de direction
+        - generic [ref=f44e181]:
+          - paragraph [ref=f44e182]: Parties externes
+          - list [ref=f44e183]:
+            - listitem [ref=f44e184]:
+              - link [ref=f44e561] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f44e186]
+                - generic [ref=f44e189]: Suivi de prestation
+            - listitem [ref=f44e190]:
+              - link [ref=f44e562] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f44e192]
+                - generic [ref=f44e197]: Fournisseurs
+        - generic [ref=f44e198]:
+          - paragraph [ref=f44e199]: Configuration
+          - list [ref=f44e200]:
+            - listitem [ref=f44e201]:
+              - link [ref=f44e563] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f44e203]
+                - generic [ref=f44e215]: Utilisateurs
+            - listitem [ref=f44e216]:
+              - link [ref=f44e564] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f44e218]
+                - generic [ref=f44e222]: Main courante
+            - listitem [ref=f44e223]:
+              - link [ref=f44e565] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f44e225]
+                - generic [ref=f44e228]: Paramètres
+            - listitem [ref=f44e229]:
+              - link [ref=f44e566] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f44e231]
+                - generic [ref=f44e234]: Corbeille
+        - generic [ref=f44e235]:
+          - paragraph [ref=f44e236]: Admin Flowise
+          - list [ref=f44e237]:
+            - listitem [ref=f44e238]:
+              - link [ref=f44e567] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f44e240]
+                - generic [ref=f44e244]: Clients
+            - listitem [ref=f44e245]:
+              - link [ref=f44e568] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f44e247]
+                - generic [ref=f44e250]: Signalements & suggestions
+    - generic [ref=f44e251]:
+      - banner [ref=f44e252]:
+        - generic [ref=f44e253]:
+          - button [ref=f44e569]:
+            - img
+            - generic [ref=f44e255]: Acme Inge
+            - img
+          - button [ref=f44e570]:
+            - img
+            - generic [ref=f44e257]: Affichage
+        - generic [ref=f44e258]:
+          - button [ref=f44e571]:
+            - img
+            - generic [ref=f44e260]: Signaler / Suggérer
+          - button [ref=f44e572]:
+            - img
+            - generic [ref=f44e262]: "3"
+          - button [ref=f44e573]:
+            - generic [ref=f44e264]: hu
+            - generic [ref=f44e265]: hugo.piovesan@flowise.fr
+      - main [ref=f44e266]:
+        - generic [ref=f44e267]:
+          - generic [ref=f44e268]:
+            - generic [ref=f44e269]:
+              - generic [ref=f44e270]:
+                - generic [ref=f44e271]:
+                  - generic [ref=f44e272]:
+                    - heading [level=1] [ref=f44e574]: Risques & Opportunités
+                    - generic [ref=f44e274]: ISO 9001 §6.1
+                  - paragraph [ref=f44e275]: Registre R&O et matrice de criticité.
+                - button [ref=f44e575]: Nouveau risque / opportunité
+              - group [ref=f44e278]:
+                - generic [ref=f44e576] [cursor=pointer]:
+                  - img [ref=f44e280]
+                  - generic [ref=f44e282]: Aide & exigence
+                  - generic [ref=f44e283]: Afficher
+            - generic [ref=f44e284]:
+              - generic [ref=f44e286]:
+                - paragraph [ref=f44e287]: "7"
+                - paragraph [ref=f44e288]: Risques
+              - generic [ref=f44e290]:
+                - paragraph [ref=f44e291]: "2"
+                - paragraph [ref=f44e292]: Opportunités
+              - generic [ref=f44e294]:
+                - paragraph [ref=f44e295]: "1"
+                - paragraph [ref=f44e296]: Criticité élevée (> 15)
+              - generic [ref=f44e298]:
+                - paragraph [ref=f44e299]: "2"
+                - paragraph [ref=f44e300]: À revoir
+            - generic [ref=f44e301]:
+              - generic [ref=f44e303]: Matrice de criticité (risques)
+              - generic [ref=f44e305]:
+                - generic [ref=f44e306]:
+                  - generic [ref=f44e308]: Probabilité →
+                  - generic [ref=f44e309]:
+                    - generic [ref=f44e310]:
+                      - generic [ref=f44e312]: "5"
+                      - generic [ref=f44e314]: "10"
+                      - generic [ref=f44e316]: "15"
+                      - generic [ref=f44e318]: "20"
+                      - generic [ref=f44e319]:
+                        - generic [ref=f44e320]: "1"
+                        - generic [ref=f44e321]: "25"
+                      - generic [ref=f44e323]: "4"
+                      - generic [ref=f44e325]: "8"
+                      - generic [ref=f44e327]: "12"
+                      - generic [ref=f44e329]: "16"
+                      - generic [ref=f44e331]: "20"
+                      - generic [ref=f44e333]: "3"
+                      - generic [ref=f44e335]: "6"
+                      - generic [ref=f44e337]: "9"
+                      - generic [ref=f44e339]: "12"
+                      - generic [ref=f44e340]:
+                        - generic [ref=f44e341]: "1"
+                        - generic [ref=f44e342]: "15"
+                      - generic [ref=f44e344]: "2"
+                      - generic [ref=f44e346]: "4"
+                      - generic [ref=f44e347]:
+                        - generic [ref=f44e348]: "2"
+                        - generic [ref=f44e349]: "6"
+                      - generic [ref=f44e351]: "8"
+                      - generic [ref=f44e353]: "10"
+                      - generic [ref=f44e354]:
+                        - generic [ref=f44e355]: "3"
+                        - generic [ref=f44e356]: "1"
+                      - generic [ref=f44e358]: "2"
+                      - generic [ref=f44e360]: "3"
+                      - generic [ref=f44e362]: "4"
+                      - generic [ref=f44e364]: "5"
+                    - paragraph [ref=f44e365]: Gravité →
+                - generic [ref=f44e366]:
+                  - generic [ref=f44e367]: Faible (< 9)
+                  - generic [ref=f44e369]: Moyenne (9 à 15)
+                  - generic [ref=f44e371]: Élevée (> 15)
+                  - generic [ref=f44e373]: Le chiffre dans chaque case = nombre de risques.
+            - table [ref=f44e376]:
+              - rowgroup [ref=f44e377]:
+                - row [ref=f44e577]:
+                  - columnheader [ref=f44e578]: Intitulé
+                  - columnheader [ref=f44e579]: Type
+                  - columnheader [ref=f44e580]: G × P
+                  - columnheader [ref=f44e581]: Criticité brute
+                  - columnheader [ref=f44e582]: Résiduelle
+                  - columnheader [ref=f44e583]: Revue
+                  - columnheader [ref=f44e584]: Statut
+                  - columnheader [ref=f44e386]
+              - rowgroup [ref=f44e387]:
+                - row [ref=f44e585]:
+                  - cell [ref=f44e586]:
+                    - link [ref=f44e587] [cursor=pointer]:
+                      - /url: /risques/476f567e-fbc1-48e9-a686-5ef9ab5df26c
+                      - text: Déclin du marché automobile
+                  - cell [ref=f44e588]: Risque
+                  - cell [ref=f44e589]: 5 × 5
+                  - cell [ref=f44e590]:
+                    - generic [ref=f44e394]: "25"
+                  - cell [ref=f44e591]: "-"
+                  - cell [ref=f44e592]:
+                    - generic [ref=f44e593]: À revoir
+                  - cell [ref=f44e594]:
+                    - combobox [ref=f44e595]
+                  - cell [ref=f44e596]:
+                    - button [ref=f44e597]:
+                      - img
+                - row [ref=f44e598]:
+                  - cell [ref=f44e599]:
+                    - link [ref=f44e600] [cursor=pointer]:
+                      - /url: /risques/0a954523-b342-4d68-82e9-795a0db83814
+                      - text: Intercontrat
+                  - cell [ref=f44e601]: Risque
+                  - cell [ref=f44e602]: 5 × 3
+                  - cell [ref=f44e603]:
+                    - generic [ref=f44e409]: "15"
+                  - cell [ref=f44e604]: "-"
+                  - cell [ref=f44e605]: "-"
+                  - cell [ref=f44e606]:
+                    - combobox [ref=f44e607]
+                  - cell [ref=f44e608]:
+                    - button [ref=f44e609]:
+                      - img
+                - row [ref=f44e610]:
+                  - cell [ref=f44e611]:
+                    - link [ref=f44e612] [cursor=pointer]:
+                      - /url: /risques/750d3fc2-4efb-4e78-88df-7f3c47087753
+                      - text: Perte de marché
+                  - cell [ref=f44e613]: Risque
+                  - cell [ref=f44e614]: 3 × 2
+                  - cell [ref=f44e615]:
+                    - generic [ref=f44e422]: "6"
+                  - cell [ref=f44e616]: "-"
+                  - cell [ref=f44e617]:
+                    - generic [ref=f44e618]: À revoir
+                  - cell [ref=f44e619]:
+                    - combobox [ref=f44e620]
+                  - cell [ref=f44e621]:
+                    - button [ref=f44e622]:
+                      - img
+                - row [ref=f44e623]:
+                  - cell [ref=f44e624]:
+                    - link [ref=f44e625] [cursor=pointer]:
+                      - /url: /risques/17c4259a-f7c9-471b-abe6-7313ab1a12f4
+                      - text: "[TEST PW] Risque modifié"
+                  - cell [ref=f44e626]: Risque
+                  - cell [ref=f44e627]: 3 × 2
+                  - cell [ref=f44e628]:
+                    - generic [ref=f44e437]: "6"
+                  - cell [ref=f44e629]: "-"
+                  - cell [ref=f44e630]: "-"
+                  - cell [ref=f44e631]:
+                    - combobox [ref=f44e632]
+                  - cell [ref=f44e633]:
+                    - button [expanded] [ref=f44e634]:
+                      - img
+                - row [ref=f44e635]:
+                  - cell [ref=f44e636]:
+                    - link [ref=f44e637] [cursor=pointer]:
+                      - /url: /risques/4b775ecf-daef-44cf-8857-a7d7ae5ca34a
+                      - text: "Démarche perçue comme bureaucratique par les pilotes : désengagement et non-respect des procédures"
+                  - cell [ref=f44e638]: Risque
+                  - cell [ref=f44e639]: 1 × 1
+                  - cell [ref=f44e640]:
+                    - generic [ref=f44e450]: "1"
+                  - cell [ref=f44e641]: "-"
+                  - cell [ref=f44e642]: "-"
+                  - cell [ref=f44e643]:
+                    - combobox [ref=f44e644]
+                  - cell [ref=f44e645]:
+                    - button [ref=f44e646]:
+                      - img
+                - row [ref=f44e647]:
+                  - cell [ref=f44e648]:
+                    - link [ref=f44e649] [cursor=pointer]:
+                      - /url: /risques/2431c64b-a192-4a6e-959d-9140c80abd78
+                      - text: Échec ou report de la certification ISO 9001 visée au Q4 2026 / Q1 2027 (charge documentaire, retard de validation, non-conformités majeures à l'audit)
+                  - cell [ref=f44e650]: Risque
+                  - cell [ref=f44e651]: 1 × 1
+                  - cell [ref=f44e652]:
+                    - generic [ref=f44e463]: "1"
+                  - cell [ref=f44e653]: "-"
+                  - cell [ref=f44e654]: "-"
+                  - cell [ref=f44e655]:
+                    - combobox [ref=f44e656]
+                  - cell [ref=f44e657]:
+                    - button [ref=f44e658]:
+                      - img
+                - row [ref=f44e659]:
+                  - cell [ref=f44e660]:
+                    - link [ref=f44e661] [cursor=pointer]:
+                      - /url: /risques/af4bb0a9-4367-4170-bfe7-462c0bca71fa
+                      - text: Circulation de documents obsolètes ou de versions multiples (mauvaise utilisation d'anciennes versions par les collaborateurs)
+                  - cell [ref=f44e662]: Risque
+                  - cell [ref=f44e663]: 1 × 1
+                  - cell [ref=f44e664]:
+                    - generic [ref=f44e476]: "1"
+                  - cell [ref=f44e665]: "-"
+                  - cell [ref=f44e666]: "-"
+                  - cell [ref=f44e667]:
+                    - combobox [ref=f44e668]
+                  - cell [ref=f44e669]:
+                    - button [ref=f44e670]:
+                      - img
+                - row [ref=f44e671]:
+                  - cell [ref=f44e672]:
+                    - link [ref=f44e673] [cursor=pointer]:
+                      - /url: /risques/f51e6bb9-4a36-45e9-9f35-5a9f07077b8f
+                      - text: "Différenciation commerciale par la certification ISO 9001 : accès facilité aux grands comptes et donneurs d'ordre publics"
+                  - cell [ref=f44e674]: Opportunité
+                  - cell [ref=f44e675]: 1 × 1
+                  - cell [ref=f44e676]:
+                    - generic [ref=f44e489]: "1"
+                  - cell [ref=f44e677]: "-"
+                  - cell [ref=f44e678]: "-"
+                  - cell [ref=f44e679]:
+                    - combobox [ref=f44e680]
+                  - cell [ref=f44e681]:
+                    - button [ref=f44e682]:
+                      - img
+                - row [ref=f44e683]:
+                  - cell [ref=f44e684]:
+                    - link [ref=f44e685] [cursor=pointer]:
+                      - /url: /risques/4a387df4-a03d-4c1b-b5d8-204bfdaa7f64
+                      - text: "Capitalisation des connaissances internes via la documentation structurée : onboarding plus rapide, montée en compétence des alternants"
+                  - cell [ref=f44e686]: Opportunité
+                  - cell [ref=f44e687]: 1 × 1
+                  - cell [ref=f44e688]:
+                    - generic [ref=f44e502]: "1"
+                  - cell [ref=f44e689]: "-"
+                  - cell [ref=f44e690]: "-"
+                  - cell [ref=f44e691]:
+                    - combobox [ref=f44e692]
+                  - cell [ref=f44e693]:
+                    - button [ref=f44e694]:
+                      - img
+          - generic [ref=f44e509]:
+            - link [ref=f44e695] [cursor=pointer]:
+              - /url: https://flowise.fr
+              - text: flowise.
+            - link [ref=f44e696] [cursor=pointer]:
+              - /url: /mentions-legales
+              - text: Mentions légales
+            - link [ref=f44e697] [cursor=pointer]:
+              - /url: /cgu
+              - text: Conditions d'utilisation
+            - link [ref=f44e698] [cursor=pointer]:
+              - /url: /confidentialite
+              - text: Confidentialité
+    - generic [ref=f44e514]:
+      - generic [ref=f44e515]:
+        - generic [ref=f44e516]:
+          - img [ref=f44e517]
+          - text: ToDo
+        - generic [ref=f44e520]: "1"
+        - img [ref=f44e522]
+      - generic [ref=f44e523]:
+        - textbox [ref=f44e699]:
+          - /placeholder: Ajouter une tâche…
+        - button [disabled] [ref=f44e700]:
+          - img [ref=f44e526]
+      - list [ref=f44e527]:
+        - listitem [ref=f44e528]:
+          - button [ref=f44e701]
+          - generic [ref=f44e530]: Test
+          - button [ref=f44e702]:
+            - img [ref=f44e532]
+  - region "Notifications alt+T"
+  - alert [ref=f44e535]
+  - dialog "Confirmer la suppression" [ref=f44e706]:
+    - generic [ref=f44e707]:
+      - heading "Confirmer la suppression" [level=2] [ref=f44e708]
+      - paragraph [ref=f44e709]: Supprimer ce risque ? Il sera mis à la corbeille.
+    - generic [ref=f44e710]:
+      - button "Annuler" [active] [ref=f44e711]
+      - button "Supprimer" [ref=f44e712]
+    - button "Close" [ref=f44e713]:
+      - img
+      - generic [ref=f44e714]: Close

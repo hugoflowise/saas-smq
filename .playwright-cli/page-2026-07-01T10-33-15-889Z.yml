@@ -1,0 +1,717 @@
+- generic [active] [ref=f31e1]:
+  - generic [ref=f31e2]:
+    - complementary [ref=f31e3]:
+      - img "Flowise" [ref=f31e5]
+      - navigation [ref=f31e7]:
+        - generic [ref=f31e8]:
+          - paragraph [ref=f31e9]: Pilotage
+          - list [ref=f31e10]:
+            - listitem [ref=f31e11]:
+              - link "Tableau de bord" [ref=f31e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f31e13]
+                - generic [ref=f31e18]: Tableau de bord
+            - listitem [ref=f31e19]:
+              - link "Mise en route" [ref=f31e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f31e21]
+                - generic [ref=f31e26]: Mise en route
+            - listitem [ref=f31e27]:
+              - link "Calendrier qualité" [ref=f31e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f31e29]
+                - generic [ref=f31e31]: Calendrier qualité
+            - listitem [ref=f31e32]:
+              - link "Réunions QHSE" [ref=f31e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f31e34]
+                - generic [ref=f31e37]: Réunions QHSE
+            - listitem [ref=f31e38]:
+              - link "Mode audit" [ref=f31e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f31e40]
+                - generic [ref=f31e43]: Mode audit
+            - listitem [ref=f31e44]:
+              - link "Effectif & couverture" [ref=f31e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f31e46]
+                - generic [ref=f31e50]: Effectif & couverture
+            - listitem [ref=f31e51]:
+              - link "Suivi consultant" [ref=f31e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f31e53]
+                - generic [ref=f31e56]: Suivi consultant
+        - generic [ref=f31e57]:
+          - paragraph [ref=f31e58]: Stratégie
+          - list [ref=f31e59]:
+            - listitem [ref=f31e60]:
+              - link "Politique qualité" [ref=f31e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f31e62]
+                - generic [ref=f31e65]: Politique qualité
+            - listitem [ref=f31e66]:
+              - link "Contexte" [ref=f31e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f31e68]
+                - generic [ref=f31e70]: Contexte
+            - listitem [ref=f31e71]:
+              - link "Domaine d'application" [ref=f31e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f31e73]
+                - generic [ref=f31e75]: Domaine d'application
+            - listitem [ref=f31e76]:
+              - link "Parties prenantes" [ref=f31e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f31e78]
+                - generic [ref=f31e83]: Parties prenantes
+            - listitem [ref=f31e84]:
+              - link "Risques & opportunités" [ref=f31e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f31e86]
+                - generic [ref=f31e89]: Risques & opportunités
+            - listitem [ref=f31e90]:
+              - link "Modifications du SMQ" [ref=f31e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f31e92]
+                - generic [ref=f31e100]: Modifications du SMQ
+        - generic [ref=f31e101]:
+          - paragraph [ref=f31e102]: Organisation
+          - list [ref=f31e103]:
+            - listitem [ref=f31e104]:
+              - link "Processus" [ref=f31e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f31e106]
+                - generic [ref=f31e111]: Processus
+            - listitem [ref=f31e112]:
+              - link "Documentation" [ref=f31e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f31e114]
+                - generic [ref=f31e118]: Documentation
+            - listitem [ref=f31e119]:
+              - link "Communications" [ref=f31e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f31e121]
+                - generic [ref=f31e124]: Communications
+        - generic [ref=f31e125]:
+          - paragraph [ref=f31e126]: Amélioration
+          - list [ref=f31e127]:
+            - listitem [ref=f31e128]:
+              - link "Plan d'actions" [ref=f31e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f31e130]
+                - generic [ref=f31e133]: Plan d'actions
+            - listitem [ref=f31e134]:
+              - link "Non-conformités" [ref=f31e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f31e136]
+                - generic [ref=f31e138]: Non-conformités
+            - listitem [ref=f31e139]:
+              - link "Remontées" [ref=f31e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f31e141]
+                - generic [ref=f31e143]: Remontées
+        - generic [ref=f31e144]:
+          - paragraph [ref=f31e145]: Évaluation
+          - list [ref=f31e146]:
+            - listitem [ref=f31e147]:
+              - link "Objectifs & indicateurs" [ref=f31e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f31e149]
+                - generic [ref=f31e153]: Objectifs & indicateurs
+            - listitem [ref=f31e154]:
+              - link "Audits" [ref=f31e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f31e156]
+                - generic [ref=f31e159]: Audits
+            - listitem [ref=f31e160]:
+              - link "Auto-diagnostic" [ref=f31e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f31e162]
+                - generic [ref=f31e166]: Auto-diagnostic
+            - listitem [ref=f31e167]:
+              - link "Veille réglementaire" [ref=f31e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f31e169]
+                - generic [ref=f31e173]: Veille réglementaire
+            - listitem [ref=f31e174]:
+              - link "Revues de direction" [ref=f31e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f31e176]
+                - generic [ref=f31e180]: Revues de direction
+        - generic [ref=f31e181]:
+          - paragraph [ref=f31e182]: Parties externes
+          - list [ref=f31e183]:
+            - listitem [ref=f31e184]:
+              - link "Suivi de prestation" [ref=f31e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f31e186]
+                - generic [ref=f31e189]: Suivi de prestation
+            - listitem [ref=f31e190]:
+              - link "Fournisseurs" [ref=f31e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f31e192]
+                - generic [ref=f31e197]: Fournisseurs
+        - generic [ref=f31e198]:
+          - paragraph [ref=f31e199]: Configuration
+          - list [ref=f31e200]:
+            - listitem [ref=f31e201]:
+              - link "Utilisateurs" [ref=f31e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f31e203]
+                - generic [ref=f31e215]: Utilisateurs
+            - listitem [ref=f31e216]:
+              - link "Main courante" [ref=f31e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f31e218]
+                - generic [ref=f31e222]: Main courante
+            - listitem [ref=f31e223]:
+              - link "Paramètres" [ref=f31e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f31e225]
+                - generic [ref=f31e228]: Paramètres
+            - listitem [ref=f31e229]:
+              - link "Corbeille" [ref=f31e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f31e231]
+                - generic [ref=f31e234]: Corbeille
+        - generic [ref=f31e235]:
+          - paragraph [ref=f31e236]: Admin Flowise
+          - list [ref=f31e237]:
+            - listitem [ref=f31e238]:
+              - link "Clients" [ref=f31e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f31e240]
+                - generic [ref=f31e244]: Clients
+            - listitem [ref=f31e245]:
+              - link "Signalements & suggestions" [ref=f31e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f31e247]
+                - generic [ref=f31e250]: Signalements & suggestions
+    - generic [ref=f31e251]:
+      - banner [ref=f31e252]:
+        - generic [ref=f31e253]:
+          - button "Acme Inge" [ref=f31e254]:
+            - img
+            - generic [ref=f31e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f31e256]:
+            - img
+            - generic [ref=f31e257]: Affichage
+        - generic [ref=f31e258]:
+          - button "Signaler ou suggérer" [ref=f31e259]:
+            - img
+            - generic [ref=f31e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f31e261]:
+            - img
+            - generic [ref=f31e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f31e263]:
+            - generic [ref=f31e264]: hu
+            - generic [ref=f31e265]: hugo.piovesan@flowise.fr
+      - main [ref=f31e266]:
+        - generic [ref=f31e267]:
+          - generic [ref=f31e268]:
+            - generic [ref=f31e269]:
+              - generic [ref=f31e271]:
+                - generic [ref=f31e272]:
+                  - heading "Auto-diagnostic ISO 9001:2015" [level=1] [ref=f31e273]
+                  - generic [ref=f31e274]: ISO 9001:2015
+                - paragraph [ref=f31e275]: Auto-évaluation de la conformité, chapitre par chapitre.
+              - group [ref=f31e276]:
+                - generic "Aide & exigence Afficher" [ref=f31e277] [cursor=pointer]:
+                  - img [ref=f31e278]
+                  - generic [ref=f31e280]: Aide & exigence
+                  - generic [ref=f31e281]: Afficher
+            - generic [ref=f31e283]:
+              - generic [ref=f31e284]:
+                - paragraph [ref=f31e285]: 7%
+                - paragraph [ref=f31e286]: conforme
+              - generic [ref=f31e287]:
+                - generic [ref=f31e288]:
+                  - paragraph [ref=f31e289]: "2"
+                  - paragraph [ref=f31e290]: Conformes
+                - generic [ref=f31e291]:
+                  - paragraph [ref=f31e292]: "0"
+                  - paragraph [ref=f31e293]: À réévaluer
+                - generic [ref=f31e294]:
+                  - paragraph [ref=f31e295]: "1"
+                  - paragraph [ref=f31e296]: Points d'attention
+                - generic [ref=f31e297]:
+                  - paragraph [ref=f31e298]: "1"
+                  - paragraph [ref=f31e299]: Non-conformités
+                - generic [ref=f31e300]:
+                  - paragraph [ref=f31e301]: "26"
+                  - paragraph [ref=f31e302]: Non évalués
+            - generic [ref=f31e303]:
+              - generic [ref=f31e304]:
+                - heading "4. Contexte de l'organisme" [level=2] [ref=f31e305]
+                - generic [ref=f31e306]:
+                  - generic [ref=f31e307]:
+                    - generic [ref=f31e310]:
+                      - paragraph [ref=f31e311]: 4.1 Compréhension de l'organisme et de son contexte
+                      - paragraph [ref=f31e312]: "Preuves : Analyse SWOT/PESTEL documentée, revue annuelle"
+                      - paragraph [ref=f31e313]: Évalué le 18/06/2026 · à revoir avant le 18/06/2027
+                    - generic [ref=f31e314]:
+                      - combobox [ref=f31e315]:
+                        - option "Non évalué"
+                        - option "Conforme"
+                        - option "Point fort" [selected]
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e316]
+                  - generic [ref=f31e317]:
+                    - generic [ref=f31e320]:
+                      - paragraph [ref=f31e321]: 4.2 Besoins et attentes des parties intéressées
+                      - paragraph [ref=f31e322]: "Preuves : Registre des parties intéressées et de leurs exigences"
+                      - paragraph [ref=f31e323]: Évalué le 18/06/2026
+                    - generic [ref=f31e324]:
+                      - combobox [ref=f31e325]:
+                        - option "Non évalué"
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention" [selected]
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e326]
+                  - generic [ref=f31e327]:
+                    - generic [ref=f31e330]:
+                      - paragraph [ref=f31e331]: 4.3 Périmètre du système de management de la qualité
+                      - paragraph [ref=f31e332]: "Preuves : Domaine d'application documenté, exclusions justifiées"
+                      - paragraph [ref=f31e333]: Évalué le 18/06/2026
+                    - generic [ref=f31e334]:
+                      - combobox [ref=f31e335]:
+                        - option "Non évalué"
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure" [selected]
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e336]
+                  - generic [ref=f31e337]:
+                    - generic [ref=f31e340]:
+                      - paragraph [ref=f31e341]: 4.4 Système de management de la qualité et ses processus
+                      - paragraph [ref=f31e342]: "Preuves : Cartographie des processus, interactions, pilotes"
+                      - paragraph [ref=f31e343]: Évalué le 18/06/2026 · à revoir avant le 18/06/2027
+                    - generic [ref=f31e344]:
+                      - combobox [ref=f31e345]:
+                        - option "Non évalué"
+                        - option "Conforme" [selected]
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e346]
+              - generic [ref=f31e347]:
+                - heading "5. Leadership" [level=2] [ref=f31e348]
+                - generic [ref=f31e349]:
+                  - generic [ref=f31e350]:
+                    - generic [ref=f31e353]:
+                      - paragraph [ref=f31e354]: 5.1 Leadership et engagement
+                      - paragraph [ref=f31e355]: "Preuves : Implication de la direction, revues de direction"
+                    - generic [ref=f31e356]:
+                      - combobox [ref=f31e357]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e358]
+                  - generic [ref=f31e359]:
+                    - generic [ref=f31e362]:
+                      - paragraph [ref=f31e363]: 5.1.2 Orientation client
+                      - paragraph [ref=f31e364]: "Preuves : Prise en compte des exigences clients et réglementaires"
+                    - generic [ref=f31e365]:
+                      - combobox [ref=f31e366]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e367]
+                  - generic [ref=f31e368]:
+                    - generic [ref=f31e371]:
+                      - paragraph [ref=f31e372]: 5.2 Politique qualité
+                      - paragraph [ref=f31e373]: "Preuves : Politique qualité documentée, datée, signée, diffusée"
+                    - generic [ref=f31e374]:
+                      - combobox [ref=f31e375]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e376]
+                  - generic [ref=f31e377]:
+                    - generic [ref=f31e380]:
+                      - paragraph [ref=f31e381]: 5.3 Rôles, responsabilités et autorités
+                      - paragraph [ref=f31e382]: "Preuves : Organigramme, fiches de fonction, responsabilités SMQ"
+                    - generic [ref=f31e383]:
+                      - combobox [ref=f31e384]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e385]
+              - generic [ref=f31e386]:
+                - heading "6. Planification" [level=2] [ref=f31e387]
+                - generic [ref=f31e388]:
+                  - generic [ref=f31e389]:
+                    - generic [ref=f31e392]:
+                      - paragraph [ref=f31e393]: 6.1 Actions face aux risques et opportunités
+                      - paragraph [ref=f31e394]: "Preuves : Registre R&O, cotation, plans de traitement"
+                    - generic [ref=f31e395]:
+                      - combobox [ref=f31e396]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e397]
+                  - generic [ref=f31e398]:
+                    - generic [ref=f31e401]:
+                      - paragraph [ref=f31e402]: 6.2 Objectifs qualité et planification
+                      - paragraph [ref=f31e403]: "Preuves : Objectifs SMART, plans d'action associés"
+                    - generic [ref=f31e404]:
+                      - combobox [ref=f31e405]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e406]
+                  - generic [ref=f31e407]:
+                    - generic [ref=f31e410]:
+                      - paragraph [ref=f31e411]: 6.3 Planification des modifications
+                      - paragraph [ref=f31e412]: "Preuves : Gestion des modifications du SMQ"
+                    - generic [ref=f31e413]:
+                      - combobox [ref=f31e414]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e415]
+              - generic [ref=f31e416]:
+                - heading "7. Support" [level=2] [ref=f31e417]
+                - generic [ref=f31e418]:
+                  - generic [ref=f31e419]:
+                    - generic [ref=f31e422]:
+                      - paragraph [ref=f31e423]: 7.1 Ressources
+                      - paragraph [ref=f31e424]: "Preuves : Ressources humaines, infrastructures, environnement"
+                    - generic [ref=f31e425]:
+                      - combobox [ref=f31e426]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e427]
+                  - generic [ref=f31e428]:
+                    - generic [ref=f31e431]:
+                      - paragraph [ref=f31e432]: 7.2 Compétences
+                      - paragraph [ref=f31e433]: "Preuves : Matrice de compétences, preuves de qualification"
+                    - generic [ref=f31e434]:
+                      - combobox [ref=f31e435]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e436]
+                  - generic [ref=f31e437]:
+                    - generic [ref=f31e440]:
+                      - paragraph [ref=f31e441]: 7.3 Sensibilisation
+                      - paragraph [ref=f31e442]: "Preuves : Sensibilisation du personnel à la politique et aux objectifs"
+                    - generic [ref=f31e443]:
+                      - combobox [ref=f31e444]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e445]
+                  - generic [ref=f31e446]:
+                    - generic [ref=f31e449]:
+                      - paragraph [ref=f31e450]: 7.4 Communication
+                      - paragraph [ref=f31e451]: "Preuves : Plan de communication interne/externe"
+                    - generic [ref=f31e452]:
+                      - combobox [ref=f31e453]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e454]
+                  - generic [ref=f31e455]:
+                    - generic [ref=f31e458]:
+                      - paragraph [ref=f31e459]: 7.5 Informations documentées
+                      - paragraph [ref=f31e460]: "Preuves : Maîtrise documentaire : création, mise à jour, diffusion"
+                    - generic [ref=f31e461]:
+                      - combobox [ref=f31e462]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e463]
+              - generic [ref=f31e464]:
+                - heading "8. Réalisation des activités" [level=2] [ref=f31e465]
+                - generic [ref=f31e466]:
+                  - generic [ref=f31e467]:
+                    - generic [ref=f31e470]:
+                      - paragraph [ref=f31e471]: 8.1 Planification et maîtrise opérationnelles
+                      - paragraph [ref=f31e472]: "Preuves : Planification des prestations, critères de maîtrise"
+                    - generic [ref=f31e473]:
+                      - combobox [ref=f31e474]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e475]
+                  - generic [ref=f31e476]:
+                    - generic [ref=f31e479]:
+                      - paragraph [ref=f31e480]: 8.2 Exigences relatives aux produits et services
+                      - paragraph [ref=f31e481]: "Preuves : Revue des exigences, revue d'offre/contrat"
+                    - generic [ref=f31e482]:
+                      - combobox [ref=f31e483]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e484]
+                  - generic [ref=f31e485]:
+                    - generic [ref=f31e488]:
+                      - paragraph [ref=f31e489]: 8.3 Conception et développement
+                      - paragraph [ref=f31e490]: "Preuves : Maîtrise de la conception (souvent exclu en ESN)"
+                    - generic [ref=f31e491]:
+                      - combobox [ref=f31e492]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e493]
+                  - generic [ref=f31e494]:
+                    - generic [ref=f31e497]:
+                      - paragraph [ref=f31e498]: 8.4 Maîtrise des prestataires externes
+                      - paragraph [ref=f31e499]: "Preuves : Évaluation et suivi des sous-traitants/fournisseurs"
+                    - generic [ref=f31e500]:
+                      - combobox [ref=f31e501]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e502]
+                  - generic [ref=f31e503]:
+                    - generic [ref=f31e506]:
+                      - paragraph [ref=f31e507]: 8.5 Production et prestation de service
+                      - paragraph [ref=f31e508]: "Preuves : Maîtrise de la mise en mission et du suivi de prestation"
+                    - generic [ref=f31e509]:
+                      - combobox [ref=f31e510]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e511]
+                  - generic [ref=f31e512]:
+                    - generic [ref=f31e515]:
+                      - paragraph [ref=f31e516]: 8.6 Libération des produits et services
+                      - paragraph [ref=f31e517]: "Preuves : Vérification de conformité avant livraison"
+                    - generic [ref=f31e518]:
+                      - combobox [ref=f31e519]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e520]
+                  - generic [ref=f31e521]:
+                    - generic [ref=f31e524]:
+                      - paragraph [ref=f31e525]: 8.7 Maîtrise des éléments de sortie non conformes
+                      - paragraph [ref=f31e526]: "Preuves : Traitement des non-conformités produit/service"
+                    - generic [ref=f31e527]:
+                      - combobox [ref=f31e528]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e529]
+              - generic [ref=f31e530]:
+                - heading "9. Évaluation des performances" [level=2] [ref=f31e531]
+                - generic [ref=f31e532]:
+                  - generic [ref=f31e533]:
+                    - generic [ref=f31e536]:
+                      - paragraph [ref=f31e537]: 9.1 Surveillance, mesure, analyse et évaluation
+                      - paragraph [ref=f31e538]: "Preuves : Tableau de bord d'indicateurs, analyses"
+                    - generic [ref=f31e539]:
+                      - combobox [ref=f31e540]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e541]
+                  - generic [ref=f31e542]:
+                    - generic [ref=f31e545]:
+                      - paragraph [ref=f31e546]: 9.1.2 Satisfaction du client
+                      - paragraph [ref=f31e547]: "Preuves : Enquêtes de satisfaction, traitement des retours"
+                    - generic [ref=f31e548]:
+                      - combobox [ref=f31e549]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e550]
+                  - generic [ref=f31e551]:
+                    - generic [ref=f31e554]:
+                      - paragraph [ref=f31e555]: 9.2 Audit interne
+                      - paragraph [ref=f31e556]: "Preuves : Programme d'audit, rapports, écarts"
+                    - generic [ref=f31e557]:
+                      - combobox [ref=f31e558]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e559]
+                  - generic [ref=f31e560]:
+                    - generic [ref=f31e563]:
+                      - paragraph [ref=f31e564]: 9.3 Revue de direction
+                      - paragraph [ref=f31e565]: "Preuves : Comptes rendus de revue de direction, décisions"
+                    - generic [ref=f31e566]:
+                      - combobox [ref=f31e567]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e568]
+              - generic [ref=f31e569]:
+                - heading "10. Amélioration" [level=2] [ref=f31e570]
+                - generic [ref=f31e571]:
+                  - generic [ref=f31e572]:
+                    - generic [ref=f31e575]:
+                      - paragraph [ref=f31e576]: 10.1 Amélioration — généralités
+                      - paragraph [ref=f31e577]: "Preuves : Démarche d'amélioration continue"
+                    - generic [ref=f31e578]:
+                      - combobox [ref=f31e579]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e580]
+                  - generic [ref=f31e581]:
+                    - generic [ref=f31e584]:
+                      - paragraph [ref=f31e585]: 10.2 Non-conformité et action corrective
+                      - paragraph [ref=f31e586]: "Preuves : Fiches NC, analyse des causes, actions correctives"
+                    - generic [ref=f31e587]:
+                      - combobox [ref=f31e588]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e589]
+                  - generic [ref=f31e590]:
+                    - generic [ref=f31e593]:
+                      - paragraph [ref=f31e594]: 10.3 Amélioration continue
+                      - paragraph [ref=f31e595]: "Preuves : Bilan d'efficacité du SMQ, axes de progrès"
+                    - generic [ref=f31e596]:
+                      - combobox [ref=f31e597]:
+                        - option "Non évalué" [selected]
+                        - option "Conforme"
+                        - option "Point fort"
+                        - option "Point d'attention"
+                        - option "NC mineure"
+                        - option "NC majeure"
+                        - option "Non applicable"
+                      - textbox "Commentaire…" [ref=f31e598]
+          - generic [ref=f31e599]:
+            - link "flowise." [ref=f31e600] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f31e601] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f31e602] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f31e603] [cursor=pointer]:
+              - /url: /confidentialite
+    - generic [ref=f31e604]:
+      - generic [ref=f31e605]:
+        - generic [ref=f31e606]:
+          - img [ref=f31e607]
+          - text: ToDo
+        - generic [ref=f31e610]: "1"
+        - img [ref=f31e612]
+      - generic [ref=f31e613]:
+        - textbox "Ajouter une tâche…" [ref=f31e614]
+        - button "Ajouter" [disabled] [ref=f31e615]:
+          - img [ref=f31e616]
+      - list [ref=f31e617]:
+        - listitem [ref=f31e618]:
+          - button "Cocher" [ref=f31e619]
+          - generic [ref=f31e620]: Test
+          - button "Supprimer" [ref=f31e621]:
+            - img [ref=f31e622]
+  - region "Notifications alt+T"
+  - alert [ref=f31e625]

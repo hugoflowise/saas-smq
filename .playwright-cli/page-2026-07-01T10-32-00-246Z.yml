@@ -1,0 +1,377 @@
+- generic [active] [ref=f22e1]:
+  - generic [ref=f22e2]:
+    - complementary [ref=f22e3]:
+      - img "Flowise" [ref=f22e5]
+      - navigation [ref=f22e7]:
+        - generic [ref=f22e8]:
+          - paragraph [ref=f22e9]: Pilotage
+          - list [ref=f22e10]:
+            - listitem [ref=f22e11]:
+              - link "Tableau de bord" [ref=f22e12] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=f22e13]
+                - generic [ref=f22e18]: Tableau de bord
+            - listitem [ref=f22e19]:
+              - link "Mise en route" [ref=f22e20] [cursor=pointer]:
+                - /url: /mise-en-route
+                - img [ref=f22e21]
+                - generic [ref=f22e26]: Mise en route
+            - listitem [ref=f22e27]:
+              - link "Calendrier qualité" [ref=f22e28] [cursor=pointer]:
+                - /url: /calendrier
+                - img [ref=f22e29]
+                - generic [ref=f22e31]: Calendrier qualité
+            - listitem [ref=f22e32]:
+              - link "Réunions QHSE" [ref=f22e33] [cursor=pointer]:
+                - /url: /reunions
+                - img [ref=f22e34]
+                - generic [ref=f22e37]: Réunions QHSE
+            - listitem [ref=f22e38]:
+              - link "Mode audit" [ref=f22e39] [cursor=pointer]:
+                - /url: /mode-audit
+                - img [ref=f22e40]
+                - generic [ref=f22e43]: Mode audit
+            - listitem [ref=f22e44]:
+              - link "Effectif & couverture" [ref=f22e45] [cursor=pointer]:
+                - /url: /effectif
+                - img [ref=f22e46]
+                - generic [ref=f22e50]: Effectif & couverture
+            - listitem [ref=f22e51]:
+              - link "Suivi consultant" [ref=f22e52] [cursor=pointer]:
+                - /url: /suivi-consultant
+                - img [ref=f22e53]
+                - generic [ref=f22e56]: Suivi consultant
+        - generic [ref=f22e57]:
+          - paragraph [ref=f22e58]: Stratégie
+          - list [ref=f22e59]:
+            - listitem [ref=f22e60]:
+              - link "Politique qualité" [ref=f22e61] [cursor=pointer]:
+                - /url: /strategie/politique
+                - img [ref=f22e62]
+                - generic [ref=f22e65]: Politique qualité
+            - listitem [ref=f22e66]:
+              - link "Contexte" [ref=f22e67] [cursor=pointer]:
+                - /url: /strategie/contexte
+                - img [ref=f22e68]
+                - generic [ref=f22e70]: Contexte
+            - listitem [ref=f22e71]:
+              - link "Domaine d'application" [ref=f22e72] [cursor=pointer]:
+                - /url: /strategie/domaine
+                - img [ref=f22e73]
+                - generic [ref=f22e75]: Domaine d'application
+            - listitem [ref=f22e76]:
+              - link "Parties prenantes" [ref=f22e77] [cursor=pointer]:
+                - /url: /strategie/parties-prenantes
+                - img [ref=f22e78]
+                - generic [ref=f22e83]: Parties prenantes
+            - listitem [ref=f22e84]:
+              - link "Risques & opportunités" [ref=f22e85] [cursor=pointer]:
+                - /url: /risques
+                - img [ref=f22e86]
+                - generic [ref=f22e89]: Risques & opportunités
+            - listitem [ref=f22e90]:
+              - link "Modifications du SMQ" [ref=f22e91] [cursor=pointer]:
+                - /url: /modifications-smq
+                - img [ref=f22e92]
+                - generic [ref=f22e100]: Modifications du SMQ
+        - generic [ref=f22e101]:
+          - paragraph [ref=f22e102]: Organisation
+          - list [ref=f22e103]:
+            - listitem [ref=f22e104]:
+              - link "Processus" [ref=f22e105] [cursor=pointer]:
+                - /url: /processus
+                - img [ref=f22e106]
+                - generic [ref=f22e111]: Processus
+            - listitem [ref=f22e112]:
+              - link "Documentation" [ref=f22e113] [cursor=pointer]:
+                - /url: /documents
+                - img [ref=f22e114]
+                - generic [ref=f22e118]: Documentation
+            - listitem [ref=f22e119]:
+              - link "Communications" [ref=f22e120] [cursor=pointer]:
+                - /url: /communications
+                - img [ref=f22e121]
+                - generic [ref=f22e124]: Communications
+        - generic [ref=f22e125]:
+          - paragraph [ref=f22e126]: Amélioration
+          - list [ref=f22e127]:
+            - listitem [ref=f22e128]:
+              - link "Plan d'actions" [ref=f22e129] [cursor=pointer]:
+                - /url: /actions
+                - img [ref=f22e130]
+                - generic [ref=f22e133]: Plan d'actions
+            - listitem [ref=f22e134]:
+              - link "Non-conformités" [ref=f22e135] [cursor=pointer]:
+                - /url: /nc
+                - img [ref=f22e136]
+                - generic [ref=f22e138]: Non-conformités
+            - listitem [ref=f22e139]:
+              - link "Remontées" [ref=f22e140] [cursor=pointer]:
+                - /url: /reclamations
+                - img [ref=f22e141]
+                - generic [ref=f22e143]: Remontées
+        - generic [ref=f22e144]:
+          - paragraph [ref=f22e145]: Évaluation
+          - list [ref=f22e146]:
+            - listitem [ref=f22e147]:
+              - link "Objectifs & indicateurs" [ref=f22e148] [cursor=pointer]:
+                - /url: /strategie/objectifs
+                - img [ref=f22e149]
+                - generic [ref=f22e153]: Objectifs & indicateurs
+            - listitem [ref=f22e154]:
+              - link "Audits" [ref=f22e155] [cursor=pointer]:
+                - /url: /audits
+                - img [ref=f22e156]
+                - generic [ref=f22e159]: Audits
+            - listitem [ref=f22e160]:
+              - link "Auto-diagnostic" [ref=f22e161] [cursor=pointer]:
+                - /url: /conformite
+                - img [ref=f22e162]
+                - generic [ref=f22e166]: Auto-diagnostic
+            - listitem [ref=f22e167]:
+              - link "Veille réglementaire" [ref=f22e168] [cursor=pointer]:
+                - /url: /veille
+                - img [ref=f22e169]
+                - generic [ref=f22e173]: Veille réglementaire
+            - listitem [ref=f22e174]:
+              - link "Revues de direction" [ref=f22e175] [cursor=pointer]:
+                - /url: /revues/direction
+                - img [ref=f22e176]
+                - generic [ref=f22e180]: Revues de direction
+        - generic [ref=f22e181]:
+          - paragraph [ref=f22e182]: Parties externes
+          - list [ref=f22e183]:
+            - listitem [ref=f22e184]:
+              - link "Suivi de prestation" [ref=f22e185] [cursor=pointer]:
+                - /url: /suivi-prestation
+                - img [ref=f22e186]
+                - generic [ref=f22e189]: Suivi de prestation
+            - listitem [ref=f22e190]:
+              - link "Fournisseurs" [ref=f22e191] [cursor=pointer]:
+                - /url: /fournisseurs
+                - img [ref=f22e192]
+                - generic [ref=f22e197]: Fournisseurs
+        - generic [ref=f22e198]:
+          - paragraph [ref=f22e199]: Configuration
+          - list [ref=f22e200]:
+            - listitem [ref=f22e201]:
+              - link "Utilisateurs" [ref=f22e202] [cursor=pointer]:
+                - /url: /utilisateurs
+                - img [ref=f22e203]
+                - generic [ref=f22e215]: Utilisateurs
+            - listitem [ref=f22e216]:
+              - link "Main courante" [ref=f22e217] [cursor=pointer]:
+                - /url: /journal
+                - img [ref=f22e218]
+                - generic [ref=f22e222]: Main courante
+            - listitem [ref=f22e223]:
+              - link "Paramètres" [ref=f22e224] [cursor=pointer]:
+                - /url: /parametres
+                - img [ref=f22e225]
+                - generic [ref=f22e228]: Paramètres
+            - listitem [ref=f22e229]:
+              - link "Corbeille" [ref=f22e230] [cursor=pointer]:
+                - /url: /corbeille
+                - img [ref=f22e231]
+                - generic [ref=f22e234]: Corbeille
+        - generic [ref=f22e235]:
+          - paragraph [ref=f22e236]: Admin Flowise
+          - list [ref=f22e237]:
+            - listitem [ref=f22e238]:
+              - link "Clients" [ref=f22e239] [cursor=pointer]:
+                - /url: /admin/clients
+                - img [ref=f22e240]
+                - generic [ref=f22e244]: Clients
+            - listitem [ref=f22e245]:
+              - link "Signalements & suggestions" [ref=f22e246] [cursor=pointer]:
+                - /url: /admin/retours
+                - img [ref=f22e247]
+                - generic [ref=f22e250]: Signalements & suggestions
+    - generic [ref=f22e251]:
+      - banner [ref=f22e252]:
+        - generic [ref=f22e253]:
+          - button "Acme Inge" [ref=f22e254]:
+            - img
+            - generic [ref=f22e255]: Acme Inge
+            - img
+          - button "Affichage" [ref=f22e256]:
+            - img
+            - generic [ref=f22e257]: Affichage
+        - generic [ref=f22e258]:
+          - button "Signaler ou suggérer" [ref=f22e259]:
+            - img
+            - generic [ref=f22e260]: Signaler / Suggérer
+          - button "Notifications" [ref=f22e261]:
+            - img
+            - generic [ref=f22e262]: "3"
+          - button "hu hugo.piovesan@flowise.fr" [ref=f22e263]:
+            - generic [ref=f22e264]: hu
+            - generic [ref=f22e265]: hugo.piovesan@flowise.fr
+      - main [ref=f22e266]:
+        - generic [ref=f22e267]:
+          - generic [ref=f22e268]:
+            - generic [ref=f22e269]:
+              - generic [ref=f22e270]:
+                - generic [ref=f22e271]:
+                  - generic [ref=f22e272]:
+                    - heading "Communications" [level=1] [ref=f22e273]
+                    - generic [ref=f22e274]: ISO 9001 §7.4
+                  - paragraph [ref=f22e275]: Bibliothèque de modèles d'e-mails (EPI, formations, ODM…) à envoyer en un clic.
+                - button "Nouveau modèle" [ref=f22e277]:
+                  - img
+                  - text: Nouveau modèle
+              - group [ref=f22e278]:
+                - generic "Aide & exigence Afficher" [ref=f22e279] [cursor=pointer]:
+                  - img [ref=f22e280]
+                  - generic [ref=f22e282]: Aide & exigence
+                  - generic [ref=f22e283]: Afficher
+            - generic [ref=f22e284]:
+              - generic [ref=f22e285]:
+                - heading "Qualité" [level=2] [ref=f22e286]
+                - generic [ref=f22e287]:
+                  - generic [ref=f22e289]:
+                    - generic [ref=f22e290]:
+                      - button "Diffusion de la politique qualité" [ref=f22e291] [cursor=pointer]
+                      - generic [ref=f22e292]: Fourni
+                    - paragraph [ref=f22e293]: Politique qualité de Acme Inge
+                    - generic [ref=f22e294]:
+                      - button "Envoyer" [ref=f22e295]:
+                        - img
+                        - text: Envoyer
+                      - button "Modifier" [ref=f22e296]:
+                        - img
+                        - text: Modifier
+                  - generic [ref=f22e298]:
+                    - generic [ref=f22e299]:
+                      - button "Nouvelle procédure applicable" [ref=f22e300] [cursor=pointer]
+                      - generic [ref=f22e301]: Fourni
+                    - paragraph [ref=f22e302]: Nouvelle procédure applicable
+                    - generic [ref=f22e303]:
+                      - button "Envoyer" [ref=f22e304]:
+                        - img
+                        - text: Envoyer
+                      - button "Modifier" [ref=f22e305]:
+                        - img
+                        - text: Modifier
+              - generic [ref=f22e306]:
+                - heading "Sécurité" [level=2] [ref=f22e307]
+                - generic [ref=f22e310]:
+                  - generic [ref=f22e311]:
+                    - button "Consigne de sécurité" [ref=f22e312] [cursor=pointer]
+                    - generic [ref=f22e313]: Fourni
+                  - paragraph [ref=f22e314]: Consigne de sécurité
+                  - generic [ref=f22e315]:
+                    - button "Envoyer" [ref=f22e316]:
+                      - img
+                      - text: Envoyer
+                    - button "Modifier" [ref=f22e317]:
+                      - img
+                      - text: Modifier
+              - generic [ref=f22e318]:
+                - heading "EPI" [level=2] [ref=f22e319]
+                - generic [ref=f22e322]:
+                  - generic [ref=f22e323]:
+                    - 'button "Rappel : port des EPI" [ref=f22e324] [cursor=pointer]'
+                    - generic [ref=f22e325]: Fourni
+                  - paragraph [ref=f22e326]: "Rappel : port des équipements de protection individuelle"
+                  - generic [ref=f22e327]:
+                    - button "Envoyer" [ref=f22e328]:
+                      - img
+                      - text: Envoyer
+                    - button "Modifier" [ref=f22e329]:
+                      - img
+                      - text: Modifier
+              - generic [ref=f22e330]:
+                - heading "Formations" [level=2] [ref=f22e331]
+                - generic [ref=f22e334]:
+                  - generic [ref=f22e335]:
+                    - button "Convocation à une formation" [ref=f22e336] [cursor=pointer]
+                    - generic [ref=f22e337]: Fourni
+                  - paragraph [ref=f22e338]: "Convocation à une formation le {date}"
+                  - generic [ref=f22e339]:
+                    - button "Envoyer" [ref=f22e340]:
+                      - img
+                      - text: Envoyer
+                    - button "Modifier" [ref=f22e341]:
+                      - img
+                      - text: Modifier
+              - generic [ref=f22e342]:
+                - heading "Ordres de mission" [level=2] [ref=f22e343]
+                - generic [ref=f22e346]:
+                  - generic [ref=f22e347]:
+                    - button "Transmission d'un ordre de mission" [ref=f22e348] [cursor=pointer]
+                    - generic [ref=f22e349]: Fourni
+                  - paragraph [ref=f22e350]: Ordre de mission
+                  - generic [ref=f22e351]:
+                    - button "Envoyer" [ref=f22e352]:
+                      - img
+                      - text: Envoyer
+                    - button "Modifier" [ref=f22e353]:
+                      - img
+                      - text: Modifier
+              - generic [ref=f22e354]:
+                - heading "Réunions" [level=2] [ref=f22e355]
+                - generic [ref=f22e358]:
+                  - generic [ref=f22e359]:
+                    - button "Invitation réunion QHSE" [ref=f22e360] [cursor=pointer]
+                    - generic [ref=f22e361]: Fourni
+                  - paragraph [ref=f22e362]: "Invitation : réunion QHSE le {date}"
+                  - generic [ref=f22e363]:
+                    - button "Envoyer" [ref=f22e364]:
+                      - img
+                      - text: Envoyer
+                    - button "Modifier" [ref=f22e365]:
+                      - img
+                      - text: Modifier
+            - heading "Historique des communications" [level=2] [ref=f22e366]
+            - table [ref=f22e369]:
+              - rowgroup [ref=f22e370]:
+                - row "Sujet Audience Date" [ref=f22e371]:
+                  - columnheader "Sujet" [ref=f22e372]
+                  - columnheader "Audience" [ref=f22e373]
+                  - columnheader "Date" [ref=f22e374]
+              - rowgroup [ref=f22e375]:
+                - row "Politique qualité de Acme Inge tom.test@flowise.fr 22/06/2026" [ref=f22e376]:
+                  - cell "Politique qualité de Acme Inge" [ref=f22e377]
+                  - cell "tom.test@flowise.fr" [ref=f22e378]
+                  - cell "22/06/2026" [ref=f22e379]
+                - row "Politique qualité de Acme Inge tom.test@flowise.fr 22/06/2026" [ref=f22e380]:
+                  - cell "Politique qualité de Acme Inge" [ref=f22e381]
+                  - cell "tom.test@flowise.fr" [ref=f22e382]
+                  - cell "22/06/2026" [ref=f22e383]
+                - row "Politique qualité de Acme Inge Destinataire 22/06/2026" [ref=f22e384]:
+                  - cell "Politique qualité de Acme Inge" [ref=f22e385]
+                  - cell "Destinataire" [ref=f22e386]
+                  - cell "22/06/2026" [ref=f22e387]
+                - row "Lancement démarche ISO 9001 Tout le personnel 19/06/2026" [ref=f22e388]:
+                  - cell "Lancement démarche ISO 9001" [ref=f22e389]
+                  - cell "Tout le personnel" [ref=f22e390]
+                  - cell "19/06/2026" [ref=f22e391]
+          - generic [ref=f22e392]:
+            - link "flowise." [ref=f22e393] [cursor=pointer]:
+              - /url: https://flowise.fr
+            - link "Mentions légales" [ref=f22e394] [cursor=pointer]:
+              - /url: /mentions-legales
+            - link "Conditions d'utilisation" [ref=f22e395] [cursor=pointer]:
+              - /url: /cgu
+            - link "Confidentialité" [ref=f22e396] [cursor=pointer]:
+              - /url: /confidentialite
+    - generic [ref=f22e397]:
+      - generic [ref=f22e398]:
+        - generic [ref=f22e399]:
+          - img [ref=f22e400]
+          - text: ToDo
+        - generic [ref=f22e403]: "1"
+        - img [ref=f22e405]
+      - generic [ref=f22e406]:
+        - textbox "Ajouter une tâche…" [ref=f22e407]
+        - button "Ajouter" [disabled] [ref=f22e408]:
+          - img [ref=f22e409]
+      - list [ref=f22e410]:
+        - listitem [ref=f22e411]:
+          - button "Cocher" [ref=f22e412]
+          - generic [ref=f22e413]: Test
+          - button "Supprimer" [ref=f22e414]:
+            - img [ref=f22e415]
+  - region "Notifications alt+T"
+  - alert [ref=f22e418]
