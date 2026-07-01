@@ -4532,6 +4532,7 @@ export type Database = {
           id: string
           manager: string | null
           mission: string | null
+          modele_version: number | null
           nouvelle_date_suivi: string | null
           nps: number | null
           reponses: Json
@@ -4549,6 +4550,7 @@ export type Database = {
           id?: string
           manager?: string | null
           mission?: string | null
+          modele_version?: number | null
           nouvelle_date_suivi?: string | null
           nps?: number | null
           reponses?: Json
@@ -4566,6 +4568,7 @@ export type Database = {
           id?: string
           manager?: string | null
           mission?: string | null
+          modele_version?: number | null
           nouvelle_date_suivi?: string | null
           nps?: number | null
           reponses?: Json

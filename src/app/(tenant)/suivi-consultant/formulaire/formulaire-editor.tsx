@@ -26,7 +26,15 @@ const TYPE_LABELS: Record<ChampType, string> = {
   multi: "Choix multiple",
   note5: "Note sur 5",
   nps: "Recommandation (0–10)",
+  matrice: "Matrice (lignes notées)",
 };
+
+/**
+ * Types proposables à la création d'un champ libre. La matrice, plus complexe
+ * (lignes + échelle), n'est disponible que sur les champs socle existants : on
+ * l'affiche en lecture seule mais on ne permet pas d'en créer via l'éditeur.
+ */
+const TYPES_LIBRES = Object.entries(TYPE_LABELS).filter(([v]) => v !== "matrice");
 
 /** Section d'édition : on ajoute un id stable pour les clés React (rename sans perte de focus). */
 type EditSection = { id: string; title: string; champs: Champ[] };
@@ -244,7 +252,7 @@ export function FormulaireEditor({
                             className={SELECT_CLASS}
                             aria-label="Type de question"
                           >
-                            {Object.entries(TYPE_LABELS).map(([v, l]) => (
+                            {TYPES_LIBRES.map(([v, l]) => (
                               <option key={v} value={v}>
                                 {l}
                               </option>
@@ -284,6 +292,12 @@ export function FormulaireEditor({
                       {hasOptions(champ.type) && champ.verrou ? (
                         <p className="text-muted-foreground text-xs">
                           Options : {(champ.options ?? []).join(", ")}
+                        </p>
+                      ) : null}
+                      {champ.type === "matrice" ? (
+                        <p className="text-muted-foreground text-xs">
+                          Lignes notées de {champ.echelle?.min ?? 1} à {champ.echelle?.max ?? 4} :{" "}
+                          {(champ.lignes ?? []).map((l) => l.label).join(", ")}
                         </p>
                       ) : null}
                     </div>

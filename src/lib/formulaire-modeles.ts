@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SectionConfig } from "@/lib/suivi-consultant";
 import { SUIVI_CONSULTANT_SECTIONS } from "@/lib/suivi-consultant";
+import { SUIVI_PRESTATION_SECTIONS } from "@/lib/suivi-prestation";
 import type { Database } from "@/lib/supabase/database.types";
 
 /** Formulaires de suivi personnalisables par client. */
@@ -11,11 +12,10 @@ export type FormulaireType = "suivi_consultant" | "suivi_prestation";
  * Modèle par défaut (codé en TS) de chaque formulaire. Sert de référence tant
  * qu'un client n'a pas personnalisé son formulaire : aucune ligne n'est alors
  * créée dans `formulaire_modeles`, et c'est ce modèle qui est rendu.
- * (`suivi_prestation` sera branché en Phase 3, avec le type de champ « matrice ».)
  */
 export const MODELES_PAR_DEFAUT: Record<FormulaireType, SectionConfig[]> = {
   suivi_consultant: SUIVI_CONSULTANT_SECTIONS,
-  suivi_prestation: [],
+  suivi_prestation: SUIVI_PRESTATION_SECTIONS,
 };
 
 export type DefinitionResolue = {

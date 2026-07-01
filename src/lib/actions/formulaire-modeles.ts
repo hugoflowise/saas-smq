@@ -13,13 +13,22 @@ import { getTenantContext } from "@/lib/tenant-context";
 const champSchema = z.object({
   key: z.string().trim().min(1),
   label: z.string().trim().min(1, "Chaque question doit avoir un libellé."),
-  type: z.enum(["text", "email", "textarea", "date", "single", "multi", "note5", "nps"]),
+  type: z.enum(["text", "email", "textarea", "date", "single", "multi", "note5", "nps", "matrice"]),
   required: z.boolean().optional(),
   options: z.array(z.string().trim()).optional(),
   allowAutre: z.boolean().optional(),
   showIf: z.object({ key: z.string(), equals: z.string() }).optional(),
   verrou: z.boolean().optional(),
   roleStat: z.string().optional(),
+  // Type « matrice » (socle uniquement) : re-stampé depuis le modèle par défaut.
+  lignes: z.array(z.object({ key: z.string(), label: z.string() })).optional(),
+  echelle: z
+    .object({
+      min: z.number(),
+      max: z.number(),
+      labels: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
 });
 
 const sectionSchema = z.object({
@@ -132,9 +141,15 @@ export async function saveFormulaireModeleAction(input: unknown): Promise<Action
   });
   if (error) return { ok: false, error: error.message };
 
-  revalidatePath("/suivi-consultant");
-  revalidatePath("/suivi-consultant/formulaire");
+  revaliderFormulaire(type);
   return { ok: true };
+}
+
+/** Revalide les pages liées au type de formulaire (liste + éditeur). */
+function revaliderFormulaire(type: FormulaireType): void {
+  const base = type === "suivi_prestation" ? "/suivi-prestation" : "/suivi-consultant";
+  revalidatePath(base);
+  revalidatePath(`${base}/formulaire`);
 }
 
 /** Réinitialise le formulaire au modèle standard (désactive toute personnalisation). */
@@ -152,7 +167,6 @@ export async function resetFormulaireModeleAction(type: FormulaireType): Promise
     .eq("actif", true);
   if (error) return { ok: false, error: error.message };
 
-  revalidatePath("/suivi-consultant");
-  revalidatePath("/suivi-consultant/formulaire");
+  revaliderFormulaire(type);
   return { ok: true };
 }
