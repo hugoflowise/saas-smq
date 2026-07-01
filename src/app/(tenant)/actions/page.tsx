@@ -120,7 +120,7 @@ export default async function ActionsPage({
         title="Plan d'actions"
         description="Suivi des actions d'amélioration, correctives et préventives."
         concept="actions"
-        help="Colonne vertébrale du SMQ : toutes les actions convergent ici, quelle que soit leur origine (audit, non-conformité, réclamation, revue, risque…). Une seule liste, filtrable par origine."
+        help="Colonne vertébrale du {{sigle}} : toutes les actions convergent ici, quelle que soit leur origine (audit, non-conformité, réclamation, revue, risque…). Une seule liste, filtrable par origine."
       >
         <ViewToggle />
         <ActionDialog processusOptions={options} objectifOptions={objectifs} />

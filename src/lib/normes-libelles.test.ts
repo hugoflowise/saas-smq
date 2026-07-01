@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  appliquerLibelles,
   clauseBadge,
   domaineLabel,
   objectifsLabel,
@@ -58,5 +59,21 @@ describe("clauseBadge", () => {
   it("undefined si concept inconnu ou aucun chapitre", () => {
     expect(clauseBadge("inconnu", ["9001"])).toBeUndefined();
     expect(clauseBadge("politique", ["CEFRI"])).toBeUndefined();
+  });
+});
+
+describe("appliquerLibelles", () => {
+  it("substitue les jetons selon les normes", () => {
+    expect(appliquerLibelles("votre {{sigle}}", ["9001"])).toBe("votre SMQ");
+    expect(appliquerLibelles("votre {{sigle}}", ["MASE"])).toBe("votre SSE");
+    expect(appliquerLibelles("espace {{domaine}}", ["9001", "MASE"])).toBe("espace QSSE");
+  });
+
+  it("{{Systeme}} met la première lettre en majuscule", () => {
+    expect(appliquerLibelles("{{Systeme}}", ["MASE"])).toBe("Système de management SSE");
+  });
+
+  it("laisse le texte intact s'il n'y a pas de jeton", () => {
+    expect(appliquerLibelles("Bonjour", ["9001"])).toBe("Bonjour");
   });
 });

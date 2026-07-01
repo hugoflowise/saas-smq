@@ -19,7 +19,7 @@ export default async function CalendrierPage() {
     return (
       <div className="w-full">
         <PageHeader
-          title="Planning qualité"
+          title="Planning {{domaine}}"
           description="Événements, échéances et certification."
         />
         <EmptyState
@@ -53,7 +53,7 @@ export default async function CalendrierPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Planning qualité"
+        title="Planning {{domaine}}"
         description="Échéances agrégées (audits, revues, actions, R&O, communications, réunions, révisions) et cycle de certification."
         help="Vue consolidée des échéances de tous les modules. Les audits, revues, réunions, actions… se créent dans leur module (bouton « Planifier ») et apparaissent ici automatiquement. L'onglet « Cycle de certification » génère le cycle (audits internes + certification, surveillances, renouvellement) et crée les audits liés."
       />

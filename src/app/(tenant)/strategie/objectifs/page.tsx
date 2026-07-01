@@ -235,7 +235,7 @@ export default async function ObjectifsPage() {
       {total === 0 ? (
         <EmptyState
           title="Aucun objectif"
-          description="Définissez les objectifs qualité (SMART) alignés sur la politique."
+          description={`Définissez les objectifs ${domaine} (SMART) alignés sur la politique.`}
         />
       ) : (
         <div className="flex flex-col gap-8">

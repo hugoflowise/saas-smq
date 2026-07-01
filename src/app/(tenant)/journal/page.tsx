@@ -57,7 +57,7 @@ export default async function JournalPage({
       <div className="w-full">
         <PageHeader
           title="Main courante"
-          description="Journal horodaté de toutes les modifications du système qualité."
+          description="Journal horodaté de toutes les modifications du système {{domaine}}."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -91,7 +91,7 @@ export default async function JournalPage({
     <div className="w-full">
       <PageHeader
         title="Main courante"
-        description="Journal horodaté des créations, modifications et suppressions du système qualité."
+        description="Journal horodaté des créations, modifications et suppressions du système {{domaine}}."
         isoClause="ISO 9001 §7.5"
         help="La main courante fournit une traçabilité consultable de l'activité documentaire : qui a fait quoi, quand, sur quel élément. C'est un appui pour la maîtrise des informations documentées et les audits."
       >

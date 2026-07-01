@@ -117,7 +117,7 @@ export default async function VeillePage() {
         title="Veille réglementaire"
         description="Textes applicables et analyse d'impact."
         isoClause="Obligations légales & §4"
-        help="Suivez les textes applicables (qualité, réglementaires) pertinents pour votre activité, évaluez leur impact et tracez les actions de mise en conformité."
+        help="Suivez les textes applicables ({{domaine}}, réglementaires) pertinents pour votre activité, évaluez leur impact et tracez les actions de mise en conformité."
       >
         <VeilleDialog />
       </PageHeader>
@@ -200,7 +200,7 @@ export default async function VeillePage() {
       {items.length === 0 ? (
         <EmptyState
           title="Aucun texte"
-          description="Ajoutez les textes réglementaires applicables et leur impact sur le SMQ."
+          description="Ajoutez les textes réglementaires applicables et leur impact sur le {{sigle}}."
         />
       ) : (
         <div className="rounded-2xl border bg-card">

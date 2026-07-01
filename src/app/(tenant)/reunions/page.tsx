@@ -33,7 +33,7 @@ export default async function ReunionsPage() {
       <div className="w-full">
         <PageHeader
           title="Réunions QHSE"
-          description="Suivi et traçabilité des réunions qualité."
+          description="Suivi et traçabilité des réunions {{domaine}}."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -57,7 +57,7 @@ export default async function ReunionsPage() {
     <div className="w-full">
       <PageHeader
         title="Réunions QHSE"
-        description="Préparation, tenue, actions et comptes rendus des réunions qualité."
+        description="Préparation, tenue, actions et comptes rendus des réunions {{domaine}}."
         concept="reunions"
         help="Centralisez vos réunions QHSE : préparez l'ordre du jour, saisissez discussions et décisions en séance, générez les actions et un compte rendu PDF. Traçabilité complète."
       >
