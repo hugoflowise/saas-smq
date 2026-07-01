@@ -1,7 +1,8 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { createIndicateurAction } from "@/lib/actions/indicateurs";
 import { createObjectifAction, updateObjectifAction } from "@/lib/actions/registres";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
@@ -56,9 +58,42 @@ export function ObjectifDialog({
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
   const [indicateurIds, setIndicateurIds] = useState<string[]>(linkedIndicateurIds);
+  // Indicateurs créés à la volée depuis ce dialogue (ajoutés aux options locales).
+  const [extraIndicateurs, setExtraIndicateurs] = useState<{ id: string; nom: string }[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newInd, setNewInd] = useState({ nom: "", unite: "", cible: "", sens: "hausse" });
+
+  const allIndicateurs = [...indicateurOptions, ...extraIndicateurs];
 
   function toggleIndicateur(id: string) {
     setIndicateurIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  async function creerIndicateur() {
+    if (!newInd.nom.trim()) {
+      toast.error("Donnez un nom à l'indicateur.");
+      return;
+    }
+    setCreating(true);
+    const r = await createIndicateurAction({
+      nom: newInd.nom,
+      unite: newInd.unite || undefined,
+      cible: newInd.cible || undefined,
+      sens: newInd.sens,
+      type: "numeric",
+      frequence: "mensuel",
+    });
+    setCreating(false);
+    if (!r.ok) {
+      toast.error(r.error);
+      return;
+    }
+    setExtraIndicateurs((prev) => [...prev, { id: r.id, nom: newInd.nom }]);
+    setIndicateurIds((prev) => [...prev, r.id]);
+    setNewInd({ nom: "", unite: "", cible: "", sens: "hausse" });
+    setShowCreate(false);
+    toast.success("Indicateur créé et rattaché.");
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -174,14 +209,14 @@ export function ObjectifDialog({
           </div>
           <div className="flex flex-col gap-2">
             <Label>Indicateurs de mesure</Label>
-            {indicateurOptions.length === 0 ? (
+            {allIndicateurs.length === 0 ? (
               <p className="rounded-lg border border-dashed px-3 py-2 text-muted-foreground text-xs">
-                Aucun indicateur disponible. Créez vos indicateurs dans Pilotage → Indicateurs, puis
-                revenez les rattacher ici.
+                Aucun indicateur pour l'instant. Créez-en un ci-dessous, ou dans Pilotage →
+                Indicateurs.
               </p>
             ) : (
               <div className="flex max-h-44 flex-col gap-1 overflow-y-auto rounded-lg border p-2">
-                {indicateurOptions.map((i) => (
+                {allIndicateurs.map((i) => (
                   <label
                     key={i.id}
                     className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-muted/50"
@@ -197,11 +232,68 @@ export function ObjectifDialog({
                 ))}
               </div>
             )}
+
+            {showCreate ? (
+              <div className="flex flex-col gap-2 rounded-lg border border-dashed p-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Nom de l'indicateur"
+                    value={newInd.nom}
+                    onChange={(e) => setNewInd((s) => ({ ...s, nom: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Unité (%, NPS, €…)"
+                    value={newInd.unite}
+                    onChange={(e) => setNewInd((s) => ({ ...s, unite: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="Cible"
+                    value={newInd.cible}
+                    onChange={(e) => setNewInd((s) => ({ ...s, cible: e.target.value }))}
+                  />
+                  <select
+                    className={SELECT_CLASS}
+                    value={newInd.sens}
+                    onChange={(e) => setNewInd((s) => ({ ...s, sens: e.target.value }))}
+                  >
+                    <option value="hausse">À atteindre ou dépasser (≥ cible)</option>
+                    <option value="baisse">À ne pas dépasser (≤ cible)</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="button" size="sm" disabled={creating} onClick={creerIndicateur}>
+                    {creating ? "Création…" : "Ajouter l'indicateur"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowCreate(false)}
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-1.5 self-start"
+                onClick={() => setShowCreate(true)}
+              >
+                <Plus className="size-3.5" />
+                Créer un indicateur
+              </Button>
+            )}
+
             <p className="text-muted-foreground text-xs">
               Rattachez le ou les indicateurs qui mesurent cet objectif (ISO 9001 §6.2/§9.1). La
               progression de l'objectif est calculée à partir de ses indicateurs : chacun porte sa
-              propre cible et son sens (définis dans Pilotage → Indicateurs). L'objectif est atteint
-              quand tous ses indicateurs atteignent leur cible.
+              propre cible et son sens. L'objectif est atteint quand tous ses indicateurs atteignent
+              leur cible.
             </p>
           </div>
           <div className="flex flex-col gap-2">

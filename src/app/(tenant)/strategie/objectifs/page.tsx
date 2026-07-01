@@ -86,6 +86,7 @@ export default async function ObjectifsPage() {
     .is("deleted_at", null)
     .order("ordre", { ascending: true });
   const engagementOptions = engagements ?? [];
+  const engagementById = new Map(engagementOptions.map((e) => [e.id, e.libelle]));
 
   // Mesure de chaque objectif via ses indicateurs liés (source unique partagée
   // avec le dashboard, la fiche processus et la revue de direction).
@@ -264,6 +265,11 @@ export default async function ObjectifsPage() {
                           <TableRow>
                             <TableCell className="font-medium align-top">
                               {o.intitule}
+                              {o.engagement_id && engagementById.has(o.engagement_id) ? (
+                                <span className="mt-0.5 block text-xs text-primary">
+                                  ↳ Engagement : {engagementById.get(o.engagement_id)}
+                                </span>
+                              ) : null}
                               {o.pctMoyen !== null ? (
                                 <span className="mt-0.5 block text-muted-foreground text-xs">
                                   Progression globale : {o.pctMoyen}%

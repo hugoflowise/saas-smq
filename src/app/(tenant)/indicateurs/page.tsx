@@ -94,20 +94,18 @@ export default async function IndicateursPage() {
   // Ordre chronologique pour les graphes (les valeurs ont été empilées en desc).
   for (const s of serieByInd.values()) s.reverse();
 
-  // Objectif(s) rattaché(s) à chaque indicateur (§6.2/§9.1).
-  const { data: liens } = await supabase
-    .from("objectif_indicateurs")
-    .select("indicateur_id, objectif_id")
-    .eq("tenant_id", tid);
-  const objIds = [...new Set((liens ?? []).map((l) => l.objectif_id))];
-  const objNomById = new Map<string, string>();
-  if (objIds.length) {
-    const { data: objs } = await supabase
+  // Objectifs qualité : tous (options de rattachement) + liens existants (§6.2/§9.1).
+  const [{ data: liens }, { data: allObjectifs }] = await Promise.all([
+    supabase.from("objectif_indicateurs").select("indicateur_id, objectif_id").eq("tenant_id", tid),
+    supabase
       .from("objectifs_qualite")
       .select("id, intitule")
-      .in("id", objIds);
-    for (const o of objs ?? []) objNomById.set(o.id, o.intitule);
-  }
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+  ]);
+  const objectifOptions = (allObjectifs ?? []).map((o) => ({ id: o.id, intitule: o.intitule }));
+  const objNomById = new Map(objectifOptions.map((o) => [o.id, o.intitule]));
   const objectifsByInd = new Map<string, string[]>();
   for (const l of liens ?? []) {
     const nom = objNomById.get(l.objectif_id);
@@ -143,7 +141,10 @@ export default async function IndicateursPage() {
         isoClause="ISO 9001 §9.1.1"
         help="Surveillance et mesure : déterminez quoi mesurer, par quelles méthodes et à quelle fréquence, puis analysez les résultats au regard des objectifs. Le tableau montre l'évolution des 12 derniers mois ; cliquez un indicateur pour son graphe détaillé."
       >
-        <CreateIndicateurDialog processusOptions={processusOptions} />
+        <CreateIndicateurDialog
+          processusOptions={processusOptions}
+          objectifOptions={objectifOptions}
+        />
       </PageHeader>
 
       {sansObjectif > 0 ? (

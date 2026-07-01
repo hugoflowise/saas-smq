@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,14 +36,23 @@ export function IndicateurDialog({
   indicateur,
   processusOptions,
   presetProcessusId,
+  objectifOptions = [],
+  linkedObjectifIds = [],
 }: {
   indicateur?: IndicateurRow;
   processusOptions: { id: string; nom: string }[];
   presetProcessusId?: string;
+  objectifOptions?: { id: string; intitule: string }[];
+  linkedObjectifIds?: string[];
 }) {
   const isEdit = Boolean(indicateur);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+  const [objectifIds, setObjectifIds] = useState<string[]>(linkedObjectifIds);
+
+  function toggleObjectif(id: string) {
+    setObjectifIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -57,6 +67,7 @@ export function IndicateurDialog({
           cible: form.get("cible") || undefined,
           sens: form.get("sens"),
           frequence: form.get("frequence"),
+          objectifIds,
         };
         return isEdit
           ? updateIndicateurAction({ id: indicateur?.id, ...data })
@@ -197,6 +208,36 @@ export function IndicateurDialog({
             />
           </div>
 
+          <div className="flex flex-col gap-2">
+            <Label>Objectifs qualité mesurés</Label>
+            {objectifOptions.length === 0 ? (
+              <p className="rounded-lg border border-dashed px-3 py-2 text-muted-foreground text-xs">
+                Aucun objectif disponible. Créez vos objectifs dans Stratégie → Objectifs.
+              </p>
+            ) : (
+              <div className="flex max-h-40 flex-col gap-1 overflow-y-auto rounded-lg border p-2">
+                {objectifOptions.map((o) => (
+                  <label
+                    key={o.id}
+                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-muted/50"
+                  >
+                    <input
+                      type="checkbox"
+                      className="size-4"
+                      checked={objectifIds.includes(o.id)}
+                      onChange={() => toggleObjectif(o.id)}
+                    />
+                    {o.intitule}
+                  </label>
+                ))}
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Rattachez cet indicateur aux objectifs qu'il mesure (facultatif). Le lien apparaît
+              aussi côté objectif.
+            </p>
+          </div>
+
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer l'indicateur"}
           </Button>
@@ -210,6 +251,7 @@ export function IndicateurDialog({
 export function CreateIndicateurDialog(props: {
   processusOptions: { id: string; nom: string }[];
   presetProcessusId?: string;
+  objectifOptions?: { id: string; intitule: string }[];
 }) {
   return <IndicateurDialog {...props} />;
 }
