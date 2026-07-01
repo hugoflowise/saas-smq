@@ -611,6 +611,8 @@ export type Database = {
           date_evaluation: string | null
           evaluateur_id: string | null
           id: string
+          neutralisee: boolean
+          points_obtenus: number | null
           preuves_liees: Json | null
           referentiel_iso_id: string
           tenant_id: string
@@ -623,6 +625,8 @@ export type Database = {
           date_evaluation?: string | null
           evaluateur_id?: string | null
           id?: string
+          neutralisee?: boolean
+          points_obtenus?: number | null
           preuves_liees?: Json | null
           referentiel_iso_id: string
           tenant_id: string
@@ -635,6 +639,8 @@ export type Database = {
           date_evaluation?: string | null
           evaluateur_id?: string | null
           id?: string
+          neutralisee?: boolean
+          points_obtenus?: number | null
           preuves_liees?: Json | null
           referentiel_iso_id?: string
           tenant_id?: string
@@ -3886,41 +3892,53 @@ export type Database = {
       }
       referentiel_iso: {
         Row: {
+          axe: number | null
           chapitre: string
+          cotation_type: string | null
           description: string | null
-          domaine: Database["public"]["Enums"]["domaine_iso"]
+          domaine: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire: boolean
           exigences: Json | null
           id: string
           intitule: string
+          neutralisable: boolean
           norme: string
           ordre_affichage: number
+          points_max: number | null
           preuves_attendues: string | null
           version: string
         }
         Insert: {
+          axe?: number | null
           chapitre: string
+          cotation_type?: string | null
           description?: string | null
-          domaine: Database["public"]["Enums"]["domaine_iso"]
+          domaine?: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire?: boolean
           exigences?: Json | null
           id?: string
           intitule: string
+          neutralisable?: boolean
           norme?: string
           ordre_affichage?: number
+          points_max?: number | null
           preuves_attendues?: string | null
           version?: string
         }
         Update: {
+          axe?: number | null
           chapitre?: string
+          cotation_type?: string | null
           description?: string | null
-          domaine?: Database["public"]["Enums"]["domaine_iso"]
+          domaine?: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire?: boolean
           exigences?: Json | null
           id?: string
           intitule?: string
+          neutralisable?: boolean
           norme?: string
           ordre_affichage?: number
+          points_max?: number | null
           preuves_attendues?: string | null
           version?: string
         }
