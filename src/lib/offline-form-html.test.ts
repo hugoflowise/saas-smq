@@ -54,6 +54,14 @@ describe("buildOfflineFormHtml", () => {
     expect(html).toContain("idempotencyKey");
   });
 
+  it("cloisonne le stockage local par type + client + environnement", () => {
+    const html = buildOfflineFormHtml(cfg());
+    // La clé de file d'attente combine type, token et endpoint (isolation).
+    expect(html).toContain(
+      '"flowise_hl::" + CFG.type + "::" + CFG.token + "::" + CFG.syncEndpoint',
+    );
+  });
+
   it("affiche « modèle standard » quand la version est nulle", () => {
     const html = buildOfflineFormHtml(cfg({ version: null }));
     expect(html).toContain("modèle standard");
