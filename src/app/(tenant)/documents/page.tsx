@@ -118,7 +118,7 @@ export default async function DocumentsPage({
 
   // Procédure de maîtrise de l'information documentée (§7.5) : présente par
   // défaut chez tous les clients (clé stable), on la relie de façon déterministe
-  // — insensible au renommage — pour l'aller-retour en un clic depuis la liste
+  // - insensible au renommage - pour l'aller-retour en un clic depuis la liste
   // maîtresse. Repli sur le titre pour les anciennes procédures sans clé.
   const procedureMaitrise =
     (procedures ?? []).find((p) => p.cle === "maitrise_documentaire") ??

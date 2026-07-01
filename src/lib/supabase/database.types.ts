@@ -465,7 +465,9 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           id: string
+          modele_source: string | null
           objet: string
+          pieces_jointes: Json
           tenant_id: string
           titre: string
           updated_at: string
@@ -478,7 +480,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          modele_source?: string | null
           objet: string
+          pieces_jointes?: Json
           tenant_id: string
           titre: string
           updated_at?: string
@@ -491,7 +495,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          modele_source?: string | null
           objet?: string
+          pieces_jointes?: Json
           tenant_id?: string
           titre?: string
           updated_at?: string
@@ -2061,6 +2067,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           echeance: string | null
+          engagement_id: string | null
           est_smart: boolean
           fonction_concernee: string | null
           id: string
@@ -2086,6 +2093,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           echeance?: string | null
+          engagement_id?: string | null
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
@@ -2111,6 +2119,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           echeance?: string | null
+          engagement_id?: string | null
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
@@ -2135,6 +2144,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "politique_engagements"
             referencedColumns: ["id"]
           },
           {
@@ -2410,6 +2426,50 @@ export type Database = {
           },
         ]
       }
+      politique_engagements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          libelle: string
+          ordre: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle: string
+          ordre?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle?: string
+          ordre?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "politique_engagements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       politique_qualite: {
         Row: {
           approved_at: string | null
@@ -2419,8 +2479,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_revision_prevue: string | null
+          engagement_direction: string | null
+          engagements_intro: string | null
           id: string
+          objectifs_texte: string | null
+          presentation: string | null
           signature_data: Json | null
+          valeurs: string | null
           soumis_le: string | null
           soumis_par: string | null
           statut: Database["public"]["Enums"]["document_statut"]
@@ -2440,8 +2505,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -2461,8 +2531,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -4109,6 +4184,47 @@ export type Database = {
           },
         ]
       }
+      formulaire_modeles: {
+        Row: {
+          actif: boolean
+          created_at: string
+          definition: Json
+          id: string
+          tenant_id: string
+          type: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          definition: Json
+          id?: string
+          tenant_id: string
+          type: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          definition?: Json
+          id?: string
+          tenant_id?: string
+          type?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formulaire_modeles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suivis_consultant: {
         Row: {
           alerte: boolean
@@ -4120,6 +4236,7 @@ export type Database = {
           email: string | null
           habilitations: boolean | null
           id: string
+          modele_version: number | null
           nom: string | null
           note_qualite_suivi_manager: number | null
           nps: number | null
@@ -4141,6 +4258,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
           nps?: number | null
@@ -4162,6 +4280,7 @@ export type Database = {
           email?: string | null
           habilitations?: boolean | null
           id?: string
+          modele_version?: number | null
           nom?: string | null
           note_qualite_suivi_manager?: number | null
           nps?: number | null
@@ -4194,6 +4313,7 @@ export type Database = {
           id: string
           manager: string | null
           mission: string | null
+          modele_version: number | null
           nouvelle_date_suivi: string | null
           nps: number | null
           reponses: Json
@@ -4211,6 +4331,7 @@ export type Database = {
           id?: string
           manager?: string | null
           mission?: string | null
+          modele_version?: number | null
           nouvelle_date_suivi?: string | null
           nps?: number | null
           reponses?: Json
@@ -4228,6 +4349,7 @@ export type Database = {
           id?: string
           manager?: string | null
           mission?: string | null
+          modele_version?: number | null
           nouvelle_date_suivi?: string | null
           nps?: number | null
           reponses?: Json

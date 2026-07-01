@@ -49,7 +49,8 @@ const AUDIT_PREFIX: Record<string, string> = {
   fournisseur: "AF",
 };
 
-function auditPayload(d: z.infer<typeof auditCreate>) {
+/** Champs de contexte de l'audit (hors rapport / écarts, saisis après la grille). */
+function auditContextePayload(d: z.infer<typeof auditCreate>) {
   return {
     type_audit: d.typeAudit,
     organisme: d.organisme ?? null,
@@ -61,6 +62,12 @@ function auditPayload(d: z.infer<typeof auditCreate>) {
     date_realisee: d.dateRealisee || null,
     duree_prevue: d.dureePrevue ?? null,
     statut: d.statut,
+  };
+}
+
+function auditPayload(d: z.infer<typeof auditCreate>) {
+  return {
+    ...auditContextePayload(d),
     rapport: d.rapport ?? null,
     ecarts_constates: d.ecartsConstates ?? null,
   };
@@ -174,9 +181,42 @@ export async function updateAuditAction(input: unknown): Promise<ActionResult> {
     if (avertissement) return { ok: false, error: avertissement };
   }
 
+  // Mise à jour du contexte uniquement : le rapport et les écarts (saisis après
+  // la grille) ont leur propre action et ne doivent pas être écrasés ici.
   const { error } = await c.supabase
     .from("audits_internes")
-    .update({ ...auditPayload(parsed.data), updated_by: c.userId })
+    .update({ ...auditContextePayload(parsed.data), updated_by: c.userId })
+    .eq("id", parsed.data.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/audits");
+  return { ok: true };
+}
+
+const auditConclusionSchema = z.object({
+  id: z.string().uuid(),
+  rapport: z.string().trim().optional(),
+  ecartsConstates: z.string().trim().optional(),
+});
+
+/**
+ * Conclusion de l'audit : écarts constatés + rapport, saisis APRÈS la grille
+ * (trame logique contexte → questions → constats → conclusion). Action séparée
+ * du contexte pour ne mettre à jour que ces deux champs.
+ */
+export async function updateAuditConclusionAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = auditConclusionSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+
+  const { error } = await c.supabase
+    .from("audits_internes")
+    .update({
+      rapport: parsed.data.rapport ?? null,
+      ecarts_constates: parsed.data.ecartsConstates ?? null,
+      updated_by: c.userId,
+    })
     .eq("id", parsed.data.id)
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };

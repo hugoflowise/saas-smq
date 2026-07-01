@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ProcessusLink } from "@/components/processus-link";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -14,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteObjectifAction } from "@/lib/actions/registres";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
@@ -53,7 +55,7 @@ export default async function ObjectifsPage() {
     supabase
       .from("objectifs_qualite")
       .select(
-        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, valide_par, valide_le",
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, engagement_id, valide_par, valide_le",
       )
       .eq("tenant_id", tid)
       .is("deleted_at", null)
@@ -76,6 +78,15 @@ export default async function ObjectifsPage() {
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
   const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
+
+  // Engagements de la politique qualité (§6.2), pour la matrice de couverture.
+  const { data: engagements } = await supabase
+    .from("politique_engagements")
+    .select("id, libelle")
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .order("ordre", { ascending: true });
+  const engagementOptions = engagements ?? [];
 
   // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
   // indicateurs rattachés à chaque objectif).
@@ -190,7 +201,11 @@ export default async function ObjectifsPage() {
         isoClause="ISO 9001 §6.2"
         help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
       >
-        <ObjectifDialog processusOptions={processusOptions} indicateurOptions={indicateurOptions} />
+        <ObjectifDialog
+          processusOptions={processusOptions}
+          indicateurOptions={indicateurOptions}
+          engagementOptions={engagementOptions}
+        />
       </PageHeader>
 
       {total > 0 ? (
@@ -359,12 +374,21 @@ export default async function ObjectifsPage() {
                               <ObjStatutCell id={o.id} value={o.statut} />
                             </TableCell>
                             <TableCell>
-                              <ObjectifDialog
-                                objectif={o}
-                                processusOptions={processusOptions}
-                                indicateurOptions={indicateurOptions}
-                                linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
-                              />
+                              <div className="flex items-center justify-end gap-1">
+                                <ObjectifDialog
+                                  objectif={o}
+                                  processusOptions={processusOptions}
+                                  indicateurOptions={indicateurOptions}
+                                  engagementOptions={engagementOptions}
+                                  linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
+                                />
+                                <SupprimerButton
+                                  action={deleteObjectifAction}
+                                  id={o.id}
+                                  libelle={`l'objectif « ${o.intitule} »`}
+                                  iconOnly
+                                />
+                              </div>
                             </TableCell>
                           </TableRow>
                           <TableRow className="border-b-0 hover:bg-transparent">

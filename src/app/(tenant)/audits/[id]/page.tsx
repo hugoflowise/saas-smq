@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { listTenantMembers } from "@/lib/tenant-users";
 import { AuditActions } from "./audit-actions";
+import { AuditConclusionForm } from "./audit-conclusion-form";
 import { AuditEditForm } from "./audit-edit-form";
 import { AuditGrille } from "./audit-grille";
 
@@ -76,24 +77,41 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ id
         <DownloadPdfButton printHref={`/print/audit/${id}`} label="Rapport d'audit (PDF)" />
       </PageHeader>
 
+      {/* Trame logique d'un audit : contexte → questions → constats/conclusion → actions. */}
       <Card className="mb-6">
-        <CardContent className="pt-6">
+        <CardHeader>
+          <CardTitle className="text-base">1. Contexte de l'audit</CardTitle>
+        </CardHeader>
+        <CardContent>
           <AuditEditForm audit={audit} processusOptions={processus ?? []} auditeurs={auditeurs} />
         </CardContent>
       </Card>
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Grille d'audit</CardTitle>
+          <CardTitle className="text-base">2. Grille d'audit</CardTitle>
         </CardHeader>
         <CardContent>
           <AuditGrille auditId={audit.id} questions={questions ?? []} />
         </CardContent>
       </Card>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">3. Constats et conclusion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AuditConclusionForm
+            auditId={audit.id}
+            rapport={audit.rapport}
+            ecartsConstates={audit.ecarts_constates}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Actions correctives (écarts)</CardTitle>
+          <CardTitle className="text-base">4. Actions correctives</CardTitle>
         </CardHeader>
         <CardContent>
           <AuditActions

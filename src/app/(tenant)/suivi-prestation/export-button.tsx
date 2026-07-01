@@ -2,7 +2,7 @@
 
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SATISFACTION_AXES } from "@/lib/suivi-prestation";
+import type { Champ } from "@/lib/suivi-consultant";
 
 export type SuiviExportRow = {
   est_reclamation: boolean;
@@ -16,53 +16,43 @@ function fmt(v: unknown): string {
   return String(v);
 }
 
-// Colonnes de l'export : tous les champs du formulaire.
-const COLUMNS: { header: string; key: string }[] = [
-  { header: "Date du suivi", key: "date_suivi" },
-  { header: "Consultant", key: "consultant" },
-  { header: "Client", key: "client" },
-  { header: "Mission", key: "mission" },
-  { header: "Manager", key: "manager" },
-  { header: "Réalisations passées", key: "realisations_passees" },
-  { header: "Réalisations à venir", key: "realisations_a_venir" },
-  { header: "Périmètre évolué", key: "perimetre_evolue" },
-  { header: "Écarts (si oui)", key: "ecarts_details" },
-  ...SATISFACTION_AXES.map((a) => ({ header: `Satisf. ${a.label}`, key: `axe_${a.key}` })),
-  { header: "Points forts", key: "points_forts" },
-  { header: "Points forts (autre)", key: "points_forts_autre" },
-  { header: "Axes d'amélioration", key: "axes_amelioration" },
-  { header: "Axes d'amélioration (autre)", key: "axes_amelioration_autre" },
-  { header: "Commentaire bilan", key: "commentaire_bilan" },
-  { header: "QSSE - consignes", key: "securite_consignes" },
-  { header: "QSSE - EPI", key: "securite_epi" },
-  { header: "QSSE - plan de prévention", key: "plan_prevention" },
-  { header: "Satisfaction globale (/5)", key: "satisfaction_globale" },
-  { header: "NPS (0-10)", key: "nps" },
-  { header: "Commentaire satisfaction", key: "commentaire_satisfaction" },
-  { header: "Futurs besoins", key: "besoins_futurs" },
-  { header: "Futurs besoins (autre)", key: "besoins_futurs_autre" },
-  { header: "Améliorations proposées", key: "amelioration_prestations" },
-  { header: "Actions à prévoir", key: "plan_actions" },
-  { header: "Actions (autre)", key: "plan_actions_autre" },
-  { header: "Délais des actions", key: "delais_actions" },
-  { header: "Nouvelle date de suivi", key: "nouvelle_date_suivi" },
-  { header: "Commentaire plan", key: "commentaire_plan" },
-  { header: "Représentant client", key: "nom_representant" },
-  { header: "E-mail représentant", key: "mail_representant" },
-];
+/**
+ * Colonnes de l'export, dérivées de la définition du formulaire du client.
+ * Une matrice génère une colonne par ligne (`champ.key.ligne.key`), et un
+ * choix multiple avec « Autre » ajoute une colonne libre.
+ */
+function buildColumns(champs: Champ[]): { header: string; key: string; matrice?: string }[] {
+  const columns: { header: string; key: string; matrice?: string }[] = [];
+  for (const c of champs) {
+    if (c.type === "matrice") {
+      for (const ligne of c.lignes ?? []) {
+        columns.push({ header: ligne.label, key: ligne.key, matrice: c.key });
+      }
+      continue;
+    }
+    columns.push({ header: c.label, key: c.key });
+    if (c.type === "multi" && c.allowAutre) {
+      columns.push({ header: `${c.label} (autre)`, key: `${c.key}_autre` });
+    }
+  }
+  return columns;
+}
 
 function csv(v: string): string {
   return `"${v.replace(/"/g, '""')}"`;
 }
 
-export function ExportButton({ rows }: { rows: SuiviExportRow[] }) {
+export function ExportButton({ rows, champs }: { rows: SuiviExportRow[]; champs: Champ[] }) {
   function exportCsv() {
-    const header = [...COLUMNS.map((c) => c.header), "Réclamation"];
+    const columns = buildColumns(champs);
+    const header = [...columns.map((c) => c.header), "Réclamation"];
     const lines = rows.map((row) => {
       const r = row.reponses ?? {};
-      const axes = (r.satisfaction_axes ?? {}) as Record<string, unknown>;
-      const cells = COLUMNS.map((c) => {
-        if (c.key.startsWith("axe_")) return csv(fmt(axes[c.key.slice(4)]));
+      const cells = columns.map((c) => {
+        if (c.matrice) {
+          const m = (r[c.matrice] ?? {}) as Record<string, unknown>;
+          return csv(fmt(m[c.key]));
+        }
         return csv(fmt(r[c.key]));
       });
       cells.push(csv(row.est_reclamation ? "Oui" : "Non"));

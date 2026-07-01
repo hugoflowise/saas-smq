@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
+import { PolitiqueSections } from "@/components/politique-sections";
 import { PrintShell, type Societe } from "@/components/print-shell";
 import { SignatairesBlock } from "@/components/signataires";
 import { TiptapEditor } from "@/components/tiptap-editor";
@@ -25,7 +26,9 @@ export default async function PolitiquePrintPage() {
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("code, contenu, statut, version_actuelle_id")
+    .select(
+      "code, contenu, statut, version_actuelle_id, presentation, valeurs, engagements_intro, objectifs_texte, engagement_direction",
+    )
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -56,6 +59,14 @@ export default async function PolitiquePrintPage() {
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? politique?.contenu ?? null) as JSONContent | null;
 
+  // Engagements de la politique (§6.2), listés dans le document imprimé.
+  const { data: engagements } = await supabase
+    .from("politique_engagements")
+    .select("id, libelle")
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .order("ordre", { ascending: true });
+
   const reference = politique?.code?.trim() || "-";
   const meta = isPublished
     ? [
@@ -79,7 +90,18 @@ export default async function PolitiquePrintPage() {
       meta={meta}
       genereLe={formatDate(todayISO())}
     >
-      <TiptapEditor content={contenu} editable={false} bare />
+      <PolitiqueSections
+        print
+        presentation={politique?.presentation ?? null}
+        valeurs={politique?.valeurs ?? null}
+        engagementsIntro={politique?.engagements_intro ?? null}
+        engagements={(engagements ?? []).map((e) => ({ libelle: e.libelle }))}
+        objectifsTexte={politique?.objectifs_texte ?? null}
+        engagementDirection={politique?.engagement_direction ?? null}
+      />
+      <div className="mt-8">
+        <TiptapEditor content={contenu} editable={false} bare />
+      </div>
       {isPublished ? (
         <SignatairesBlock
           className="mt-8"

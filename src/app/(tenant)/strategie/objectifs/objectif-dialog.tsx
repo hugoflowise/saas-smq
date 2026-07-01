@@ -32,20 +32,25 @@ export type ObjectifRow = {
   sens: string | null;
   processus_id: string | null;
   indicateur_id: string | null;
+  engagement_id?: string | null;
 };
 
 export function ObjectifDialog({
   objectif,
   processusOptions = [],
   indicateurOptions = [],
+  engagementOptions = [],
   linkedIndicateurIds = [],
   presetProcessusId,
+  presetEngagementId,
 }: {
   objectif?: ObjectifRow;
   processusOptions?: { id: string; nom: string }[];
   indicateurOptions?: { id: string; nom: string }[];
+  engagementOptions?: { id: string; libelle: string }[];
   linkedIndicateurIds?: string[];
   presetProcessusId?: string;
+  presetEngagementId?: string;
 }) {
   const isEdit = Boolean(objectif);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -70,6 +75,7 @@ export function ObjectifDialog({
           unite: f.get("unite") || undefined,
           sens: f.get("sens") || undefined,
           processusId: f.get("processusId") || undefined,
+          engagementId: f.get("engagementId") || undefined,
           indicateurIds,
         };
         return isEdit
@@ -161,6 +167,22 @@ export function ObjectifDialog({
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="engagementId">Engagement de la politique</Label>
+              <select
+                id="engagementId"
+                name="engagementId"
+                className={SELECT_CLASS}
+                defaultValue={objectif?.engagement_id ?? presetEngagementId ?? ""}
+              >
+                <option value="">-</option>
+                {engagementOptions.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.libelle}
                   </option>
                 ))}
               </select>

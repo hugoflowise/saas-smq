@@ -2,7 +2,7 @@
 
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SUIVI_CONSULTANT_CHAMPS } from "@/lib/suivi-consultant";
+import type { Champ } from "@/lib/suivi-consultant";
 
 export type ConsultantExportRow = {
   alerte: boolean;
@@ -16,24 +16,29 @@ function fmt(v: unknown): string {
   return String(v);
 }
 
-const COLUMNS: { header: string; key: string }[] = [];
-for (const c of SUIVI_CONSULTANT_CHAMPS) {
-  COLUMNS.push({ header: c.label, key: c.key });
-  if (c.type === "multi" && c.allowAutre) {
-    COLUMNS.push({ header: `${c.label} (autre)`, key: `${c.key}_autre` });
+/** Colonnes de l'export, dérivées de la définition du formulaire du client. */
+function buildColumns(champs: Champ[]): { header: string; key: string }[] {
+  const columns: { header: string; key: string }[] = [];
+  for (const c of champs) {
+    columns.push({ header: c.label, key: c.key });
+    if (c.type === "multi" && c.allowAutre) {
+      columns.push({ header: `${c.label} (autre)`, key: `${c.key}_autre` });
+    }
   }
+  return columns;
 }
 
 function csv(v: string): string {
   return `"${v.replace(/"/g, '""')}"`;
 }
 
-export function ExportButton({ rows }: { rows: ConsultantExportRow[] }) {
+export function ExportButton({ rows, champs }: { rows: ConsultantExportRow[]; champs: Champ[] }) {
   function exportCsv() {
-    const header = [...COLUMNS.map((c) => c.header), "Alerte santé/RPS"];
+    const columns = buildColumns(champs);
+    const header = [...columns.map((c) => c.header), "Alerte santé/RPS"];
     const lines = rows.map((row) => {
       const r = row.reponses ?? {};
-      const cells = COLUMNS.map((c) => csv(fmt(r[c.key])));
+      const cells = columns.map((c) => csv(fmt(r[c.key])));
       cells.push(csv(row.alerte ? "Oui" : "Non"));
       return cells.join(";");
     });

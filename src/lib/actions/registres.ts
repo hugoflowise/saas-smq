@@ -238,6 +238,8 @@ const objBase = {
   unite: z.string().trim().optional(),
   sens: z.enum(["hausse", "baisse"]).optional(),
   processusId: z.string().uuid().optional(),
+  // Engagement de la politique qualité décliné par cet objectif (§6.2).
+  engagementId: z.string().uuid().optional(),
   // Un objectif peut être mesuré par plusieurs indicateurs (liaison N–N).
   indicateurIds: z.array(z.string().uuid()).optional(),
 };
@@ -259,6 +261,7 @@ function objPayload(d: z.infer<typeof objCreate>) {
     unite: d.unite ?? null,
     sens: d.sens ?? "hausse",
     processus_id: d.processusId ?? null,
+    engagement_id: d.engagementId ?? null,
     // Colonne historique : pilote la progression « tête de liste » quand
     // l'objectif n'a qu'un seul indicateur. La table de liaison reste la
     // source de vérité pour l'ensemble des indicateurs.
@@ -359,6 +362,16 @@ export async function updateObjectifAction(input: unknown): Promise<ActionResult
   revalidatePath("/strategie/objectifs");
   revalidatePath("/indicateurs");
   return { ok: true };
+}
+
+/** Met un objectif qualité à la corbeille (soft-delete, réversible). */
+export async function deleteObjectifAction(id: string): Promise<ActionResult> {
+  const r = await softDeleteRow("objectifs_qualite", id);
+  if (r.ok) {
+    revalidatePath("/strategie/objectifs");
+    revalidatePath("/indicateurs");
+  }
+  return r;
 }
 
 const objValiderSchema = z.object({ id: z.string().uuid(), valider: z.boolean() });

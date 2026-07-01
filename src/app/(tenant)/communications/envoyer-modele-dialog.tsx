@@ -23,6 +23,7 @@ import {
 } from "@/lib/communications";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { SELECT_CLASS } from "@/lib/ui-classes";
+import { ModelePiecesJointes } from "./modele-pieces-jointes";
 
 export function EnvoyerModeleDialog({
   modele,
@@ -145,6 +146,17 @@ export function EnvoyerModeleDialog({
               Vous pouvez modifier l'objet et le message avant l'envoi.
             </p>
           </div>
+
+          {modele.pieces && modele.pieces.length > 0 ? (
+            <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+              <Label>Pièces jointes à ajouter à votre e-mail</Label>
+              <p className="text-muted-foreground text-xs">
+                L'envoi ouvre votre messagerie avec l'objet et le message. Téléchargez la ou les
+                pièces jointes ci-dessous et ajoutez-les manuellement à votre e-mail.
+              </p>
+              <ModelePiecesJointes modeleId={modele.id} pieces={modele.pieces} />
+            </div>
+          ) : null}
 
           <Button onClick={envoyer} disabled={envoi} className="gap-1.5 self-start">
             <Send className="size-4" />

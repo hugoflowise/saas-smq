@@ -1,6 +1,9 @@
 "use client";
 
-import { Copy, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,38 +15,77 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createModeleAction, updateModeleAction } from "@/lib/actions/communications-modeles";
-import { MODELE_CATEGORIES, type Modele } from "@/lib/communications";
+import {
+  createModeleAction,
+  materialiserModeleAction,
+  updateModeleAction,
+} from "@/lib/actions/communications-modeles";
+import { MODELE_CATEGORIES, type Modele, type ModelePiece } from "@/lib/communications";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
-import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SELECT_CLASS } from "@/lib/ui-classes";
+import { ModelePiecesJointes } from "./modele-pieces-jointes";
 
-type Mode = "creer" | "modifier" | "dupliquer";
+type Mode = "creer" | "modifier";
 
 /**
- * Crée un modèle, en modifie un personnalisé, ou duplique un modèle fourni
- * (la duplication crée une copie personnalisée éditable).
+ * Crée un modèle ou en modifie un (fourni OU personnalisé - même logique).
+ * Un modèle fourni est « matérialisé » (copié en base) au premier enregistrement.
+ * Après le premier enregistrement, la section Pièces jointes apparaît : on peut
+ * ainsi attacher une PJ dès la création, sans devoir rouvrir en modification.
  */
 export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) {
-  const { open, setOpen, pending, submit } = useDialogForm();
+  const router = useRouter();
   const readOnly = useReadOnly();
-  const isModifier = mode === "modifier";
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  // Id de la ligne en base : déjà présent pour un modèle personnalisé, sinon posé
+  // au premier enregistrement (création ou matérialisation d'un modèle fourni).
+  const existingId = modele && !modele.integre ? modele.id : null;
+  const [savedId, setSavedId] = useState<string | null>(existingId);
+  const [pieces, setPieces] = useState<ModelePiece[]>(modele?.pieces ?? []);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    submit(event, {
-      action: (f) => {
-        const data = {
-          categorie: f.get("categorie"),
-          titre: f.get("titre"),
-          objet: f.get("objet"),
-          corps: f.get("corps") ?? "",
-        };
-        return isModifier && modele?.id
-          ? updateModeleAction({ id: modele.id, ...data })
-          : createModeleAction(data);
-      },
-      success: isModifier ? "Modèle mis à jour." : "Modèle enregistré.",
-    });
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const f = new FormData(event.currentTarget);
+    const data = {
+      categorie: f.get("categorie"),
+      titre: f.get("titre"),
+      objet: f.get("objet"),
+      corps: f.get("corps") ?? "",
+    };
+    setPending(true);
+    if (savedId) {
+      const r = await updateModeleAction({ id: savedId, ...data });
+      setPending(false);
+      if (!r.ok) return toast.error(r.error);
+    } else {
+      const r = await createModeleAction({
+        ...data,
+        // Matérialisation d'un modèle fourni : on garde le lien vers l'origine.
+        modeleSource: modele?.integre ? modele.id : undefined,
+      });
+      setPending(false);
+      if (!r.ok) return toast.error(r.error);
+      // On récupère l'id pour révéler la section pièces jointes.
+      setSavedId(r.id);
+    }
+    toast.success("Modèle enregistré.");
+  }
+
+  // À l'ouverture d'un modèle fourni, on le matérialise (copie éditable) pour que
+  // la section Pièces jointes soit disponible tout de suite.
+  async function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next && !savedId && modele?.integre) {
+      const r = await materialiserModeleAction(modele.id);
+      if (r.ok) {
+        setSavedId(r.id);
+        setPieces(r.pieces);
+      } else {
+        toast.error(r.error);
+      }
+    }
+    if (!next && savedId) router.refresh();
   }
 
   const trigger =
@@ -52,30 +94,21 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
         <Plus className="size-4" />
         Nouveau modèle
       </Button>
-    ) : mode === "modifier" ? (
+    ) : (
       <Button variant="ghost" size="sm" className="gap-1.5">
         <Pencil className="size-3.5" />
         Modifier
       </Button>
-    ) : (
-      <Button variant="ghost" size="sm" className="gap-1.5">
-        <Copy className="size-3.5" />
-        Personnaliser
-      </Button>
     );
-
-  // En duplication, on préremplit avec le contenu fourni mais sans id (= création).
-  const titreDefaut =
-    mode === "dupliquer" ? `${modele?.titre ?? ""} (copie)` : (modele?.titre ?? "");
 
   if (readOnly) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={trigger} />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isModifier ? "Modifier le modèle" : "Nouveau modèle"}</DialogTitle>
+          <DialogTitle>{mode === "creer" ? "Nouveau modèle" : "Modifier le modèle"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[200px_1fr]">
@@ -96,7 +129,7 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="titre">Titre du modèle</Label>
-              <Input id="titre" name="titre" required defaultValue={titreDefaut} />
+              <Input id="titre" name="titre" required defaultValue={modele?.titre ?? ""} />
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -111,10 +144,22 @@ export function ModeleDialog({ mode, modele }: { mode: Mode; modele?: Modele }) 
               l'envoi).
             </p>
           </div>
-          <Button type="submit" disabled={pending} className="mt-1 self-start">
-            {pending ? "Enregistrement…" : isModifier ? "Enregistrer" : "Créer le modèle"}
+          <Button type="submit" disabled={pending} className="self-start">
+            {pending ? "Enregistrement…" : "Enregistrer"}
           </Button>
         </form>
+
+        {/* Pièces jointes : disponibles dès que le modèle existe en base. */}
+        {savedId ? (
+          <div className="mt-2 flex flex-col gap-2 border-t pt-4">
+            <Label>Pièces jointes</Label>
+            <ModelePiecesJointes modeleId={savedId} pieces={pieces} manage />
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-xs">
+            Enregistrez le modèle pour pouvoir y joindre un fichier.
+          </p>
+        )}
       </DialogContent>
     </Dialog>
   );

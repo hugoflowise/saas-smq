@@ -3,7 +3,8 @@ import { BackLink } from "@/components/back-link";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
-import { type Champ, SUIVI_CONSULTANT_SECTIONS } from "@/lib/suivi-consultant";
+import { resoudreDefinitionFormulaire } from "@/lib/formulaire-modeles";
+import type { Champ } from "@/lib/suivi-consultant";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 
@@ -44,6 +45,12 @@ export default async function SuiviConsultantDetailPage({
     .maybeSingle();
   if (!suivi) notFound();
 
+  const { sections } = await resoudreDefinitionFormulaire(
+    supabase,
+    ctx.effectiveTenantId,
+    "suivi_consultant",
+  );
+
   const r = (suivi.reponses ?? {}) as Record<string, unknown>;
 
   return (
@@ -63,7 +70,7 @@ export default async function SuiviConsultantDetailPage({
       ) : null}
 
       <div className="flex flex-col gap-6">
-        {SUIVI_CONSULTANT_SECTIONS.map((section) => {
+        {sections.map((section) => {
           const champs = section.champs.filter((c) => visible(c, r));
           if (champs.length === 0) return null;
           return (
