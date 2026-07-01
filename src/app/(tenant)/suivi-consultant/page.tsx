@@ -23,6 +23,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ExportButton } from "./export-button";
+import { OfflineFormButton } from "./offline-form-button";
 
 function moyenne(arr: number[]): number | null {
   return arr.length > 0
@@ -145,6 +146,7 @@ export default async function SuiviConsultantPage() {
             Personnaliser le formulaire
           </Link>
         ) : null}
+        {ctx.role !== "auditeur" ? <OfflineFormButton type="suivi_consultant" /> : null}
         <ExportButton
           champs={champsExport}
           rows={items.map((s) => ({
