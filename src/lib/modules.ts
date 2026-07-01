@@ -4,12 +4,15 @@
 //
 // Trois niveaux d'exigence par module :
 //   - "socle"   : toujours visible (transverse + obligations légales, ex. DUERP)
-//   - "systeme" : visible dès qu'au moins une norme est active (tronc commun,
-//                 type Annexe SL : politique, objectifs, processus, audits…)
-//   - { normes }: visible si l'une de ces normes est active (module métier)
+//   - "systeme" : visible dès qu'au moins une norme est active (management commun
+//                 à toutes les normes : politique, objectifs, plan d'actions,
+//                 audits, veille, remontées, revue, auto-diagnostic…)
+//   - { normes }: visible si l'une de ces normes est active (tronc ISO Annexe SL
+//                 réservé aux normes ISO, ou module métier propre à une norme)
 //
-// Un href non listé est traité comme "systeme" (tronc commun) → aucun module
-// existant n'est masqué pour les clients actuels (tous en 9001).
+// Un href non listé est traité comme "systeme" → aucun module existant n'est
+// masqué pour les clients actuels (tous en 9001). Le masquage ne concerne pour
+// l'instant que les clients d'autres normes (ex. MASE seul).
 // ============================================================================
 
 export type NormeCode = "9001" | "14001" | "45001" | "MASE" | "CEFRI";
