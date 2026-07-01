@@ -8,7 +8,7 @@ import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
 import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
 import { computeNps, npsLabel } from "@/lib/nps";
-import { objectifProgress } from "@/lib/objectifs";
+import { chargerMesuresObjectifs } from "@/lib/objectifs-mesure";
 import { loadOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -128,23 +128,28 @@ export default async function DashboardPage() {
     return horsCible(v, i.cible, i.sens);
   }).length;
 
-  // Objectifs qualité (progression)
+  // Objectifs qualité (progression pilotée par leurs indicateurs liés)
   const { data: objectifsData } = await supabase
     .from("objectifs_qualite")
-    .select("id, intitule, statut, valeur_cible, valeur_actuelle, unite, sens, indicateur_id")
+    .select("id, intitule, statut")
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("created_at");
-  const objectifs = (objectifsData ?? []).map((o) => {
-    const valeurEffective =
-      o.indicateur_id && lastVal.has(o.indicateur_id)
-        ? (lastVal.get(o.indicateur_id) ?? null)
-        : o.valeur_actuelle;
-    const pct = objectifProgress(valeurEffective, o.valeur_cible, o.sens);
-    const atteint = o.statut === "atteint" || (pct !== null && pct >= 100);
-    return { ...o, pct, atteint };
-  });
-  const objActifs = objectifs.filter((o) => o.statut !== "abandonne");
+  const objMesures = await chargerMesuresObjectifs(
+    supabase,
+    tid,
+    (objectifsData ?? []).map((o) => o.id),
+  );
+  const objActifs = (objectifsData ?? [])
+    .filter((o) => o.statut !== "abandonne")
+    .map((o) => {
+      const m = objMesures.get(o.id);
+      return {
+        ...o,
+        pctMoyen: m?.pctMoyen ?? null,
+        atteint: o.statut === "atteint" || (m?.indicateursAtteints ?? false),
+      };
+    });
   const objAtteints = objActifs.filter((o) => o.atteint).length;
   const tauxObjectifs =
     objActifs.length > 0 ? Math.round((objAtteints / objActifs.length) * 100) : null;
@@ -476,17 +481,17 @@ export default async function DashboardPage() {
                   <li key={o.id} className="flex flex-col gap-1">
                     <div className="flex items-center justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate">{o.intitule}</span>
-                      {o.pct !== null ? (
-                        <span className="shrink-0 font-medium text-xs">{o.pct}%</span>
+                      {o.pctMoyen !== null ? (
+                        <span className="shrink-0 font-medium text-xs">{o.pctMoyen}%</span>
                       ) : (
-                        <span className="shrink-0 text-status-pa text-xs">à chiffrer</span>
+                        <span className="shrink-0 text-status-pa text-xs">sans indicateur</span>
                       )}
                     </div>
-                    {o.pct !== null ? (
+                    {o.pctMoyen !== null ? (
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
-                          className={`h-full rounded-full ${progressClass(o.pct)}`}
-                          style={{ width: `${o.pct}%` }}
+                          className={`h-full rounded-full ${progressClass(o.pctMoyen)}`}
+                          style={{ width: `${o.pctMoyen}%` }}
                         />
                       </div>
                     ) : null}

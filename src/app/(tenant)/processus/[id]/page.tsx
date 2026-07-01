@@ -18,7 +18,7 @@ import { deleteProcessusAction } from "@/lib/actions/processus";
 import { loadFicheProcessusData } from "@/lib/fiche-processus-data";
 import { formatDate, nomPersonne } from "@/lib/format";
 import { cibleAffichee, horsCible } from "@/lib/indicateurs";
-import { objectifProgress } from "@/lib/objectifs";
+import { chargerMesuresObjectifs, mesureVide } from "@/lib/objectifs-mesure";
 import { canApprove, canWrite } from "@/lib/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -147,15 +147,19 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
   const processusOptions = allProcessus.data ?? [];
   const indicateurOptions = indList.map((i) => ({ id: i.id, nom: i.nom }));
 
+  // Objectifs mesurés par leurs indicateurs liés (source unique partagée).
+  const objMesures = await chargerMesuresObjectifs(
+    supabase,
+    tid,
+    (objectifs.data ?? []).map((o) => o.id),
+  );
   const objList = (objectifs.data ?? []).map((o) => {
-    const valeurEffective =
-      o.indicateur_id && lastVal.has(o.indicateur_id)
-        ? (lastVal.get(o.indicateur_id) ?? null)
-        : o.valeur_actuelle;
+    const m = objMesures.get(o.id) ?? mesureVide();
     return {
       ...o,
-      valeurEffective,
-      pct: objectifProgress(valeurEffective, o.valeur_cible, o.sens),
+      indicateursLies: m.indicateurs,
+      pctMoyen: m.pctMoyen,
+      linkedIds: m.indicateurs.map((i) => i.id),
     };
   });
 
@@ -354,60 +358,65 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               <CardContent className="py-2">
                 <ul className="flex flex-col divide-y">
                   {objList.map((o) => (
-                    <li key={o.id} className="flex items-center justify-between gap-4 py-3">
-                      <div className="min-w-0">
+                    <li key={o.id} className="flex flex-col gap-1.5 py-3">
+                      <div className="flex items-center justify-between gap-4">
                         <Link
                           href="/strategie/objectifs"
-                          className="font-medium text-sm hover:text-primary"
+                          className="min-w-0 font-medium text-sm hover:text-primary"
                         >
                           {o.intitule}
                         </Link>
-                        {o.indicateur_id ? (
-                          <Link
-                            href={`/indicateurs/${o.indicateur_id}${from}`}
-                            className="block text-primary text-xs hover:underline"
-                          >
-                            ↳ Indicateur de mesure
-                          </Link>
-                        ) : null}
+                        <div className="flex shrink-0 items-center gap-2">
+                          {o.pctMoyen !== null ? (
+                            <span className="font-medium text-xs">{o.pctMoyen}%</span>
+                          ) : null}
+                          <ObjectifDialog
+                            objectif={o}
+                            processusOptions={processusOptions}
+                            indicateurOptions={indicateurOptions}
+                            linkedIndicateurIds={o.linkedIds}
+                          />
+                        </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-3">
-                        {o.valeur_cible !== null ? (
-                          <div className="flex w-40 flex-col gap-1">
-                            <div className="flex items-center justify-between gap-2 text-xs">
-                              <span className="text-muted-foreground">
-                                {o.valeurEffective ?? "-"} / {o.valeur_cible} {o.unite ?? ""}
+                      {o.indicateursLies.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {o.indicateursLies.map((ind) => (
+                            <div
+                              key={ind.id}
+                              className="flex items-center justify-between gap-2 text-xs"
+                            >
+                              <Link
+                                href={`/indicateurs/${ind.id}${from}`}
+                                className="text-primary hover:underline"
+                              >
+                                {ind.nom}
+                              </Link>
+                              <span className="shrink-0">
+                                <span
+                                  className={
+                                    ind.atteint ? "font-medium text-status-conforme" : "font-medium"
+                                  }
+                                >
+                                  {ind.derniere ?? "-"}
+                                  {ind.unite ? ` ${ind.unite}` : ""}
+                                </span>
+                                {ind.cible !== null ? (
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    / {ind.cible}
+                                    {ind.unite ? ` ${ind.unite}` : ""}
+                                  </span>
+                                ) : null}
+                                {ind.pct !== null ? (
+                                  <span className="ml-1 font-medium">{ind.pct}%</span>
+                                ) : null}
                               </span>
-                              {o.pct !== null ? (
-                                <span className="font-medium">{o.pct}%</span>
-                              ) : null}
                             </div>
-                            {o.pct !== null ? (
-                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                                <div
-                                  className={`h-full rounded-full ${
-                                    o.pct >= 100
-                                      ? "bg-status-conforme"
-                                      : o.pct >= 60
-                                        ? "bg-status-pf"
-                                        : o.pct >= 30
-                                          ? "bg-status-pa"
-                                          : "bg-status-nc-mineure"
-                                  }`}
-                                  style={{ width: `${o.pct}%` }}
-                                />
-                              </div>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <span className="text-status-pa text-xs">À chiffrer</span>
-                        )}
-                        <ObjectifDialog
-                          objectif={o}
-                          processusOptions={processusOptions}
-                          indicateurOptions={indicateurOptions}
-                        />
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-status-pa text-xs">Aucun indicateur de mesure</span>
+                      )}
                     </li>
                   ))}
                 </ul>
