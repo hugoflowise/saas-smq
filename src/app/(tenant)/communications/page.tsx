@@ -47,7 +47,7 @@ export default async function CommunicationsPage() {
     supabase.from("tenants").select("nom_societe, liste_diffusion").eq("id", tid).maybeSingle(),
     supabase
       .from("communication_modeles")
-      .select("id, categorie, titre, objet, corps")
+      .select("id, categorie, titre, objet, corps, pieces_jointes")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("titre"),
@@ -63,7 +63,14 @@ export default async function CommunicationsPage() {
   const listeDiffusion = tenant?.liste_diffusion ?? null;
 
   // Modèles fournis + personnalisés, regroupés par catégorie.
-  const customModeles: Modele[] = (customs ?? []).map((m) => ({ ...m, integre: false }));
+  const customModeles: Modele[] = (customs ?? []).map((m) => {
+    const { pieces_jointes, ...rest } = m;
+    return {
+      ...rest,
+      integre: false,
+      pieces: (pieces_jointes ?? []) as Modele["pieces"],
+    };
+  });
   const tousModeles = [...MODELES_INTEGRES, ...customModeles];
   const categoriesPresentes = Object.keys(MODELE_CATEGORIES).filter((cat) =>
     tousModeles.some((m) => m.categorie === cat),

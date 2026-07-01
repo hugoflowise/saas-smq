@@ -19,6 +19,8 @@ export const MODELE_CATEGORIES: Record<string, string> = {
   autre: "Autre",
 };
 
+export type ModelePiece = { path: string; nom: string; taille: number; type: string };
+
 export type Modele = {
   id: string;
   categorie: string;
@@ -27,6 +29,8 @@ export type Modele = {
   corps: string;
   /** true pour les modèles fournis (non supprimables, mais duplicables). */
   integre?: boolean;
+  /** Pièces jointes du modèle (uniquement pour les modèles personnalisés). */
+  pieces?: ModelePiece[];
 };
 
 /**

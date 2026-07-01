@@ -4,9 +4,40 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
+import { canWrite } from "@/lib/permissions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
+
+/** Une pièce jointe d'un modèle (métadonnées stockées en jsonb sur la ligne). */
+export type ModelePieceJointe = { path: string; nom: string; taille: number; type: string };
+
+const MAX_PIECES = 5;
+const MAX_TAILLE = 10 * 1024 * 1024; // 10 Mo (fichier téléchargé puis joint au mail)
+
+function nomSur(nom: string): string {
+  const base = nom
+    .normalize("NFKD")
+    .replace(/[^\w.\- ]/g, "_")
+    .replace(/\s+/g, "_");
+  return base.slice(-80) || "fichier";
+}
+
+/** Récupère le modèle (RLS = périmètre client) avec ses PJ, ou null. */
+async function chargerModele(modeleId: string) {
+  const ctx = await getTenantContext();
+  if (!ctx.userId || !ctx.effectiveTenantId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("communication_modeles")
+    .select("id, tenant_id, pieces_jointes")
+    .eq("id", modeleId)
+    .maybeSingle();
+  if (!data) return null;
+  return { ctx, pieces: (data.pieces_jointes ?? []) as ModelePieceJointe[] };
+}
 
 const base = {
   categorie: z.string().trim().min(1),
@@ -89,4 +120,87 @@ export async function logCommunicationEnvoyeeAction(input: {
   if (error) return { ok: false, error: error.message };
   revalidatePath("/communications");
   return { ok: true };
+}
+
+/** Ajoute une ou plusieurs pièces jointes à un modèle (upload côté serveur). */
+export async function uploadModelePieceAction(formData: FormData): Promise<ActionResult> {
+  if (!(formData instanceof FormData)) {
+    return { ok: false, error: "Session expirée. Rechargez la page." };
+  }
+  const modeleId = String(formData.get("modeleId") ?? "");
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!canWrite(infos.ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const fichiers = formData
+    .getAll("fichiers")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+  if (fichiers.length === 0) return { ok: false, error: "Aucun fichier." };
+  if (infos.pieces.length + fichiers.length > MAX_PIECES) {
+    return { ok: false, error: `Maximum ${MAX_PIECES} pièces jointes par modèle.` };
+  }
+  for (const f of fichiers) {
+    if (f.size > MAX_TAILLE) return { ok: false, error: `« ${f.name} » dépasse 10 Mo.` };
+  }
+
+  const admin = createAdminClient();
+  const tenantSeg = infos.ctx.effectiveTenantId ?? "global";
+  const ajoutees: ModelePieceJointe[] = [];
+  for (const f of fichiers) {
+    const path = `${tenantSeg}/${modeleId}/${Date.now()}-${nomSur(f.name)}`;
+    const { error: upErr } = await admin.storage
+      .from("communications")
+      .upload(path, await f.arrayBuffer(), {
+        contentType: f.type || "application/octet-stream",
+        upsert: true,
+      });
+    if (upErr) return { ok: false, error: upErr.message };
+    ajoutees.push({ path, nom: f.name, taille: f.size, type: f.type || "" });
+  }
+
+  const pieces = [...infos.pieces, ...ajoutees];
+  const { error } = await admin
+    .from("communication_modeles")
+    .update({ pieces_jointes: pieces as unknown as Json })
+    .eq("id", modeleId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/communications");
+  return { ok: true };
+}
+
+/** Retire une pièce jointe d'un modèle (storage + métadonnées). */
+export async function deleteModelePieceAction(
+  modeleId: string,
+  path: string,
+): Promise<ActionResult> {
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!canWrite(infos.ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const admin = createAdminClient();
+  await admin.storage.from("communications").remove([path]);
+  const pieces = infos.pieces.filter((p) => p.path !== path);
+  const { error } = await admin
+    .from("communication_modeles")
+    .update({ pieces_jointes: pieces as unknown as Json })
+    .eq("id", modeleId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/communications");
+  return { ok: true };
+}
+
+/** URL signée (5 min) pour télécharger une pièce jointe d'un modèle du client. */
+export async function getModelePieceUrlAction(
+  modeleId: string,
+  path: string,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!infos.pieces.some((p) => p.path === path)) {
+    return { ok: false, error: "Pièce jointe introuvable." };
+  }
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from("communications").createSignedUrl(path, 300);
+  if (error || !data) return { ok: false, error: error?.message ?? "Lien indisponible." };
+  return { ok: true, url: data.signedUrl };
 }
