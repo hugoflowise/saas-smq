@@ -1,7 +1,6 @@
 "use client";
 
 import { Download, Loader2, Paperclip, Upload, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,9 +31,10 @@ export function ModelePiecesJointes({
   pieces: ModelePiece[];
   manage?: boolean;
 }) {
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  // État local des PJ : mise à jour immédiate après upload/suppression (sans refresh).
+  const [list, setList] = useState<ModelePiece[]>(pieces);
 
   async function telecharger(path: string) {
     const r = await getModelePieceUrlAction(modeleId, path);
@@ -51,8 +51,8 @@ export function ModelePiecesJointes({
     setBusy(false);
     if (inputRef.current) inputRef.current.value = "";
     if (r.ok) {
+      setList(r.pieces);
       toast.success("Pièce jointe ajoutée.");
-      router.refresh();
     } else {
       toast.error(r.error);
     }
@@ -63,8 +63,8 @@ export function ModelePiecesJointes({
     const r = await deleteModelePieceAction(modeleId, path);
     setBusy(false);
     if (r.ok) {
+      setList(r.pieces);
       toast.success("Pièce jointe supprimée.");
-      router.refresh();
     } else {
       toast.error(r.error);
     }
@@ -72,13 +72,13 @@ export function ModelePiecesJointes({
 
   return (
     <div className="flex flex-col gap-2">
-      {pieces.length === 0 ? (
+      {list.length === 0 ? (
         <p className="text-muted-foreground text-xs">
           {manage ? "Aucune pièce jointe." : "Aucune pièce jointe pour ce modèle."}
         </p>
       ) : (
         <ul className="flex flex-col gap-1.5">
-          {pieces.map((p) => (
+          {list.map((p) => (
             <li
               key={p.path}
               className="flex items-center gap-2 rounded-lg border bg-muted/20 px-3 py-2 text-sm"

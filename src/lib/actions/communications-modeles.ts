@@ -45,7 +45,8 @@ const base = {
   objet: z.string().trim().min(2, "Objet requis."),
   corps: z.string().default(""),
 };
-const createSchema = z.object(base);
+// À la création, `modeleSource` mémorise le modèle fourni matérialisé (le cas échéant).
+const createSchema = z.object({ ...base, modeleSource: z.string().trim().optional() });
 const updateSchema = z.object({ id: z.string().uuid(), ...base });
 
 export async function createModeleAction(input: unknown): Promise<CreateResult> {
@@ -56,10 +57,16 @@ export async function createModeleAction(input: unknown): Promise<CreateResult> 
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
+  const { modeleSource, ...champs } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("communication_modeles")
-    .insert({ tenant_id: ctx.effectiveTenantId, ...parsed.data, created_by: ctx.userId })
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      ...champs,
+      modele_source: modeleSource ?? null,
+      created_by: ctx.userId,
+    })
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: error?.message ?? "Création impossible." };
@@ -122,8 +129,10 @@ export async function logCommunicationEnvoyeeAction(input: {
   return { ok: true };
 }
 
+type PiecesResult = { ok: true; pieces: ModelePieceJointe[] } | { ok: false; error: string };
+
 /** Ajoute une ou plusieurs pièces jointes à un modèle (upload côté serveur). */
-export async function uploadModelePieceAction(formData: FormData): Promise<ActionResult> {
+export async function uploadModelePieceAction(formData: FormData): Promise<PiecesResult> {
   if (!(formData instanceof FormData)) {
     return { ok: false, error: "Session expirée. Rechargez la page." };
   }
@@ -165,14 +174,14 @@ export async function uploadModelePieceAction(formData: FormData): Promise<Actio
     .eq("id", modeleId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/communications");
-  return { ok: true };
+  return { ok: true, pieces };
 }
 
 /** Retire une pièce jointe d'un modèle (storage + métadonnées). */
 export async function deleteModelePieceAction(
   modeleId: string,
   path: string,
-): Promise<ActionResult> {
+): Promise<PiecesResult> {
   const infos = await chargerModele(modeleId);
   if (!infos) return { ok: false, error: "Modèle introuvable." };
   if (!canWrite(infos.ctx.role)) return { ok: false, error: "Droits insuffisants." };
@@ -186,7 +195,7 @@ export async function deleteModelePieceAction(
     .eq("id", modeleId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/communications");
-  return { ok: true };
+  return { ok: true, pieces };
 }
 
 /** URL signée (5 min) pour télécharger une pièce jointe d'un modèle du client. */
