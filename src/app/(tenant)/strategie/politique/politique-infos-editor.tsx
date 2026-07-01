@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ENGAGEMENTS_DIRECTION_DEFAUT } from "@/components/politique-sections";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,27 +66,31 @@ export function PolitiqueInfosEditor({ initial }: { initial: PolitiqueSectionsIn
       />
       <Champ
         name="engagementsIntro"
-        label="3. Nos engagements — introduction (l'ambition)"
+        label="3. Nos engagements - texte d'introduction (l'ambition)"
         defaultValue={initial.engagementsIntro}
         rows={3}
-        placeholder="Notre ambition est de… La liste des engagements se gère dans l'encart « Engagements de la politique » (reliés aux objectifs/KPI)."
+        placeholder="Notre ambition est de satisfaire durablement nos clients et nos collaborateurs… (la LISTE des engagements se gère juste en dessous, reliée aux objectifs/KPI)."
       />
       <Champ
         name="objectifsTexte"
-        label="4. Nos objectifs"
+        label="4. Nos objectifs - texte (facultatif : un lien vers vos objectifs est ajouté automatiquement)"
         defaultValue={initial.objectifsTexte}
         rows={3}
-        placeholder="Cette politique constitue le cadre de référence pour nos objectifs qualité annuels, déclinés par processus et suivis dans un tableau de bord dédié."
+        placeholder="Laissez vide pour le texte standard, ou personnalisez : « Cette politique constitue le cadre de référence pour nos objectifs qualité annuels… »"
       />
-      <Champ
-        name="engagementDirection"
-        label="5. Engagement de la Direction (une action par ligne)"
-        defaultValue={initial.engagementDirection}
-        rows={5}
-        placeholder={
-          "Allouer les ressources nécessaires\nDésigner un responsable du système de management (RSMQ)\nPiloter l'efficacité via une revue de direction annuelle\nVeiller à la conformité légale et réglementaire\nAméliorer en continu le système de management"
-        }
-      />
+      <div className="flex flex-col gap-1">
+        <Champ
+          name="engagementDirection"
+          label="5. Engagement de la Direction - une action par ligne (pré-rempli avec les engagements-types)"
+          defaultValue={initial.engagementDirection || ENGAGEMENTS_DIRECTION_DEFAUT}
+          rows={6}
+        />
+        <p className="text-muted-foreground text-xs">
+          Ce sont les engagements de la Direction (ressources, RSMQ, revue, conformité,
+          amélioration) - distincts de « Nos engagements » qui sont ceux de l'organisme. Ajustez-les
+          si besoin.
+        </p>
+      </div>
 
       <div>
         <Button type="submit" disabled={pending}>
