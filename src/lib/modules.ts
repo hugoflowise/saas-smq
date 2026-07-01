@@ -106,8 +106,11 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   "/suivi-prestation": { normes: ["9001"] }, // satisfaction client §9.1.2
   "/fournisseurs": { normes: ["9001"] }, // achats / évaluation fournisseurs §8.4
 
+  // --- Modules métier SST / MASE (masqués pour un client qualité/environnement seul) ---
+  // Analyse de risques par mission + plan de prévention (MASE Axe 3, cœur métier).
+  "/sst/analyses-risques": { normes: ["MASE", "45001"] },
+
   // --- Modules métier à venir (exemples du gating ciblé) ---
-  // "/sst/plans-prevention": { normes: ["MASE", "45001"] },
   // "/sst/accidents": { normes: ["MASE", "45001"] },
   // "/environnement/aspects": { normes: ["14001"] },
 };

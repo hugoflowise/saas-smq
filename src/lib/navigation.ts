@@ -74,6 +74,11 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    // Section métier SST/MASE : masquée pour un client qualité seul (gating par norme).
+    title: "Maîtrise opérationnelle",
+    items: [{ label: "Analyses de risques", href: "/sst/analyses-risques", icon: HardHat }],
+  },
+  {
     title: "Organisation",
     items: [
       { label: "Processus", href: "/processus", icon: FolderTree },
