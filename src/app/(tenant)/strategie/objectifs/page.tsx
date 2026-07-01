@@ -20,6 +20,7 @@ import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { objectifProgress } from "@/lib/objectifs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { EngagementsCard } from "./engagements-card";
 import { ObjEcheanceCell, ObjStatutCell, ObjValeurActuelleCell } from "./inline-cells";
 import { ObjectifActions } from "./objectif-actions";
 import { ObjectifDialog } from "./objectif-dialog";
@@ -55,7 +56,7 @@ export default async function ObjectifsPage() {
     supabase
       .from("objectifs_qualite")
       .select(
-        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, valide_par, valide_le",
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, engagement_id, valide_par, valide_le",
       )
       .eq("tenant_id", tid)
       .is("deleted_at", null)
@@ -78,6 +79,15 @@ export default async function ObjectifsPage() {
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
   const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
+
+  // Engagements de la politique qualité (§6.2), pour la matrice de couverture.
+  const { data: engagements } = await supabase
+    .from("politique_engagements")
+    .select("id, libelle")
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .order("ordre", { ascending: true });
+  const engagementOptions = engagements ?? [];
 
   // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
   // indicateurs rattachés à chaque objectif).
@@ -133,6 +143,19 @@ export default async function ObjectifsPage() {
   // Détection d'orphelins (intégrité relationnelle, recommandée et non bloquante).
   const sansProcessus = withProgress.filter((o) => !o.processus_id).length;
   const sansIndicateur = withProgress.filter((o) => o.indicateursLies.length === 0).length;
+
+  // Matrice de couverture §6.2 : engagement → objectif(s) → indicateur(s).
+  const engagementsCouverture = engagementOptions.map((e) => ({
+    id: e.id,
+    libelle: e.libelle,
+    objectifs: withProgress
+      .filter((o) => o.engagement_id === e.id)
+      .map((o) => ({
+        id: o.id,
+        intitule: o.intitule,
+        indicateurs: o.indicateursLies.map((i) => ({ id: i.id, nom: i.nom })),
+      })),
+  }));
 
   // §6.2.2 : actions de mise en œuvre rattachées aux objectifs.
   const actionsByObjectif = new Map<
@@ -192,8 +215,14 @@ export default async function ObjectifsPage() {
         isoClause="ISO 9001 §6.2"
         help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
       >
-        <ObjectifDialog processusOptions={processusOptions} indicateurOptions={indicateurOptions} />
+        <ObjectifDialog
+          processusOptions={processusOptions}
+          indicateurOptions={indicateurOptions}
+          engagementOptions={engagementOptions}
+        />
       </PageHeader>
+
+      <EngagementsCard engagements={engagementsCouverture} />
 
       {total > 0 ? (
         <Card className="mb-6">
@@ -366,6 +395,7 @@ export default async function ObjectifsPage() {
                                   objectif={o}
                                   processusOptions={processusOptions}
                                   indicateurOptions={indicateurOptions}
+                                  engagementOptions={engagementOptions}
                                   linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
                                 />
                                 <SupprimerButton
