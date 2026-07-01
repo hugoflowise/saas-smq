@@ -2,8 +2,8 @@
 
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
+import { ingestSuiviPrestation } from "@/lib/suivi-ingest";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Json } from "@/lib/supabase/database.types";
 
 const schema = z.object({
   token: z.string().uuid(),
@@ -12,14 +12,11 @@ const schema = z.object({
   attestation: z.literal(true, { message: "L'attestation sur l'honneur est requise." }),
 });
 
-const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
-const num = (v: unknown): number | null => (typeof v === "number" ? v : null);
-
 /**
  * Soumission publique d'un suivi de prestation client (BM, sans authentification).
- * Les colonnes dénormalisées de `suivis_prestation` (consultant, client, etc.) et
- * la logique de réclamation sont extraites depuis `reponses`, dont les clés sont
- * figées par les champs socle (`verrou`) du modèle par défaut.
+ * Les colonnes dénormalisées de `suivis_prestation` et la logique de réclamation
+ * sont extraites depuis `reponses` par `ingestSuiviPrestation` (source unique
+ * partagée avec la synchronisation hors-ligne).
  */
 export async function submitSuiviPrestationAction(input: unknown): Promise<ActionResult> {
   const parsed = schema.safeParse(input);
@@ -36,45 +33,7 @@ export async function submitSuiviPrestationAction(input: unknown): Promise<Actio
     .maybeSingle();
   if (!tenant) return { ok: false, error: "Questionnaire introuvable." };
 
-  const satisfactionGlobale = num(r.satisfaction_globale);
-  const nps = num(r.nps);
-  // `date_suivi` est un champ socle requis : présent en pratique, sécurisé ici.
-  const dateSuivi = str(r.date_suivi) ?? "";
-
-  // Réclamation : recommandation faible (≤ 6) ou satisfaction basse (≤ 2).
-  const estReclamation =
-    (nps != null && nps <= 6) || (satisfactionGlobale != null && satisfactionGlobale <= 2);
-
-  const { error } = await admin.from("suivis_prestation").insert({
-    tenant_id: tenant.id,
-    consultant: str(r.consultant),
-    client: str(r.client),
-    mission: str(r.mission),
-    manager: str(r.manager),
-    date_suivi: dateSuivi || null,
-    satisfaction_globale: satisfactionGlobale,
-    nps,
-    est_reclamation: estReclamation,
-    nouvelle_date_suivi: str(r.nouvelle_date_suivi),
-    modele_version: modeleVersion ?? null,
-    reponses: r as unknown as Json,
-  });
-  if (error) return { ok: false, error: error.message };
-
-  // Alimente aussi le module Satisfaction (NPS global) · note /5 ramenée sur /10.
-  await admin.from("enquetes_satisfaction").insert({
-    tenant_id: tenant.id,
-    client: str(r.client),
-    date_reponse: dateSuivi,
-    note_recommandation: nps,
-    note_satisfaction: satisfactionGlobale != null ? satisfactionGlobale * 2 : null,
-    commentaire:
-      typeof r.commentaire_satisfaction === "string"
-        ? (r.commentaire_satisfaction as string)
-        : null,
-    est_reclamation: estReclamation,
-    source: "Suivi de prestation client",
-  });
-
+  const result = await ingestSuiviPrestation(admin, tenant.id, r, modeleVersion ?? null);
+  if (!result.ok) return { ok: false, error: result.error };
   return { ok: true };
 }
