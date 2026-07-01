@@ -119,6 +119,9 @@ export default async function AnalyseSuiviPrestationPage({
   const a = analyserSuivisPrestation(rows);
   const periodeLabel = anneeActive == null ? "toutes les années" : String(anneeActive);
 
+  // NPS (-100..100) projeté sur 0..100 pour l'anneau de jauge.
+  const npsRing = a.nps == null ? null : Math.round((a.nps + 100) / 2);
+
   const tiles = [
     { label: "Suivis réalisés", value: a.nbSuivis, cls: "text-foreground" },
     { label: "Clients suivis", value: a.nbClients, cls: "text-status-pf" },
@@ -182,43 +185,36 @@ export default async function AnalyseSuiviPrestationPage({
               <CardHeader>
                 <CardTitle className="text-base">Recommandation (NPS)</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-semibold text-4xl text-status-pf">
-                    {a.nps != null ? a.nps : "-"}
+              <CardContent className="flex items-center gap-5">
+                <Jauge
+                  pct={npsRing}
+                  value={a.nps != null ? String(a.nps) : "-"}
+                  sub={a.npsLabel}
+                  tone="pf"
+                />
+                <div className="flex flex-col gap-1 text-sm">
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-status-conforme" />
+                    <span className="font-medium">{a.npsRepartition.promoteurs}</span>
+                    <span className="text-muted-foreground">
+                      promoteurs ({a.npsRepartition.pctPromoteurs}%)
+                    </span>
                   </span>
-                  <span className="text-muted-foreground text-sm">{a.npsLabel}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-muted-foreground/40" />
+                    <span className="font-medium">{a.npsRepartition.passifs}</span>
+                    <span className="text-muted-foreground">
+                      passifs ({a.npsRepartition.pctPassifs}%)
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-status-nc-mineure" />
+                    <span className="font-medium">{a.npsRepartition.detracteurs}</span>
+                    <span className="text-muted-foreground">
+                      détracteurs ({a.npsRepartition.pctDetracteurs}%)
+                    </span>
+                  </span>
                 </div>
-                {a.npsRepartition.total > 0 ? (
-                  <>
-                    <div className="flex h-3 overflow-hidden rounded-full">
-                      <div
-                        className="h-full bg-status-conforme"
-                        style={{ width: `${a.npsRepartition.pctPromoteurs}%` }}
-                      />
-                      <div
-                        className="h-full bg-muted-foreground/40"
-                        style={{ width: `${a.npsRepartition.pctPassifs}%` }}
-                      />
-                      <div
-                        className="h-full bg-status-nc-mineure"
-                        style={{ width: `${a.npsRepartition.pctDetracteurs}%` }}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                      <span className="text-status-conforme">
-                        {a.npsRepartition.promoteurs} promoteurs ({a.npsRepartition.pctPromoteurs}%)
-                      </span>
-                      <span className="text-muted-foreground">
-                        {a.npsRepartition.passifs} passifs ({a.npsRepartition.pctPassifs}%)
-                      </span>
-                      <span className="text-status-nc-mineure">
-                        {a.npsRepartition.detracteurs} détracteurs (
-                        {a.npsRepartition.pctDetracteurs}%)
-                      </span>
-                    </div>
-                  </>
-                ) : null}
               </CardContent>
             </Card>
 
