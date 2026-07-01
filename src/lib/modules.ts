@@ -51,6 +51,13 @@ export function normalizeNormes(codes: readonly string[]): NormeCode[] {
 
 type Requirement = "socle" | "systeme" | { normes: NormeCode[] };
 
+// Normes ISO à structure Annexe SL (High Level Structure) : elles partagent le
+// même tronc « système de management » (contexte §4.1, parties intéressées §4.2,
+// domaine §4.3, approche processus §4.4, R&O §6.1, modifications §6.3,
+// non-conformités §10.2…). MASE n'est PAS une norme Annexe SL (structure en
+// 5 axes) : ces modules-là doivent être masqués pour un client MASE seul.
+const ISO_ANNEXE_SL: NormeCode[] = ["9001", "14001", "45001"];
+
 // Modules transverses / obligations légales : toujours visibles, indépendamment
 // des normes (un client a toujours au moins ces entrées).
 const MODULE_REQUIREMENTS: Record<string, Requirement> = {
@@ -65,15 +72,24 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   "/corbeille": "socle",
   "/utilisateurs": "socle",
   // DUERP (document unique) : obligation légale dès 1 salarié, indépendante de
-  // toute certification → socle.
+  // toute certification → socle, visible pour tous (MASE s'appuie dessus mais ne
+  // le « possède » pas).
   "/duerp": "socle",
-  //
-  // Modules métier ISO 9001 : satisfaction client (§9.1.2) et achats/fournisseurs
-  // (§8.4). Masqués pour un client qui n'a QUE des normes SST/environnement.
-  "/suivi-prestation": { normes: ["9001"] },
-  "/fournisseurs": { normes: ["9001"] },
-  //
-  // Modules métier (à venir) - exemples du gating ciblé :
+
+  // --- Tronc « système de management » ISO Annexe SL (masqué pour MASE seul) ---
+  "/strategie/contexte": { normes: ISO_ANNEXE_SL }, // §4.1 enjeux internes/externes
+  "/strategie/domaine": { normes: ISO_ANNEXE_SL }, // §4.3 domaine d'application
+  "/strategie/parties-prenantes": { normes: ISO_ANNEXE_SL }, // §4.2 parties intéressées
+  "/risques": { normes: ISO_ANNEXE_SL }, // §6.1 R&O stratégiques (≠ l'AdR par mission MASE)
+  "/modifications-smq": { normes: ISO_ANNEXE_SL }, // §6.3 modifications planifiées
+  "/processus": { normes: ISO_ANNEXE_SL }, // §4.4 approche processus
+  "/nc": { normes: ISO_ANNEXE_SL }, // §10.2 non-conformités (MASE : écarts + remontées)
+
+  // --- Modules métier ISO 9001 (masqués pour un client SST/environnement seul) ---
+  "/suivi-prestation": { normes: ["9001"] }, // satisfaction client §9.1.2
+  "/fournisseurs": { normes: ["9001"] }, // achats / évaluation fournisseurs §8.4
+
+  // --- Modules métier à venir (exemples du gating ciblé) ---
   // "/sst/plans-prevention": { normes: ["MASE", "45001"] },
   // "/sst/accidents": { normes: ["MASE", "45001"] },
   // "/environnement/aspects": { normes: ["14001"] },

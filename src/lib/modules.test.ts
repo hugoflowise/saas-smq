@@ -39,4 +39,38 @@ describe("isModuleVisible", () => {
     expect(isModuleVisible("/suivi-prestation", ["9001"])).toBe(true);
     expect(isModuleVisible("/fournisseurs", ["9001", "MASE"])).toBe(true);
   });
+
+  it("les modules du tronc ISO Annexe SL sont masqués pour un client MASE seul", () => {
+    for (const href of [
+      "/strategie/contexte",
+      "/strategie/domaine",
+      "/strategie/parties-prenantes",
+      "/risques",
+      "/modifications-smq",
+      "/processus",
+      "/nc",
+    ]) {
+      expect(isModuleVisible(href, ["MASE"])).toBe(false);
+    }
+  });
+
+  it("les modules du tronc ISO Annexe SL restent visibles pour une norme ISO", () => {
+    expect(isModuleVisible("/processus", ["9001"])).toBe(true);
+    expect(isModuleVisible("/risques", ["45001"])).toBe(true);
+    expect(isModuleVisible("/strategie/contexte", ["14001", "MASE"])).toBe(true);
+  });
+
+  it("le management commun reste visible pour MASE (politique, objectifs, audits, veille, remontées, revue, auto-diag)", () => {
+    for (const href of [
+      "/strategie/politique",
+      "/strategie/objectifs",
+      "/audits",
+      "/veille",
+      "/reclamations",
+      "/revues/direction",
+      "/conformite",
+    ]) {
+      expect(isModuleVisible(href, ["MASE"])).toBe(true);
+    }
+  });
 });
