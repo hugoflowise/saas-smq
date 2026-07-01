@@ -47,6 +47,18 @@ export const NORMES: NormeInfo[] = [
 
 const NORME_CODES = new Set<string>(NORMES.map((n) => n.code));
 
+/**
+ * Correspondance code de norme → valeur `norme` stockée dans `referentiel_iso`
+ * (l'auto-diagnostic). Le 9001 y est enregistré sous « ISO 9001 ».
+ */
+export const REFERENTIEL_NORME: Record<NormeCode, string> = {
+  "9001": "ISO 9001",
+  "14001": "ISO 14001",
+  "45001": "ISO 45001",
+  MASE: "MASE",
+  CEFRI: "CEFRI",
+};
+
 /** Normes valides (filtre les entrées inconnues d'un tableau de codes). */
 export function normalizeNormes(codes: readonly string[]): NormeCode[] {
   return codes.filter((c): c is NormeCode => NORME_CODES.has(c));
