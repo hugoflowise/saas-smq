@@ -201,6 +201,18 @@ export default async function PolitiquePage({
             reference={politique?.code ?? null}
             onSaveReference={savePolitiqueCodeAction}
             initialContenu={(politique?.contenu ?? null) as JSONContent | null}
+            afterContent={
+              engagementsCouverture.length > 0 ? (
+                <div className="mt-8">
+                  <h2 className="mb-2 font-semibold text-lg">Nos engagements qualité</h2>
+                  <ol className="ml-5 list-decimal space-y-1">
+                    {engagementsCouverture.map((e) => (
+                      <li key={e.id}>{e.libelle}</li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null
+            }
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}
             currentVersionDate={current?.approvedAt ?? null}

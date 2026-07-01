@@ -66,6 +66,7 @@ export function MaitriseDocument({
   signatureTitle,
   signatureDescription,
   beforeContent,
+  afterContent,
   hideSignataireMeta = false,
   structuredEditor,
   numberContentHeadingsFrom,
@@ -115,6 +116,8 @@ export function MaitriseDocument({
   signatureDescription: string;
   /** Rubriques structurées rendues dans le document (lecture), avant le contenu riche. */
   beforeContent?: React.ReactNode;
+  /** Contenu rendu dans le document APRÈS le corps (avant les signatures), hors édition. */
+  afterContent?: React.ReactNode;
   /** Masque date d'approbation / signataire / rédacteur du bloc méta (doublon quand un tableau de révision les affiche déjà). */
   hideSignataireMeta?: boolean;
   /** Éditeur des rubriques structurées, affiché en mode édition (bascule « Modifier »). */
@@ -464,6 +467,7 @@ export function MaitriseDocument({
             bare={!editable}
           />
         </div>
+        {editing ? null : afterContent}
         {!editing && showSignatures ? (
           <SignatairesBlock
             className="mt-8"

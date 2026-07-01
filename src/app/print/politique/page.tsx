@@ -56,6 +56,14 @@ export default async function PolitiquePrintPage() {
   const isPublished = Boolean(version);
   const contenu = (version?.contenu_snapshot ?? politique?.contenu ?? null) as JSONContent | null;
 
+  // Engagements de la politique (§6.2), listés dans le document imprimé.
+  const { data: engagements } = await supabase
+    .from("politique_engagements")
+    .select("id, libelle")
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .order("ordre", { ascending: true });
+
   const reference = politique?.code?.trim() || "-";
   const meta = isPublished
     ? [
@@ -80,6 +88,16 @@ export default async function PolitiquePrintPage() {
       genereLe={formatDate(todayISO())}
     >
       <TiptapEditor content={contenu} editable={false} bare />
+      {engagements && engagements.length > 0 ? (
+        <div className="mt-8">
+          <h2 className="mb-2 font-semibold text-lg">Nos engagements qualité</h2>
+          <ol className="ml-5 list-decimal space-y-1">
+            {engagements.map((e) => (
+              <li key={e.id}>{e.libelle}</li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
       {isPublished ? (
         <SignatairesBlock
           className="mt-8"
