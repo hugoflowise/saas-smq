@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteObjectifAction } from "@/lib/actions/registres";
+import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { getNormesActives } from "@/lib/normes-actives";
 import { domaineLabel, objectifsLabel } from "@/lib/normes-libelles";
@@ -38,6 +39,8 @@ export default async function ObjectifsPage() {
   const normes = await getNormesActives();
   const objTitre = objectifsLabel(normes);
   const domaine = domaineLabel(normes);
+  // MASE §1.3 : les objectifs doivent couvrir Sécurité / Santé / Environnement.
+  const afficherDomaine = normes.includes("MASE");
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
@@ -60,7 +63,7 @@ export default async function ObjectifsPage() {
     supabase
       .from("objectifs_qualite")
       .select(
-        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, engagement_id, valide_par, valide_le",
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, engagement_id, domaine, valide_par, valide_le",
       )
       .eq("tenant_id", tid)
       .is("deleted_at", null)
@@ -112,6 +115,12 @@ export default async function ObjectifsPage() {
   const total = withProgress.length;
   const atteints = withProgress.filter((o) => o.atteint).length;
   const tauxGlobal = total > 0 ? Math.round((atteints / total) * 100) : 0;
+
+  // Couverture des domaines SSE (MASE §1.3) : un domaine est couvert s'il porte
+  // au moins un objectif non abandonné.
+  const domainesCouverts = new Set(
+    withProgress.filter((o) => o.statut !== "abandonne" && o.domaine).map((o) => o.domaine),
+  );
 
   // Détection d'orphelins (intégrité relationnelle, recommandée et non bloquante).
   const sansProcessus = withProgress.filter((o) => !o.processus_id).length;
@@ -179,8 +188,38 @@ export default async function ObjectifsPage() {
           processusOptions={processusOptions}
           indicateurOptions={indicateurOptions}
           engagementOptions={engagementOptions}
+          afficherDomaine={afficherDomaine}
         />
       </PageHeader>
+
+      {afficherDomaine ? (
+        <Card className="mb-6">
+          <CardContent className="flex flex-wrap items-center gap-4 py-4">
+            <span className="font-medium text-sm">Couverture des domaines (MASE §1.3)</span>
+            <div className="flex flex-wrap gap-2">
+              {DOMAINES_SSE.map((d) => {
+                const couvert = domainesCouverts.has(d);
+                return (
+                  <span
+                    key={d}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
+                      couvert
+                        ? "bg-status-conforme/15 text-status-conforme"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <span
+                      className={`size-1.5 rounded-full ${couvert ? "bg-status-conforme" : "bg-muted-foreground/40"}`}
+                    />
+                    {DOMAINE_SSE_LABELS[d]}
+                    {couvert ? " couvert" : " à couvrir"}
+                  </span>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {total > 0 ? (
         <Card className="mb-6">
@@ -350,6 +389,7 @@ export default async function ObjectifsPage() {
                                   indicateurOptions={indicateurOptions}
                                   engagementOptions={engagementOptions}
                                   linkedIndicateurIds={o.linkedIds}
+                                  afficherDomaine={afficherDomaine}
                                 />
                                 <SupprimerButton
                                   action={deleteObjectifAction}
