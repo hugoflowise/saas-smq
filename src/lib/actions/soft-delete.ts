@@ -22,6 +22,7 @@ export type SoftDeletableTable =
   | "objectifs_qualite"
   | "parties_interessees"
   | "pi_attentes"
+  | "politique_engagements"
   | "procedures"
   | "processus"
   | "reunions"

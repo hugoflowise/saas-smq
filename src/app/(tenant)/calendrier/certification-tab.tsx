@@ -33,7 +33,7 @@ export function CertificationTab({ jalons }: { jalons: JalonRow[] }) {
   const tiles = [
     {
       label: "Prochain jalon",
-      value: prochain ? formatDate(prochain.date_jalon) : "—",
+      value: prochain ? formatDate(prochain.date_jalon) : "-",
       cls: "text-foreground",
     },
     { label: "Jalons planifiés", value: planifies.length, cls: "text-status-pf" },

@@ -55,7 +55,7 @@ export default async function ObjectifsPage() {
     supabase
       .from("objectifs_qualite")
       .select(
-        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, valide_par, valide_le",
+        "id, intitule, description, cible_chiffree, echeance, fonction_concernee, statut, valeur_cible, valeur_actuelle, unite, sens, processus_id, indicateur_id, engagement_id, valide_par, valide_le",
       )
       .eq("tenant_id", tid)
       .is("deleted_at", null)
@@ -78,6 +78,15 @@ export default async function ObjectifsPage() {
   const processusOptions = processus ?? [];
   const indicateurOptions = indicateurs ?? [];
   const indicateurById = new Map(indicateurOptions.map((i) => [i.id, i]));
+
+  // Engagements de la politique qualité (§6.2), pour la matrice de couverture.
+  const { data: engagements } = await supabase
+    .from("politique_engagements")
+    .select("id, libelle")
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .order("ordre", { ascending: true });
+  const engagementOptions = engagements ?? [];
 
   // Liaison N–N objectif ↔ indicateurs (source de vérité de l'ensemble des
   // indicateurs rattachés à chaque objectif).
@@ -192,7 +201,11 @@ export default async function ObjectifsPage() {
         isoClause="ISO 9001 §6.2"
         help="Les objectifs qualité doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction."
       >
-        <ObjectifDialog processusOptions={processusOptions} indicateurOptions={indicateurOptions} />
+        <ObjectifDialog
+          processusOptions={processusOptions}
+          indicateurOptions={indicateurOptions}
+          engagementOptions={engagementOptions}
+        />
       </PageHeader>
 
       {total > 0 ? (
@@ -366,6 +379,7 @@ export default async function ObjectifsPage() {
                                   objectif={o}
                                   processusOptions={processusOptions}
                                   indicateurOptions={indicateurOptions}
+                                  engagementOptions={engagementOptions}
                                   linkedIndicateurIds={indicateurIdsByObjectif.get(o.id) ?? []}
                                 />
                                 <SupprimerButton

@@ -2061,6 +2061,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           echeance: string | null
+          engagement_id: string | null
           est_smart: boolean
           fonction_concernee: string | null
           id: string
@@ -2086,6 +2087,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           echeance?: string | null
+          engagement_id?: string | null
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
@@ -2111,6 +2113,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           echeance?: string | null
+          engagement_id?: string | null
           est_smart?: boolean
           fonction_concernee?: string | null
           id?: string
@@ -2135,6 +2138,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "objectifs_qualite_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "politique_engagements"
             referencedColumns: ["id"]
           },
           {
@@ -2410,6 +2420,50 @@ export type Database = {
           },
         ]
       }
+      politique_engagements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          libelle: string
+          ordre: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle: string
+          ordre?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          libelle?: string
+          ordre?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "politique_engagements_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       politique_qualite: {
         Row: {
           approved_at: string | null
@@ -2419,8 +2473,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_revision_prevue: string | null
+          engagement_direction: string | null
+          engagements_intro: string | null
           id: string
+          objectifs_texte: string | null
+          presentation: string | null
           signature_data: Json | null
+          valeurs: string | null
           soumis_le: string | null
           soumis_par: string | null
           statut: Database["public"]["Enums"]["document_statut"]
@@ -2440,8 +2499,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -2461,8 +2525,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]

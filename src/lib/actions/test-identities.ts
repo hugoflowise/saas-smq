@@ -7,7 +7,7 @@ import { getTenantContext, IS_STAGING } from "@/lib/tenant-context";
 
 /**
  * Aide au TEST (staging uniquement) : crée deux fiches utilisateurs « placeholder »
- * dans le tenant actif — un Manager flowise et un Dirigeant flowise — qui servent
+ * dans le tenant actif - un Manager flowise et un Dirigeant flowise - qui servent
  * uniquement de signataires distincts. Couplé à l'identité simulée
  * (cf. {@link getTenantContext}), cela permet à un admin de dérouler tout seul un
  * circuit rédacteur → vérificateur → approbateur (et de tester les signatures)

@@ -1,9 +1,11 @@
 import type { JSONContent } from "@tiptap/react";
+import { EngagementsCard } from "@/app/(tenant)/strategie/objectifs/engagements-card";
 import { BackLink } from "@/components/back-link";
 import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
+import { PolitiqueSections } from "@/components/politique-sections";
 import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,6 +18,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { versionLettre } from "@/lib/versions";
+import { PolitiqueInfosEditor } from "./politique-infos-editor";
 import { VersionHistory } from "./version-history";
 
 export default async function PolitiquePage({
@@ -56,7 +59,7 @@ export default async function PolitiquePage({
   const { data: politique } = await supabase
     .from("politique_qualite")
     .select(
-      "code, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at",
+      "code, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, presentation, valeurs, engagements_intro, objectifs_texte, engagement_direction",
     )
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -106,6 +109,54 @@ export default async function PolitiquePage({
 
   const current = versions.find((v) => v.id === politique?.version_actuelle_id) ?? null;
 
+  // Engagements de la politique (§6.2) + matrice de couverture engagement → objectif → KPI.
+  const [{ data: engagements }, { data: objectifsEng }, { data: liensEng }] = await Promise.all([
+    supabase
+      .from("politique_engagements")
+      .select("id, libelle")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("ordre", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule, engagement_id")
+      .eq("tenant_id", tid)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+    supabase.from("objectif_indicateurs").select("objectif_id, indicateur_id").eq("tenant_id", tid),
+  ]);
+  const objsEng = objectifsEng ?? [];
+  const indIds = [...new Set((liensEng ?? []).map((l) => l.indicateur_id))];
+  const indNomById = new Map<string, string>();
+  if (indIds.length) {
+    const { data: inds } = await supabase
+      .from("indicateurs")
+      .select("id, nom")
+      .in("id", indIds)
+      .is("deleted_at", null);
+    for (const i of inds ?? []) indNomById.set(i.id, i.nom);
+  }
+  const indsByObjectif = new Map<string, { id: string; nom: string }[]>();
+  for (const l of liensEng ?? []) {
+    const nom = indNomById.get(l.indicateur_id);
+    if (!nom) continue;
+    const list = indsByObjectif.get(l.objectif_id) ?? [];
+    list.push({ id: l.indicateur_id, nom });
+    indsByObjectif.set(l.objectif_id, list);
+  }
+  const engagementsCouverture = (engagements ?? []).map((e) => ({
+    id: e.id,
+    libelle: e.libelle,
+    objectifs: objsEng
+      .filter((o) => o.engagement_id === e.id)
+      .map((o) => ({
+        id: o.id,
+        intitule: o.intitule,
+        indicateurs: indsByObjectif.get(o.id) ?? [],
+      })),
+  }));
+  const tousObjectifs = objsEng.map((o) => ({ id: o.id, intitule: o.intitule }));
+
   const isApprover = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
   const canWrite = isApprover || ctx.role === "manager";
   // Rédacteur du document = la personne qui a soumis la version (signature de
@@ -148,6 +199,34 @@ export default async function PolitiquePage({
             reference={politique?.code ?? null}
             onSaveReference={savePolitiqueCodeAction}
             initialContenu={(politique?.contenu ?? null) as JSONContent | null}
+            beforeContent={
+              <PolitiqueSections
+                presentation={politique?.presentation ?? null}
+                valeurs={politique?.valeurs ?? null}
+                engagementsIntro={politique?.engagements_intro ?? null}
+                engagements={engagementsCouverture.map((e) => ({ libelle: e.libelle }))}
+                objectifsTexte={politique?.objectifs_texte ?? null}
+                engagementDirection={politique?.engagement_direction ?? null}
+              />
+            }
+            structuredEditor={
+              <div className="flex flex-col gap-5">
+                <PolitiqueInfosEditor
+                  initial={{
+                    presentation: politique?.presentation ?? "",
+                    valeurs: politique?.valeurs ?? "",
+                    engagementsIntro: politique?.engagements_intro ?? "",
+                    objectifsTexte: politique?.objectifs_texte ?? "",
+                    engagementDirection: politique?.engagement_direction ?? "",
+                  }}
+                />
+                {/* Section 3 - la liste des engagements (reliée aux objectifs/KPI). */}
+                <EngagementsCard
+                  engagements={engagementsCouverture}
+                  tousObjectifs={tousObjectifs}
+                />
+              </div>
+            }
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}
             currentVersionDate={current?.approvedAt ?? null}
