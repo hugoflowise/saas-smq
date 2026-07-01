@@ -1740,6 +1740,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           formule_calcul: string | null
           frequence_mesure: Database["public"]["Enums"]["indicateur_frequence"]
           id: string
@@ -1762,6 +1763,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           formule_calcul?: string | null
           frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
           id?: string
@@ -1784,6 +1786,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           formule_calcul?: string | null
           frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
           id?: string
@@ -2306,6 +2309,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           echeance: string | null
           engagement_id: string | null
           est_smart: boolean
@@ -2332,6 +2336,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           echeance?: string | null
           engagement_id?: string | null
           est_smart?: boolean
@@ -2358,6 +2363,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           echeance?: string | null
           engagement_id?: string | null
           est_smart?: boolean
