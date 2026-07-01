@@ -75,6 +75,47 @@ export async function savePolitiqueContenuAction(contenu: Json): Promise<ActionR
   return { ok: true };
 }
 
+/** Enregistre les rubriques structurées de la politique (sections à compléter). */
+export async function savePolitiqueSectionsAction(input: {
+  presentation?: string;
+  valeurs?: string;
+  engagementsIntro?: string;
+  objectifsTexte?: string;
+  engagementDirection?: string;
+}): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!permissions(ctx.role).writer) return { ok: false, error: "Droits insuffisants." };
+
+  const { supabase, politique } = await loadPolitique(ctx.effectiveTenantId);
+  if (politique && politique.statut !== "brouillon") {
+    return { ok: false, error: "La politique n'est modifiable qu'en brouillon." };
+  }
+
+  const patch = {
+    presentation: input.presentation?.trim() || null,
+    valeurs: input.valeurs?.trim() || null,
+    engagements_intro: input.engagementsIntro?.trim() || null,
+    objectifs_texte: input.objectifsTexte?.trim() || null,
+    engagement_direction: input.engagementDirection?.trim() || null,
+  };
+
+  const { error } = politique
+    ? await supabase
+        .from("politique_qualite")
+        .update({ ...patch, updated_by: ctx.userId })
+        .eq("id", politique.id)
+    : await supabase
+        .from("politique_qualite")
+        .insert({ tenant_id: ctx.effectiveTenantId, ...patch, created_by: ctx.userId });
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/strategie/politique");
+  revalidatePath("/print/politique");
+  return { ok: true };
+}
+
 /**
  * Enregistre le code documentaire de la politique (ex. « DG_SMQ_004 »).
  * Métadonnée d'identification : modifiable par un rédacteur quel que soit le
