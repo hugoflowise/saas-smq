@@ -3,10 +3,42 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import { MODELES_INTEGRES } from "@/lib/communications";
 import { todayISO } from "@/lib/format";
+import { canWrite } from "@/lib/permissions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { softDeleteRow } from "./soft-delete";
+
+/** Une pièce jointe d'un modèle (métadonnées stockées en jsonb sur la ligne). */
+export type ModelePieceJointe = { path: string; nom: string; taille: number; type: string };
+
+const MAX_PIECES = 5;
+const MAX_TAILLE = 10 * 1024 * 1024; // 10 Mo (fichier téléchargé puis joint au mail)
+
+function nomSur(nom: string): string {
+  const base = nom
+    .normalize("NFKD")
+    .replace(/[^\w.\- ]/g, "_")
+    .replace(/\s+/g, "_");
+  return base.slice(-80) || "fichier";
+}
+
+/** Récupère le modèle (RLS = périmètre client) avec ses PJ, ou null. */
+async function chargerModele(modeleId: string) {
+  const ctx = await getTenantContext();
+  if (!ctx.userId || !ctx.effectiveTenantId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("communication_modeles")
+    .select("id, tenant_id, pieces_jointes")
+    .eq("id", modeleId)
+    .maybeSingle();
+  if (!data) return null;
+  return { ctx, pieces: (data.pieces_jointes ?? []) as ModelePieceJointe[] };
+}
 
 const base = {
   categorie: z.string().trim().min(1),
@@ -14,8 +46,60 @@ const base = {
   objet: z.string().trim().min(2, "Objet requis."),
   corps: z.string().default(""),
 };
-const createSchema = z.object(base);
+// À la création, `modeleSource` mémorise le modèle fourni matérialisé (le cas échéant).
+const createSchema = z.object({ ...base, modeleSource: z.string().trim().optional() });
 const updateSchema = z.object({ id: z.string().uuid(), ...base });
+
+/**
+ * Matérialise un modèle fourni en copie éditable (idempotent) et renvoie son id
+ * + ses pièces jointes. Permet d'attacher une PJ à un modèle de base directement,
+ * sans avoir à l'enregistrer manuellement d'abord.
+ */
+export async function materialiserModeleAction(
+  sourceId: string,
+): Promise<{ ok: true; id: string; pieces: ModelePieceJointe[] } | { ok: false; error: string }> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  // Copie déjà matérialisée ? On la réutilise (idempotent, pas de doublon).
+  const { data: existant } = await supabase
+    .from("communication_modeles")
+    .select("id, pieces_jointes")
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .eq("modele_source", sourceId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (existant) {
+    return {
+      ok: true,
+      id: existant.id,
+      pieces: (existant.pieces_jointes ?? []) as ModelePieceJointe[],
+    };
+  }
+
+  const source = MODELES_INTEGRES.find((m) => m.id === sourceId);
+  if (!source) return { ok: false, error: "Modèle fourni introuvable." };
+
+  const { data, error } = await supabase
+    .from("communication_modeles")
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      categorie: source.categorie,
+      titre: source.titre,
+      objet: source.objet,
+      corps: source.corps,
+      modele_source: sourceId,
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Matérialisation impossible." };
+  revalidatePath("/communications");
+  return { ok: true, id: data.id, pieces: [] };
+}
 
 export async function createModeleAction(input: unknown): Promise<CreateResult> {
   const ctx = await getTenantContext();
@@ -25,10 +109,16 @@ export async function createModeleAction(input: unknown): Promise<CreateResult> 
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
+  const { modeleSource, ...champs } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("communication_modeles")
-    .insert({ tenant_id: ctx.effectiveTenantId, ...parsed.data, created_by: ctx.userId })
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      ...champs,
+      modele_source: modeleSource ?? null,
+      created_by: ctx.userId,
+    })
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: error?.message ?? "Création impossible." };
@@ -89,4 +179,89 @@ export async function logCommunicationEnvoyeeAction(input: {
   if (error) return { ok: false, error: error.message };
   revalidatePath("/communications");
   return { ok: true };
+}
+
+type PiecesResult = { ok: true; pieces: ModelePieceJointe[] } | { ok: false; error: string };
+
+/** Ajoute une ou plusieurs pièces jointes à un modèle (upload côté serveur). */
+export async function uploadModelePieceAction(formData: FormData): Promise<PiecesResult> {
+  if (!(formData instanceof FormData)) {
+    return { ok: false, error: "Session expirée. Rechargez la page." };
+  }
+  const modeleId = String(formData.get("modeleId") ?? "");
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!canWrite(infos.ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const fichiers = formData
+    .getAll("fichiers")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+  if (fichiers.length === 0) return { ok: false, error: "Aucun fichier." };
+  if (infos.pieces.length + fichiers.length > MAX_PIECES) {
+    return { ok: false, error: `Maximum ${MAX_PIECES} pièces jointes par modèle.` };
+  }
+  for (const f of fichiers) {
+    if (f.size > MAX_TAILLE) return { ok: false, error: `« ${f.name} » dépasse 10 Mo.` };
+  }
+
+  const admin = createAdminClient();
+  const tenantSeg = infos.ctx.effectiveTenantId ?? "global";
+  const ajoutees: ModelePieceJointe[] = [];
+  for (const f of fichiers) {
+    const path = `${tenantSeg}/${modeleId}/${Date.now()}-${nomSur(f.name)}`;
+    const { error: upErr } = await admin.storage
+      .from("communications")
+      .upload(path, await f.arrayBuffer(), {
+        contentType: f.type || "application/octet-stream",
+        upsert: true,
+      });
+    if (upErr) return { ok: false, error: upErr.message };
+    ajoutees.push({ path, nom: f.name, taille: f.size, type: f.type || "" });
+  }
+
+  const pieces = [...infos.pieces, ...ajoutees];
+  const { error } = await admin
+    .from("communication_modeles")
+    .update({ pieces_jointes: pieces as unknown as Json })
+    .eq("id", modeleId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/communications");
+  return { ok: true, pieces };
+}
+
+/** Retire une pièce jointe d'un modèle (storage + métadonnées). */
+export async function deleteModelePieceAction(
+  modeleId: string,
+  path: string,
+): Promise<PiecesResult> {
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!canWrite(infos.ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const admin = createAdminClient();
+  await admin.storage.from("communications").remove([path]);
+  const pieces = infos.pieces.filter((p) => p.path !== path);
+  const { error } = await admin
+    .from("communication_modeles")
+    .update({ pieces_jointes: pieces as unknown as Json })
+    .eq("id", modeleId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/communications");
+  return { ok: true, pieces };
+}
+
+/** URL signée (5 min) pour télécharger une pièce jointe d'un modèle du client. */
+export async function getModelePieceUrlAction(
+  modeleId: string,
+  path: string,
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const infos = await chargerModele(modeleId);
+  if (!infos) return { ok: false, error: "Modèle introuvable." };
+  if (!infos.pieces.some((p) => p.path === path)) {
+    return { ok: false, error: "Pièce jointe introuvable." };
+  }
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from("communications").createSignedUrl(path, 300);
+  if (error || !data) return { ok: false, error: error?.message ?? "Lien indisponible." };
+  return { ok: true, url: data.signedUrl };
 }

@@ -465,7 +465,9 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           id: string
+          modele_source: string | null
           objet: string
+          pieces_jointes: Json
           tenant_id: string
           titre: string
           updated_at: string
@@ -478,7 +480,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          modele_source?: string | null
           objet: string
+          pieces_jointes?: Json
           tenant_id: string
           titre: string
           updated_at?: string
@@ -491,7 +495,9 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           id?: string
+          modele_source?: string | null
           objet?: string
+          pieces_jointes?: Json
           tenant_id?: string
           titre?: string
           updated_at?: string
