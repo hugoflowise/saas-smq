@@ -32,6 +32,7 @@ import {
   UserCog,
   Users,
   UsersRound,
+  Wrench,
 } from "lucide-react";
 
 export type NavItem = {
@@ -76,7 +77,10 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     // Section métier SST/MASE : masquée pour un client qualité seul (gating par norme).
     title: "Maîtrise opérationnelle",
-    items: [{ label: "Analyses de risques", href: "/sst/analyses-risques", icon: HardHat }],
+    items: [
+      { label: "Analyses de risques", href: "/sst/analyses-risques", icon: HardHat },
+      { label: "Contrôles obligatoires", href: "/sst/controles", icon: Wrench },
+    ],
   },
   {
     title: "Organisation",
