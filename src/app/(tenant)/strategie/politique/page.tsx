@@ -5,6 +5,7 @@ import type { Societe } from "@/components/document-paper";
 import { EmptyState } from "@/components/empty-state";
 import { MaitriseDocument } from "@/components/maitrise-document";
 import { PageHeader } from "@/components/page-header";
+import { PolitiqueSections } from "@/components/politique-sections";
 import { SupprimerButton } from "@/components/supprimer-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,6 +18,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { versionLettre } from "@/lib/versions";
+import { PolitiqueInfosEditor } from "./politique-infos-editor";
 import { VersionHistory } from "./version-history";
 
 export default async function PolitiquePage({
@@ -57,7 +59,7 @@ export default async function PolitiquePage({
   const { data: politique } = await supabase
     .from("politique_qualite")
     .select(
-      "code, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at",
+      "code, contenu, statut, version_actuelle_id, created_by, soumis_par, soumis_le, verifie_par, verifie_le, approved_by, approved_at, presentation, valeurs, engagements_intro, objectifs_texte, engagement_direction",
     )
     .eq("tenant_id", tid)
     .maybeSingle();
@@ -201,17 +203,26 @@ export default async function PolitiquePage({
             reference={politique?.code ?? null}
             onSaveReference={savePolitiqueCodeAction}
             initialContenu={(politique?.contenu ?? null) as JSONContent | null}
-            afterContent={
-              engagementsCouverture.length > 0 ? (
-                <div className="mt-8">
-                  <h2 className="mb-2 font-semibold text-lg">Nos engagements qualité</h2>
-                  <ol className="ml-5 list-decimal space-y-1">
-                    {engagementsCouverture.map((e) => (
-                      <li key={e.id}>{e.libelle}</li>
-                    ))}
-                  </ol>
-                </div>
-              ) : null
+            beforeContent={
+              <PolitiqueSections
+                presentation={politique?.presentation ?? null}
+                valeurs={politique?.valeurs ?? null}
+                engagementsIntro={politique?.engagements_intro ?? null}
+                engagements={engagementsCouverture.map((e) => ({ libelle: e.libelle }))}
+                objectifsTexte={politique?.objectifs_texte ?? null}
+                engagementDirection={politique?.engagement_direction ?? null}
+              />
+            }
+            structuredEditor={
+              <PolitiqueInfosEditor
+                initial={{
+                  presentation: politique?.presentation ?? "",
+                  valeurs: politique?.valeurs ?? "",
+                  engagementsIntro: politique?.engagements_intro ?? "",
+                  objectifsTexte: politique?.objectifs_texte ?? "",
+                  engagementDirection: politique?.engagement_direction ?? "",
+                }}
+              />
             }
             statut={politique?.statut ?? "brouillon"}
             currentVersion={current?.version ?? null}

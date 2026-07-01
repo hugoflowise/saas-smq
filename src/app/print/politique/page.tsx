@@ -1,4 +1,5 @@
 import type { JSONContent } from "@tiptap/react";
+import { PolitiqueSections } from "@/components/politique-sections";
 import { PrintShell, type Societe } from "@/components/print-shell";
 import { SignatairesBlock } from "@/components/signataires";
 import { TiptapEditor } from "@/components/tiptap-editor";
@@ -25,7 +26,9 @@ export default async function PolitiquePrintPage() {
 
   const { data: politique } = await supabase
     .from("politique_qualite")
-    .select("code, contenu, statut, version_actuelle_id")
+    .select(
+      "code, contenu, statut, version_actuelle_id, presentation, valeurs, engagements_intro, objectifs_texte, engagement_direction",
+    )
     .eq("tenant_id", tid)
     .maybeSingle();
 
@@ -87,17 +90,17 @@ export default async function PolitiquePrintPage() {
       meta={meta}
       genereLe={formatDate(todayISO())}
     >
-      <TiptapEditor content={contenu} editable={false} bare />
-      {engagements && engagements.length > 0 ? (
-        <div className="mt-8">
-          <h2 className="mb-2 font-semibold text-lg">Nos engagements qualité</h2>
-          <ol className="ml-5 list-decimal space-y-1">
-            {engagements.map((e) => (
-              <li key={e.id}>{e.libelle}</li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
+      <PolitiqueSections
+        presentation={politique?.presentation ?? null}
+        valeurs={politique?.valeurs ?? null}
+        engagementsIntro={politique?.engagements_intro ?? null}
+        engagements={(engagements ?? []).map((e) => ({ libelle: e.libelle }))}
+        objectifsTexte={politique?.objectifs_texte ?? null}
+        engagementDirection={politique?.engagement_direction ?? null}
+      />
+      <div className="mt-8">
+        <TiptapEditor content={contenu} editable={false} bare />
+      </div>
       {isPublished ? (
         <SignatairesBlock
           className="mt-8"

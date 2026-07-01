@@ -2473,8 +2473,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_revision_prevue: string | null
+          engagement_direction: string | null
+          engagements_intro: string | null
           id: string
+          objectifs_texte: string | null
+          presentation: string | null
           signature_data: Json | null
+          valeurs: string | null
           soumis_le: string | null
           soumis_par: string | null
           statut: Database["public"]["Enums"]["document_statut"]
@@ -2494,8 +2499,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
@@ -2515,8 +2525,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_revision_prevue?: string | null
+          engagement_direction?: string | null
+          engagements_intro?: string | null
           id?: string
+          objectifs_texte?: string | null
+          presentation?: string | null
           signature_data?: Json | null
+          valeurs?: string | null
           soumis_le?: string | null
           soumis_par?: string | null
           statut?: Database["public"]["Enums"]["document_statut"]
