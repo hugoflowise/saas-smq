@@ -9,6 +9,7 @@ import {
   FileStack,
   FolderTree,
   Gauge,
+  HardHat,
   History,
   Inbox,
   LayoutDashboard,
@@ -71,6 +72,11 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Risques & opportunités", href: "/risques", icon: ShieldCheck },
       { label: "Modifications du SMQ", href: "/modifications-smq", icon: Replace },
     ],
+  },
+  {
+    // Section métier SST/MASE : masquée pour un client qualité seul (gating par norme).
+    title: "Maîtrise opérationnelle",
+    items: [{ label: "Analyses de risques", href: "/sst/analyses-risques", icon: HardHat }],
   },
   {
     title: "Organisation",

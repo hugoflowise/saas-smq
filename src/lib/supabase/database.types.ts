@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      analyses_risques: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_analyse: string | null
+          date_revision: string | null
+          deleted_at: string | null
+          id: string
+          intitule: string
+          lieu: string | null
+          mission: string | null
+          notes: string | null
+          pdp_date_signature: string | null
+          pdp_reference: string | null
+          pdp_requis: boolean
+          statut: Database["public"]["Enums"]["adr_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          valide_le: string | null
+          valide_par: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_analyse?: string | null
+          date_revision?: string | null
+          deleted_at?: string | null
+          id?: string
+          intitule: string
+          lieu?: string | null
+          mission?: string | null
+          notes?: string | null
+          pdp_date_signature?: string | null
+          pdp_reference?: string | null
+          pdp_requis?: boolean
+          statut?: Database["public"]["Enums"]["adr_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_analyse?: string | null
+          date_revision?: string | null
+          deleted_at?: string | null
+          id?: string
+          intitule?: string
+          lieu?: string | null
+          mission?: string | null
+          notes?: string | null
+          pdp_date_signature?: string | null
+          pdp_reference?: string | null
+          pdp_requis?: boolean
+          statut?: Database["public"]["Enums"]["adr_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Relationships: []
+      }
+      analyses_risques_lignes: {
+        Row: {
+          analyse_id: string
+          created_at: string
+          created_by: string | null
+          criticite: number | null
+          danger: string | null
+          domaine: Database["public"]["Enums"]["adr_domaine"]
+          gravite: number
+          id: string
+          mesures_prevention: string | null
+          ordre: number
+          probabilite: number
+          risque_residuel: string | null
+          tache: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          analyse_id: string
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          danger?: string | null
+          domaine?: Database["public"]["Enums"]["adr_domaine"]
+          gravite?: number
+          id?: string
+          mesures_prevention?: string | null
+          ordre?: number
+          probabilite?: number
+          risque_residuel?: string | null
+          tache: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          analyse_id?: string
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          danger?: string | null
+          domaine?: Database["public"]["Enums"]["adr_domaine"]
+          gravite?: number
+          id?: string
+          mesures_prevention?: string | null
+          ordre?: number
+          probabilite?: number
+          risque_residuel?: string | null
+          tache?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       actions: {
         Row: {
           cause_fondamentale: string | null
@@ -4664,6 +4787,8 @@ export type Database = {
       jwt_user_role: { Args: never; Returns: string }
     }
     Enums: {
+      adr_domaine: "securite" | "sante" | "environnement"
+      adr_statut: "brouillon" | "validee" | "a_reviser" | "archivee"
       action_origine:
         | "manuelle"
         | "demarrage_smq"
@@ -4964,6 +5089,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adr_domaine: ["securite", "sante", "environnement"],
+      adr_statut: ["brouillon", "validee", "a_reviser", "archivee"],
       action_origine: [
         "manuelle",
         "demarrage_smq",
