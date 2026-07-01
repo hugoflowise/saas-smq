@@ -57,6 +57,8 @@ export async function genererFormulaireHorsLigneAction(
     logoUrl: tenant.logo_url ?? null,
     genereLe: formatDate(todayISO()),
     syncEndpoint,
+    // Le suivi de prestation exige une attestation sur l'honneur (comme en ligne).
+    attestation: type === "suivi_prestation",
   });
 
   return {
