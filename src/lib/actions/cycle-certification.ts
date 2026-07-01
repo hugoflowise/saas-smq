@@ -235,7 +235,7 @@ export async function genererCycleAction(input: unknown): Promise<ActionResult> 
       const auditInterneId = await createAudit(
         "interne",
         dateInterne,
-        `Audit interne — préparation ${ext.libelle.toLowerCase()}`,
+        `Audit interne - préparation ${ext.libelle.toLowerCase()}`,
       );
       jalons.push({
         libelle: `Audit interne (préparation ${ext.libelle.toLowerCase()})`,

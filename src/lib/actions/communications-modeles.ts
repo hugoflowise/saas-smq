@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult, CreateResult } from "@/lib/actions/types";
+import { MODELES_INTEGRES } from "@/lib/communications";
 import { todayISO } from "@/lib/format";
 import { canWrite } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -48,6 +49,57 @@ const base = {
 // À la création, `modeleSource` mémorise le modèle fourni matérialisé (le cas échéant).
 const createSchema = z.object({ ...base, modeleSource: z.string().trim().optional() });
 const updateSchema = z.object({ id: z.string().uuid(), ...base });
+
+/**
+ * Matérialise un modèle fourni en copie éditable (idempotent) et renvoie son id
+ * + ses pièces jointes. Permet d'attacher une PJ à un modèle de base directement,
+ * sans avoir à l'enregistrer manuellement d'abord.
+ */
+export async function materialiserModeleAction(
+  sourceId: string,
+): Promise<{ ok: true; id: string; pieces: ModelePieceJointe[] } | { ok: false; error: string }> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Sélectionnez d'abord un client." };
+  if (!canWrite(ctx.role)) return { ok: false, error: "Droits insuffisants." };
+
+  const supabase = await createClient();
+  // Copie déjà matérialisée ? On la réutilise (idempotent, pas de doublon).
+  const { data: existant } = await supabase
+    .from("communication_modeles")
+    .select("id, pieces_jointes")
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .eq("modele_source", sourceId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (existant) {
+    return {
+      ok: true,
+      id: existant.id,
+      pieces: (existant.pieces_jointes ?? []) as ModelePieceJointe[],
+    };
+  }
+
+  const source = MODELES_INTEGRES.find((m) => m.id === sourceId);
+  if (!source) return { ok: false, error: "Modèle fourni introuvable." };
+
+  const { data, error } = await supabase
+    .from("communication_modeles")
+    .insert({
+      tenant_id: ctx.effectiveTenantId,
+      categorie: source.categorie,
+      titre: source.titre,
+      objet: source.objet,
+      corps: source.corps,
+      modele_source: sourceId,
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Matérialisation impossible." };
+  revalidatePath("/communications");
+  return { ok: true, id: data.id, pieces: [] };
+}
 
 export async function createModeleAction(input: unknown): Promise<CreateResult> {
   const ctx = await getTenantContext();
