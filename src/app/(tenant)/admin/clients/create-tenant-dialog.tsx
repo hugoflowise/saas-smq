@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,10 +15,17 @@ import { Label } from "@/components/ui/label";
 import { createTenantAction } from "@/lib/actions/tenants";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import { SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
+import { NORMES, type NormeCode } from "@/lib/modules";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export function CreateTenantDialog() {
   const { open, setOpen, pending, submit } = useDialogForm();
+  // Par défaut ISO 9001 (cas le plus courant) ; l'admin ajuste avant de créer.
+  const [normes, setNormes] = useState<NormeCode[]>(["9001"]);
+
+  function toggleNorme(code: NormeCode) {
+    setNormes((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -30,6 +38,7 @@ export function CreateTenantDialog() {
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
           bureauEtudes: form.get("bureauEtudes") === "on",
+          normesActives: normes,
         }),
       success: "Client créé. Le dirigeant peut se connecter via son e-mail.",
     });
@@ -102,11 +111,32 @@ export function CreateTenantDialog() {
             Activité bureau d'études / conception (§8.3)
           </label>
 
+          <div className="flex flex-col gap-2 rounded-lg border bg-surface p-3">
+            <Label>Normes / référentiels souscrits</Label>
+            <p className="text-muted-foreground text-xs">
+              Pilote les modules visibles chez le client. Au moins une norme (par défaut ISO 9001).
+            </p>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {NORMES.map((n) => (
+                <label key={n.code} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-4"
+                    checked={normes.includes(n.code)}
+                    onChange={() => toggleNorme(n.code)}
+                  />
+                  {n.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
           <p className="rounded-lg border bg-surface p-3 text-muted-foreground text-xs">
             Le préremplissage dépend de la formule : <strong>Essentiel</strong> = app vide (le
             client construit son SMQ) ; <strong>Tandem</strong> et <strong>Premium</strong> = app
-            pré-remplie (processus, actions ISO et parties prenantes types). La procédure de
-            maîtrise documentaire est toujours créée.
+            pré-remplie (processus, actions ISO et parties prenantes types). Ce préremplissage étant
+            propre à l'ISO 9001, il n'est appliqué que si la norme <strong>9001</strong> est
+            souscrite. La procédure de maîtrise documentaire est toujours créée.
           </p>
 
           <Button type="submit" disabled={pending} className="mt-2">
