@@ -177,7 +177,11 @@ ${OFFLINE_RUNTIME}
 const OFFLINE_RUNTIME = String.raw`
 (function () {
   var CFG = JSON.parse(document.getElementById("cfg").textContent);
-  var QUEUE_KEY = "flowise_offline_queue_v1";
+  // Stockage cloisonné : tous les fichiers ouverts en local (file://) partagent
+  // le même localStorage. On isole donc par type + client (token) + environnement
+  // (syncEndpoint), pour qu'un fichier n'affiche et ne synchronise QUE ses propres
+  // suivis, jamais ceux d'un autre formulaire, d'un autre client ou d'un autre env.
+  var QUEUE_KEY = "flowise_hl::" + CFG.type + "::" + CFG.token + "::" + CFG.syncEndpoint;
   var app = document.getElementById("app");
 
   // --- état de saisie (choix uniques + notes, pour showIf et validation) ---
