@@ -2,6 +2,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { OfflineFormButton } from "@/components/offline-form-button";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
 import { StatTiles } from "@/components/stat-tiles";
@@ -23,7 +24,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { ExportButton } from "./export-button";
-import { OfflineFormButton } from "./offline-form-button";
 
 function moyenne(arr: number[]): number | null {
   return arr.length > 0

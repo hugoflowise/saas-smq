@@ -65,6 +65,13 @@ describe("buildOfflineFormHtml", () => {
     expect(html).toContain("&lt;script&gt;");
   });
 
+  it("active l'attestation sur l'honneur quand demandé", () => {
+    const withAttest = buildOfflineFormHtml(cfg({ attestation: true }));
+    expect(withAttest).toContain('"attestation":true');
+    const without = buildOfflineFormHtml(cfg());
+    expect(without).toContain('"attestation":false');
+  });
+
   it("insère le logo quand il est fourni", () => {
     const html = buildOfflineFormHtml(cfg({ logoUrl: "https://cdn/logo.png" }));
     expect(html).toContain('src="https://cdn/logo.png"');
