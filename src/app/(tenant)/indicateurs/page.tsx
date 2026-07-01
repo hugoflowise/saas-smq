@@ -1,15 +1,25 @@
 import { AlertTriangle } from "lucide-react";
-import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
-import { ProcessusLink } from "@/components/processus-link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cibleAffichee, horsCible } from "@/lib/indicateurs";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CreateIndicateurDialog } from "./create-indicateur-dialog";
+import { type IndicateurSuivi, IndicateursExplorer } from "./indicateurs-explorer";
+
+/** 12 derniers mois (du plus ancien au plus récent) : clés YYYY-MM + libellés courts. */
+function douzeDerniersMois(): { cle: string; label: string }[] {
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "2-digit" });
+  const out: { cle: string; label: string }[] = [];
+  for (let k = 11; k >= 0; k--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - k, 1);
+    const cle = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    out.push({ cle, label: fmt.format(d) });
+  }
+  return out;
+}
 
 export default async function IndicateursPage() {
   const ctx = await getTenantContext();
@@ -38,6 +48,8 @@ export default async function IndicateursPage() {
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("ordre_affichage", { ascending: true });
+  const processusOptions = processus ?? [];
+  const processusNomById = new Map(processusOptions.map((p) => [p.id, p.nom]));
 
   const { data: indicateurs } = await supabase
     .from("indicateurs")
@@ -45,39 +57,71 @@ export default async function IndicateursPage() {
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("nom", { ascending: true });
+  const items = indicateurs ?? [];
 
-  // Dernière valeur de chaque indicateur
+  // Valeurs (les plus récentes d'abord) → dernière valeur + valeurs par mois.
   const { data: valeurs } = await supabase
     .from("indicateurs_valeurs")
     .select("indicateur_id, valeur, date_mesure")
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("date_mesure", { ascending: false });
-  const lastByIndicateur = new Map<string, { valeur: number; date: string }>();
+
+  const periodes = douzeDerniersMois();
+  const periodeKeys = new Set(periodes.map((p) => p.cle));
+  const lastByInd = new Map<string, { valeur: number; date: string }>();
+  const parMoisByInd = new Map<string, Record<string, number>>();
   for (const v of valeurs ?? []) {
-    if (!lastByIndicateur.has(v.indicateur_id)) {
-      lastByIndicateur.set(v.indicateur_id, { valeur: v.valeur, date: v.date_mesure });
+    if (!lastByInd.has(v.indicateur_id)) {
+      lastByInd.set(v.indicateur_id, { valeur: v.valeur, date: v.date_mesure });
+    }
+    const mois = (v.date_mesure ?? "").slice(0, 7);
+    if (periodeKeys.has(mois)) {
+      const rec = parMoisByInd.get(v.indicateur_id) ?? {};
+      // Valeurs triées desc : la première rencontrée pour un mois est la plus récente.
+      if (rec[mois] === undefined) {
+        rec[mois] = v.valeur;
+        parMoisByInd.set(v.indicateur_id, rec);
+      }
     }
   }
 
-  // Indicateurs rattachés à au moins un objectif (intégrité §6.2/§9.1).
+  // Objectif(s) rattaché(s) à chaque indicateur (§6.2/§9.1).
   const { data: liens } = await supabase
     .from("objectif_indicateurs")
-    .select("indicateur_id")
+    .select("indicateur_id, objectif_id")
     .eq("tenant_id", tid);
+  const objIds = [...new Set((liens ?? []).map((l) => l.objectif_id))];
+  const objNomById = new Map<string, string>();
+  if (objIds.length) {
+    const { data: objs } = await supabase
+      .from("objectifs_qualite")
+      .select("id, intitule")
+      .in("id", objIds);
+    for (const o of objs ?? []) objNomById.set(o.id, o.intitule);
+  }
+  const objectifsByInd = new Map<string, string[]>();
+  for (const l of liens ?? []) {
+    const nom = objNomById.get(l.objectif_id);
+    if (!nom) continue;
+    const list = objectifsByInd.get(l.indicateur_id) ?? [];
+    list.push(nom);
+    objectifsByInd.set(l.indicateur_id, list);
+  }
   const lieAObjectif = new Set((liens ?? []).map((l) => l.indicateur_id));
 
-  const items = indicateurs ?? [];
-  const processusOptions = processus ?? [];
-
-  // Regroupement par processus (ordre d'affichage), « non rattachés » en dernier.
-  type IndItem = (typeof items)[number];
-  const groupes: { id: string | null; nom: string; inds: IndItem[] }[] = [];
-  for (const p of processusOptions) {
-    const inds = items.filter((i) => i.processus_id === p.id);
-    if (inds.length) groupes.push({ id: p.id, nom: p.nom, inds });
-  }
-  const globaux = items.filter((i) => !i.processus_id);
+  const suivi: IndicateurSuivi[] = items.map((ind) => ({
+    id: ind.id,
+    nom: ind.nom,
+    unite: ind.unite,
+    cible: ind.cible,
+    sens: ind.sens,
+    processusNom: ind.processus_id ? (processusNomById.get(ind.processus_id) ?? null) : null,
+    objectifs: objectifsByInd.get(ind.id) ?? [],
+    last: lastByInd.get(ind.id) ?? null,
+    valeursParPeriode: parMoisByInd.get(ind.id) ?? {},
+    lieAObjectif: lieAObjectif.has(ind.id),
+  }));
 
   const sansObjectif = items.filter((i) => !lieAObjectif.has(i.id)).length;
 
@@ -88,7 +132,7 @@ export default async function IndicateursPage() {
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."
         isoClause="ISO 9001 §9.1.1"
-        help="Surveillance et mesure : déterminez quoi mesurer, par quelles méthodes et à quelle fréquence, puis analysez les résultats au regard des objectifs."
+        help="Surveillance et mesure : déterminez quoi mesurer, par quelles méthodes et à quelle fréquence, puis analysez les résultats au regard des objectifs. Le tableau montre l'évolution des 12 derniers mois ; cliquez un indicateur pour son graphe détaillé."
       >
         <CreateIndicateurDialog processusOptions={processusOptions} />
       </PageHeader>
@@ -115,65 +159,7 @@ export default async function IndicateursPage() {
           description="Créez un indicateur puis saisissez ses valeurs au fil du temps."
         />
       ) : (
-        <div className="flex flex-col gap-8">
-          {[...groupes, ...(globaux.length ? [{ id: null, nom: "", inds: globaux }] : [])].map(
-            (g) => (
-              <section key={g.id ?? "globaux"}>
-                <h2 className="mb-2 flex items-center gap-2 font-medium text-sm">
-                  {g.id ? (
-                    <ProcessusLink id={g.id} nom={g.nom} />
-                  ) : (
-                    <span className="text-muted-foreground">
-                      Indicateurs globaux (sans processus)
-                    </span>
-                  )}
-                  <span className="text-muted-foreground text-xs">({g.inds.length})</span>
-                </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {g.inds.map((ind) => {
-                    const last = lastByIndicateur.get(ind.id);
-                    const alert = last && horsCible(last.valeur, ind.cible, ind.sens);
-                    const orphelin = !lieAObjectif.has(ind.id);
-                    return (
-                      <Link key={ind.id} href={`/indicateurs/${ind.id}`}>
-                        <Card className="h-full transition-colors hover:border-primary/40">
-                          <CardHeader>
-                            <CardTitle className="text-sm">{ind.nom}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-baseline gap-1">
-                              <span className="font-semibold text-2xl">
-                                {last ? last.valeur : "-"}
-                              </span>
-                              {ind.unite ? (
-                                <span className="text-muted-foreground text-sm">{ind.unite}</span>
-                              ) : null}
-                            </div>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                              {ind.cible !== null ? (
-                                <span>Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}</span>
-                              ) : null}
-                              {alert ? (
-                                <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">
-                                  Hors cible
-                                </span>
-                              ) : null}
-                              {orphelin ? (
-                                <span className="rounded-full bg-status-pa/15 px-2 py-0.5 font-medium text-status-pa">
-                                  Sans objectif
-                                </span>
-                              ) : null}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            ),
-          )}
-        </div>
+        <IndicateursExplorer indicateurs={suivi} periodes={periodes} />
       )}
     </div>
   );
