@@ -80,7 +80,7 @@ export default async function ConformitePage() {
       <PageHeader
         title="Auto-diagnostic ISO 9001:2015"
         description="Auto-évaluation de la conformité, chapitre par chapitre."
-        isoClause="ISO 9001:2015"
+        concept="referentiels"
         help="Auto-évaluez la conformité chapitre par chapitre pour mesurer votre taux de couverture et identifier les écarts à traiter avant l'audit de certification. Chaque cotation conforme est à réévaluer au bout de 12 mois (badge « À réévaluer ») : un diagnostic n'est jamais acquis définitivement."
       />
 

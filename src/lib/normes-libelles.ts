@@ -103,9 +103,23 @@ const NORME_PREFIX: Record<NormeCode, string> = {
   CEFRI: "CEFRI",
 };
 
+// Chapitres MASE : précis pour l'Axe 1 (lu en détail) ; niveau « Axe N » pour
+// les axes 2 à 5 (on ne sur-précise pas les sous-numéros non vérifiés).
 const CLAUSES: Record<string, Partial<Record<NormeCode, string>>> = {
   politique: { "9001": "§5.2", "14001": "§5.2", "45001": "§5.2", MASE: "§1.2" },
   objectifs: { "9001": "§6.2", "14001": "§6.2", "45001": "§6.2", MASE: "§1.3 et §1.4" },
+  indicateurs: { "9001": "§9.1.1", MASE: "§1.4" },
+  actions: { "9001": "§10", MASE: "§1.6.1" },
+  documents: { "9001": "§7.5", MASE: "§1.6.2" },
+  communications: { "9001": "§7.4", MASE: "§1.7" },
+  reunions: { "9001": "§7.4 et §9.3", MASE: "§1.7" },
+  audits: { "9001": "§9.2", MASE: "Axe 4" },
+  revue: { "9001": "§9.3", MASE: "Axe 5" },
+  remontees: { "9001": "§9.1.2 et §10.2", MASE: "§1.5.14 et Axe 4" },
+  effectif: { "9001": "§7.1 et §9.1.1", MASE: "Axe 2" },
+  competences: { "9001": "§7.2", MASE: "Axe 2" },
+  dashboard: { "9001": "§9.1", MASE: "Axe 4" },
+  suiviConsultant: { "9001": "§7.1 et §9.1", MASE: "Axe 3" },
   systeme: { "9001": "§4.4", "14001": "§4.4", "45001": "§4.4", MASE: "Axe 1" },
 };
 
@@ -120,5 +134,14 @@ export function clauseBadge(concept: string, normes: readonly string[]): string 
   const parts = NORMES.filter((n) => normes.includes(n.code) && map[n.code]).map(
     (n) => `${NORME_PREFIX[n.code]} ${map[n.code]}`,
   );
+  return parts.length > 0 ? parts.join(" · ") : undefined;
+}
+
+/**
+ * Badge listant simplement les référentiels actifs (ex. « ISO 9001 · MASE »),
+ * pour les pages transverses à toutes les normes (auto-diagnostic, mode audit).
+ */
+export function referentielsBadge(normes: readonly string[]): string | undefined {
+  const parts = NORMES.filter((n) => normes.includes(n.code)).map((n) => NORME_PREFIX[n.code]);
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }

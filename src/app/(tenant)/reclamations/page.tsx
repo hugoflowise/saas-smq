@@ -90,7 +90,7 @@ export default async function ReclamationsPage() {
       <PageHeader
         title="Remontées"
         description="Réclamations, dysfonctionnements, incidents et accidents."
-        isoClause="ISO 9001 §9.1.2 · §10.2"
+        concept="remontees"
         help="Tracez toutes les remontées (réclamation client, dysfonctionnement, incident, accident), analysez les causes et déclenchez des actions dans le plan d'actions. Cochez « Créer une action liée » à l'enregistrement pour ouvrir automatiquement l'action de traitement."
       >
         <ReclamationDialog processusOptions={processusOptions} />

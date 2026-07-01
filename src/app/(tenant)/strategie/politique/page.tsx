@@ -16,7 +16,7 @@ import {
   transitionPolitiqueStatutAction,
 } from "@/lib/actions/politique";
 import { getNormesActives } from "@/lib/normes-actives";
-import { clauseBadge, domaineLabel, politiqueLabel } from "@/lib/normes-libelles";
+import { domaineLabel, politiqueLabel } from "@/lib/normes-libelles";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { versionLettre } from "@/lib/versions";
@@ -184,7 +184,7 @@ export default async function PolitiquePage({
       <PageHeader
         title={politiqueTitre}
         description={`Document maîtrisé définissant les engagements ${domaine} de la direction.`}
-        isoClause={clauseBadge("politique", normes)}
+        concept="politique"
         help={`La direction établit et tient à jour une politique ${domaine} adaptée à la finalité de l'organisme. Elle sert de cadre aux objectifs ${domaine}, est communiquée à tous et tenue à disposition des parties intéressées.`}
       >
         {politique && canWrite ? (

@@ -1,26 +1,51 @@
 import { Info } from "lucide-react";
+import { getNormesActives } from "@/lib/normes-actives";
+import { clauseBadge, referentielsBadge } from "@/lib/normes-libelles";
 
 type PageHeaderProps = {
   title: string;
   description?: string;
-  /** Référence de clause normative, ex. "ISO 9001 §9.1.2". Affichée en badge près du titre. */
+  /**
+   * Concept normatif de la page (ex. "audits", "revue", "politique"). Le badge
+   * de chapitres s'adapte alors aux normes du client (« ISO 9001 §9.2 · MASE
+   * Axe 4 »). Cas spécial "referentiels" : liste les référentiels actifs.
+   */
+  concept?: string;
+  /**
+   * Référence de clause en dur, ex. "ISO 9001 §9.1.2". Prioritaire sur `concept`
+   * (pour les cas non couverts par le registre). Affichée en badge près du titre.
+   */
   isoClause?: string;
   /** Texte pédagogique (exigence, méthode) affiché dans un encart « Aide » repliable. */
   help?: React.ReactNode;
   children?: React.ReactNode;
 };
 
-/** En-tête de page standard : titre + clause ISO + description + aide + actions optionnelles. */
-export function PageHeader({ title, description, isoClause, help, children }: PageHeaderProps) {
+/** En-tête de page standard : titre + clause normative + description + aide + actions optionnelles. */
+export async function PageHeader({
+  title,
+  description,
+  concept,
+  isoClause,
+  help,
+  children,
+}: PageHeaderProps) {
+  // Badge : clause en dur si fournie, sinon résolue depuis le concept selon les
+  // normes actives du client.
+  let badge = isoClause;
+  if (!badge && concept) {
+    const normes = await getNormesActives();
+    badge = concept === "referentiels" ? referentielsBadge(normes) : clauseBadge(concept, normes);
+  }
   return (
     <div className="mb-6 flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-semibold text-2xl tracking-tight">{title}</h1>
-            {isoClause ? (
+            {badge ? (
               <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
-                {isoClause}
+                {badge}
               </span>
             ) : null}
           </div>
