@@ -133,40 +133,34 @@ export default async function ObjectifsPage() {
     string,
     { id: string; reference: string; description_courte: string; statut: string }[]
   >();
-  if (objIds.length) {
-    const { data: linkedActions } = await supabase
+  // Actions existantes non encore rattachées à un objectif : proposées au lien.
+  const actionsDisponibles: { id: string; reference: string; description_courte: string }[] = [];
+  {
+    const { data: toutesActions } = await supabase
       .from("actions")
       .select("id, reference, description_courte, statut, objectif_id")
       .eq("tenant_id", tid)
       .is("deleted_at", null)
-      .in("objectif_id", objIds)
       .order("created_at", { ascending: true });
-    for (const a of linkedActions ?? []) {
-      if (!a.objectif_id) continue;
-      const list = actionsByObjectif.get(a.objectif_id) ?? [];
-      list.push({
-        id: a.id,
-        reference: a.reference,
-        description_courte: a.description_courte,
-        statut: a.statut,
-      });
-      actionsByObjectif.set(a.objectif_id, list);
+    for (const a of toutesActions ?? []) {
+      if (a.objectif_id) {
+        const list = actionsByObjectif.get(a.objectif_id) ?? [];
+        list.push({
+          id: a.id,
+          reference: a.reference,
+          description_courte: a.description_courte,
+          statut: a.statut,
+        });
+        actionsByObjectif.set(a.objectif_id, list);
+      } else {
+        actionsDisponibles.push({
+          id: a.id,
+          reference: a.reference,
+          description_courte: a.description_courte,
+        });
+      }
     }
   }
-
-  // Nom des validateurs (preuve d'établissement par la direction).
-  const valideurIds = [...new Set(items.map((o) => o.valide_par).filter(Boolean))] as string[];
-  const valideurNom = new Map<string, string>();
-  if (valideurIds.length) {
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name")
-      .in("id", valideurIds);
-    for (const p of profs ?? []) valideurNom.set(p.id, p.full_name ?? "");
-  }
-
-  // Seule la direction (dirigeant / admin) peut établir un objectif.
-  const canApprove = ctx.role === "admin_flowise" || ctx.role === "dirigeant";
 
   // Regroupement par processus (dans l'ordre d'affichage), orphelins en dernier.
   type ObjItem = (typeof withProgress)[number];
@@ -413,11 +407,7 @@ export default async function ObjectifsPage() {
                               <ObjectifActions
                                 objectifId={o.id}
                                 linked={actionsByObjectif.get(o.id) ?? []}
-                                valideLe={o.valide_le}
-                                valideurNom={
-                                  o.valide_par ? (valideurNom.get(o.valide_par) ?? null) : null
-                                }
-                                canApprove={canApprove}
+                                actionsDisponibles={actionsDisponibles}
                               />
                             </TableCell>
                           </TableRow>

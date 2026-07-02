@@ -450,6 +450,46 @@ export async function createActionForObjectifAction(input: unknown): Promise<Act
   return { ok: true };
 }
 
+// §6.2.2 : rattacher / détacher une action EXISTANTE à un objectif qualité.
+const lierActionObjectifSchema = z.object({
+  actionId: z.string().uuid(),
+  // null = délier l'action de l'objectif.
+  objectifId: z.string().uuid().nullable(),
+});
+
+/**
+ * Lie (ou délie) une action déjà existante à un objectif via `objectif_id`.
+ * Filtre sur le tenant courant : on ne touche qu'aux actions du client actif.
+ */
+export async function lierActionObjectifAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+  if (!ctx.effectiveTenantId) return { ok: false, error: "Aucun client actif." };
+
+  const parsed = lierActionObjectifSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const d = parsed.data;
+  const supabase = await createClient();
+
+  const { data: rows, error } = await supabase
+    .from("actions")
+    .update({ objectif_id: d.objectifId })
+    .eq("id", d.actionId)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) return { ok: false, error: error.message };
+  if (!rows || rows.length === 0) {
+    return { ok: false, error: "Action introuvable ou droits insuffisants." };
+  }
+
+  revalidatePath("/actions");
+  revalidatePath("/strategie/objectifs");
+  return { ok: true };
+}
+
 /** Met une action du plan d'action à la corbeille (soft-delete, réversible). */
 export async function deleteActionAction(id: string): Promise<ActionResult> {
   const r = await softDeleteRow("actions", id);
