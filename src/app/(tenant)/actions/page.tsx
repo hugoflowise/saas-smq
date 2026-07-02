@@ -177,13 +177,13 @@ export default async function ActionsPage({
             <TableHeader>
               <TableRow>
                 <TableHead>Réf.</TableHead>
-                <TableHead className="min-w-[220px]">Intitulé</TableHead>
+                <TableHead className="w-[22%]">Intitulé</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Responsable</TableHead>
                 <TableHead>Échéance</TableHead>
-                <TableHead className="min-w-[180px]">Résultats / Efficacité</TableHead>
+                <TableHead className="w-[16%]">Résultats / Efficacité</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -94,7 +94,7 @@ export default async function AnalysesRisquesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[36%] min-w-[180px]">Intitulé</TableHead>
+                <TableHead className="w-[34%]">Intitulé</TableHead>
                 <TableHead>Mission / site</TableHead>
                 <TableHead>Analyse</TableHead>
                 <TableHead>Révision</TableHead>

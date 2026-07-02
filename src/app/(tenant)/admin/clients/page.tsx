@@ -115,23 +115,16 @@ export default async function AdminClientsPage() {
                 const tenantDirigeants = dirigeantsByTenant.get(t.id) ?? [];
                 return (
                   <TableRow key={t.id}>
-                    <TableCell className="font-medium">
-                      <span className="block max-w-[160px] truncate" title={t.nom_societe}>
-                        {t.nom_societe}
-                      </span>
+                    <TableCell className="w-[22%] whitespace-normal font-medium">
+                      {t.nom_societe}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-[24%] whitespace-normal">
                       {tenantDirigeants.length > 0 ? (
-                        <span className="flex max-w-[220px] flex-col gap-1">
+                        <span className="flex flex-col gap-1">
                           {tenantDirigeants.map((d) => (
-                            <span key={d.id} className="flex min-w-0 flex-col">
-                              <span className="truncate" title={d.full_name ?? undefined}>
-                                {d.full_name ?? "-"}
-                              </span>
-                              <span
-                                className="truncate text-muted-foreground text-xs"
-                                title={d.email}
-                              >
+                            <span key={d.id} className="flex flex-col">
+                              <span>{d.full_name ?? "-"}</span>
+                              <span className="break-all text-muted-foreground text-xs">
                                 {d.email}
                               </span>
                             </span>

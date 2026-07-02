@@ -184,12 +184,12 @@ export default async function AnalyseRisquesDetailPage({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[160px]">Tâche / situation</TableHead>
+                  <TableHead className="w-[22%]">Tâche / situation</TableHead>
                   <TableHead>Domaine</TableHead>
-                  <TableHead className="min-w-[160px]">Danger / risque</TableHead>
+                  <TableHead className="w-[22%]">Danger / risque</TableHead>
                   <TableHead>G × P</TableHead>
                   <TableHead>Criticité</TableHead>
-                  <TableHead className="min-w-[160px]">Mesures de prévention</TableHead>
+                  <TableHead className="w-[26%]">Mesures de prévention</TableHead>
                   <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>

@@ -171,7 +171,7 @@ export default async function RisquesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%] min-w-[180px]">Intitulé</TableHead>
+                <TableHead className="w-[34%]">Intitulé</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>G × P</TableHead>
                 <TableHead>Criticité brute</TableHead>

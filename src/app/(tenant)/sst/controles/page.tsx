@@ -98,7 +98,7 @@ export default async function ControlesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[180px]">Contrôle</TableHead>
+                <TableHead className="w-[24%]">Contrôle</TableHead>
                 <TableHead>Domaine</TableHead>
                 <TableHead>Organisme</TableHead>
                 <TableHead>Périodicité</TableHead>

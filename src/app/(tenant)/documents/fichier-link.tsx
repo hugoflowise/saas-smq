@@ -21,11 +21,11 @@ export function FichierLink({ id, nom }: { id: string; nom: string }) {
       type="button"
       onClick={open}
       disabled={pending}
-      className="inline-flex items-center gap-1 text-primary text-sm hover:underline"
+      className="inline-flex max-w-full items-center gap-1 text-left text-primary text-sm hover:underline"
       title={nom}
     >
-      <Download className="size-3.5" />
-      <span className="max-w-32 truncate">{nom}</span>
+      <Download className="size-3.5 shrink-0" />
+      <span className="truncate">{nom}</span>
     </button>
   );
 }
