@@ -45,7 +45,9 @@ export function RevueDialog({
         const data = {
           annee: f.get("annee"),
           dateRealisation: f.get("dateRealisation") || undefined,
-          statut: f.get("statut"),
+          // À la création, le sélecteur de statut est absent : on laisse le
+          // défaut du schéma (« planifiee ») s'appliquer (undefined, pas null).
+          statut: f.get("statut") || undefined,
           ordreDuJour: f.get("ordreDuJour") || undefined,
           conclusions: f.get("conclusions") || undefined,
           decisions: f.get("decisions") || undefined,
