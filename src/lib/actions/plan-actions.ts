@@ -64,6 +64,9 @@ const baseSchema = {
 // du formulaire de NC). Champs facultatifs : on retombe sur des valeurs déduites
 // de l'action (intitulé, processus). Type/gravité/origine par défaut raisonnables.
 const actionNcSchema = z.object({
+  intitule: z.string().trim().optional(),
+  description: z.string().trim().optional(),
+  dateConstat: z.string().optional(),
   gravite: z.enum(["mineure", "majeure", "critique"]).optional(),
   type: z.enum(["nc_produit", "nc_processus", "reclamation_client"]).optional(),
   origine: z
@@ -169,9 +172,10 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
       .insert({
         tenant_id: ctx.effectiveTenantId,
         reference: ncRef,
-        intitule: d.descriptionCourte,
-        description: d.constat ?? d.descriptionDetail ?? null,
-        date_constat: todayISO(),
+        // Contenu de la NC : saisi dans le formulaire, sinon déduit de l'action.
+        intitule: nc.intitule?.trim() || d.descriptionCourte,
+        description: nc.description?.trim() || d.constat || d.descriptionDetail || null,
+        date_constat: nc.dateConstat || todayISO(),
         origine: nc.origine ?? "autre",
         gravite: nc.gravite ?? "mineure",
         type: nc.type ?? "nc_processus",
