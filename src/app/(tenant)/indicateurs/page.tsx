@@ -62,7 +62,7 @@ export default async function IndicateursPage() {
 
   const { data: indicateurs } = await supabase
     .from("indicateurs")
-    .select("id, nom, unite, cible, sens, frequence_mesure, processus_id, domaine")
+    .select("id, nom, unite, cible, cible_texte, sens, frequence_mesure, processus_id, domaine")
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("nom", { ascending: true });
@@ -131,6 +131,7 @@ export default async function IndicateursPage() {
     nom: ind.nom,
     unite: ind.unite,
     cible: ind.cible,
+    cibleTexte: ind.cible_texte,
     sens: ind.sens,
     processusNom: ind.processus_id ? (processusNomById.get(ind.processus_id) ?? null) : null,
     objectifs: objectifsByInd.get(ind.id) ?? [],

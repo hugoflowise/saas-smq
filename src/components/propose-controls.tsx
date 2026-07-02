@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   refuserElementAction,
+  refuserToutAction,
   validerElementAction,
   validerToutAction,
 } from "@/lib/actions/validation";
@@ -121,6 +122,21 @@ export function ProposeBanner({
     }
   }
 
+  async function refuserTout() {
+    if (!confirm("Refuser et supprimer définitivement tous les éléments proposés non validés ?")) {
+      return;
+    }
+    setPending(true);
+    const r = await refuserToutAction({ table });
+    setPending(false);
+    if (r.ok) {
+      toast.success("Tous les éléments proposés ont été supprimés.");
+      router.refresh();
+    } else {
+      toast.error(r.error);
+    }
+  }
+
   return (
     <div className="mb-4 flex flex-col gap-2 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-status-pa">
@@ -129,16 +145,28 @@ export function ProposeBanner({
         élément n'est pas validé, il n'est pas comptabilisé.
       </p>
       {readOnly ? null : (
-        <Button
-          size="sm"
-          variant="outline"
-          className="shrink-0 gap-1.5"
-          disabled={pending}
-          onClick={validerTout}
-        >
-          <Check className="size-3.5" />
-          Tout valider
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            disabled={pending}
+            onClick={validerTout}
+          >
+            <Check className="size-3.5" />
+            Tout valider
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 text-muted-foreground hover:text-destructive"
+            disabled={pending}
+            onClick={refuserTout}
+          >
+            <X className="size-3.5" />
+            Tout refuser
+          </Button>
+        </div>
       )}
     </div>
   );

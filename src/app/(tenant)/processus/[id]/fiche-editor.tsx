@@ -124,6 +124,7 @@ export function FicheEditor({
   return (
     <div className="flex flex-col gap-6">
       <form
+        id="fiche-form"
         onSubmit={handleSubmit}
         className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm"
       >
@@ -367,19 +368,11 @@ export function FicheEditor({
           Rédacteur, vérificateur, approbateur et version se renseignent automatiquement au fil du
           cycle de vie (soumission, approbation, publication).
         </p>
-
-        <div className="flex gap-2">
-          <Button type="submit" disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer la fiche"}
-          </Button>
-          <Button type="button" variant="outline" onClick={onDone} disabled={pending}>
-            Annuler
-          </Button>
-        </div>
       </form>
 
-      {/* Indicateurs et R&O : édités directement ici (chaque ajout/modif est
-          enregistré immédiatement, indépendamment du bouton « Enregistrer la fiche »). */}
+      {/* Indicateurs et R&O : font partie de la fiche (au-dessus du bouton d'enregistrement).
+          Chaque ajout/modif est enregistré immédiatement via son propre dialogue,
+          indépendamment du bouton « Enregistrer la fiche ». */}
       <div className="flex flex-col gap-7 rounded-lg border bg-card p-6 shadow-sm">
         <SectionLiee
           titre="Indicateurs de performance"
@@ -437,6 +430,16 @@ export function FicheEditor({
             </li>
           ))}
         </SectionLiee>
+      </div>
+
+      {/* Enregistrement de la fiche : tout en bas, après l'ensemble des blocs. */}
+      <div className="flex gap-2">
+        <Button type="submit" form="fiche-form" disabled={pending}>
+          {pending ? "Enregistrement…" : "Enregistrer la fiche"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onDone} disabled={pending}>
+          Annuler
+        </Button>
       </div>
     </div>
   );

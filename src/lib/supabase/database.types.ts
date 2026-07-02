@@ -1721,6 +1721,7 @@ export type Database = {
         Row: {
           boond_endpoint: string | null
           cible: number | null
+          cible_texte: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -1744,6 +1745,7 @@ export type Database = {
         Insert: {
           boond_endpoint?: string | null
           cible?: number | null
+          cible_texte?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -1767,6 +1769,7 @@ export type Database = {
         Update: {
           boond_endpoint?: string | null
           cible?: number | null
+          cible_texte?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null

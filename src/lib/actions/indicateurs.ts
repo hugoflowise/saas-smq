@@ -18,6 +18,8 @@ const baseSchema = z.object({
   unite: z.string().trim().optional(),
   formule: z.string().trim().optional(),
   cible: z.coerce.number().optional(),
+  // Cible descriptive en texte libre (prime sur la cible chiffrée si renseignée).
+  cibleTexte: z.string().trim().optional(),
   sens: z.enum(["hausse", "baisse"]),
   frequence: z.enum(["quotidien", "hebdo", "mensuel", "trimestriel", "annuel"]),
   // Domaine SSE couvert (MASE §1.4 : Sécurité / Santé / Environnement).
@@ -77,6 +79,7 @@ export async function createIndicateurAction(input: unknown): Promise<CreateResu
       unite: d.unite ?? null,
       formule_calcul: d.formule ?? null,
       cible: d.cible ?? null,
+      cible_texte: d.cibleTexte ?? null,
       sens: d.sens,
       frequence_mesure: d.frequence,
       domaine: d.domaine ?? null,
@@ -127,6 +130,7 @@ export async function updateIndicateurAction(input: unknown): Promise<ActionResu
       unite: d.unite ?? null,
       formule_calcul: d.formule ?? null,
       cible: d.cible ?? null,
+      cible_texte: d.cibleTexte ?? null,
       sens: d.sens,
       frequence_mesure: d.frequence,
       domaine: d.domaine ?? null,
