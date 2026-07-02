@@ -254,6 +254,7 @@ export async function createTenantAction(input: unknown): Promise<ActionResult> 
 const updateTenantSchema = z.object({
   tenantId: z.string().uuid(),
   nomSociete: z.string().trim().min(2, "Nom de société requis."),
+  formule: z.enum(["Essentiel", "Tandem", "Premium"]).optional(),
   effectif: z.enum(["1-9", "10-49", "50-99", "100-299", "300+"]).optional(),
   secteur: z.enum(["SI", "ESN", "autre"]).optional(),
   bureauEtudes: z.boolean().optional(),
@@ -281,6 +282,8 @@ export async function updateTenantAction(input: unknown): Promise<ActionResult> 
     .from("tenants")
     .update({
       nom_societe: data.nomSociete,
+      // Formule NOT NULL : on ne l'écrase que si elle est fournie.
+      ...(data.formule ? { formule: data.formule } : {}),
       effectif_tranche: data.effectif ?? null,
       secteur: data.secteur ?? null,
       bureau_etudes: data.bureauEtudes ?? false,

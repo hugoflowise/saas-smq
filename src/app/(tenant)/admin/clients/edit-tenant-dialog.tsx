@@ -17,13 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateTenantAction, uploadTenantLogoAction } from "@/lib/actions/tenants";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
-import { SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
+import { FORMULE_LABELS, FORMULE_OPTIONS, SECTEUR_LABELS, SECTEUR_OPTIONS } from "@/lib/labels";
 import { NORMES, type NormeCode } from "@/lib/modules";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 type Tenant = {
   id: string;
   nom_societe: string;
+  formule: string;
   effectif_tranche: string | null;
   secteur: string | null;
   bureau_etudes: boolean;
@@ -73,6 +74,7 @@ export function EditTenantDialog({
         updateTenantAction({
           tenantId: tenant.id,
           nomSociete: form.get("nomSociete"),
+          formule: form.get("formule") || undefined,
           effectif: form.get("effectif") || undefined,
           secteur: form.get("secteur") || undefined,
           bureauEtudes: form.get("bureauEtudes") === "on",
@@ -126,6 +128,22 @@ export function EditTenantDialog({
           <div className="flex flex-col gap-2">
             <Label htmlFor="nomSociete">Nom de la société</Label>
             <Input id="nomSociete" name="nomSociete" required defaultValue={tenant.nom_societe} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="formule">Formule (offre)</Label>
+            <select
+              id="formule"
+              name="formule"
+              className={SELECT_CLASS}
+              defaultValue={tenant.formule}
+            >
+              {FORMULE_OPTIONS.map((f) => (
+                <option key={f} value={f}>
+                  {FORMULE_LABELS[f]}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-2">

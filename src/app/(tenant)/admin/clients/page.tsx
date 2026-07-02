@@ -103,6 +103,7 @@ export default async function AdminClientsPage() {
               <TableRow>
                 <TableHead>Société</TableHead>
                 <TableHead>Dirigeant</TableHead>
+                <TableHead>Formule</TableHead>
                 <TableHead>Effectif</TableHead>
                 <TableHead>Secteur</TableHead>
                 <TableHead>Statut</TableHead>
@@ -128,6 +129,11 @@ export default async function AdminClientsPage() {
                       ) : (
                         "-"
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {t.formule}
+                      </Badge>
                     </TableCell>
                     <TableCell>{t.effectif_tranche ?? "-"}</TableCell>
                     <TableCell>
@@ -160,6 +166,7 @@ export default async function AdminClientsPage() {
                           tenant={{
                             id: t.id,
                             nom_societe: t.nom_societe,
+                            formule: t.formule,
                             effectif_tranche: t.effectif_tranche,
                             secteur: t.secteur,
                             bureau_etudes: t.bureau_etudes,
