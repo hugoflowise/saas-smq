@@ -157,10 +157,10 @@ export default async function AdminRetoursPage() {
                               {RETOUR_TYPE_LABELS[r.type]}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-xs">
-                            <span className="block truncate font-medium">{r.titre}</span>
+                          <TableCell className="w-[32%] whitespace-normal">
+                            <span className="block font-medium">{r.titre}</span>
                             {r.page_url ? (
-                              <span className="block truncate font-mono text-muted-foreground text-xs">
+                              <span className="block break-all font-mono text-muted-foreground text-xs">
                                 {r.page_url}
                               </span>
                             ) : null}

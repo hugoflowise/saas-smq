@@ -323,15 +323,15 @@ export default async function DocumentsPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-24">Code</TableHead>
+                <TableHead className="w-20">Code</TableHead>
                 <TableHead>Document</TableHead>
-                <TableHead className="w-20">Version</TableHead>
-                <TableHead className="w-28">Statut</TableHead>
-                <TableHead className="w-40">Approbateur</TableHead>
-                <TableHead className="w-32">Révision prévue</TableHead>
-                <TableHead className="w-32">Durée de stockage</TableHead>
-                <TableHead className="w-32">Dernière mise à jour</TableHead>
-                <TableHead className="w-40">Fichier</TableHead>
+                <TableHead className="w-16">Version</TableHead>
+                <TableHead className="w-24">Statut</TableHead>
+                <TableHead className="w-32 whitespace-normal">Approbateur</TableHead>
+                <TableHead className="w-24 whitespace-normal">Révision prévue</TableHead>
+                <TableHead className="w-24 whitespace-normal">Durée de stockage</TableHead>
+                <TableHead className="w-24 whitespace-normal">Dernière mise à jour</TableHead>
+                <TableHead className="w-28 whitespace-normal">Fichier</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
