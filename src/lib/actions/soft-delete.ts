@@ -8,10 +8,12 @@ import type { ActionResult } from "./types";
 /** Tables à suppression logique (colonne `deleted_at` + `tenant_id`). */
 export type SoftDeletableTable =
   | "actions"
+  | "analyses_risques"
   | "communication_modeles"
   | "competences"
   | "competences_personnes"
   | "consultants"
+  | "controles_obligatoires"
   | "documents_maitrise"
   | "enquetes_satisfaction"
   | "evenements_qualite"

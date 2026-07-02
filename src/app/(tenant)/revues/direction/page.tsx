@@ -44,8 +44,8 @@ export default async function RevuesDirectionPage() {
       <PageHeader
         title="Revues de direction"
         description="Revues annuelles de direction."
-        isoClause="ISO 9001 §9.3"
-        help="À intervalles planifiés, la direction revoit la performance du SMQ et des processus (objectifs vs résultats, NC, audits, satisfaction, risques) et décide des actions et ressources."
+        concept="revue"
+        help="À intervalles planifiés, la direction revoit la performance du {{sigle}} et des processus (objectifs vs résultats, NC, audits, satisfaction, risques) et décide des actions et ressources."
       >
         <RevueDialog />
       </PageHeader>

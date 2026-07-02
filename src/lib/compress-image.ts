@@ -37,6 +37,6 @@ export async function compresserImage(file: File, maxLargeur = 1600): Promise<Fi
   );
   if (!blob || blob.size >= file.size) return file; // compression non bénéfique
 
-  const nom = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+  const nom = `${file.name.replace(/\.[^.]+$/, "")}.jpg`;
   return new File([blob], nom, { type: "image/jpeg" });
 }

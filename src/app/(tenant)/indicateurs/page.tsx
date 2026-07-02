@@ -2,8 +2,12 @@ import { AlertTriangle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { ModuleTabs } from "@/components/module-tabs";
 import { PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { formatDate } from "@/lib/format";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
+import { isModuleVisible } from "@/lib/modules";
+import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { CreateIndicateurDialog } from "./create-indicateur-dialog";
@@ -42,6 +46,10 @@ export default async function IndicateursPage() {
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
+  // MASE §1.4 : les indicateurs doivent couvrir Sécurité / Santé / Environnement.
+  const normes = await getNormesActives();
+  const afficherDomaine = normes.includes("MASE");
+  const afficherProcessus = isModuleVisible("/processus", normes);
 
   const { data: processus } = await supabase
     .from("processus")
@@ -54,11 +62,13 @@ export default async function IndicateursPage() {
 
   const { data: indicateurs } = await supabase
     .from("indicateurs")
-    .select("id, nom, unite, cible, sens, frequence_mesure, processus_id")
+    .select("id, nom, unite, cible, sens, frequence_mesure, processus_id, domaine")
     .eq("tenant_id", tid)
     .is("deleted_at", null)
     .order("nom", { ascending: true });
   const items = indicateurs ?? [];
+  // Couverture des domaines SSE (MASE §1.4).
+  const domainesCouverts = new Set(items.map((i) => i.domaine).filter(Boolean));
 
   // Valeurs (les plus récentes d'abord) → dernière valeur + valeurs par mois + série.
   // NB : indicateurs_valeurs n'a PAS de colonne deleted_at → ne pas filtrer dessus.
@@ -138,14 +148,48 @@ export default async function IndicateursPage() {
       <PageHeader
         title="Indicateurs / KPI"
         description="Tableau de bord des indicateurs de performance."
-        isoClause="ISO 9001 §9.1.1"
+        concept="indicateurs"
         help="Surveillance et mesure : déterminez quoi mesurer, par quelles méthodes et à quelle fréquence, puis analysez les résultats au regard des objectifs. Le tableau montre l'évolution des 12 derniers mois ; cliquez un indicateur pour son graphe détaillé."
       >
         <CreateIndicateurDialog
           processusOptions={processusOptions}
           objectifOptions={objectifOptions}
+          afficherDomaine={afficherDomaine}
+          afficherProcessus={afficherProcessus}
+          normes={normes}
         />
       </PageHeader>
+
+      {afficherDomaine ? (
+        <Card className="mb-6">
+          <CardContent className="flex flex-wrap items-center gap-4 py-4">
+            <span className="font-medium text-sm">
+              Couverture des domaines · au moins un indicateur par domaine (MASE §1.4)
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {DOMAINES_SSE.map((d) => {
+                const couvert = domainesCouverts.has(d);
+                return (
+                  <span
+                    key={d}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
+                      couvert
+                        ? "bg-status-conforme/15 text-status-conforme"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <span
+                      className={`size-1.5 rounded-full ${couvert ? "bg-status-conforme" : "bg-muted-foreground/40"}`}
+                    />
+                    {DOMAINE_SSE_LABELS[d]}
+                    {couvert ? " couvert" : " à couvrir"}
+                  </span>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {sansObjectif > 0 ? (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-status-pa/40 bg-status-pa/5 px-4 py-3 text-sm">

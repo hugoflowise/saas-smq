@@ -20,6 +20,7 @@ import {
 } from "@/lib/actions/registres";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { VEILLE_APPLICABILITE_LABELS, VEILLE_CONFORMITE_LABELS } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type VeilleRow = {
@@ -33,14 +34,19 @@ export type VeilleRow = {
   actions_a_prevoir: string | null;
   lien: string | null;
   statut: string;
+  applicabilite?: string | null;
+  conformite?: string | null;
 };
 
 export function VeilleDialog({
   veille,
   trigger,
+  afficherSse = false,
 }: {
   veille?: VeilleRow;
   trigger?: React.ReactElement;
+  /** Affiche le récolement SSE (applicabilité + conformité), MASE Axe 4. */
+  afficherSse?: boolean;
 }) {
   const isEdit = Boolean(veille);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -59,6 +65,8 @@ export function VeilleDialog({
           actionsAPrevoir: f.get("actionsAPrevoir") || undefined,
           lien: f.get("lien") || undefined,
           statut: f.get("statut"),
+          applicabilite: f.get("applicabilite") || undefined,
+          conformite: f.get("conformite") || undefined,
         };
         return isEdit ? updateVeilleAction({ id: veille?.id, ...data }) : createVeilleAction(data);
       },
@@ -151,6 +159,48 @@ export function VeilleDialog({
               </select>
             </div>
           </div>
+          {afficherSse ? (
+            <div className="grid grid-cols-1 gap-3 rounded-xl border bg-muted/30 p-3 sm:grid-cols-2">
+              <p className="col-span-full font-medium text-sm">
+                Récolement SSE
+                <span className="ml-2 font-normal text-muted-foreground text-xs">
+                  identification → applicabilité → conformité → actions
+                </span>
+              </p>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="applicabilite">Applicabilité</Label>
+                <select
+                  id="applicabilite"
+                  name="applicabilite"
+                  className={SELECT_CLASS}
+                  defaultValue={veille?.applicabilite ?? ""}
+                >
+                  <option value="">-</option>
+                  {Object.entries(VEILLE_APPLICABILITE_LABELS).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="conformite">Conformité</Label>
+                <select
+                  id="conformite"
+                  name="conformite"
+                  className={SELECT_CLASS}
+                  defaultValue={veille?.conformite ?? ""}
+                >
+                  <option value="">-</option>
+                  {Object.entries(VEILLE_CONFORMITE_LABELS).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="impactSmq">Impact SMQ</Label>
             <Textarea

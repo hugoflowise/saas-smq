@@ -20,6 +20,8 @@ const baseSchema = z.object({
   cible: z.coerce.number().optional(),
   sens: z.enum(["hausse", "baisse"]),
   frequence: z.enum(["quotidien", "hebdo", "mensuel", "trimestriel", "annuel"]),
+  // Domaine SSE couvert (MASE §1.4 : Sécurité / Santé / Environnement).
+  domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
   // Objectifs qualité mesurés par cet indicateur (liaison N–N objectif_indicateurs).
   objectifIds: z.array(z.string().uuid()).optional(),
 });
@@ -77,6 +79,7 @@ export async function createIndicateurAction(input: unknown): Promise<CreateResu
       cible: d.cible ?? null,
       sens: d.sens,
       frequence_mesure: d.frequence,
+      domaine: d.domaine ?? null,
       source: "manuel",
       created_by: ctx.userId,
     })
@@ -126,6 +129,7 @@ export async function updateIndicateurAction(input: unknown): Promise<ActionResu
       cible: d.cible ?? null,
       sens: d.sens,
       frequence_mesure: d.frequence,
+      domaine: d.domaine ?? null,
       updated_by: ctx.userId,
     })
     .eq("id", d.id)

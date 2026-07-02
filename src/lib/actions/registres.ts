@@ -21,7 +21,17 @@ async function tenantWrite() {
 
 // ------------------------------------------------------------------ Remontées
 const recBase = {
-  type: z.enum(["reclamation", "dysfonctionnement", "incident", "accident"]),
+  type: z.enum([
+    "reclamation",
+    "dysfonctionnement",
+    "incident",
+    "accident",
+    // Types SSE (MASE Axe 4).
+    "situation_dangereuse",
+    "presqu_accident",
+    "maladie_professionnelle",
+    "impact_environnemental",
+  ]),
   objet: z.string().trim().min(2, "Objet requis."),
   client: z.string().trim().optional(),
   dateReception: z.string().optional(),
@@ -30,6 +40,12 @@ const recBase = {
   description: z.string().trim().optional(),
   traitement: z.string().trim().optional(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]),
+  // SSE (MASE Axe 4) : domaine concerné (l'analyse des causes se fait ensuite,
+  // via la page détail de la remontée : setRemonteeAnalyseAction).
+  domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
+  // Accident du travail (MASE) : avec arrêt + jours d'arrêt (base TF/TG).
+  avecArret: z.boolean().optional(),
+  joursArret: z.coerce.number().int().min(0).optional(),
 };
 // Champs de l'action liée, saisis directement dans le formulaire de remontée
 // (tout est facultatif : on retombe sur des valeurs déduites du sujet si vide).
@@ -60,6 +76,9 @@ function recPayload(d: z.infer<typeof recCreate>) {
     description: d.description ?? null,
     traitement: d.traitement ?? null,
     statut: d.statut,
+    domaine: d.domaine ?? null,
+    avec_arret: d.avecArret ?? false,
+    jours_arret: d.joursArret ?? null,
   };
 }
 
@@ -132,6 +151,38 @@ export async function updateReclamationAction(input: unknown): Promise<ActionRes
   return { ok: true };
 }
 
+// Analyse des causes guidée (MASE Axe 4) : méthode + détail structuré + synthèse.
+const recAnalyseSchema = z.object({
+  id: z.string().uuid(),
+  analyseMethode: z.enum(["5_pourquoi", "arbre_causes", "autre"]).optional(),
+  analyseDetails: z.record(z.string(), z.string()).optional(),
+  analyseCauses: z.string().trim().optional(),
+});
+
+/** Enregistre l'analyse des causes d'une remontée (étape postérieure à la déclaration). */
+export async function setRemonteeAnalyseAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = recAnalyseSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+
+  const { error } = await c.supabase
+    .from("reclamations")
+    .update({
+      analyse_methode: d.analyseMethode ?? null,
+      analyse_details: d.analyseDetails ?? null,
+      analyse_causes: d.analyseCauses ?? null,
+      updated_by: c.userId,
+    })
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/reclamations/${d.id}`);
+  revalidatePath("/reclamations");
+  return { ok: true };
+}
+
 const recQuickSchema = z.object({
   id: z.string().uuid(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]).optional(),
@@ -171,6 +222,9 @@ const veilleBase = {
   actionsAPrevoir: z.string().trim().optional(),
   lien: z.string().trim().optional(),
   statut: z.enum(["a_analyser", "analysee", "integree", "sans_objet"]),
+  // Récolement SSE (MASE Axe 4) : applicabilité + conformité.
+  applicabilite: z.enum(["applicable", "non_applicable", "a_evaluer"]).optional(),
+  conformite: z.enum(["conforme", "non_conforme", "partielle", "a_evaluer"]).optional(),
 };
 const veilleCreate = z.object(veilleBase);
 const veilleUpdate = z.object({ id: z.string().uuid(), ...veilleBase });
@@ -186,6 +240,8 @@ function veillePayload(d: z.infer<typeof veilleCreate>) {
     actions_a_prevoir: d.actionsAPrevoir ?? null,
     lien: d.lien ?? null,
     statut: d.statut,
+    applicabilite: d.applicabilite ?? null,
+    conformite: d.conformite ?? null,
   };
 }
 
@@ -240,6 +296,8 @@ const objBase = {
   processusId: z.string().uuid().optional(),
   // Engagement de la politique qualité décliné par cet objectif (§6.2).
   engagementId: z.string().uuid().optional(),
+  // Domaine SSE couvert (MASE §1.3 : Sécurité / Santé / Environnement).
+  domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
   // Un objectif peut être mesuré par plusieurs indicateurs (liaison N–N).
   indicateurIds: z.array(z.string().uuid()).optional(),
 };
@@ -262,6 +320,7 @@ function objPayload(d: z.infer<typeof objCreate>) {
     sens: d.sens ?? "hausse",
     processus_id: d.processusId ?? null,
     engagement_id: d.engagementId ?? null,
+    domaine: d.domaine ?? null,
     // Colonne historique : pilote la progression « tête de liste » quand
     // l'objectif n'a qu'un seul indicateur. La table de liaison reste la
     // source de vérité pour l'ensemble des indicateurs.

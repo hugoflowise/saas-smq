@@ -15,6 +15,7 @@ import {
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
   ACTION_TYPE_LABELS,
+  REMONTEE_TYPE_LABELS,
 } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -89,6 +90,15 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         .is("deleted_at", null)
     : { data: [] };
 
+  // Remontée d'origine (réclamation / événement SSE ayant généré cette action).
+  const { data: remonteeSource } = await supabase
+    .from("reclamations")
+    .select("id, objet, type")
+    .eq("action_id", id)
+    .eq("tenant_id", tid)
+    .is("deleted_at", null)
+    .maybeSingle();
+
   return (
     <div className="mx-auto w-full max-w-3xl">
       <BackLink href="/actions" label="Plan d'actions" />
@@ -118,6 +128,23 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
           </span>
         ) : null}
       </div>
+
+      {remonteeSource ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Remontée d'origine</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`/reclamations/${remonteeSource.id}`}
+              className="text-sm hover:text-primary hover:underline"
+            >
+              {REMONTEE_TYPE_LABELS[remonteeSource.type] ?? remonteeSource.type} ·{" "}
+              {remonteeSource.objet}
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {(ncLiees ?? []).length > 0 ? (
         <Card className="mb-6">

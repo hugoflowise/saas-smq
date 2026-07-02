@@ -110,8 +110,8 @@ export default async function CompetencesPage() {
       <PageHeader
         title="Compétences"
         description="Compétences requises/acquises, formations et habilitations avec échéances et pièces justificatives."
-        isoClause="ISO 9001 §7.2"
-        help="§7.2 exige de conserver les preuves de compétence du personnel dont le travail influe sur la performance du SMQ. Renseignez par personne les compétences acquises/à acquérir, les dates d'obtention et d'échéance des habilitations, l'organisme, et joignez l'attestation/diplôme/habilitation. Les échéances dépassées ou proches (60 jours) sont mises en évidence."
+        concept="competences"
+        help="§7.2 exige de conserver les preuves de compétence du personnel dont le travail influe sur la performance du {{sigle}}. Renseignez par personne les compétences acquises/à acquérir, les dates d'obtention et d'échéance des habilitations, l'organisme, et joignez l'attestation/diplôme/habilitation. Les échéances dépassées ou proches (60 jours) sont mises en évidence."
       >
         {consultants.length > 0 && competences.length > 0 ? (
           <AttributionDialog consultants={consultantsMin} competences={competencesMin} />

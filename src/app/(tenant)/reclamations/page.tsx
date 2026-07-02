@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
+import { StatTiles } from "@/components/stat-tiles";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -11,8 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DOMAINE_SSE_LABELS, type DomaineSse } from "@/lib/domaines-sse";
 import { formatDate } from "@/lib/format";
 import { REMONTEE_TYPE_LABELS } from "@/lib/labels";
+import { getNormesActives } from "@/lib/normes-actives";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -53,11 +57,13 @@ export default async function ReclamationsPage() {
   }
 
   const supabase = await createClient();
+  const normes = await getNormesActives();
+  const afficherSse = normes.includes("MASE");
   const [{ data: reclamations }, { data: processus }] = await Promise.all([
     supabase
       .from("reclamations")
       .select(
-        "id, type, objet, client, declarant_email, declarant_role, date_reception, canal, gravite, description, traitement, statut",
+        "id, type, objet, client, declarant_email, declarant_role, date_reception, canal, gravite, description, traitement, statut, domaine, analyse_methode, analyse_causes, avec_arret, jours_arret",
       )
       .eq("tenant_id", ctx.effectiveTenantId)
       .order("date_reception", { ascending: false }),
@@ -90,11 +96,39 @@ export default async function ReclamationsPage() {
       <PageHeader
         title="Remontées"
         description="Réclamations, dysfonctionnements, incidents et accidents."
-        isoClause="ISO 9001 §9.1.2 · §10.2"
+        concept="remontees"
         help="Tracez toutes les remontées (réclamation client, dysfonctionnement, incident, accident), analysez les causes et déclenchez des actions dans le plan d'actions. Cochez « Créer une action liée » à l'enregistrement pour ouvrir automatiquement l'action de traitement."
       >
-        <ReclamationDialog processusOptions={processusOptions} />
+        <ReclamationDialog processusOptions={processusOptions} afficherSse={afficherSse} />
       </PageHeader>
+
+      {afficherSse ? (
+        <StatTiles
+          className="mb-6"
+          tiles={[
+            {
+              label: "Situations dangereuses",
+              value: items.filter((r) => r.type === "situation_dangereuse").length,
+              cls: "text-status-pa",
+            },
+            {
+              label: "Presqu'accidents",
+              value: items.filter((r) => r.type === "presqu_accident").length,
+              cls: "text-status-pa",
+            },
+            {
+              label: "Accidents",
+              value: items.filter((r) => r.type === "accident").length,
+              cls: "text-status-nc-majeure",
+            },
+            {
+              label: "Impacts environnementaux",
+              value: items.filter((r) => r.type === "impact_environnemental").length,
+              cls: "text-foreground",
+            },
+          ]}
+        />
+      ) : null}
 
       <ShareFormCard
         lien={lien}
@@ -121,6 +155,7 @@ export default async function ReclamationsPage() {
               <TableRow>
                 <TableHead className="w-40">Type</TableHead>
                 <TableHead>Objet</TableHead>
+                {afficherSse ? <TableHead>Domaine</TableHead> : null}
                 <TableHead>Client</TableHead>
                 <TableHead>Canal</TableHead>
                 <TableHead>Gravité</TableHead>
@@ -137,15 +172,15 @@ export default async function ReclamationsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <ReclamationDialog
-                      reclamation={r}
-                      trigger={
-                        <button type="button" className={ROW_NAME_BUTTON}>
-                          {r.objet}
-                        </button>
-                      }
-                    />
+                    <Link href={`/reclamations/${r.id}`} className={ROW_NAME_BUTTON}>
+                      {r.objet}
+                    </Link>
                   </TableCell>
+                  {afficherSse ? (
+                    <TableCell className="text-muted-foreground text-sm">
+                      {r.domaine ? DOMAINE_SSE_LABELS[r.domaine as DomaineSse] : "-"}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     {r.client ?? "-"}
                     {r.declarant_role ? (

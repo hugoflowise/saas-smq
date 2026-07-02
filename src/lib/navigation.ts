@@ -9,6 +9,7 @@ import {
   FileStack,
   FolderTree,
   Gauge,
+  HardHat,
   History,
   Inbox,
   LayoutDashboard,
@@ -31,6 +32,7 @@ import {
   UserCog,
   Users,
   UsersRound,
+  Wrench,
 } from "lucide-react";
 
 export type NavItem = {
@@ -70,6 +72,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Parties prenantes", href: "/strategie/parties-prenantes", icon: Users },
       { label: "Risques & opportunités", href: "/risques", icon: ShieldCheck },
       { label: "Modifications du SMQ", href: "/modifications-smq", icon: Replace },
+    ],
+  },
+  {
+    // Section métier SST/MASE : masquée pour un client qualité seul (gating par norme).
+    title: "Maîtrise opérationnelle",
+    items: [
+      { label: "Analyses de risques", href: "/sst/analyses-risques", icon: HardHat },
+      { label: "Contrôles obligatoires", href: "/sst/controles", icon: Wrench },
     ],
   },
   {

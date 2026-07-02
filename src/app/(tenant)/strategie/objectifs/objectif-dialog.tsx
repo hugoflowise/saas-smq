@@ -16,8 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createIndicateurAction } from "@/lib/actions/indicateurs";
 import { createObjectifAction, updateObjectifAction } from "@/lib/actions/registres";
+import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { clauseBadge } from "@/lib/normes-libelles";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ObjectifRow = {
@@ -35,6 +37,7 @@ export type ObjectifRow = {
   processus_id: string | null;
   indicateur_id: string | null;
   engagement_id?: string | null;
+  domaine?: string | null;
 };
 
 export function ObjectifDialog({
@@ -45,6 +48,9 @@ export function ObjectifDialog({
   linkedIndicateurIds = [],
   presetProcessusId,
   presetEngagementId,
+  afficherDomaine = false,
+  afficherProcessus = true,
+  normes = ["9001"],
 }: {
   objectif?: ObjectifRow;
   processusOptions?: { id: string; nom: string }[];
@@ -53,6 +59,12 @@ export function ObjectifDialog({
   linkedIndicateurIds?: string[];
   presetProcessusId?: string;
   presetEngagementId?: string;
+  /** Affiche le sélecteur de domaine SSE (MASE §1.3). */
+  afficherDomaine?: boolean;
+  /** Affiche le rattachement au processus pilote (approche processus, hors MASE). */
+  afficherProcessus?: boolean;
+  /** Normes actives du client (libellés / clauses dynamiques). */
+  normes?: string[];
 }) {
   const isEdit = Boolean(objectif);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -107,6 +119,7 @@ export function ObjectifDialog({
           statut: f.get("statut"),
           processusId: f.get("processusId") || undefined,
           engagementId: f.get("engagementId") || undefined,
+          domaine: f.get("domaine") || undefined,
           indicateurIds,
         };
         return isEdit
@@ -135,7 +148,7 @@ export function ObjectifDialog({
       />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifier l'objectif" : "Nouvel objectif qualité"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Modifier l'objectif" : "Nouvel objectif"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -143,22 +156,24 @@ export function ObjectifDialog({
             <Input id="intitule" name="intitule" required defaultValue={objectif?.intitule ?? ""} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="processusId">Processus pilote</Label>
-              <select
-                id="processusId"
-                name="processusId"
-                className={SELECT_CLASS}
-                defaultValue={objectif?.processus_id ?? presetProcessusId ?? ""}
-              >
-                <option value="">-</option>
-                {processusOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nom}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {afficherProcessus ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="processusId">Processus pilote</Label>
+                <select
+                  id="processusId"
+                  name="processusId"
+                  className={SELECT_CLASS}
+                  defaultValue={objectif?.processus_id ?? presetProcessusId ?? ""}
+                >
+                  <option value="">-</option>
+                  {processusOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-2">
               <Label htmlFor="engagementId">Engagement de la politique</Label>
               <select
@@ -206,6 +221,24 @@ export function ObjectifDialog({
                 <option value="abandonne">Abandonné</option>
               </select>
             </div>
+            {afficherDomaine ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="domaine">Domaine SSE</Label>
+                <select
+                  id="domaine"
+                  name="domaine"
+                  className={SELECT_CLASS}
+                  defaultValue={objectif?.domaine ?? ""}
+                >
+                  <option value="">-</option>
+                  {DOMAINES_SSE.map((d) => (
+                    <option key={d} value={d}>
+                      {DOMAINE_SSE_LABELS[d]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
           </div>
           <div className="flex flex-col gap-2">
             <Label>Indicateurs de mesure</Label>
@@ -290,7 +323,8 @@ export function ObjectifDialog({
             )}
 
             <p className="text-muted-foreground text-xs">
-              Rattachez le ou les indicateurs qui mesurent cet objectif (ISO 9001 §6.2/§9.1). La
+              Rattachez le ou les indicateurs qui mesurent cet objectif
+              {clauseBadge("objectifs", normes) ? ` (${clauseBadge("objectifs", normes)})` : ""}. La
               progression de l'objectif est calculée à partir de ses indicateurs : chacun porte sa
               propre cible et son sens. L'objectif est atteint quand tous ses indicateurs atteignent
               leur cible.

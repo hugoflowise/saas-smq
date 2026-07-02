@@ -4,12 +4,15 @@
 //
 // Trois niveaux d'exigence par module :
 //   - "socle"   : toujours visible (transverse + obligations légales, ex. DUERP)
-//   - "systeme" : visible dès qu'au moins une norme est active (tronc commun,
-//                 type Annexe SL : politique, objectifs, processus, audits…)
-//   - { normes }: visible si l'une de ces normes est active (module métier)
+//   - "systeme" : visible dès qu'au moins une norme est active (management commun
+//                 à toutes les normes : politique, objectifs, plan d'actions,
+//                 audits, veille, remontées, revue, auto-diagnostic…)
+//   - { normes }: visible si l'une de ces normes est active (tronc ISO Annexe SL
+//                 réservé aux normes ISO, ou module métier propre à une norme)
 //
-// Un href non listé est traité comme "systeme" (tronc commun) → aucun module
-// existant n'est masqué pour les clients actuels (tous en 9001).
+// Un href non listé est traité comme "systeme" → aucun module existant n'est
+// masqué pour les clients actuels (tous en 9001). Le masquage ne concerne pour
+// l'instant que les clients d'autres normes (ex. MASE seul).
 // ============================================================================
 
 export type NormeCode = "9001" | "14001" | "45001" | "MASE" | "CEFRI";
@@ -44,12 +47,33 @@ export const NORMES: NormeInfo[] = [
 
 const NORME_CODES = new Set<string>(NORMES.map((n) => n.code));
 
+/**
+ * Correspondance code de norme → valeurs `norme` acceptées dans `referentiel_iso`
+ * (l'auto-diagnostic). On liste les variantes de libellé possibles (le 9001
+ * historique a pu être seedé sous « ISO 9001 », « ISO 9001:2015 » ou « 9001 »)
+ * pour ne jamais vider par erreur un référentiel déjà en base.
+ */
+export const REFERENTIEL_NORMES: Record<NormeCode, string[]> = {
+  "9001": ["ISO 9001", "ISO 9001:2015", "9001"],
+  "14001": ["ISO 14001", "14001"],
+  "45001": ["ISO 45001", "45001"],
+  MASE: ["MASE"],
+  CEFRI: ["CEFRI"],
+};
+
 /** Normes valides (filtre les entrées inconnues d'un tableau de codes). */
 export function normalizeNormes(codes: readonly string[]): NormeCode[] {
   return codes.filter((c): c is NormeCode => NORME_CODES.has(c));
 }
 
 type Requirement = "socle" | "systeme" | { normes: NormeCode[] };
+
+// Normes ISO à structure Annexe SL (High Level Structure) : elles partagent le
+// même tronc « système de management » (contexte §4.1, parties intéressées §4.2,
+// domaine §4.3, approche processus §4.4, R&O §6.1, modifications §6.3,
+// non-conformités §10.2…). MASE n'est PAS une norme Annexe SL (structure en
+// 5 axes) : ces modules-là doivent être masqués pour un client MASE seul.
+export const ISO_ANNEXE_SL: NormeCode[] = ["9001", "14001", "45001"];
 
 // Modules transverses / obligations légales : toujours visibles, indépendamment
 // des normes (un client a toujours au moins ces entrées).
@@ -65,11 +89,30 @@ const MODULE_REQUIREMENTS: Record<string, Requirement> = {
   "/corbeille": "socle",
   "/utilisateurs": "socle",
   // DUERP (document unique) : obligation légale dès 1 salarié, indépendante de
-  // toute certification → socle (à brancher quand le module sera livré).
+  // toute certification → socle, visible pour tous (MASE s'appuie dessus mais ne
+  // le « possède » pas). À brancher quand le module sera livré.
   // "/duerp": "socle",
-  //
-  // Modules métier (à venir) - exemples du gating ciblé :
-  // "/sst/plans-prevention": { normes: ["MASE", "45001"] },
+
+  // --- Tronc « système de management » ISO Annexe SL (masqué pour MASE seul) ---
+  "/strategie/contexte": { normes: ISO_ANNEXE_SL }, // §4.1 enjeux internes/externes
+  "/strategie/domaine": { normes: ISO_ANNEXE_SL }, // §4.3 domaine d'application
+  "/strategie/parties-prenantes": { normes: ISO_ANNEXE_SL }, // §4.2 parties intéressées
+  "/risques": { normes: ISO_ANNEXE_SL }, // §6.1 R&O stratégiques (≠ l'AdR par mission MASE)
+  "/modifications-smq": { normes: ISO_ANNEXE_SL }, // §6.3 modifications planifiées
+  "/processus": { normes: ISO_ANNEXE_SL }, // §4.4 approche processus
+  "/nc": { normes: ISO_ANNEXE_SL }, // §10.2 non-conformités (MASE : écarts + remontées)
+
+  // --- Modules métier ISO 9001 (masqués pour un client SST/environnement seul) ---
+  "/suivi-prestation": { normes: ["9001"] }, // satisfaction client §9.1.2
+  "/fournisseurs": { normes: ["9001"] }, // achats / évaluation fournisseurs §8.4
+
+  // --- Modules métier SST / MASE (masqués pour un client qualité/environnement seul) ---
+  // Analyse de risques par mission + plan de prévention (MASE Axe 3, cœur métier).
+  "/sst/analyses-risques": { normes: ["MASE", "45001"] },
+  // Registre des contrôles réglementaires obligatoires (MASE Axe 4).
+  "/sst/controles": { normes: ["MASE", "45001"] },
+
+  // --- Modules métier à venir (exemples du gating ciblé) ---
   // "/sst/accidents": { normes: ["MASE", "45001"] },
   // "/environnement/aspects": { normes: ["14001"] },
 };

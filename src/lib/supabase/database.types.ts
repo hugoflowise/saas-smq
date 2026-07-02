@@ -14,6 +14,225 @@ export type Database = {
   }
   public: {
     Tables: {
+      heures_travaillees: {
+        Row: {
+          annee: number
+          created_at: string
+          created_by: string | null
+          heures: number
+          id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          annee: number
+          created_at?: string
+          created_by?: string | null
+          heures: number
+          id?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          annee?: number
+          created_at?: string
+          created_by?: string | null
+          heures?: number
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      controles_obligatoires: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_dernier: string | null
+          date_prochain: string | null
+          deleted_at: string | null
+          domaine: string | null
+          equipement: string | null
+          id: string
+          intitule: string
+          observations: string | null
+          organisme: string | null
+          periodicite_mois: number | null
+          reference: string | null
+          statut: Database["public"]["Enums"]["controle_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_dernier?: string | null
+          date_prochain?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          equipement?: string | null
+          id?: string
+          intitule: string
+          observations?: string | null
+          organisme?: string | null
+          periodicite_mois?: number | null
+          reference?: string | null
+          statut?: Database["public"]["Enums"]["controle_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_dernier?: string | null
+          date_prochain?: string | null
+          deleted_at?: string | null
+          domaine?: string | null
+          equipement?: string | null
+          id?: string
+          intitule?: string
+          observations?: string | null
+          organisme?: string | null
+          periodicite_mois?: number | null
+          reference?: string | null
+          statut?: Database["public"]["Enums"]["controle_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      analyses_risques: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_analyse: string | null
+          date_revision: string | null
+          deleted_at: string | null
+          id: string
+          intitule: string
+          lieu: string | null
+          mission: string | null
+          notes: string | null
+          pdp_date_signature: string | null
+          pdp_lien: string | null
+          pdp_reference: string | null
+          pdp_requis: boolean
+          statut: Database["public"]["Enums"]["adr_statut"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          valide_le: string | null
+          valide_par: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_analyse?: string | null
+          date_revision?: string | null
+          deleted_at?: string | null
+          id?: string
+          intitule: string
+          lieu?: string | null
+          mission?: string | null
+          notes?: string | null
+          pdp_date_signature?: string | null
+          pdp_lien?: string | null
+          pdp_reference?: string | null
+          pdp_requis?: boolean
+          statut?: Database["public"]["Enums"]["adr_statut"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_analyse?: string | null
+          date_revision?: string | null
+          deleted_at?: string | null
+          id?: string
+          intitule?: string
+          lieu?: string | null
+          mission?: string | null
+          notes?: string | null
+          pdp_date_signature?: string | null
+          pdp_lien?: string | null
+          pdp_reference?: string | null
+          pdp_requis?: boolean
+          statut?: Database["public"]["Enums"]["adr_statut"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          valide_le?: string | null
+          valide_par?: string | null
+        }
+        Relationships: []
+      }
+      analyses_risques_lignes: {
+        Row: {
+          analyse_id: string
+          created_at: string
+          created_by: string | null
+          criticite: number | null
+          danger: string | null
+          domaine: Database["public"]["Enums"]["adr_domaine"]
+          gravite: number
+          id: string
+          mesures_prevention: string | null
+          ordre: number
+          probabilite: number
+          risque_residuel: string | null
+          tache: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          analyse_id: string
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          danger?: string | null
+          domaine?: Database["public"]["Enums"]["adr_domaine"]
+          gravite?: number
+          id?: string
+          mesures_prevention?: string | null
+          ordre?: number
+          probabilite?: number
+          risque_residuel?: string | null
+          tache: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          analyse_id?: string
+          created_at?: string
+          created_by?: string | null
+          criticite?: number | null
+          danger?: string | null
+          domaine?: Database["public"]["Enums"]["adr_domaine"]
+          gravite?: number
+          id?: string
+          mesures_prevention?: string | null
+          ordre?: number
+          probabilite?: number
+          risque_residuel?: string | null
+          tache?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       actions: {
         Row: {
           cause_fondamentale: string | null
@@ -611,6 +830,8 @@ export type Database = {
           date_evaluation: string | null
           evaluateur_id: string | null
           id: string
+          neutralisee: boolean
+          points_obtenus: number | null
           preuves_liees: Json | null
           referentiel_iso_id: string
           tenant_id: string
@@ -623,6 +844,8 @@ export type Database = {
           date_evaluation?: string | null
           evaluateur_id?: string | null
           id?: string
+          neutralisee?: boolean
+          points_obtenus?: number | null
           preuves_liees?: Json | null
           referentiel_iso_id: string
           tenant_id: string
@@ -635,6 +858,8 @@ export type Database = {
           date_evaluation?: string | null
           evaluateur_id?: string | null
           id?: string
+          neutralisee?: boolean
+          points_obtenus?: number | null
           preuves_liees?: Json | null
           referentiel_iso_id?: string
           tenant_id?: string
@@ -1500,6 +1725,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           formule_calcul: string | null
           frequence_mesure: Database["public"]["Enums"]["indicateur_frequence"]
           id: string
@@ -1522,6 +1748,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           formule_calcul?: string | null
           frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
           id?: string
@@ -1544,6 +1771,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           formule_calcul?: string | null
           frequence_mesure?: Database["public"]["Enums"]["indicateur_frequence"]
           id?: string
@@ -2066,6 +2294,7 @@ export type Database = {
           created_by: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           echeance: string | null
           engagement_id: string | null
           est_smart: boolean
@@ -2092,6 +2321,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           echeance?: string | null
           engagement_id?: string | null
           est_smart?: boolean
@@ -2118,6 +2348,7 @@ export type Database = {
           created_by?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           echeance?: string | null
           engagement_id?: string | null
           est_smart?: boolean
@@ -3546,6 +3777,10 @@ export type Database = {
       reclamations: {
         Row: {
           action_id: string | null
+          analyse_causes: string | null
+          analyse_details: Json | null
+          analyse_methode: string | null
+          avec_arret: boolean
           canal: Database["public"]["Enums"]["reclamation_canal"]
           client: string | null
           created_at: string
@@ -3557,8 +3792,10 @@ export type Database = {
           declarant_role: string | null
           deleted_at: string | null
           description: string | null
+          domaine: string | null
           gravite: Database["public"]["Enums"]["nc_gravite"]
           id: string
+          jours_arret: number | null
           nc_associee: string | null
           objet: string
           satisfait_client: boolean | null
@@ -3571,6 +3808,10 @@ export type Database = {
         }
         Insert: {
           action_id?: string | null
+          analyse_causes?: string | null
+          analyse_details?: Json | null
+          analyse_methode?: string | null
+          avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -3582,8 +3823,10 @@ export type Database = {
           declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
+          jours_arret?: number | null
           nc_associee?: string | null
           objet: string
           satisfait_client?: boolean | null
@@ -3596,6 +3839,10 @@ export type Database = {
         }
         Update: {
           action_id?: string | null
+          analyse_causes?: string | null
+          analyse_details?: Json | null
+          analyse_methode?: string | null
+          avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
           client?: string | null
           created_at?: string
@@ -3607,8 +3854,10 @@ export type Database = {
           declarant_role?: string | null
           deleted_at?: string | null
           description?: string | null
+          domaine?: string | null
           gravite?: Database["public"]["Enums"]["nc_gravite"]
           id?: string
+          jours_arret?: number | null
           nc_associee?: string | null
           objet?: string
           satisfait_client?: boolean | null
@@ -3652,41 +3901,53 @@ export type Database = {
       }
       referentiel_iso: {
         Row: {
+          axe: number | null
           chapitre: string
+          cotation_type: string | null
           description: string | null
-          domaine: Database["public"]["Enums"]["domaine_iso"]
+          domaine: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire: boolean
           exigences: Json | null
           id: string
           intitule: string
+          neutralisable: boolean
           norme: string
           ordre_affichage: number
+          points_max: number | null
           preuves_attendues: string | null
           version: string
         }
         Insert: {
+          axe?: number | null
           chapitre: string
+          cotation_type?: string | null
           description?: string | null
-          domaine: Database["public"]["Enums"]["domaine_iso"]
+          domaine?: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire?: boolean
           exigences?: Json | null
           id?: string
           intitule: string
+          neutralisable?: boolean
           norme?: string
           ordre_affichage?: number
+          points_max?: number | null
           preuves_attendues?: string | null
           version?: string
         }
         Update: {
+          axe?: number | null
           chapitre?: string
+          cotation_type?: string | null
           description?: string | null
-          domaine?: Database["public"]["Enums"]["domaine_iso"]
+          domaine?: Database["public"]["Enums"]["domaine_iso"] | null
           est_obligatoire?: boolean
           exigences?: Json | null
           id?: string
           intitule?: string
+          neutralisable?: boolean
           norme?: string
           ordre_affichage?: number
+          points_max?: number | null
           preuves_attendues?: string | null
           version?: string
         }
@@ -4486,6 +4747,8 @@ export type Database = {
       veille_reglementaire: {
         Row: {
           actions_a_prevoir: string | null
+          applicabilite: string | null
+          conformite: string | null
           created_at: string
           created_by: string | null
           date_application: string | null
@@ -4505,6 +4768,8 @@ export type Database = {
         }
         Insert: {
           actions_a_prevoir?: string | null
+          applicabilite?: string | null
+          conformite?: string | null
           created_at?: string
           created_by?: string | null
           date_application?: string | null
@@ -4524,6 +4789,8 @@ export type Database = {
         }
         Update: {
           actions_a_prevoir?: string | null
+          applicabilite?: string | null
+          conformite?: string | null
           created_at?: string
           created_by?: string | null
           date_application?: string | null
@@ -4640,6 +4907,9 @@ export type Database = {
       jwt_user_role: { Args: never; Returns: string }
     }
     Enums: {
+      adr_domaine: "securite" | "sante" | "environnement"
+      adr_statut: "brouillon" | "validee" | "a_reviser" | "archivee"
+      controle_statut: "a_planifier" | "conforme" | "non_conforme"
       action_origine:
         | "manuelle"
         | "demarrage_smq"
@@ -4655,6 +4925,10 @@ export type Database = {
         | "incident"
         | "accident"
         | "objectif"
+        | "situation_dangereuse"
+        | "presqu_accident"
+        | "maladie_professionnelle"
+        | "impact_environnemental"
       action_priorite: "p1" | "p2" | "p3"
       action_statut:
         | "a_faire"
@@ -4793,7 +5067,15 @@ export type Database = {
         | "enquete"
         | "autre"
       reclamation_statut: "recue" | "analysee" | "traitee" | "cloturee"
-      remontee_type: "reclamation" | "dysfonctionnement" | "incident" | "accident"
+      remontee_type:
+        | "reclamation"
+        | "dysfonctionnement"
+        | "incident"
+        | "accident"
+        | "situation_dangereuse"
+        | "presqu_accident"
+        | "maladie_professionnelle"
+        | "impact_environnemental"
       reunion_statut: "planifiee" | "terminee"
       reunion_type: "comite_qhse" | "reunion_echange" | "revue" | "autre"
       retour_statut: "nouveau" | "en_cours" | "traite" | "rejete"
@@ -4940,6 +5222,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adr_domaine: ["securite", "sante", "environnement"],
+      adr_statut: ["brouillon", "validee", "a_reviser", "archivee"],
+      controle_statut: ["a_planifier", "conforme", "non_conforme"],
       action_origine: [
         "manuelle",
         "demarrage_smq",
@@ -4955,6 +5240,10 @@ export const Constants = {
         "incident",
         "accident",
         "objectif",
+        "situation_dangereuse",
+        "presqu_accident",
+        "maladie_professionnelle",
+        "impact_environnemental",
       ],
       action_priorite: ["p1", "p2", "p3"],
       action_statut: [
@@ -5103,7 +5392,16 @@ export const Constants = {
       processus_type: ["pilotage", "realisation", "support"],
       reclamation_canal: ["mail", "tel", "visio", "audit", "enquete", "autre"],
       reclamation_statut: ["recue", "analysee", "traitee", "cloturee"],
-      remontee_type: ["reclamation", "dysfonctionnement", "incident", "accident"],
+      remontee_type: [
+        "reclamation",
+        "dysfonctionnement",
+        "incident",
+        "accident",
+        "situation_dangereuse",
+        "presqu_accident",
+        "maladie_professionnelle",
+        "impact_environnemental",
+      ],
       reunion_statut: ["planifiee", "terminee"],
       reunion_type: ["comite_qhse", "reunion_echange", "revue", "autre"],
       retour_statut: ["nouveau", "en_cours", "traite", "rejete"],

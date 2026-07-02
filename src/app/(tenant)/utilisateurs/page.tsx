@@ -21,7 +21,10 @@ export default async function UtilisateursPage() {
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
-        <PageHeader title="Utilisateurs" description="Gérez les accès à votre espace qualité." />
+        <PageHeader
+          title="Utilisateurs"
+          description="Gérez les accès à votre espace {{domaine}}."
+        />
         <EmptyState
           title="Aucun client sélectionné"
           description="Choisissez un client dans le sélecteur en haut de la page."
@@ -33,7 +36,10 @@ export default async function UtilisateursPage() {
   if (!canManageUsers(ctx.role)) {
     return (
       <div className="w-full">
-        <PageHeader title="Utilisateurs" description="Gérez les accès à votre espace qualité." />
+        <PageHeader
+          title="Utilisateurs"
+          description="Gérez les accès à votre espace {{domaine}}."
+        />
         <EmptyState
           title="Accès réservé"
           description="Seul le dirigeant peut gérer les utilisateurs de l'organisation."
@@ -56,7 +62,7 @@ export default async function UtilisateursPage() {
     <div className="w-full">
       <PageHeader
         title="Utilisateurs"
-        description="Invitez vos collègues et gérez leurs accès à l'espace qualité."
+        description="Invitez vos collègues et gérez leurs accès à l'espace {{domaine}}."
         help="Le dirigeant invite des utilisateurs par e-mail et leur attribue un rôle : dirigeant (tout, y compris validation), manager (contribue sans valider) ou auditeur (lecture seule). Le retrait révoque l'accès sans supprimer le compte."
       >
         {IS_STAGING && ctx.realIsAdmin ? <IdentitesTestButton /> : null}

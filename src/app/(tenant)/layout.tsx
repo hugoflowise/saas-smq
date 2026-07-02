@@ -5,6 +5,7 @@ import { LegalFooter } from "@/components/legal-footer";
 import { TodoWidget } from "@/components/todo-widget";
 import { getActiveTenantId } from "@/lib/active-tenant";
 import { ReadOnlyProvider } from "@/lib/hooks/read-only-context";
+import { systemeLabel } from "@/lib/normes-libelles";
 import { loadNotifications } from "@/lib/notifications-view";
 import { loadOnboarding } from "@/lib/onboarding";
 import { canManageUsers, isReadOnly } from "@/lib/permissions";
@@ -104,8 +105,8 @@ export default async function TenantLayout({ children }: { children: React.React
           <div className="mx-auto w-full min-w-0 max-w-screen-2xl">
             {isReadOnly(role) ? (
               <div className="mb-6 rounded-lg border border-status-pa/40 bg-status-pa/10 px-4 py-2.5 text-sm text-status-pa">
-                Mode lecture seule : le rôle auditeur permet de consulter le système qualité mais
-                pas de le modifier.
+                Mode lecture seule : le rôle auditeur permet de consulter le{" "}
+                {systemeLabel(normesActives)} mais pas de le modifier.
               </div>
             ) : null}
             <ReadOnlyProvider value={isReadOnly(role)}>{children}</ReadOnlyProvider>

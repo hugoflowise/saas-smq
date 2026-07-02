@@ -7,11 +7,14 @@ import { loadCalendarEvents } from "@/lib/calendrier";
 import { dateOffsetISO, formatDate, todayISO } from "@/lib/format";
 import { horsCible } from "@/lib/indicateurs";
 import { AUDIT_TYPE_LABELS } from "@/lib/labels";
+import { getNormesActives } from "@/lib/normes-actives";
+import { objectifsLabel, systemeLabel, systemeSigle } from "@/lib/normes-libelles";
 import { computeNps, npsLabel } from "@/lib/nps";
 import { chargerMesuresObjectifs } from "@/lib/objectifs-mesure";
 import { loadOnboarding } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { SseDashboardSection } from "./sse-dashboard-section";
 
 const NC_OUVERTES = ["ouverte", "analysee", "action_definie"] as (
   | "ouverte"
@@ -40,14 +43,14 @@ function npsClass(nps: number | null) {
 
 export default async function DashboardPage() {
   const ctx = await getTenantContext();
+  const normes = await getNormesActives();
+  const systeme = systemeLabel(normes);
+  const afficherSse = normes.includes("MASE");
 
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
-        <PageHeader
-          title="Tableau de bord"
-          description="Vue d'ensemble du Système de Management de la Qualité."
-        />
+        <PageHeader title="Tableau de bord" description={`Vue d'ensemble du ${systeme}.`} />
         <EmptyState
           title="Aucun client sélectionné"
           description="Choisissez un client dans le sélecteur en haut pour afficher son pilotage."
@@ -362,9 +365,9 @@ export default async function DashboardPage() {
     <div className="w-full">
       <PageHeader
         title="Tableau de bord"
-        description="Vue d'ensemble du Système de Management de la Qualité."
-        isoClause="ISO 9001 §9.1"
-        help="Cette page réunit les indicateurs clés de votre SMQ : conformité, objectifs, indicateurs de performance, non-conformités et réclamations, actions, audits et échéances à venir. Chaque tuile renvoie au module concerné pour agir. C'est aussi le point de départ de la revue de direction (§9.3). Tant que la mise en route n'est pas terminée, un bandeau vous guide étape par étape."
+        description={`Vue d'ensemble du ${systeme}.`}
+        concept="dashboard"
+        help={`Cette page réunit les indicateurs clés de votre ${systemeSigle(normes)} : conformité, objectifs, indicateurs de performance, non-conformités et réclamations, actions, audits et échéances à venir. Chaque tuile renvoie au module concerné pour agir. C'est aussi le point de départ de la revue de direction. Tant que la mise en route n'est pas terminée, un bandeau vous guide étape par étape.`}
       />
 
       {onboarding.complete ? null : (
@@ -400,6 +403,8 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {afficherSse ? <SseDashboardSection tenantId={tid} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -472,7 +477,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Objectifs qualité</CardTitle>
+            <CardTitle className="text-base">{objectifsLabel(normes)}</CardTitle>
           </CardHeader>
           <CardContent>
             {objActifs.length === 0 ? (

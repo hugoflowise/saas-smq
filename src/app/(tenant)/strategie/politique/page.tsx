@@ -15,6 +15,8 @@ import {
   savePolitiqueContenuAction,
   transitionPolitiqueStatutAction,
 } from "@/lib/actions/politique";
+import { getNormesActives } from "@/lib/normes-actives";
+import { domaineLabel, politiqueLabel } from "@/lib/normes-libelles";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { versionLettre } from "@/lib/versions";
@@ -30,16 +32,22 @@ export default async function PolitiquePage({
   const retourDocuments = from === "/documents";
   const ctx = await getTenantContext();
 
+  // Libellés adaptés aux normes du client : « Politique qualité » (9001),
+  // « Politique SSE » (MASE), « Politique QSSE » (les deux)…
+  const normes = await getNormesActives();
+  const politiqueTitre = politiqueLabel(normes);
+  const domaine = domaineLabel(normes);
+
   if (!ctx.effectiveTenantId) {
     return (
       <div className="mx-auto w-full max-w-5xl">
         <PageHeader
-          title="Politique qualité"
-          description="Document maîtrisé définissant les engagements qualité de la direction."
+          title={politiqueTitre}
+          description={`Document maîtrisé définissant les engagements ${domaine} de la direction.`}
         />
         <EmptyState
           title="Aucun client sélectionné"
-          description="Choisissez un client dans le sélecteur en haut pour gérer sa politique qualité."
+          description={`Choisissez un client dans le sélecteur en haut pour gérer sa politique ${domaine}.`}
         />
       </div>
     );
@@ -174,10 +182,10 @@ export default async function PolitiquePage({
       {retourDocuments ? <BackLink href="/documents" label="Retour aux documents" /> : null}
 
       <PageHeader
-        title="Politique qualité"
-        description="Document maîtrisé définissant les engagements qualité de la direction."
-        isoClause="ISO 9001 §5.2"
-        help="La direction établit et tient à jour une politique qualité adaptée à la finalité de l'organisme. Elle sert de cadre aux objectifs qualité, est communiquée à tous et tenue à disposition des parties intéressées."
+        title={politiqueTitre}
+        description={`Document maîtrisé définissant les engagements ${domaine} de la direction.`}
+        concept="politique"
+        help={`La direction établit et tient à jour une politique ${domaine} adaptée à la finalité de l'organisme. Elle sert de cadre aux objectifs ${domaine}, est communiquée à tous et tenue à disposition des parties intéressées.`}
       >
         {politique && canWrite ? (
           <SupprimerButton
@@ -185,7 +193,7 @@ export default async function PolitiquePage({
             id="politique"
             label="Réinitialiser la politique"
             successText="Politique réinitialisée."
-            confirmText="Réinitialiser la politique qualité ? Le contenu sera effacé et repassé en brouillon."
+            confirmText={`Réinitialiser la politique ${domaine} ? Le contenu sera effacé et repassé en brouillon.`}
           />
         ) : null}
       </PageHeader>
@@ -194,7 +202,7 @@ export default async function PolitiquePage({
         <div className="min-w-0">
           <MaitriseDocument
             surtitre="Document maîtrisé"
-            titre="Politique qualité"
+            titre={politiqueTitre}
             societe={tenant as Societe}
             reference={politique?.code ?? null}
             onSaveReference={savePolitiqueCodeAction}
@@ -252,7 +260,7 @@ export default async function PolitiquePage({
             approvedAt={politique?.approved_at ?? null}
             printHref="/print/politique"
             labelDocument="politique"
-            signatureTitle="Approuver la politique qualité"
+            signatureTitle={`Approuver la politique ${domaine}`}
             signatureDescription="Signez avec votre mot de passe pour approuver ce document."
             onSaveContenu={savePolitiqueContenuAction}
             onTransition={transitionPolitiqueStatutAction}
@@ -275,7 +283,7 @@ export default async function PolitiquePage({
                 }
                 document={{
                   surtitre: "Document maîtrisé",
-                  titre: "Politique qualité",
+                  titre: politiqueTitre,
                   societe: tenant as Societe,
                   reference: politique?.code ?? null,
                   withVerification: true,

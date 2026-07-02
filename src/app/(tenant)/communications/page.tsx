@@ -30,7 +30,7 @@ export default async function CommunicationsPage() {
       <div className="w-full">
         <PageHeader
           title="Communications"
-          description="Modèles d'e-mails et communication interne sur le SMQ."
+          description="Modèles d'e-mails et communication interne sur le {{sigle}}."
         />
         <EmptyState
           title="Aucun client sélectionné"
@@ -90,7 +90,7 @@ export default async function CommunicationsPage() {
       <PageHeader
         title="Communications"
         description="Bibliothèque de modèles d'e-mails (EPI, formations, ODM…) à envoyer en un clic."
-        isoClause="ISO 9001 §7.4"
+        concept="communications"
         help="Cliquez un modèle pour préparer l'e-mail : objet et message sont modifiables avant l'envoi, puis l'e-mail s'ouvre dans votre messagerie (Outlook) prêt à partir à une personne ou à toute la société. Chaque envoi est journalisé (traçabilité ISO §7.4). Pour l'option « toute la société », renseignez une adresse de liste de diffusion (créée dans Microsoft 365) dans Paramètres → Informations société."
       >
         <ModeleDialog mode="creer" />

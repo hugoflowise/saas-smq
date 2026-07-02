@@ -14,9 +14,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createReclamationAction, updateReclamationAction } from "@/lib/actions/registres";
+import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
-import { ACTION_PRIORITE_LABELS, ACTION_TYPE_LABELS } from "@/lib/labels";
+import {
+  ACTION_PRIORITE_LABELS,
+  ACTION_TYPE_LABELS,
+  REMONTEE_TYPE_LABELS,
+  REMONTEE_TYPES_QUALITE,
+  REMONTEE_TYPES_SSE,
+} from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type ReclamationRow = {
@@ -30,22 +37,32 @@ export type ReclamationRow = {
   description: string | null;
   traitement: string | null;
   statut: string;
+  domaine?: string | null;
+  analyse_methode?: string | null;
+  analyse_causes?: string | null;
+  avec_arret?: boolean | null;
+  jours_arret?: number | null;
 };
 
 export function ReclamationDialog({
   reclamation,
   trigger,
   processusOptions = [],
+  afficherSse = false,
 }: {
   reclamation?: ReclamationRow;
   trigger?: React.ReactElement;
   processusOptions?: { id: string; nom: string }[];
+  /** Affiche les types + champs santé-sécurité-environnement (MASE Axe 4). */
+  afficherSse?: boolean;
 }) {
   const isEdit = Boolean(reclamation);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
   // À la création : la case « créer une action » révèle les champs de l'action.
   const [creerAction, setCreerAction] = useState(true);
+  // Accident avec arrêt de travail : révèle le nombre de jours d'arrêt (TF/TG).
+  const [avecArret, setAvecArret] = useState(reclamation?.avec_arret ?? false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -60,6 +77,9 @@ export function ReclamationDialog({
           description: f.get("description") || undefined,
           traitement: f.get("traitement") || undefined,
           statut: f.get("statut"),
+          domaine: f.get("domaine") || undefined,
+          avecArret,
+          joursArret: avecArret ? f.get("joursArret") || undefined : undefined,
         };
         if (isEdit) return updateReclamationAction({ id: reclamation?.id, ...data });
         const withAction = f.get("creerAction") === "on";
@@ -81,6 +101,15 @@ export function ReclamationDialog({
       success: isEdit ? "Remontée mise à jour." : "Remontée enregistrée.",
     });
   }
+
+  // Types proposés selon la norme ; on garde le type courant s'il n'est pas listé
+  // (ex. remontée SSE ouverte puis client repassé en qualité seule).
+  const typesBase = afficherSse ? REMONTEE_TYPES_SSE : REMONTEE_TYPES_QUALITE;
+  const typeCourant = reclamation?.type;
+  const typeOptions: string[] = [
+    ...typesBase,
+    ...(typeCourant && !typesBase.includes(typeCourant as never) ? [typeCourant] : []),
+  ];
 
   // Lecture seule (auditeur) : en édition on garde le trigger fourni (libellé de
   // ligne) mais inerte ; le crayon par défaut est masqué. En création on masque tout.
@@ -113,12 +142,13 @@ export function ReclamationDialog({
                 id="type"
                 name="type"
                 className={SELECT_CLASS}
-                defaultValue={reclamation?.type ?? "reclamation"}
+                defaultValue={reclamation?.type ?? typeOptions[0]}
               >
-                <option value="reclamation">Réclamation</option>
-                <option value="dysfonctionnement">Dysfonctionnement</option>
-                <option value="incident">Incident</option>
-                <option value="accident">Accident</option>
+                {typeOptions.map((t) => (
+                  <option key={t} value={t}>
+                    {REMONTEE_TYPE_LABELS[t as keyof typeof REMONTEE_TYPE_LABELS] ?? t}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex flex-col gap-2">
@@ -169,6 +199,24 @@ export function ReclamationDialog({
                 <option value="critique">Critique</option>
               </select>
             </div>
+            {afficherSse ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="domaine">Domaine SSE</Label>
+                <select
+                  id="domaine"
+                  name="domaine"
+                  className={SELECT_CLASS}
+                  defaultValue={reclamation?.domaine ?? ""}
+                >
+                  <option value="">-</option>
+                  {DOMAINES_SSE.map((d) => (
+                    <option key={d} value={d}>
+                      {DOMAINE_SSE_LABELS[d]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             <div className="col-span-2 flex flex-col gap-2">
               <Label htmlFor="statut">Statut</Label>
               <select
@@ -202,6 +250,33 @@ export function ReclamationDialog({
               defaultValue={reclamation?.traitement ?? ""}
             />
           </div>
+          {afficherSse ? (
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-3">
+              <label className="flex items-center gap-2 font-medium text-sm">
+                <input
+                  type="checkbox"
+                  name="avecArret"
+                  checked={avecArret}
+                  onChange={(e) => setAvecArret(e.target.checked)}
+                  className="size-4 rounded border-input"
+                />
+                Accident avec arrêt de travail
+              </label>
+              {avecArret ? (
+                <div className="flex flex-col gap-2 sm:max-w-xs">
+                  <Label htmlFor="joursArret">Nombre de journées d'arrêt</Label>
+                  <Input
+                    id="joursArret"
+                    name="joursArret"
+                    type="number"
+                    min={0}
+                    defaultValue={reclamation?.jours_arret ?? ""}
+                    placeholder="Base du taux de gravité"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           {!isEdit ? (
             <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-3">
               <label className="flex items-center gap-2 text-sm font-medium">

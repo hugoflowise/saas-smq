@@ -10,6 +10,7 @@ import {
   RO_STATUT_LABELS,
   REVUE_STATUT_LABELS as STATUT_LABELS,
 } from "@/lib/labels";
+import { getNormesActives } from "@/lib/normes-actives";
 import { canApprove, canWrite } from "@/lib/permissions";
 import { revueComplete } from "@/lib/revue-circuit";
 import {
@@ -24,6 +25,7 @@ import { RevueDialog } from "../revue-dialog";
 import { RevueActionForm } from "./revue-action-form";
 import { RevueApprobation } from "./revue-approbation";
 import { RevuePerformanceCapture } from "./revue-performance-capture";
+import { RevueSseBilan } from "./revue-sse-bilan";
 import type { RevueParticipant } from "./revue-structure-editor";
 import { RevueStructureEditor } from "./revue-structure-editor";
 
@@ -87,6 +89,9 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
     .order("date_creation", { ascending: false });
   const actions = linkedActions ?? [];
 
+  // Bilan SSE (MASE Axe 5) : donnée d'entrée supplémentaire pour un client MASE.
+  const afficherSse = (await getNormesActives()).includes("MASE");
+
   return (
     <div className="mx-auto w-full max-w-4xl">
       <BackLink href="/revues/direction" label="Revues de direction" />
@@ -96,7 +101,7 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
         description={`${STATUT_LABELS[revue.statut as keyof typeof STATUT_LABELS] ?? revue.statut}${
           revue.date_realisation ? ` · ${formatDate(revue.date_realisation)}` : ""
         }`}
-        isoClause="ISO 9001 §9.3"
+        concept="revue"
         help="Structurez les éléments d'entrée (§9.3.2 a→f) et de sortie (§9.3.3) de la revue. Les données de performance peuvent être pré-remplies depuis le pilotage."
       >
         <DownloadPdfButton printHref={`/print/revue/${id}`} label="Compte rendu (PDF)" />
@@ -124,6 +129,10 @@ export default async function RevueDetailPage({ params }: { params: Promise<{ id
             <PerformanceGrid perf={perf} />
           </CardContent>
         </Card>
+
+        {afficherSse ? (
+          <RevueSseBilan supabase={supabase} tenantId={tid} annee={revue.annee} />
+        ) : null}
 
         {/* §9.3.2 a→f + §9.3.3 - éléments d'entrée / sortie */}
         <RevueStructureEditor
