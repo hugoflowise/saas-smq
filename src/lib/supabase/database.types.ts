@@ -5059,6 +5059,7 @@ export type Database = {
         | "policy_review_due"
         | "mention"
         | "retour_update"
+        | "action_assigned"
       objectif_sens: "hausse" | "baisse"
       objectif_statut: "actif" | "atteint" | "abandonne"
       pi_influence: "faible" | "moyen" | "fort"
@@ -5397,6 +5398,7 @@ export const Constants = {
         "policy_review_due",
         "mention",
         "retour_update",
+        "action_assigned",
       ],
       objectif_sens: ["hausse", "baisse"],
       objectif_statut: ["actif", "atteint", "abandonne"],

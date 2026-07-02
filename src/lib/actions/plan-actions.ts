@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ActionResult } from "@/lib/actions/types";
 import { todayISO } from "@/lib/format";
+import { notifyUsers } from "@/lib/notifications";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -46,6 +47,8 @@ const baseSchema = {
     .or(z.literal("")),
   priorite: z.enum(["p1", "p2", "p3"]),
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
+  // Responsable de l'action (membre du client).
+  responsableId: z.string().uuid().optional().or(z.literal("")),
   processusConcerne: z.string().uuid().optional(),
   // Date de fin réalisée (saisie explicite ; à défaut, auto au passage « terminé »).
   dateEffective: z.string().optional(),
@@ -150,6 +153,7 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
       objectif_id: d.objectifId ?? null,
+      responsable_id: d.responsableId || null,
       revue_id: d.revueId ?? null,
       date_prevue: d.datePrevue || null,
       indicateur_efficacite: d.indicateurEfficacite ?? null,
@@ -169,6 +173,9 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
     .single();
 
   if (error || !act) return { ok: false, error: error?.message ?? "Création impossible." };
+
+  // Notifie le responsable désigné, sauf s'il s'agit de la personne qui crée l'action.
+  await notifierAffectation(d.responsableId, ctx.userId, act.id, d.descriptionCourte);
 
   // Non-conformité liée dans le registre des NC (case cochée dans le formulaire).
   // On déduit l'intitulé et la description de l'action ; le processus est repris.
@@ -326,6 +333,14 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
   const origine = d.objectifId && d.origine === "manuelle" ? "objectif" : d.origine;
 
   const supabase = await createClient();
+  // Responsable avant modification : pour ne notifier que sur un vrai changement.
+  const { data: avant } = await supabase
+    .from("actions")
+    .select("responsable_id")
+    .eq("id", d.id)
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .single();
+
   const { error } = await supabase
     .from("actions")
     .update({
@@ -337,6 +352,7 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
       objectif_id: d.objectifId ?? null,
+      responsable_id: d.responsableId || null,
       date_prevue: d.datePrevue || null,
       // Date de fin réalisée : valeur saisie prioritaire, sinon auto au « terminé ».
       date_effective: d.dateEffective || (d.statut === "termine" ? todayISO() : null),
@@ -357,9 +373,34 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
 
   if (error) return { ok: false, error: error.message };
 
+  // Notifie le nouveau responsable si l'affectation a changé (et n'est pas soi-même).
+  const nouveau = d.responsableId || null;
+  if (nouveau && nouveau !== (avant?.responsable_id ?? null)) {
+    await notifierAffectation(nouveau, ctx.userId, d.id, d.descriptionCourte);
+  }
+
   revalidatePath("/actions");
   if (d.objectifId) revalidatePath("/strategie/objectifs");
   return { ok: true };
+}
+
+/**
+ * Notifie le responsable d'une action qu'elle lui a été affectée, sauf s'il
+ * s'agit de la personne qui fait l'affectation (pas d'auto-notification).
+ */
+async function notifierAffectation(
+  responsableId: string | undefined | null,
+  actorId: string,
+  actionId: string,
+  intitule: string,
+): Promise<void> {
+  if (!responsableId || responsableId === actorId) return;
+  await notifyUsers([responsableId], {
+    type: "action_assigned",
+    title: "Une action vous a été affectée",
+    body: intitule,
+    link: `/actions/${actionId}`,
+  });
 }
 
 // §6.2.2 : création rapide d'une action de mise en œuvre, liée à un objectif.

@@ -15,6 +15,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
@@ -53,7 +54,7 @@ export default async function ActionsPage({
 
   const supabase = await createClient();
 
-  const [{ data: processusOptions }, { data: objectifOptions }] = await Promise.all([
+  const [{ data: processusOptions }, { data: objectifOptions }, membres] = await Promise.all([
     supabase
       .from("processus")
       .select("id, nom")
@@ -66,12 +67,14 @@ export default async function ActionsPage({
       .eq("tenant_id", ctx.effectiveTenantId)
       .is("deleted_at", null)
       .order("created_at", { ascending: true }),
+    listTenantMembers(ctx.effectiveTenantId),
   ]);
+  const membreNom = new Map(membres.map((m) => [m.id, m.nom]));
 
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, propose, valide_le",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, propose, valide_le",
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null);
@@ -123,7 +126,11 @@ export default async function ActionsPage({
         help="Colonne vertébrale du {{sigle}} : toutes les actions convergent ici, quelle que soit leur origine (audit, non-conformité, réclamation, revue, risque…). Une seule liste, filtrable par origine."
       >
         <ViewToggle />
-        <ActionDialog processusOptions={options} objectifOptions={objectifs} />
+        <ActionDialog
+          processusOptions={options}
+          objectifOptions={objectifs}
+          responsableOptions={membres}
+        />
       </PageHeader>
 
       <ProposeBanner table="actions" count={aValider} libelle="actions de démarrage" />
@@ -170,8 +177,9 @@ export default async function ActionsPage({
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead>Responsable</TableHead>
                 <TableHead>Échéance</TableHead>
-                <TableHead className="min-w-[200px]">Résultats / Efficacité</TableHead>
+                <TableHead className="min-w-[180px]">Résultats / Efficacité</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,6 +195,7 @@ export default async function ActionsPage({
                       <ActionDialog
                         processusOptions={options}
                         objectifOptions={objectifs}
+                        responsableOptions={membres}
                         action={a}
                         trigger={
                           <button type="button" className={ROW_NAME_BUTTON}>
@@ -211,6 +220,9 @@ export default async function ActionsPage({
                   </TableCell>
                   <TableCell>
                     <StatutCell id={a.id} value={a.statut} />
+                  </TableCell>
+                  <TableCell className="whitespace-normal text-sm">
+                    {a.responsable_id ? (membreNom.get(a.responsable_id) ?? "-") : "-"}
                   </TableCell>
                   <TableCell>
                     <EcheanceCell id={a.id} value={a.date_prevue} />
