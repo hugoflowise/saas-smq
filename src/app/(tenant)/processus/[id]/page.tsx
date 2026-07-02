@@ -91,7 +91,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
     supabase
       .from("indicateurs")
       .select(
-        "id, nom, description, processus_id, type, unite, cible, sens, formule_calcul, frequence_mesure",
+        "id, nom, description, processus_id, type, unite, cible, cible_texte, sens, formule_calcul, frequence_mesure",
       )
       .eq("tenant_id", tid)
       .eq("processus_id", id)
@@ -306,7 +306,8 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {indList.map((ind) => {
                   const v = lastVal.get(ind.id);
-                  const alert = v !== undefined && horsCible(v, ind.cible, ind.sens);
+                  const alert =
+                    v !== undefined && horsCible(v, ind.cible, ind.sens, ind.cible_texte);
                   return (
                     <Link key={ind.id} href={`/indicateurs/${ind.id}${from}`}>
                       <Card className="h-full transition-colors hover:border-primary/40">
@@ -322,7 +323,10 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                           </div>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
                             {ind.cible !== null ? (
-                              <span>Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}</span>
+                              <span>
+                                Cible :{" "}
+                                {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cible_texte)}
+                              </span>
                             ) : null}
                             {alert ? (
                               <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">

@@ -29,6 +29,7 @@ export type IndicateurRow = {
   unite: string | null;
   formule_calcul: string | null;
   cible: number | null;
+  cible_texte?: string | null;
   sens: string;
   frequence_mesure: string;
   domaine?: string | null;
@@ -77,6 +78,7 @@ export function IndicateurDialog({
           unite: form.get("unite") || undefined,
           formule: form.get("formule") || undefined,
           cible: form.get("cible") || undefined,
+          cibleTexte: form.get("cibleTexte") || undefined,
           sens: form.get("sens"),
           frequence: form.get("frequence"),
           domaine: form.get("domaine") || undefined,
@@ -142,10 +144,10 @@ export function IndicateurDialog({
                 className={SELECT_CLASS}
                 defaultValue={indicateur?.type ?? "percentage"}
               >
-                <option value="numeric">Numérique</option>
-                <option value="percentage">Pourcentage</option>
-                <option value="count">Nombre</option>
-                <option value="duration">Durée</option>
+                <option value="percentage">Pourcentage (%)</option>
+                <option value="count">Comptage (nombre d'occurrences)</option>
+                <option value="numeric">Valeur chiffrée (montant, ratio, note…)</option>
+                <option value="duration">Durée (jours, heures…)</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">
@@ -209,7 +211,7 @@ export function IndicateurDialog({
               </div>
             ) : null}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="cible">Cible</Label>
+              <Label htmlFor="cible">Cible chiffrée</Label>
               <Input
                 id="cible"
                 name="cible"
@@ -230,6 +232,20 @@ export function IndicateurDialog({
                 <option value="baisse">À ne pas dépasser (≤ cible)</option>
               </select>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cibleTexte">Cible descriptive (facultatif)</Label>
+            <Input
+              id="cibleTexte"
+              name="cibleTexte"
+              defaultValue={indicateur?.cible_texte ?? ""}
+              placeholder="Ex. « ≥ 5 × salaire moyen mensuel + 20 000 »"
+            />
+            <p className="text-muted-foreground text-xs">
+              Pour une cible qui ne se résume pas à un nombre. Si renseignée, elle prime sur la
+              cible chiffrée pour l'affichage et l'alerte automatique « hors cible » est désactivée.
+            </p>
           </div>
 
           <div className="flex flex-col gap-2">

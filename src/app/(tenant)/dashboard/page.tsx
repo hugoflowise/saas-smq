@@ -113,7 +113,7 @@ export default async function DashboardPage() {
   // Indicateurs + dernières valeurs (sert aussi aux objectifs liés)
   const { data: indicateurs } = await supabase
     .from("indicateurs")
-    .select("id, cible, sens")
+    .select("id, cible, cible_texte, sens")
     .eq("tenant_id", tid)
     .is("deleted_at", null);
   const { data: valeurs } = await supabase
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
   const indicateursHorsSeuil = (indicateurs ?? []).filter((i) => {
     const v = lastVal.get(i.id);
     if (v === undefined) return false;
-    return horsCible(v, i.cible, i.sens);
+    return horsCible(v, i.cible, i.sens, i.cible_texte);
   }).length;
 
   // Objectifs qualité (progression pilotée par leurs indicateurs liés)

@@ -47,7 +47,7 @@ export default async function IndicateurDetailPage({
   const { data: ind } = await supabase
     .from("indicateurs")
     .select(
-      "id, nom, description, processus_id, type, unite, formule_calcul, cible, sens, frequence_mesure, domaine",
+      "id, nom, description, processus_id, type, unite, formule_calcul, cible, cible_texte, sens, frequence_mesure, domaine",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -124,7 +124,9 @@ export default async function IndicateurDetailPage({
             <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
               Objectif / cible
             </p>
-            <p className="mt-1 text-sm">{cibleAffichee(ind.cible, ind.sens, ind.unite)}</p>
+            <p className="mt-1 text-sm">
+              {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cible_texte)}
+            </p>
           </div>
           <div>
             <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
