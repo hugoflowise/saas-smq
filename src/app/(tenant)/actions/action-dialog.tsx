@@ -120,6 +120,9 @@ export function ActionDialog({
           creerNc: withNc,
           nc: withNc
             ? {
+                intitule: form.get("ncIntitule") || undefined,
+                description: form.get("ncDescription") || undefined,
+                dateConstat: form.get("ncDateConstat") || undefined,
                 gravite: form.get("ncGravite") || undefined,
                 type: form.get("ncType") || undefined,
                 origine: form.get("ncOrigine") || undefined,
@@ -375,43 +378,67 @@ export function ActionDialog({
                 Créer une non-conformité liée à cette action
               </label>
               {creerNc ? (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="ncGravite">Gravité</Label>
-                    <select
-                      id="ncGravite"
-                      name="ncGravite"
-                      className={SELECT_CLASS}
-                      defaultValue="mineure"
-                    >
-                      <Options map={NC_GRAVITE_LABELS} />
-                    </select>
+                    <Label htmlFor="ncIntitule">Intitulé de la non-conformité</Label>
+                    <Input
+                      id="ncIntitule"
+                      name="ncIntitule"
+                      placeholder="Si vide, reprend l'intitulé de l'action"
+                    />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="ncType">Type</Label>
-                    <select
-                      id="ncType"
-                      name="ncType"
-                      className={SELECT_CLASS}
-                      defaultValue="nc_processus"
-                    >
-                      <Options map={NC_TYPE_LABELS} />
-                    </select>
+                    <Label htmlFor="ncDescription">Description du constat</Label>
+                    <Textarea
+                      id="ncDescription"
+                      name="ncDescription"
+                      rows={2}
+                      placeholder="Ce qui a été constaté (écart, non-respect d'une exigence)…"
+                    />
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="ncOrigine">Origine</Label>
-                    <select
-                      id="ncOrigine"
-                      name="ncOrigine"
-                      className={SELECT_CLASS}
-                      defaultValue="autre"
-                    >
-                      <Options map={NC_ORIGINE_LABELS} />
-                    </select>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncDateConstat">Date du constat</Label>
+                      <Input id="ncDateConstat" name="ncDateConstat" type="date" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncGravite">Gravité</Label>
+                      <select
+                        id="ncGravite"
+                        name="ncGravite"
+                        className={SELECT_CLASS}
+                        defaultValue="mineure"
+                      >
+                        <Options map={NC_GRAVITE_LABELS} />
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncType">Type</Label>
+                      <select
+                        id="ncType"
+                        name="ncType"
+                        className={SELECT_CLASS}
+                        defaultValue="nc_processus"
+                      >
+                        <Options map={NC_TYPE_LABELS} />
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncOrigine">Origine</Label>
+                      <select
+                        id="ncOrigine"
+                        name="ncOrigine"
+                        className={SELECT_CLASS}
+                        defaultValue="autre"
+                      >
+                        <Options map={NC_ORIGINE_LABELS} />
+                      </select>
+                    </div>
                   </div>
-                  <p className="text-muted-foreground text-xs sm:col-span-3">
-                    La non-conformité reprend l'intitulé, le constat et le processus de l'action, et
-                    démarre au statut « Action définie ».
+                  <p className="text-muted-foreground text-xs">
+                    La non-conformité démarre au statut « Action définie », liée à cette action.
+                    Vous pourrez la compléter (analyse des causes, clôture) depuis le registre des
+                    NC.
                   </p>
                 </div>
               ) : null}
