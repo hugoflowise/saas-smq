@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import { formatDate, nomPersonne } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { ContexteForm } from "./contexte-form";
 import { ContexteReference } from "./contexte-reference";
 import type { ContexteSnapshot } from "./contexte-snapshot";
@@ -74,6 +75,23 @@ export default async function ContextePage() {
   }));
   const current = versions[0] ?? null;
 
+  // Options pour créer une action liée à un point SWOT/PESTEL.
+  const [{ data: processusOptions }, { data: objectifOptions }, membres] = await Promise.all([
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("ordre_affichage", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+    listTenantMembers(ctx.effectiveTenantId),
+  ]);
+
   const swotRaw = (contexte?.analyse_swot ?? {}) as Record<string, unknown>;
   const pestelRaw = (contexte?.analyse_pestel ?? {}) as Record<string, unknown>;
 
@@ -125,6 +143,11 @@ export default async function ContextePage() {
         }}
         initialDateRevue={contexte?.date_revue ?? ""}
         initialProchainRevue={contexte?.prochain_revue ?? ""}
+        actionCtx={{
+          processusOptions: processusOptions ?? [],
+          objectifOptions: objectifOptions ?? [],
+          responsableOptions: membres,
+        }}
       />
 
       {/* Historique des versions figées (consultables en lecture seule). */}
