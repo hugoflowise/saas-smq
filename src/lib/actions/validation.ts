@@ -51,10 +51,16 @@ export async function refuserElementAction(input: unknown): Promise<ActionResult
   const parsed = validerSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Données invalides." };
 
-  const error = await supprimerPropose(parsed.data.table, ctx.effectiveTenantId, {
+  const { error, count } = await supprimerPropose(parsed.data.table, ctx.effectiveTenantId, {
     id: parsed.data.id,
   });
   if (error) return { ok: false, error };
+  if (count === 0) {
+    return {
+      ok: false,
+      error: "Suppression impossible : élément déjà validé, introuvable ou droits insuffisants.",
+    };
+  }
 
   revalidatePath(TABLES_PROPOSEES[parsed.data.table]);
   return { ok: true };
@@ -85,8 +91,14 @@ export async function refuserToutAction(input: unknown): Promise<ActionResult> {
   const parsed = validerToutSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Données invalides." };
 
-  const error = await supprimerPropose(parsed.data.table, ctx.effectiveTenantId, {});
+  const { error, count } = await supprimerPropose(parsed.data.table, ctx.effectiveTenantId, {});
   if (error) return { ok: false, error };
+  if (count === 0) {
+    return {
+      ok: false,
+      error: "Aucun élément supprimé (rien à refuser, ou droits insuffisants).",
+    };
+  }
 
   revalidatePath(TABLES_PROPOSEES[parsed.data.table]);
   return { ok: true };
@@ -128,25 +140,32 @@ async function marquerValide(
  * proposés non validés du module (refus en masse). Aiguillage explicite par table
  * pour conserver le typage du client Supabase. Le double filtre `propose=true` +
  * `valide_le is null` empêche de supprimer un élément déjà validé par ce biais.
+ *
+ * Renvoie `{ error, count }` : `count` = nombre de lignes réellement supprimées
+ * (via `.select()`), pour distinguer un refus sans effet (0 ligne, ex. RLS ou
+ * élément introuvable) d'une suppression réussie.
  */
 async function supprimerPropose(
   table: TableProposee,
   tenantId: string,
   target: { id?: string },
-): Promise<string | null> {
+): Promise<{ error: string | null; count: number }> {
   const supabase = await createClient();
 
   if (table === "processus") {
     let q = supabase.from("processus").delete().eq("tenant_id", tenantId);
     q = target.id ? q.eq("id", target.id) : q;
-    return (await q.eq("propose", true).is("valide_le", null)).error?.message ?? null;
+    const { data, error } = await q.eq("propose", true).is("valide_le", null).select("id");
+    return { error: error?.message ?? null, count: data?.length ?? 0 };
   }
   if (table === "actions") {
     let q = supabase.from("actions").delete().eq("tenant_id", tenantId);
     q = target.id ? q.eq("id", target.id) : q;
-    return (await q.eq("propose", true).is("valide_le", null)).error?.message ?? null;
+    const { data, error } = await q.eq("propose", true).is("valide_le", null).select("id");
+    return { error: error?.message ?? null, count: data?.length ?? 0 };
   }
   let q = supabase.from("parties_interessees").delete().eq("tenant_id", tenantId);
   q = target.id ? q.eq("id", target.id) : q;
-  return (await q.eq("propose", true).is("valide_le", null)).error?.message ?? null;
+  const { data, error } = await q.eq("propose", true).is("valide_le", null).select("id");
+  return { error: error?.message ?? null, count: data?.length ?? 0 };
 }
