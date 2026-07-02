@@ -20,6 +20,7 @@ import {
 } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { ActionDialog } from "../action-dialog";
 
 function Field({ label, value }: { label: string; value: string | null }) {
@@ -42,7 +43,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -50,7 +51,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
 
   if (!action) notFound();
 
-  const [{ data: processusOptions }, { data: objectifOptions }] = await Promise.all([
+  const [{ data: processusOptions }, { data: objectifOptions }, membres] = await Promise.all([
     supabase
       .from("processus")
       .select("id, nom")
@@ -62,7 +63,11 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
       .eq("tenant_id", tid)
       .is("deleted_at", null)
       .order("created_at", { ascending: true }),
+    listTenantMembers(tid),
   ]);
+  const responsableNom = action.responsable_id
+    ? (membres.find((m) => m.id === action.responsable_id)?.nom ?? null)
+    : null;
 
   const processusNom = action.processus_concerne
     ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
@@ -108,6 +113,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         <ActionDialog
           processusOptions={processusOptions ?? []}
           objectifOptions={objectifOptions ?? []}
+          responsableOptions={membres}
           action={action}
         />
         <SupprimerButton
@@ -179,6 +185,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Origine" value={ACTION_ORIGINE_LABELS[action.origine]} />
+          <Field label="Responsable" value={responsableNom} />
           <div>
             <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
               Processus concerné
