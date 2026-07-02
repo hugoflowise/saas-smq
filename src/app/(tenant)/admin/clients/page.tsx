@@ -91,7 +91,7 @@ export default async function AdminClientsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <div className="mx-auto w-full max-w-6xl">
       <PageHeader title="Clients" description="Gestion des sociétés clientes (tenants) Flowise.">
         <CreateTenantDialog />
       </PageHeader>
@@ -103,6 +103,7 @@ export default async function AdminClientsPage() {
               <TableRow>
                 <TableHead>Société</TableHead>
                 <TableHead>Dirigeant</TableHead>
+                <TableHead>Formule</TableHead>
                 <TableHead>Effectif</TableHead>
                 <TableHead>Secteur</TableHead>
                 <TableHead>Statut</TableHead>
@@ -114,20 +115,36 @@ export default async function AdminClientsPage() {
                 const tenantDirigeants = dirigeantsByTenant.get(t.id) ?? [];
                 return (
                   <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.nom_societe}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className="block max-w-[160px] truncate" title={t.nom_societe}>
+                        {t.nom_societe}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       {tenantDirigeants.length > 0 ? (
-                        <span className="flex flex-col gap-1">
+                        <span className="flex max-w-[220px] flex-col gap-1">
                           {tenantDirigeants.map((d) => (
-                            <span key={d.id} className="flex flex-col">
-                              <span>{d.full_name ?? "-"}</span>
-                              <span className="text-muted-foreground text-xs">{d.email}</span>
+                            <span key={d.id} className="flex min-w-0 flex-col">
+                              <span className="truncate" title={d.full_name ?? undefined}>
+                                {d.full_name ?? "-"}
+                              </span>
+                              <span
+                                className="truncate text-muted-foreground text-xs"
+                                title={d.email}
+                              >
+                                {d.email}
+                              </span>
                             </span>
                           ))}
                         </span>
                       ) : (
                         "-"
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {t.formule}
+                      </Badge>
                     </TableCell>
                     <TableCell>{t.effectif_tranche ?? "-"}</TableCell>
                     <TableCell>
@@ -148,7 +165,7 @@ export default async function AdminClientsPage() {
                     <TableCell>
                       <Badge variant="secondary">{t.statut}</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1">
                         <ManageDirigeantsDialog
                           tenantId={t.id}
@@ -160,6 +177,7 @@ export default async function AdminClientsPage() {
                           tenant={{
                             id: t.id,
                             nom_societe: t.nom_societe,
+                            formule: t.formule,
                             effectif_tranche: t.effectif_tranche,
                             secteur: t.secteur,
                             bureau_etudes: t.bureau_etudes,

@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +22,9 @@ import {
   ACTION_STATUT_LABELS,
   ACTION_TYPE_LABELS,
   COTATION_OPTIONS,
+  NC_GRAVITE_LABELS,
+  NC_ORIGINE_LABELS,
+  NC_TYPE_LABELS,
 } from "@/lib/labels";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
@@ -83,6 +87,8 @@ export function ActionDialog({
   const isEdit = Boolean(action);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
+  // À la création : la case « créer une NC liée » révèle les champs de la NC.
+  const [creerNc, setCreerNc] = useState(false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -107,9 +113,22 @@ export function ActionDialog({
           causeFondamentale: form.get("causeFondamentale") || undefined,
           recommandation: form.get("recommandation") || undefined,
         };
-        return isEdit
-          ? updateActionAction({ id: action?.id, ...payload })
-          : createActionAction(payload);
+        if (isEdit) return updateActionAction({ id: action?.id, ...payload });
+        const withNc = form.get("creerNc") === "on";
+        return createActionAction({
+          ...payload,
+          creerNc: withNc,
+          nc: withNc
+            ? {
+                intitule: form.get("ncIntitule") || undefined,
+                description: form.get("ncDescription") || undefined,
+                dateConstat: form.get("ncDateConstat") || undefined,
+                gravite: form.get("ncGravite") || undefined,
+                type: form.get("ncType") || undefined,
+                origine: form.get("ncOrigine") || undefined,
+              }
+            : undefined,
+        });
       },
       success: isEdit ? "Action mise à jour." : "Action créée.",
     });
@@ -343,6 +362,88 @@ export function ActionDialog({
               defaultValue={action?.commentaires ?? ""}
             />
           </div>
+
+          {/* Création uniquement : ouvrir en même temps une non-conformité liée
+              (miroir de la case « créer une action » du formulaire de NC). */}
+          {!isEdit ? (
+            <div className="flex flex-col gap-3 rounded-lg border border-dashed p-3">
+              <label className="flex items-center gap-2 font-medium text-sm">
+                <input
+                  type="checkbox"
+                  name="creerNc"
+                  className="size-4"
+                  checked={creerNc}
+                  onChange={(e) => setCreerNc(e.target.checked)}
+                />
+                Créer une non-conformité liée à cette action
+              </label>
+              {creerNc ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="ncIntitule">Intitulé de la non-conformité</Label>
+                    <Input
+                      id="ncIntitule"
+                      name="ncIntitule"
+                      placeholder="Si vide, reprend l'intitulé de l'action"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="ncDescription">Description du constat</Label>
+                    <Textarea
+                      id="ncDescription"
+                      name="ncDescription"
+                      rows={2}
+                      placeholder="Ce qui a été constaté (écart, non-respect d'une exigence)…"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncDateConstat">Date du constat</Label>
+                      <Input id="ncDateConstat" name="ncDateConstat" type="date" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncGravite">Gravité</Label>
+                      <select
+                        id="ncGravite"
+                        name="ncGravite"
+                        className={SELECT_CLASS}
+                        defaultValue="mineure"
+                      >
+                        <Options map={NC_GRAVITE_LABELS} />
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncType">Type</Label>
+                      <select
+                        id="ncType"
+                        name="ncType"
+                        className={SELECT_CLASS}
+                        defaultValue="nc_processus"
+                      >
+                        <Options map={NC_TYPE_LABELS} />
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="ncOrigine">Origine</Label>
+                      <select
+                        id="ncOrigine"
+                        name="ncOrigine"
+                        className={SELECT_CLASS}
+                        defaultValue="autre"
+                      >
+                        <Options map={NC_ORIGINE_LABELS} />
+                      </select>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    La non-conformité démarre au statut « Action définie », liée à cette action.
+                    Vous pourrez la compléter (analyse des causes, clôture) depuis le registre des
+                    NC.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           <Button type="submit" disabled={pending} className="mt-1">
             {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer l'action"}

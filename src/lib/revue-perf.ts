@@ -117,7 +117,7 @@ export async function computeRevuePerformance(
       .is("deleted_at", null),
     supabase
       .from("indicateurs")
-      .select("id, cible, sens")
+      .select("id, cible, cible_texte, sens")
       .eq("tenant_id", tenantId)
       .is("deleted_at", null),
     supabase
@@ -213,7 +213,7 @@ export async function computeRevuePerformance(
   const indicateurs = indicateursRes.data ?? [];
   const indicateursHorsCible = indicateurs.filter((i) => {
     const v = lastVal.get(i.id);
-    return v !== undefined && horsCible(v, i.cible, i.sens);
+    return v !== undefined && horsCible(v, i.cible, i.sens, i.cible_texte);
   }).length;
 
   // Objectifs qualité (taux d'atteinte, piloté par les indicateurs liés)

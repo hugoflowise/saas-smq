@@ -20,6 +20,7 @@ export type IndicateurSuivi = {
   nom: string;
   unite: string | null;
   cible: number | null;
+  cibleTexte?: string | null;
   sens: string;
   processusNom: string | null;
   objectifs: string[];
@@ -93,11 +94,14 @@ export function IndicateursExplorer({
                       {ind.objectifs.length ? ind.objectifs.join(", ") : "-"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right text-sm">
-                      {ind.cible !== null ? cibleAffichee(ind.cible, ind.sens, ind.unite) : "-"}
+                      {ind.cible !== null || ind.cibleTexte?.trim()
+                        ? cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)
+                        : "-"}
                     </TableCell>
                     {periodes.map((p) => {
                       const v = ind.valeursParPeriode[p.cle];
-                      const alerte = v !== undefined && horsCible(v, ind.cible, ind.sens);
+                      const alerte =
+                        v !== undefined && horsCible(v, ind.cible, ind.sens, ind.cibleTexte);
                       return (
                         <TableCell
                           key={p.cle}
@@ -126,9 +130,9 @@ export function IndicateursExplorer({
                     >
                       {ind.nom}
                     </Link>
-                    {ind.cible !== null ? (
+                    {ind.cible !== null || ind.cibleTexte?.trim() ? (
                       <span className="text-muted-foreground text-xs">
-                        Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}
+                        Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)}
                       </span>
                     ) : null}
                   </div>
@@ -140,7 +144,8 @@ export function IndicateursExplorer({
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {indicateurs.map((ind) => {
-            const alerte = ind.last && horsCible(ind.last.valeur, ind.cible, ind.sens);
+            const alerte =
+              ind.last && horsCible(ind.last.valeur, ind.cible, ind.sens, ind.cibleTexte);
             return (
               <Link key={ind.id} href={`/indicateurs/${ind.id}`}>
                 <Card className="h-full transition-colors hover:border-primary/40">
@@ -157,8 +162,10 @@ export function IndicateursExplorer({
                       ) : null}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                      {ind.cible !== null ? (
-                        <span>Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite)}</span>
+                      {ind.cible !== null || ind.cibleTexte?.trim() ? (
+                        <span>
+                          Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)}
+                        </span>
                       ) : null}
                       {alerte ? (
                         <span className="rounded-full bg-status-nc-mineure/15 px-2 py-0.5 font-medium text-status-nc-mineure">

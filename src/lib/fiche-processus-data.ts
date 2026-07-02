@@ -87,7 +87,7 @@ export async function loadFicheProcessusData(
         .order("ordre"),
       supabase
         .from("indicateurs")
-        .select("id, nom, cible, unite, sens, formule_calcul, frequence_mesure")
+        .select("id, nom, cible, cible_texte, unite, sens, formule_calcul, frequence_mesure")
         .eq("tenant_id", tid)
         .eq("processus_id", id)
         .is("deleted_at", null)
@@ -188,7 +188,7 @@ export async function loadFicheProcessusData(
     indicateurs: (indicateursRes.data ?? []).map((ind) => ({
       id: ind.id,
       nom: ind.nom,
-      cible: cibleAffichee(ind.cible, ind.sens, ind.unite),
+      cible: cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cible_texte),
       formule: ind.formule_calcul,
       frequence: FREQUENCE_LABELS[ind.frequence_mesure] ?? ind.frequence_mesure,
     })),
