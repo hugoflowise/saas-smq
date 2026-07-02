@@ -133,6 +133,7 @@ export default async function IndicateursPage() {
     cible: ind.cible,
     cibleTexte: ind.cible_texte,
     sens: ind.sens,
+    processusId: ind.processus_id ?? null,
     processusNom: ind.processus_id ? (processusNomById.get(ind.processus_id) ?? null) : null,
     objectifs: objectifsByInd.get(ind.id) ?? [],
     last: lastByInd.get(ind.id) ?? null,
@@ -140,6 +141,18 @@ export default async function IndicateursPage() {
     serie: serieByInd.get(ind.id) ?? [],
     lieAObjectif: lieAObjectif.has(ind.id),
   }));
+
+  // #80 : sections par processus (SMQ, Recrutement…), dans l'ordre d'affichage,
+  // indicateurs sans processus regroupés en fin de liste.
+  const groupes: { id: string; nom: string; indicateurs: IndicateurSuivi[] }[] = [];
+  for (const p of processusOptions) {
+    const inds = suivi.filter((s) => s.processusId === p.id);
+    if (inds.length) groupes.push({ id: p.id, nom: p.nom, indicateurs: inds });
+  }
+  const sansProcessus = suivi.filter((s) => !s.processusId);
+  if (sansProcessus.length) {
+    groupes.push({ id: "none", nom: "Sans processus", indicateurs: sansProcessus });
+  }
 
   const sansObjectif = items.filter((i) => !lieAObjectif.has(i.id)).length;
 
@@ -214,7 +227,7 @@ export default async function IndicateursPage() {
           description="Créez un indicateur puis saisissez ses valeurs au fil du temps."
         />
       ) : (
-        <IndicateursExplorer indicateurs={suivi} periodes={periodes} />
+        <IndicateursExplorer groupes={groupes} periodes={periodes} />
       )}
     </div>
   );
