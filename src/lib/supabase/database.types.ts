@@ -239,6 +239,8 @@ export type Database = {
           cause_fondamentale: string | null
           commentaires: string | null
           constat: string | null
+          contexte_item_id: string | null
+          contexte_item_label: string | null
           cotation: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at: string
           created_by: string | null
@@ -275,6 +277,8 @@ export type Database = {
           cause_fondamentale?: string | null
           commentaires?: string | null
           constat?: string | null
+          contexte_item_id?: string | null
+          contexte_item_label?: string | null
           cotation?: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at?: string
           created_by?: string | null
@@ -311,6 +315,8 @@ export type Database = {
           cause_fondamentale?: string | null
           commentaires?: string | null
           constat?: string | null
+          contexte_item_id?: string | null
+          contexte_item_label?: string | null
           cotation?: Database["public"]["Enums"]["cotation_conformite"] | null
           created_at?: string
           created_by?: string | null

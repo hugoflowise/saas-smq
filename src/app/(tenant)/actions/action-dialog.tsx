@@ -70,6 +70,9 @@ type Props = {
   presetDescriptionCourte?: string;
   presetConstat?: string;
   presetOrigine?: string;
+  /** Lien traçable vers le point SWOT/PESTEL d'origine. */
+  presetContexteItemId?: string;
+  presetContexteItemLabel?: string;
   action?: ActionRow;
   /**
    * Déclencheur personnalisé (ex. nom de la ligne cliquable dans la liste).
@@ -99,6 +102,8 @@ export function ActionDialog({
   presetDescriptionCourte,
   presetConstat,
   presetOrigine,
+  presetContexteItemId,
+  presetContexteItemLabel,
   action,
   trigger,
 }: Props) {
@@ -138,6 +143,8 @@ export function ActionDialog({
         const withNc = form.get("creerNc") === "on";
         return createActionAction({
           ...payload,
+          contexteItemId: presetContexteItemId || undefined,
+          contexteItemLabel: presetContexteItemLabel || undefined,
           creerNc: withNc,
           nc: withNc
             ? {

@@ -94,6 +94,9 @@ const actionNcSchema = z.object({
 
 const createSchema = z.object({
   ...baseSchema,
+  // Lien vers le point SWOT/PESTEL d'origine (action créée depuis le contexte).
+  contexteItemId: z.string().uuid().optional(),
+  contexteItemLabel: z.string().trim().optional(),
   creerNc: z.boolean().optional(),
   nc: actionNcSchema.optional(),
 });
@@ -167,6 +170,8 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
       cotation: d.cotation ?? null,
       categorie: d.categorie || null,
       date_effective: d.dateEffective || null,
+      contexte_item_id: d.contexteItemId ?? null,
+      contexte_item_label: d.contexteItemLabel ?? null,
       created_by: ctx.userId,
     })
     .select("id")
