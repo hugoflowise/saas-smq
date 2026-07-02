@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ViewToggle } from "@/components/view-toggle";
+import { resolveActionSources } from "@/lib/actions-source";
 import { todayISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -75,7 +76,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, propose, valide_le",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, objectif_id, revue_id, contexte_item_id, contexte_item_label, propose, valide_le",
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null);
@@ -120,6 +121,9 @@ export default async function ActionsPage({
   const options = processusOptions ?? [];
   const objectifs = objectifOptions ?? [];
   const aValider = items.filter((a) => a.propose && !a.valide_le).length;
+
+  // Traçabilité : origine + lien effectif vers la source de chaque action.
+  const sources = await resolveActionSources(ctx.effectiveTenantId, items);
 
   return (
     <div className="w-full">
@@ -215,6 +219,25 @@ export default async function ActionsPage({
                         </>
                       ) : null}
                     </div>
+                    {/* Origine + lien effectif vers la source (traçabilité). */}
+                    {(() => {
+                      const src = sources.get(a.id);
+                      if (!src) return null;
+                      return (
+                        <div className="mt-1 text-muted-foreground text-xs">
+                          <span className="mr-1">↳ {src.origineLabel}</span>
+                          {src.href ? (
+                            <Link
+                              href={src.href}
+                              className="text-primary hover:underline"
+                              title={src.sourceLabel ?? undefined}
+                            >
+                              {src.sourceLabel}
+                            </Link>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell>
                     <CategorieCell id={a.id} value={a.categorie} />
