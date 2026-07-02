@@ -1,6 +1,7 @@
 "use client";
 
 import { ListPlus, Plus, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -100,14 +101,16 @@ function PointList({
                 onChange(items.map((x, idx) => (idx === i ? { ...x, texte: e.target.value } : x)))
               }
             />
-            {/* Lien inverse : nombre d'actions déjà rattachées à ce point. */}
+            {/* Lien inverse : nombre d'actions rattachées à ce point, cliquable
+                vers le plan d'action filtré sur ce point. */}
             {nbActions > 0 ? (
-              <span
-                className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary"
-                title={`${nbActions} action(s) liée(s)`}
+              <Link
+                href={`/actions?ci=${item.id}`}
+                className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary hover:bg-primary/20"
+                title={`Voir la ou les ${nbActions} action(s) liée(s)`}
               >
-                {nbActions}
-              </span>
+                {nbActions} action{nbActions > 1 ? "s" : ""}
+              </Link>
             ) : null}
             {/* Créer une action liée à ce point (préremplit l'intitulé + origine R&O). */}
             {!readOnly && item.texte.trim() ? (
@@ -117,7 +120,7 @@ function PointList({
                 responsableOptions={actionCtx.responsableOptions}
                 presetDescriptionCourte={item.texte.trim()}
                 presetConstat={`${axeLabel} : ${item.texte.trim()}`}
-                presetOrigine="r_o"
+                presetOrigine="contexte"
                 presetContexteItemId={item.id || undefined}
                 presetContexteItemLabel={`${axeLabel} : ${item.texte.trim()}`}
                 trigger={

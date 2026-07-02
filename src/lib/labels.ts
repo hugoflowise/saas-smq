@@ -49,6 +49,7 @@ export const ACTION_ORIGINE_LABELS = {
   accident: "Accident",
   objectif: "Objectif qualité",
   duerp: "DUERP (risque professionnel)",
+  contexte: "Analyse de contexte (SWOT/PESTEL)",
   situation_dangereuse: "Situation dangereuse",
   presqu_accident: "Presqu'accident",
   maladie_professionnelle: "Maladie professionnelle",

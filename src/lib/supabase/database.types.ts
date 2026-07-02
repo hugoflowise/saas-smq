@@ -5196,6 +5196,7 @@ export type Database = {
         | "accident"
         | "objectif"
         | "duerp"
+        | "contexte"
         | "situation_dangereuse"
         | "presqu_accident"
         | "maladie_professionnelle"
@@ -5524,6 +5525,7 @@ export const Constants = {
         "accident",
         "objectif",
         "duerp",
+        "contexte",
         "situation_dangereuse",
         "presqu_accident",
         "maladie_professionnelle",
