@@ -240,7 +240,7 @@ export function IndicateurDialog({
               id="cibleTexte"
               name="cibleTexte"
               defaultValue={indicateur?.cible_texte ?? ""}
-              placeholder="Ex. « ≥ 5 × salaire moyen mensuel + 20 000 »"
+              placeholder="Ex. « conforme au seuil contractuel »"
             />
             <p className="text-muted-foreground text-xs">
               Pour une cible qui ne se résume pas à un nombre. Si renseignée, elle prime sur la
