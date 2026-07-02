@@ -1,14 +1,22 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { ListPlus, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ActionDialog } from "@/app/(tenant)/actions/action-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveContexteAction } from "@/lib/actions/contexte";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
+
+/** Options nécessaires pour créer une action liée à un point SWOT/PESTEL. */
+type ActionCtx = {
+  processusOptions: { id: string; nom: string }[];
+  objectifOptions: { id: string; intitule: string }[];
+  responsableOptions: { id: string; nom: string }[];
+};
 
 type Swot = { forces: string[]; faiblesses: string[]; opportunites: string[]; menaces: string[] };
 type Pestel = {
@@ -57,10 +65,15 @@ function PointList({
   items,
   onChange,
   placeholder,
+  axeLabel,
+  actionCtx,
 }: {
   items: string[];
   onChange: (items: string[]) => void;
   placeholder: string;
+  /** Libellé de l'axe (ex. « Faiblesses »), repris dans le constat de l'action. */
+  axeLabel: string;
+  actionCtx: ActionCtx;
 }) {
   const readOnly = useReadOnly();
 
@@ -79,6 +92,29 @@ function PointList({
             className="h-8"
             onChange={(e) => onChange(items.map((x, idx) => (idx === i ? e.target.value : x)))}
           />
+          {/* Créer une action liée à ce point (préremplit l'intitulé + origine R&O). */}
+          {!readOnly && item.trim() ? (
+            <ActionDialog
+              processusOptions={actionCtx.processusOptions}
+              objectifOptions={actionCtx.objectifOptions}
+              responsableOptions={actionCtx.responsableOptions}
+              presetDescriptionCourte={item.trim()}
+              presetConstat={`${axeLabel} : ${item.trim()}`}
+              presetOrigine="r_o"
+              trigger={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 shrink-0 text-muted-foreground hover:text-primary"
+                  aria-label="Créer une action liée"
+                  title="Créer une action liée"
+                >
+                  <ListPlus className="size-4" />
+                </Button>
+              }
+            />
+          ) : null}
           {/* Lecture seule : pas de bouton de suppression. */}
           {!readOnly && (
             <Button
@@ -114,11 +150,13 @@ export function ContexteForm({
   initialPestel,
   initialDateRevue,
   initialProchainRevue,
+  actionCtx,
 }: {
   initialSwot: Swot;
   initialPestel: Pestel;
   initialDateRevue: string;
   initialProchainRevue: string;
+  actionCtx: ActionCtx;
 }) {
   const router = useRouter();
   const [swot, setSwot] = useState(initialSwot);
@@ -180,6 +218,8 @@ export function ContexteForm({
               <PointList
                 items={swot[f.key]}
                 placeholder={`${f.label}…`}
+                axeLabel={`SWOT · ${f.label}`}
+                actionCtx={actionCtx}
                 onChange={(items) => setSwot((s) => ({ ...s, [f.key]: items }))}
               />
             </div>
@@ -204,6 +244,8 @@ export function ContexteForm({
               <PointList
                 items={pestel[f.key]}
                 placeholder={`${f.label}…`}
+                axeLabel={`PESTEL · ${f.label}`}
+                actionCtx={actionCtx}
                 onChange={(items) => setPestel((p) => ({ ...p, [f.key]: items }))}
               />
             </div>
