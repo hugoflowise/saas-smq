@@ -20,7 +20,6 @@ import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
   ACTION_PRIORITE_LABELS,
   ACTION_TYPE_LABELS,
-  REMONTEE_ANALYSE_LABELS,
   REMONTEE_TYPE_LABELS,
   REMONTEE_TYPES_QUALITE,
   REMONTEE_TYPES_SSE,
@@ -79,8 +78,6 @@ export function ReclamationDialog({
           traitement: f.get("traitement") || undefined,
           statut: f.get("statut"),
           domaine: f.get("domaine") || undefined,
-          analyseMethode: f.get("analyseMethode") || undefined,
-          analyseCauses: f.get("analyseCauses") || undefined,
           avecArret,
           joursArret: avecArret ? f.get("joursArret") || undefined : undefined,
         };
@@ -253,36 +250,6 @@ export function ReclamationDialog({
               defaultValue={reclamation?.traitement ?? ""}
             />
           </div>
-          {afficherSse ? (
-            <div className="grid grid-cols-1 gap-3 rounded-xl border bg-muted/30 p-3 sm:grid-cols-[200px_1fr]">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="analyseMethode">Méthode d'analyse</Label>
-                <select
-                  id="analyseMethode"
-                  name="analyseMethode"
-                  className={SELECT_CLASS}
-                  defaultValue={reclamation?.analyse_methode ?? ""}
-                >
-                  <option value="">-</option>
-                  {Object.entries(REMONTEE_ANALYSE_LABELS).map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="analyseCauses">Analyse des causes</Label>
-                <Textarea
-                  id="analyseCauses"
-                  name="analyseCauses"
-                  rows={2}
-                  defaultValue={reclamation?.analyse_causes ?? ""}
-                  placeholder="Causes profondes (5 pourquoi, arbre des causes…)"
-                />
-              </div>
-            </div>
-          ) : null}
           {afficherSse ? (
             <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-3">
               <label className="flex items-center gap-2 font-medium text-sm">
