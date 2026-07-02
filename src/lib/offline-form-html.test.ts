@@ -20,7 +20,7 @@ function cfg(over: Partial<OfflineFormConfig> = {}): OfflineFormConfig {
     sections: SECTIONS,
     version: 3,
     token: "abc-123",
-    nomSociete: "Habeo",
+    nomSociete: "Société Démo",
     logoUrl: null,
     genereLe: "01/07/2026",
     syncEndpoint: "https://app.flowise.fr/api/hors-ligne/suivi_consultant",

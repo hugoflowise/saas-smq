@@ -120,6 +120,7 @@ export type Database = {
           mission: string | null
           notes: string | null
           pdp_date_signature: string | null
+          pdp_lien: string | null
           pdp_reference: string | null
           pdp_requis: boolean
           statut: Database["public"]["Enums"]["adr_statut"]
@@ -141,6 +142,7 @@ export type Database = {
           mission?: string | null
           notes?: string | null
           pdp_date_signature?: string | null
+          pdp_lien?: string | null
           pdp_reference?: string | null
           pdp_requis?: boolean
           statut?: Database["public"]["Enums"]["adr_statut"]
@@ -162,6 +164,7 @@ export type Database = {
           mission?: string | null
           notes?: string | null
           pdp_date_signature?: string | null
+          pdp_lien?: string | null
           pdp_reference?: string | null
           pdp_requis?: boolean
           statut?: Database["public"]["Enums"]["adr_statut"]

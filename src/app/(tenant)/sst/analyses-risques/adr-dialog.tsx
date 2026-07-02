@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,8 +26,8 @@ export type AdrRow = {
   date_analyse: string | null;
   date_revision: string | null;
   statut: string;
-  pdp_requis: boolean;
   pdp_reference: string | null;
+  pdp_lien: string | null;
   pdp_date_signature: string | null;
   notes: string | null;
 };
@@ -38,7 +37,6 @@ export function AdrDialog({ analyse }: { analyse?: AdrRow }) {
   const isEdit = Boolean(analyse);
   const { open, setOpen, pending, submit } = useDialogForm();
   const readOnly = useReadOnly();
-  const [pdpRequis, setPdpRequis] = useState(analyse?.pdp_requis ?? false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     submit(event, {
@@ -50,8 +48,8 @@ export function AdrDialog({ analyse }: { analyse?: AdrRow }) {
           dateAnalyse: form.get("dateAnalyse") || undefined,
           dateRevision: form.get("dateRevision") || undefined,
           statut: form.get("statut"),
-          pdpRequis,
           pdpReference: form.get("pdpReference") || undefined,
+          pdpLien: form.get("pdpLien") || undefined,
           pdpDateSignature: form.get("pdpDateSignature") || undefined,
           notes: form.get("notes") || undefined,
         };
@@ -89,7 +87,7 @@ export function AdrDialog({ analyse }: { analyse?: AdrRow }) {
               name="intitule"
               required
               defaultValue={analyse?.intitule}
-              placeholder="Intervention soudure, chantier Awake"
+              placeholder="Ex. intervention de maintenance sur site client"
             />
           </div>
 
@@ -143,37 +141,43 @@ export function AdrDialog({ analyse }: { analyse?: AdrRow }) {
           </div>
 
           <div className="flex flex-col gap-3 rounded-lg border p-3">
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="size-4"
-                checked={pdpRequis}
-                onChange={(e) => setPdpRequis(e.target.checked)}
-              />
-              <span className="font-medium">Plan de prévention requis pour cette intervention</span>
-            </label>
-            {pdpRequis ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="pdpReference">Référence du PDP</Label>
-                  <Input
-                    id="pdpReference"
-                    name="pdpReference"
-                    defaultValue={analyse?.pdp_reference ?? ""}
-                    placeholder="N° / lien du plan co-signé"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="pdpDateSignature">Date de signature</Label>
-                  <Input
-                    id="pdpDateSignature"
-                    name="pdpDateSignature"
-                    type="date"
-                    defaultValue={analyse?.pdp_date_signature ?? ""}
-                  />
-                </div>
+            <div>
+              <p className="font-medium text-sm">Plan de prévention (obligatoire)</p>
+              <p className="mt-0.5 text-muted-foreground text-xs">
+                En MASE, toute intervention doit être couverte par un plan de prévention co-signé.
+                Renseignez sa référence, son lien et sa date de signature.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="pdpReference">Référence du PDP</Label>
+                <Input
+                  id="pdpReference"
+                  name="pdpReference"
+                  defaultValue={analyse?.pdp_reference ?? ""}
+                  placeholder="N° du plan co-signé"
+                />
               </div>
-            ) : null}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="pdpDateSignature">Date de signature</Label>
+                <Input
+                  id="pdpDateSignature"
+                  name="pdpDateSignature"
+                  type="date"
+                  defaultValue={analyse?.pdp_date_signature ?? ""}
+                />
+              </div>
+              <div className="col-span-2 flex flex-col gap-2">
+                <Label htmlFor="pdpLien">Lien vers le document</Label>
+                <Input
+                  id="pdpLien"
+                  name="pdpLien"
+                  type="url"
+                  defaultValue={analyse?.pdp_lien ?? ""}
+                  placeholder="https://… (document PDP)"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">

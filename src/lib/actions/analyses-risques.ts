@@ -18,8 +18,8 @@ const headerSchema = z.object({
   dateAnalyse: z.string().optional(),
   dateRevision: z.string().optional(),
   statut: z.enum(["brouillon", "validee", "a_reviser", "archivee"]),
-  pdpRequis: z.boolean().optional(),
   pdpReference: z.string().trim().optional(),
+  pdpLien: z.string().trim().optional(),
   pdpDateSignature: z.string().optional(),
   notes: z.string().trim().optional(),
 });
@@ -32,8 +32,10 @@ function normalizeHeader(d: z.infer<typeof headerSchema>) {
     date_analyse: d.dateAnalyse || null,
     date_revision: d.dateRevision || null,
     statut: d.statut,
-    pdp_requis: d.pdpRequis ?? false,
+    // MASE : le plan de prévention est toujours requis (pas un choix).
+    pdp_requis: true,
     pdp_reference: d.pdpReference || null,
+    pdp_lien: d.pdpLien || null,
     pdp_date_signature: d.pdpDateSignature || null,
     notes: d.notes || null,
   };
