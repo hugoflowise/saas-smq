@@ -42,6 +42,7 @@ export type ActionRow = {
   priorite: string;
   statut: string;
   processus_concerne: string | null;
+  responsable_id?: string | null;
   date_prevue: string | null;
   date_effective?: string | null;
   indicateur_efficacite: string | null;
@@ -59,6 +60,8 @@ export type ActionRow = {
 
 type Props = {
   processusOptions: { id: string; nom: string }[];
+  /** Membres du client, pour désigner le responsable de l'action. */
+  responsableOptions?: { id: string; nom: string }[];
   /** Objectifs qualité du client (lien §6.2.2). */
   objectifOptions?: { id: string; intitule: string }[];
   /** Objectif présélectionné (création d'une action depuis un objectif). */
@@ -86,6 +89,7 @@ function Options({ map }: { map: Record<string, string> }) {
 
 export function ActionDialog({
   processusOptions,
+  responsableOptions = [],
   objectifOptions = [],
   presetObjectifId,
   action,
@@ -109,6 +113,7 @@ export function ActionDialog({
           statut: form.get("statut"),
           processusConcerne: form.get("processusConcerne") || undefined,
           objectifId: form.get("objectifId") || undefined,
+          responsableId: form.get("responsableId") || undefined,
           categorie: form.get("categorie") || undefined,
           datePrevue: form.get("datePrevue") || undefined,
           dateEffective: form.get("dateEffective") || undefined,
@@ -255,6 +260,22 @@ export function ActionDialog({
                 {processusOptions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="responsableId">Responsable</Label>
+              <select
+                id="responsableId"
+                name="responsableId"
+                className={SELECT_CLASS}
+                defaultValue={action?.responsable_id ?? ""}
+              >
+                <option value="">Non défini</option>
+                {responsableOptions.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nom}
                   </option>
                 ))}
               </select>
