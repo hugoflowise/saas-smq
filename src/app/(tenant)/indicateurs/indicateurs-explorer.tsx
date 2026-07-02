@@ -94,7 +94,7 @@ export function IndicateursExplorer({
                       {ind.objectifs.length ? ind.objectifs.join(", ") : "-"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right text-sm">
-                      {ind.cible !== null
+                      {ind.cible !== null || ind.cibleTexte?.trim()
                         ? cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)
                         : "-"}
                     </TableCell>
@@ -130,7 +130,7 @@ export function IndicateursExplorer({
                     >
                       {ind.nom}
                     </Link>
-                    {ind.cible !== null ? (
+                    {ind.cible !== null || ind.cibleTexte?.trim() ? (
                       <span className="text-muted-foreground text-xs">
                         Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)}
                       </span>
@@ -162,7 +162,7 @@ export function IndicateursExplorer({
                       ) : null}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                      {ind.cible !== null ? (
+                      {ind.cible !== null || ind.cibleTexte?.trim() ? (
                         <span>
                           Cible : {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cibleTexte)}
                         </span>

@@ -322,7 +322,7 @@ export default async function ProcessusDetailPage({ params }: { params: Promise<
                             ) : null}
                           </div>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                            {ind.cible !== null ? (
+                            {ind.cible !== null || ind.cible_texte?.trim() ? (
                               <span>
                                 Cible :{" "}
                                 {cibleAffichee(ind.cible, ind.sens, ind.unite, ind.cible_texte)}
