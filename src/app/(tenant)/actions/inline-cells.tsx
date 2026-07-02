@@ -7,6 +7,7 @@ import { COTATION_BADGE_CLASS } from "@/lib/badges";
 import { TIMEZONE } from "@/lib/format";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import {
+  ACTION_CATEGORIE_LABELS,
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
   COTATION_LABELS,
@@ -162,6 +163,52 @@ export function CotationCell({ id, value }: { id: string; value: string | null }
       {Object.entries(COTATION_OPTIONS).map(([v, label]) => (
         <option key={v} value={v}>
           {label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/** Sélecteur de catégorie (nature du constat) éditable directement dans le tableau. */
+export function CategorieCell({ id, value }: { id: string; value: string | null }) {
+  const [val, setVal] = useState(value ?? "");
+  const [pending, startTransition] = useTransition();
+  const readOnly = useReadOnly();
+
+  function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value;
+    setVal(next);
+    startTransition(async () => {
+      const r = await quickUpdateActionAction({ id, categorie: next });
+      if (!r.ok) {
+        toast.error(r.error);
+        setVal(value ?? "");
+      }
+    });
+  }
+
+  const label = val
+    ? (ACTION_CATEGORIE_LABELS[val as keyof typeof ACTION_CATEGORIE_LABELS] ?? val)
+    : "-";
+
+  if (readOnly) {
+    return (
+      <span className={`${STATIC} ${val ? "font-medium" : "text-muted-foreground"}`}>{label}</span>
+    );
+  }
+
+  return (
+    <select
+      value={val}
+      onChange={onChange}
+      disabled={pending}
+      className={`${CONTROL} ${val ? "font-medium" : "text-muted-foreground"}`}
+      aria-label="Catégorie"
+    >
+      <option value="">-</option>
+      {Object.entries(ACTION_CATEGORIE_LABELS).map(([v, l]) => (
+        <option key={v} value={v}>
+          {l}
         </option>
       ))}
     </select>

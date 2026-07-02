@@ -30,10 +30,25 @@ const baseSchema = {
     "accident",
     "objectif",
   ]),
-  type: z.enum(["preventive", "corrective"]),
+  type: z.enum(["preventive", "corrective", "curative", "amelioration"]),
+  // Catégorie : nature du constat (liste métier), distincte du type d'action.
+  categorie: z
+    .enum([
+      "nc_mineure",
+      "nc_majeure",
+      "amelioration",
+      "piste_progres",
+      "opportunite",
+      "point_sensible",
+      "observation",
+    ])
+    .optional()
+    .or(z.literal("")),
   priorite: z.enum(["p1", "p2", "p3"]),
   statut: z.enum(["a_faire", "en_cours", "termine", "bloquee", "abandonnee"]),
   processusConcerne: z.string().uuid().optional(),
+  // Date de fin réalisée (saisie explicite ; à défaut, auto au passage « terminé »).
+  dateEffective: z.string().optional(),
   // §6.2.2 : objectif qualité auquel cette action contribue (lien direct).
   objectifId: z.string().uuid().optional(),
   revueId: z.string().uuid().optional(),
@@ -146,6 +161,8 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
       cause_fondamentale: d.causeFondamentale ?? null,
       recommandation: d.recommandation ?? null,
       cotation: d.cotation ?? null,
+      categorie: d.categorie || null,
+      date_effective: d.dateEffective || null,
       created_by: ctx.userId,
     })
     .select("id")
@@ -249,6 +266,18 @@ const quickUpdateSchema = z.object({
       "non_applicable",
     ])
     .optional(),
+  categorie: z
+    .enum([
+      "nc_mineure",
+      "nc_majeure",
+      "amelioration",
+      "piste_progres",
+      "opportunite",
+      "point_sensible",
+      "observation",
+    ])
+    .optional()
+    .or(z.literal("")),
 });
 
 /** Mise à jour rapide d'un seul champ depuis le tableau (édition inline). */
@@ -269,6 +298,7 @@ export async function quickUpdateActionAction(input: unknown): Promise<ActionRes
   if (d.priorite !== undefined) patch.priorite = d.priorite;
   if (d.datePrevue !== undefined) patch.date_prevue = d.datePrevue || null;
   if (d.cotation !== undefined) patch.cotation = d.cotation;
+  if (d.categorie !== undefined) patch.categorie = d.categorie || null;
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -308,7 +338,8 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       processus_concerne: d.processusConcerne ?? null,
       objectif_id: d.objectifId ?? null,
       date_prevue: d.datePrevue || null,
-      date_effective: d.statut === "termine" ? todayISO() : null,
+      // Date de fin réalisée : valeur saisie prioritaire, sinon auto au « terminé ».
+      date_effective: d.dateEffective || (d.statut === "termine" ? todayISO() : null),
       indicateur_efficacite: d.indicateurEfficacite ?? null,
       resultat_efficacite: d.resultatEfficacite ?? null,
       date_verification_efficacite: d.dateVerificationEfficacite || null,
@@ -318,6 +349,7 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
       cause_fondamentale: d.causeFondamentale ?? null,
       recommandation: d.recommandation ?? null,
       cotation: d.cotation ?? null,
+      categorie: d.categorie || null,
       updated_by: ctx.userId,
     })
     .eq("id", d.id)

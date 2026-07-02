@@ -18,7 +18,7 @@ import { getTenantContext } from "@/lib/tenant-context";
 import { ROW_NAME_BUTTON } from "@/lib/ui-classes";
 import { ActionDialog } from "./action-dialog";
 import { FilterBar } from "./filter-bar";
-import { CotationCell, EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
+import { CategorieCell, EcheanceCell, PrioriteCell, StatutCell } from "./inline-cells";
 import { ActionsKanban } from "./kanban";
 
 export default async function ActionsPage({
@@ -71,7 +71,7 @@ export default async function ActionsPage({
   let query = supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, propose, valide_le",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, propose, valide_le",
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null);
@@ -89,7 +89,7 @@ export default async function ActionsPage({
       .in("statut", ["a_faire", "en_cours", "bloquee"] as ("a_faire" | "en_cours" | "bloquee")[])
       .lt("date_prevue", today);
   } else if (filtre === "nc_majeure") {
-    query = query.eq("cotation", "nc_majeure");
+    query = query.eq("categorie", "nc_majeure");
   } else if (filtre === "p1") {
     query = query.eq("priorite", "p1");
   } else if (filtre === "solde") {
@@ -167,7 +167,7 @@ export default async function ActionsPage({
               <TableRow>
                 <TableHead>Réf.</TableHead>
                 <TableHead className="min-w-[220px]">Intitulé</TableHead>
-                <TableHead>Cotation</TableHead>
+                <TableHead>Catégorie</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Échéance</TableHead>
@@ -204,7 +204,7 @@ export default async function ActionsPage({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <CotationCell id={a.id} value={a.cotation} />
+                    <CategorieCell id={a.id} value={a.categorie} />
                   </TableCell>
                   <TableCell>
                     <PrioriteCell id={a.id} value={a.priorite} />

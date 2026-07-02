@@ -2,6 +2,7 @@
 
 import { Pencil } from "lucide-react";
 import { useState } from "react";
+import { SupprimerButton } from "@/components/supprimer-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,15 +14,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createActionAction, updateActionAction } from "@/lib/actions/plan-actions";
+import {
+  createActionAction,
+  deleteActionAction,
+  updateActionAction,
+} from "@/lib/actions/plan-actions";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
 import {
+  ACTION_CATEGORIE_LABELS,
   ACTION_ORIGINE_LABELS,
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
   ACTION_TYPE_LABELS,
-  COTATION_OPTIONS,
   NC_GRAVITE_LABELS,
   NC_ORIGINE_LABELS,
   NC_TYPE_LABELS,
@@ -38,6 +43,7 @@ export type ActionRow = {
   statut: string;
   processus_concerne: string | null;
   date_prevue: string | null;
+  date_effective?: string | null;
   indicateur_efficacite: string | null;
   resultat_efficacite: string | null;
   date_verification_efficacite: string | null;
@@ -47,6 +53,7 @@ export type ActionRow = {
   cause_fondamentale?: string | null;
   recommandation?: string | null;
   cotation?: string | null;
+  categorie?: string | null;
   objectif_id?: string | null;
 };
 
@@ -102,7 +109,9 @@ export function ActionDialog({
           statut: form.get("statut"),
           processusConcerne: form.get("processusConcerne") || undefined,
           objectifId: form.get("objectifId") || undefined,
+          categorie: form.get("categorie") || undefined,
           datePrevue: form.get("datePrevue") || undefined,
+          dateEffective: form.get("dateEffective") || undefined,
           indicateurEfficacite: form.get("indicateurEfficacite") || undefined,
           resultatEfficacite: form.get("resultatEfficacite") || undefined,
           dateVerificationEfficacite: form.get("dateVerificationEfficacite") || undefined,
@@ -195,7 +204,7 @@ export function ActionDialog({
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="type">Type d'action</Label>
               <select
                 id="type"
                 name="type"
@@ -217,17 +226,22 @@ export function ActionDialog({
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="cotation">Cotation</Label>
+              <Label htmlFor="categorie">Catégorie</Label>
               <select
-                id="cotation"
-                name="cotation"
+                id="categorie"
+                name="categorie"
                 className={SELECT_CLASS}
-                defaultValue={action?.cotation ?? "non_evalue"}
+                defaultValue={action?.categorie ?? ""}
               >
-                {/* État initial « non coté » : affichable mais discret, pas un vrai choix. */}
-                <option value="non_evalue">Non évalué</option>
-                <Options map={COTATION_OPTIONS} />
+                <option value="">-</option>
+                <Options map={ACTION_CATEGORIE_LABELS} />
               </select>
+              {/* Cotation d'audit conservée (renseignée par le mode audit) sans champ visible. */}
+              <input
+                type="hidden"
+                name="cotation"
+                defaultValue={action?.cotation ?? "non_evalue"}
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="processusConcerne">Processus</Label>
@@ -262,12 +276,21 @@ export function ActionDialog({
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="datePrevue">Échéance</Label>
+              <Label htmlFor="datePrevue">Date de fin prévue</Label>
               <Input
                 id="datePrevue"
                 name="datePrevue"
                 type="date"
                 defaultValue={action?.date_prevue ?? ""}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dateEffective">Date de fin réalisée</Label>
+              <Input
+                id="dateEffective"
+                name="dateEffective"
+                type="date"
+                defaultValue={action?.date_effective ?? ""}
               />
             </div>
           </div>
@@ -445,9 +468,20 @@ export function ActionDialog({
             </div>
           ) : null}
 
-          <Button type="submit" disabled={pending} className="mt-1">
-            {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer l'action"}
-          </Button>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <Button type="submit" disabled={pending}>
+              {pending ? "Enregistrement…" : isEdit ? "Enregistrer" : "Créer l'action"}
+            </Button>
+            {/* Suppression disponible directement depuis le dialogue d'édition. */}
+            {isEdit && action ? (
+              <SupprimerButton
+                action={deleteActionAction}
+                id={action.id}
+                libelle="cette action"
+                onSuccess={() => setOpen(false)}
+              />
+            ) : null}
+          </div>
         </form>
       </DialogContent>
     </Dialog>
