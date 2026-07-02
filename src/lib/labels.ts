@@ -224,6 +224,15 @@ export const SECTEUR_LABELS = {
 // Secteurs proposés à la saisie (création / modification d'un client).
 export const SECTEUR_OPTIONS = ["SI", "ESN", "autre"] as const;
 
+// Formule (offre commerciale) du client. Orthogonale aux normes actives.
+export const FORMULE_LABELS = {
+  Essentiel: "Essentiel - licence seule",
+  Tandem: "Tandem - accompagnement",
+  Premium: "Premium - externalisé",
+} as const;
+
+export const FORMULE_OPTIONS = ["Essentiel", "Tandem", "Premium"] as const;
+
 // Retours utilisateurs (bugs / remarques / demandes d'évolution).
 export const RETOUR_TYPE_LABELS = {
   bug: "Bug / anomalie",
