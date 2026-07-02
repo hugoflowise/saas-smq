@@ -30,6 +30,7 @@ const baseSchema = {
     "incident",
     "accident",
     "objectif",
+    "contexte",
   ]),
   type: z.enum(["preventive", "corrective", "curative", "amelioration"]),
   // Catégorie : nature du constat (liste métier), distincte du type d'action.
