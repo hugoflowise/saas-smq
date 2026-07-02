@@ -31,10 +31,11 @@ export default async function ActionsPage({
     tri?: string;
     vue?: string;
     filtre?: string;
+    ci?: string;
   }>;
 }) {
   const ctx = await getTenantContext();
-  const { statut, priorite, tri, vue, filtre } = await searchParams;
+  const { statut, priorite, tri, vue, filtre, ci } = await searchParams;
   const today = todayISO();
 
   if (!ctx.effectiveTenantId) {
@@ -78,6 +79,9 @@ export default async function ActionsPage({
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null);
+
+  // Filtre sur un point SWOT/PESTEL précis (depuis la pastille du contexte).
+  if (ci) query = query.eq("contexte_item_id", ci);
 
   if (statut)
     query = query.eq(

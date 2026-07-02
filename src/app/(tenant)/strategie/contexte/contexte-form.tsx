@@ -1,23 +1,40 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { ListPlus, Plus, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ActionDialog } from "@/app/(tenant)/actions/action-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveContexteAction } from "@/lib/actions/contexte";
+import type { ContexteItem } from "@/lib/contexte-items";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 
-type Swot = { forces: string[]; faiblesses: string[]; opportunites: string[]; menaces: string[] };
+/** Options nécessaires pour créer une action liée à un point SWOT/PESTEL. */
+type ActionCtx = {
+  processusOptions: { id: string; nom: string }[];
+  objectifOptions: { id: string; intitule: string }[];
+  responsableOptions: { id: string; nom: string }[];
+  /** Nombre d'actions liées par identifiant de point (lien inverse). */
+  actionCounts: Record<string, number>;
+};
+
+type Swot = {
+  forces: ContexteItem[];
+  faiblesses: ContexteItem[];
+  opportunites: ContexteItem[];
+  menaces: ContexteItem[];
+};
 type Pestel = {
-  politique: string[];
-  economique: string[];
-  sociologique: string[];
-  technologique: string[];
-  ecologique: string[];
-  legal: string[];
+  politique: ContexteItem[];
+  economique: ContexteItem[];
+  sociologique: ContexteItem[];
+  technologique: ContexteItem[];
+  ecologique: ContexteItem[];
+  legal: ContexteItem[];
 };
 
 // SWOT : 2×2 coloré. dot = pastille de couleur, accent = teinte de la bordure.
@@ -57,48 +74,90 @@ function PointList({
   items,
   onChange,
   placeholder,
+  axeLabel,
+  actionCtx,
 }: {
-  items: string[];
-  onChange: (items: string[]) => void;
+  items: ContexteItem[];
+  onChange: (items: ContexteItem[]) => void;
   placeholder: string;
+  /** Libellé de l'axe (ex. « Faiblesses »), repris dans le constat de l'action. */
+  axeLabel: string;
+  actionCtx: ActionCtx;
 }) {
   const readOnly = useReadOnly();
 
   return (
     <div className="flex flex-col gap-1.5">
-      {items.map((item, i) => (
-        <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: points ordonnés sans id stable
-          key={i}
-          className="flex items-center gap-1"
-        >
-          <span className="text-muted-foreground text-xs">•</span>
-          <Input
-            value={item}
-            placeholder={placeholder}
-            className="h-8"
-            onChange={(e) => onChange(items.map((x, idx) => (idx === i ? e.target.value : x)))}
-          />
-          {/* Lecture seule : pas de bouton de suppression. */}
-          {!readOnly && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8 shrink-0"
-              aria-label="Retirer le point"
-              onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-            >
-              <X className="size-4" />
-            </Button>
-          )}
-        </div>
-      ))}
+      {items.map((item, i) => {
+        const nbActions = item.id ? (actionCtx.actionCounts[item.id] ?? 0) : 0;
+        return (
+          <div key={item.id || `new-${i}`} className="flex items-center gap-1">
+            <span className="text-muted-foreground text-xs">•</span>
+            <Input
+              value={item.texte}
+              placeholder={placeholder}
+              className="h-8"
+              onChange={(e) =>
+                onChange(items.map((x, idx) => (idx === i ? { ...x, texte: e.target.value } : x)))
+              }
+            />
+            {/* Lien inverse : nombre d'actions rattachées à ce point, cliquable
+                vers le plan d'action filtré sur ce point. */}
+            {nbActions > 0 ? (
+              <Link
+                href={`/actions?ci=${item.id}`}
+                className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 font-medium text-[10px] text-primary hover:bg-primary/20"
+                title={`Voir la ou les ${nbActions} action(s) liée(s)`}
+              >
+                {nbActions} action{nbActions > 1 ? "s" : ""}
+              </Link>
+            ) : null}
+            {/* Créer une action liée à ce point (préremplit l'intitulé + origine R&O). */}
+            {!readOnly && item.texte.trim() ? (
+              <ActionDialog
+                processusOptions={actionCtx.processusOptions}
+                objectifOptions={actionCtx.objectifOptions}
+                responsableOptions={actionCtx.responsableOptions}
+                presetDescriptionCourte={item.texte.trim()}
+                presetConstat={`${axeLabel} : ${item.texte.trim()}`}
+                presetOrigine="contexte"
+                presetContexteItemId={item.id || undefined}
+                presetContexteItemLabel={`${axeLabel} : ${item.texte.trim()}`}
+                trigger={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 shrink-0 text-muted-foreground hover:text-primary"
+                    aria-label="Créer une action liée"
+                    title="Créer une action liée"
+                  >
+                    <ListPlus className="size-4" />
+                  </Button>
+                }
+              />
+            ) : null}
+            {/* Lecture seule : pas de bouton de suppression. */}
+            {!readOnly && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 shrink-0"
+                aria-label="Retirer le point"
+                onClick={() => onChange(items.filter((_, idx) => idx !== i))}
+              >
+                <X className="size-4" />
+              </Button>
+            )}
+          </div>
+        );
+      })}
       {/* Lecture seule : pas de bouton d'ajout. */}
       {!readOnly && (
         <button
           type="button"
-          onClick={() => onChange([...items, ""])}
+          onClick={() => onChange([...items, { id: crypto.randomUUID(), texte: "" }])}
           className="inline-flex items-center gap-1 self-start text-primary text-xs hover:underline"
         >
           <Plus className="size-3.5" />
@@ -114,11 +173,13 @@ export function ContexteForm({
   initialPestel,
   initialDateRevue,
   initialProchainRevue,
+  actionCtx,
 }: {
   initialSwot: Swot;
   initialPestel: Pestel;
   initialDateRevue: string;
   initialProchainRevue: string;
+  actionCtx: ActionCtx;
 }) {
   const router = useRouter();
   const [swot, setSwot] = useState(initialSwot);
@@ -128,8 +189,11 @@ export function ContexteForm({
   const [pending, setPending] = useState(false);
   const readOnly = useReadOnly();
 
-  // Nettoie les points vides avant envoi.
-  const clean = (items: string[]) => items.map((s) => s.trim()).filter(Boolean);
+  // Nettoie les points vides avant envoi ; garantit un id stable à chaque point.
+  const clean = (items: ContexteItem[]): ContexteItem[] =>
+    items
+      .map((it) => ({ id: it.id || crypto.randomUUID(), texte: it.texte.trim() }))
+      .filter((it) => it.texte.length > 0);
 
   async function save() {
     setPending(true);
@@ -180,6 +244,8 @@ export function ContexteForm({
               <PointList
                 items={swot[f.key]}
                 placeholder={`${f.label}…`}
+                axeLabel={`SWOT · ${f.label}`}
+                actionCtx={actionCtx}
                 onChange={(items) => setSwot((s) => ({ ...s, [f.key]: items }))}
               />
             </div>
@@ -204,6 +270,8 @@ export function ContexteForm({
               <PointList
                 items={pestel[f.key]}
                 placeholder={`${f.label}…`}
+                axeLabel={`PESTEL · ${f.label}`}
+                actionCtx={actionCtx}
                 onChange={(items) => setPestel((p) => ({ ...p, [f.key]: items }))}
               />
             </div>

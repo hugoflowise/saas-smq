@@ -1,27 +1,15 @@
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { normalizeItems } from "@/lib/contexte-items";
 import { formatDate, nomPersonne } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
+import { listTenantMembers } from "@/lib/tenant-users";
 import { ContexteForm } from "./contexte-form";
 import { ContexteReference } from "./contexte-reference";
 import type { ContexteSnapshot } from "./contexte-snapshot";
 import { ContexteVersionHistory, type ContexteVersionItem } from "./contexte-version-history";
 import { PublierContexteButton } from "./publier-contexte-button";
-
-/**
- * Convertit une case SWOT/PESTEL en liste de points.
- * Rétrocompatible avec l'ancien format texte libre (découpé par ligne).
- */
-function toList(v: unknown): string[] {
-  if (Array.isArray(v)) return v.filter((x): x is string => typeof x === "string");
-  if (typeof v === "string")
-    return v
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  return [];
-}
 
 export default async function ContextePage() {
   const ctx = await getTenantContext();
@@ -74,6 +62,36 @@ export default async function ContextePage() {
   }));
   const current = versions[0] ?? null;
 
+  // Options pour créer une action liée à un point SWOT/PESTEL.
+  const [{ data: processusOptions }, { data: objectifOptions }, membres] = await Promise.all([
+    supabase
+      .from("processus")
+      .select("id, nom")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("ordre_affichage", { ascending: true }),
+    supabase
+      .from("objectifs_qualite")
+      .select("id, intitule")
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true }),
+    listTenantMembers(ctx.effectiveTenantId),
+  ]);
+
+  // Lien inverse : nombre d'actions rattachées à chaque point (par contexte_item_id).
+  const { data: liees } = await supabase
+    .from("actions")
+    .select("contexte_item_id")
+    .eq("tenant_id", ctx.effectiveTenantId)
+    .is("deleted_at", null)
+    .not("contexte_item_id", "is", null);
+  const actionCounts: Record<string, number> = {};
+  for (const a of liees ?? []) {
+    if (a.contexte_item_id)
+      actionCounts[a.contexte_item_id] = (actionCounts[a.contexte_item_id] ?? 0) + 1;
+  }
+
   const swotRaw = (contexte?.analyse_swot ?? {}) as Record<string, unknown>;
   const pestelRaw = (contexte?.analyse_pestel ?? {}) as Record<string, unknown>;
 
@@ -110,21 +128,27 @@ export default async function ContextePage() {
 
       <ContexteForm
         initialSwot={{
-          forces: toList(swotRaw.forces),
-          faiblesses: toList(swotRaw.faiblesses),
-          opportunites: toList(swotRaw.opportunites),
-          menaces: toList(swotRaw.menaces),
+          forces: normalizeItems(swotRaw.forces),
+          faiblesses: normalizeItems(swotRaw.faiblesses),
+          opportunites: normalizeItems(swotRaw.opportunites),
+          menaces: normalizeItems(swotRaw.menaces),
         }}
         initialPestel={{
-          politique: toList(pestelRaw.politique),
-          economique: toList(pestelRaw.economique),
-          sociologique: toList(pestelRaw.sociologique),
-          technologique: toList(pestelRaw.technologique),
-          ecologique: toList(pestelRaw.ecologique),
-          legal: toList(pestelRaw.legal),
+          politique: normalizeItems(pestelRaw.politique),
+          economique: normalizeItems(pestelRaw.economique),
+          sociologique: normalizeItems(pestelRaw.sociologique),
+          technologique: normalizeItems(pestelRaw.technologique),
+          ecologique: normalizeItems(pestelRaw.ecologique),
+          legal: normalizeItems(pestelRaw.legal),
         }}
         initialDateRevue={contexte?.date_revue ?? ""}
         initialProchainRevue={contexte?.prochain_revue ?? ""}
+        actionCtx={{
+          processusOptions: processusOptions ?? [],
+          objectifOptions: objectifOptions ?? [],
+          responsableOptions: membres,
+          actionCounts,
+        }}
       />
 
       {/* Historique des versions figées (consultables en lecture seule). */}

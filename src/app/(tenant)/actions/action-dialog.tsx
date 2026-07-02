@@ -66,6 +66,13 @@ type Props = {
   objectifOptions?: { id: string; intitule: string }[];
   /** Objectif présélectionné (création d'une action depuis un objectif). */
   presetObjectifId?: string;
+  /** Préremplissage en création (ex. action ouverte depuis un point SWOT/PESTEL). */
+  presetDescriptionCourte?: string;
+  presetConstat?: string;
+  presetOrigine?: string;
+  /** Lien traçable vers le point SWOT/PESTEL d'origine. */
+  presetContexteItemId?: string;
+  presetContexteItemLabel?: string;
   action?: ActionRow;
   /**
    * Déclencheur personnalisé (ex. nom de la ligne cliquable dans la liste).
@@ -92,6 +99,11 @@ export function ActionDialog({
   responsableOptions = [],
   objectifOptions = [],
   presetObjectifId,
+  presetDescriptionCourte,
+  presetConstat,
+  presetOrigine,
+  presetContexteItemId,
+  presetContexteItemLabel,
   action,
   trigger,
 }: Props) {
@@ -131,6 +143,8 @@ export function ActionDialog({
         const withNc = form.get("creerNc") === "on";
         return createActionAction({
           ...payload,
+          contexteItemId: presetContexteItemId || undefined,
+          contexteItemLabel: presetContexteItemLabel || undefined,
           creerNc: withNc,
           nc: withNc
             ? {
@@ -157,15 +171,13 @@ export function ActionDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          isEdit ? (
-            (trigger ?? (
-              <Button variant="ghost" size="icon" aria-label="Modifier">
-                <Pencil className="size-4" />
-              </Button>
-            ))
-          ) : (
-            <Button>Nouvelle action</Button>
-          )
+          isEdit
+            ? (trigger ?? (
+                <Button variant="ghost" size="icon" aria-label="Modifier">
+                  <Pencil className="size-4" />
+                </Button>
+              ))
+            : (trigger ?? <Button>Nouvelle action</Button>)
         }
       />
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
@@ -180,7 +192,7 @@ export function ActionDialog({
               id="descriptionCourte"
               name="descriptionCourte"
               required
-              defaultValue={action?.description_courte ?? ""}
+              defaultValue={action?.description_courte ?? presetDescriptionCourte ?? ""}
               placeholder="Mettre à jour la revue d'offre"
             />
           </div>
@@ -225,7 +237,7 @@ export function ActionDialog({
                 id="origine"
                 name="origine"
                 className={SELECT_CLASS}
-                defaultValue={action?.origine ?? "manuelle"}
+                defaultValue={action?.origine ?? presetOrigine ?? "manuelle"}
               >
                 <Options map={ACTION_ORIGINE_LABELS} />
               </select>
@@ -322,7 +334,7 @@ export function ActionDialog({
               id="constat"
               name="constat"
               rows={2}
-              defaultValue={action?.constat ?? ""}
+              defaultValue={action?.constat ?? presetConstat ?? ""}
               placeholder="Ce qui a été observé (écart, situation)…"
             />
           </div>

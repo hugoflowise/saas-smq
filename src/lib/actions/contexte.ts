@@ -4,14 +4,15 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ContexteSnapshot } from "@/app/(tenant)/strategie/contexte/contexte-snapshot";
 import type { ActionResult } from "@/lib/actions/types";
+import { normalizeItems } from "@/lib/contexte-items";
 import { canWrite } from "@/lib/permissions";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
 import { versionIndex, versionLettre } from "@/lib/versions";
 
-// Chaque case SWOT/PESTEL est une liste de points (chaînes).
-const liste = z.array(z.string());
+// Chaque case SWOT/PESTEL est une liste de points { id, texte } (id stable).
+const liste = z.array(z.object({ id: z.string(), texte: z.string() }));
 const contexteSchema = z.object({
   swot: z.object({
     forces: liste,
@@ -99,10 +100,10 @@ export async function publishContexteVersionAction(): Promise<ActionResult> {
     return { ok: false, error: "Renseignez d'abord l'analyse de contexte." };
   }
 
-  const swotRaw = (contexte.analyse_swot ?? {}) as Record<string, string[]>;
-  const pestelRaw = (contexte.analyse_pestel ?? {}) as Record<string, string[]>;
-  const liste = (v: unknown): string[] =>
-    Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+  const swotRaw = (contexte.analyse_swot ?? {}) as Record<string, unknown>;
+  const pestelRaw = (contexte.analyse_pestel ?? {}) as Record<string, unknown>;
+  // Snapshot de version = texte figé (on aplatit les points { id, texte } en texte).
+  const liste = (v: unknown): string[] => normalizeItems(v).map((it) => it.texte);
   const snapshot: ContexteSnapshot = {
     reference: contexte.reference ?? null,
     swot: {
