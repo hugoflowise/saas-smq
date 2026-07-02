@@ -43,7 +43,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, contexte_item_label",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -185,6 +185,14 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Origine" value={ACTION_ORIGINE_LABELS[action.origine]} />
+          {action.contexte_item_label ? (
+            <div>
+              <p className="text-muted-foreground text-xs">Issu du contexte (SWOT/PESTEL)</p>
+              <Link href="/strategie/contexte" className="text-primary text-sm hover:underline">
+                {action.contexte_item_label}
+              </Link>
+            </div>
+          ) : null}
           <Field label="Responsable" value={responsableNom} />
           <div>
             <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
