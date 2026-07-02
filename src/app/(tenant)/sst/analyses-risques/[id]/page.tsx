@@ -1,3 +1,4 @@
+import { AlertTriangle } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { EmptyState } from "@/components/empty-state";
@@ -38,7 +39,7 @@ export default async function AnalyseRisquesDetailPage({
   const { data: analyse } = await supabase
     .from("analyses_risques")
     .select(
-      "id, intitule, mission, lieu, date_analyse, date_revision, statut, pdp_requis, pdp_reference, pdp_date_signature, notes",
+      "id, intitule, mission, lieu, date_analyse, date_revision, statut, pdp_reference, pdp_lien, pdp_date_signature, notes",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -107,23 +108,43 @@ export default async function AnalyseRisquesDetailPage({
             <CardTitle className="text-base">Plan de prévention</CardTitle>
           </CardHeader>
           <CardContent className="text-sm">
-            {analyse.pdp_requis ? (
+            {analyse.pdp_reference || analyse.pdp_lien ? (
               <div className="grid grid-cols-2 gap-4">
-                <Info label="Référence" value={analyse.pdp_reference?.trim() || "À renseigner"} />
+                <Info label="Référence" value={analyse.pdp_reference?.trim() || "-"} />
                 <Info
                   label="Signé le"
                   value={analyse.pdp_date_signature ? formatDate(analyse.pdp_date_signature) : "-"}
                 />
+                <div className="col-span-2">
+                  <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                    Document
+                  </p>
+                  {analyse.pdp_lien ? (
+                    <a
+                      href={analyse.pdp_lien}
+                      target="_blank"
+                      rel="noopener"
+                      className="mt-1 inline-block text-primary text-sm hover:underline"
+                    >
+                      Ouvrir le plan de prévention
+                    </a>
+                  ) : (
+                    <p className="mt-1">-</p>
+                  )}
+                </div>
                 <p className="col-span-2 text-muted-foreground text-xs">
                   Le plan de prévention co-signé avec l'entreprise utilisatrice est une donnée
                   d'entrée de cette analyse : il ne la remplace pas.
                 </p>
               </div>
             ) : (
-              <p className="text-muted-foreground">
-                Aucun plan de prévention requis pour cette intervention. Activez-le depuis «
-                Modifier » si l'intervention se déroule sur le site d'un client.
-              </p>
+              <div className="flex items-start gap-2 rounded-lg border border-status-nc-majeure/40 bg-status-nc-majeure/5 px-3 py-2.5">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-status-nc-majeure" />
+                <p className="text-status-nc-majeure text-sm">
+                  Plan de prévention à fournir : toute intervention MASE doit être couverte par un
+                  PDP co-signé. Renseignez sa référence ou son lien via « Modifier ».
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>

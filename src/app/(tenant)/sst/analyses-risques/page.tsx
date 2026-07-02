@@ -41,7 +41,7 @@ export default async function AnalysesRisquesPage() {
   const { data: analyses } = await supabase
     .from("analyses_risques")
     .select(
-      "id, intitule, mission, lieu, date_analyse, date_revision, statut, pdp_requis, pdp_reference",
+      "id, intitule, mission, lieu, date_analyse, date_revision, statut, pdp_reference, pdp_lien",
     )
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null)
@@ -55,13 +55,20 @@ export default async function AnalysesRisquesPage() {
   const aReviser = items.filter(
     (a) => a.statut === "a_reviser" || (a.date_revision != null && a.date_revision <= today),
   ).length;
-  const avecPdp = items.filter((a) => a.pdp_requis).length;
+  // PDP obligatoire (MASE) : « fourni » si une référence ou un lien est renseigné.
+  const pdpFourni = (a: { pdp_reference: string | null; pdp_lien: string | null }) =>
+    Boolean(a.pdp_reference || a.pdp_lien);
+  const pdpAFournir = items.filter((a) => !pdpFourni(a)).length;
 
   const tiles = [
     { label: "Analyses", value: items.length, cls: "text-foreground" },
     { label: "Validées", value: validees, cls: "text-status-conforme" },
     { label: "À réviser", value: aReviser, cls: "text-status-pa" },
-    { label: "Avec plan de prévention", value: avecPdp, cls: "text-foreground" },
+    {
+      label: "PDP à fournir",
+      value: pdpAFournir,
+      cls: pdpAFournir > 0 ? "text-status-nc-majeure" : "text-status-conforme",
+    },
   ];
 
   return (
@@ -132,14 +139,18 @@ export default async function AnalysesRisquesPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {a.pdp_requis ? (
+                      {pdpFourni(a) ? (
                         <span
                           className={`${BADGE_BASE} bg-status-conforme/15 text-status-conforme`}
                         >
-                          {a.pdp_reference ? "Signé" : "Requis"}
+                          Fourni
                         </span>
                       ) : (
-                        <span className="text-muted-foreground text-xs">-</span>
+                        <span
+                          className={`${BADGE_BASE} bg-status-nc-majeure/15 text-status-nc-majeure`}
+                        >
+                          À fournir
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
