@@ -139,6 +139,128 @@ export async function getRetourPieceUrlAction(
   return { ok: true, url: data.signedUrl };
 }
 
+/**
+ * Liste des retours ouverts par l'utilisateur courant (les siens uniquement).
+ * Sert à l'espace « Mes signalements » où il peut les rouvrir, modifier ou
+ * supprimer. La policy `retours_select` limite déjà la lecture à ses lignes.
+ */
+export type MonRetour = {
+  id: string;
+  numero: number;
+  type: "bug" | "amelioration" | "remarque";
+  titre: string;
+  description: string | null;
+  pageUrl: string | null;
+  statut: "nouveau" | "en_cours" | "traite" | "rejete";
+  noteAdmin: string | null;
+  createdAt: string;
+};
+
+export async function listMesRetoursAction(): Promise<MonRetour[]> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("retours")
+    .select("id, numero, type, titre, description, page_url, statut, note_admin, created_at")
+    .eq("created_by", ctx.userId)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    numero: r.numero,
+    type: r.type,
+    titre: r.titre,
+    description: r.description,
+    pageUrl: r.page_url,
+    statut: r.statut,
+    noteAdmin: r.note_admin,
+    createdAt: r.created_at,
+  }));
+}
+
+const editMonRetourSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["bug", "amelioration", "remarque"]),
+  titre: z.string().trim().min(3, "Décrivez votre retour en quelques mots."),
+  description: z.string().trim().optional(),
+});
+
+/**
+ * Modification par l'auteur d'un retour qu'il a ouvert. Bornée aux champs de
+ * saisie (type / objet / détail) ; le statut et la note restent gérés par
+ * l'admin. Refusée si le retour est déjà clos (traité / rejeté).
+ */
+export async function updateMonRetourAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+
+  const parsed = editMonRetourSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+
+  const supabase = await createClient();
+  const { data: existant } = await supabase
+    .from("retours")
+    .select("created_by, statut")
+    .eq("id", d.id)
+    .maybeSingle();
+  if (!existant || existant.created_by !== ctx.userId) {
+    return { ok: false, error: "Signalement introuvable." };
+  }
+  if (existant.statut === "traite" || existant.statut === "rejete") {
+    return { ok: false, error: "Ce signalement est déjà traité et ne peut plus être modifié." };
+  }
+
+  // Écriture via service_role après vérification de propriété : garantit qu'on ne
+  // touche que les champs de saisie (jamais statut / note_admin).
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("retours")
+    .update({ type: d.type, titre: d.titre, description: d.description || null })
+    .eq("id", d.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/retours");
+  return { ok: true };
+}
+
+/**
+ * Suppression par l'auteur d'un retour qu'il a ouvert (avec ses pièces jointes).
+ */
+export async function supprimerMonRetourAction(input: unknown): Promise<ActionResult> {
+  const ctx = await getTenantContext();
+  if (!ctx.userId) return { ok: false, error: "Non authentifié." };
+
+  const parsed = z.object({ id: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Identifiant invalide." };
+
+  const supabase = await createClient();
+  const { data: existant } = await supabase
+    .from("retours")
+    .select("created_by, pieces_jointes")
+    .eq("id", parsed.data.id)
+    .maybeSingle();
+  if (!existant || existant.created_by !== ctx.userId) {
+    return { ok: false, error: "Signalement introuvable." };
+  }
+
+  const admin = createAdminClient();
+  // Nettoyage des pièces jointes (bucket « retours ») avant la suppression.
+  const pieces = Array.isArray(existant.pieces_jointes)
+    ? (existant.pieces_jointes as unknown as RetourPieceJointe[])
+    : [];
+  if (pieces.length > 0) {
+    await admin.storage.from("retours").remove(pieces.map((p) => p.path));
+  }
+  const { error } = await admin.from("retours").delete().eq("id", parsed.data.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/retours");
+  return { ok: true };
+}
+
 const updateSchema = z.object({
   id: z.string().uuid(),
   statut: z.enum(["nouveau", "en_cours", "traite", "rejete"]),
