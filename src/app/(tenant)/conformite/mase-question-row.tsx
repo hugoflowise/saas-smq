@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { setMaseScoreAction } from "@/lib/actions/conformite";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { COTATION_TYPE_LABELS, type CotationType } from "@/lib/mase-score";
@@ -37,9 +36,9 @@ export function MaseQuestionRow({
   const [neutralisee, setNeutralisee] = useState(initialNeutralisee);
   const [pending, setPending] = useState(false);
 
-  // Plafond : le double du max pour une question VD (cotée jusqu'au double en
-  // renouvellement), le max sinon.
-  const plafond = cotationType === "VD" ? pointsMax * 2 : pointsMax;
+  // Auto-diagnostic : on note sur le max réel (le doublement VD est réservé à
+  // l'audit de renouvellement, non géré ici). Niveau « partiellement » = moitié.
+  const partiel = Math.round(pointsMax / 2);
 
   async function enregistrer(nextPoints: number | null, nextNeutralisee: boolean) {
     if (readOnly) {
@@ -78,8 +77,8 @@ export function MaseQuestionRow({
       <div className="flex shrink-0 items-center gap-2 pl-8 sm:pl-0">
         {neutralisee ? (
           <span className="text-muted-foreground text-xs italic">Neutralisée</span>
-        ) : cotationType === "B" ? (
-          <div className="flex gap-1">
+        ) : (
+          <div className="flex items-center gap-1">
             <Button
               type="button"
               size="sm"
@@ -89,6 +88,17 @@ export function MaseQuestionRow({
             >
               Non
             </Button>
+            {cotationType !== "B" ? (
+              <Button
+                type="button"
+                size="sm"
+                variant={points === partiel ? "default" : "outline"}
+                disabled={pending}
+                onClick={() => enregistrer(partiel, false)}
+              >
+                Partiellement
+              </Button>
+            ) : null}
             <Button
               type="button"
               size="sm"
@@ -98,20 +108,9 @@ export function MaseQuestionRow({
             >
               Oui
             </Button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1">
-            <Input
-              type="number"
-              min={0}
-              max={plafond}
-              value={points ?? ""}
-              disabled={pending}
-              onChange={(e) => setPoints(e.target.value === "" ? null : Number(e.target.value))}
-              onBlur={() => enregistrer(points, false)}
-              className="h-8 w-20 text-right"
-            />
-            <span className="text-muted-foreground text-xs">/ {plafond}</span>
+            <span className="ml-1 shrink-0 text-muted-foreground text-xs">
+              {points ?? 0}/{pointsMax}
+            </span>
           </div>
         )}
 
