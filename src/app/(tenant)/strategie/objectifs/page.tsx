@@ -18,6 +18,7 @@ import {
 import { deleteObjectifAction } from "@/lib/actions/registres";
 import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
+import { isModuleVisible } from "@/lib/modules";
 import { getNormesActives } from "@/lib/normes-actives";
 import { domaineLabel, objectifsLabel } from "@/lib/normes-libelles";
 import { chargerMesuresObjectifs, mesureVide } from "@/lib/objectifs-mesure";
@@ -41,6 +42,7 @@ export default async function ObjectifsPage() {
   const domaine = domaineLabel(normes);
   // MASE §1.3 : les objectifs doivent couvrir Sécurité / Santé / Environnement.
   const afficherDomaine = normes.includes("MASE");
+  const afficherProcessus = isModuleVisible("/processus", normes);
   if (!ctx.effectiveTenantId) {
     return (
       <div className="w-full">
@@ -182,20 +184,24 @@ export default async function ObjectifsPage() {
         title={objTitre}
         description="Objectifs SMART et leur déclinaison par fonction."
         concept="objectifs"
-        help={`Les objectifs ${domaine} doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART, déclinés par processus, faits par les pilotes et validés par la direction.`}
+        help={`Les objectifs ${domaine} doivent être mesurables, cohérents avec la politique, suivis et mis à jour. Visez des objectifs SMART${afficherProcessus ? ", déclinés par processus, faits par les pilotes" : ""} et validés par la direction.`}
       >
         <ObjectifDialog
           processusOptions={processusOptions}
           indicateurOptions={indicateurOptions}
           engagementOptions={engagementOptions}
           afficherDomaine={afficherDomaine}
+          afficherProcessus={afficherProcessus}
+          normes={normes}
         />
       </PageHeader>
 
       {afficherDomaine ? (
         <Card className="mb-6">
           <CardContent className="flex flex-wrap items-center gap-4 py-4">
-            <span className="font-medium text-sm">Couverture des domaines (MASE §1.3)</span>
+            <span className="font-medium text-sm">
+              Couverture des domaines · au moins un objectif par domaine (MASE §1.3)
+            </span>
             <div className="flex flex-wrap gap-2">
               {DOMAINES_SSE.map((d) => {
                 const couvert = domainesCouverts.has(d);
@@ -390,6 +396,8 @@ export default async function ObjectifsPage() {
                                   engagementOptions={engagementOptions}
                                   linkedIndicateurIds={o.linkedIds}
                                   afficherDomaine={afficherDomaine}
+                                  afficherProcessus={afficherProcessus}
+                                  normes={normes}
                                 />
                                 <SupprimerButton
                                   action={deleteObjectifAction}

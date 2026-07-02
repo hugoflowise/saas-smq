@@ -17,6 +17,7 @@ import { createIndicateurAction, updateIndicateurAction } from "@/lib/actions/in
 import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { useReadOnly } from "@/lib/hooks/read-only-context";
 import { useDialogForm } from "@/lib/hooks/use-dialog-form";
+import { objectifsLabel } from "@/lib/normes-libelles";
 import { SELECT_CLASS } from "@/lib/ui-classes";
 
 export type IndicateurRow = {
@@ -41,6 +42,8 @@ export function IndicateurDialog({
   objectifOptions = [],
   linkedObjectifIds = [],
   afficherDomaine = false,
+  afficherProcessus = true,
+  normes = ["9001"],
 }: {
   indicateur?: IndicateurRow;
   processusOptions: { id: string; nom: string }[];
@@ -49,6 +52,10 @@ export function IndicateurDialog({
   linkedObjectifIds?: string[];
   /** Affiche le sélecteur de domaine SSE (MASE §1.4). */
   afficherDomaine?: boolean;
+  /** Affiche le rattachement au processus (approche processus, hors MASE). */
+  afficherProcessus?: boolean;
+  /** Normes actives du client (libellés dynamiques). */
+  normes?: string[];
 }) {
   const isEdit = Boolean(indicateur);
   const { open, setOpen, pending, submit } = useDialogForm();
@@ -111,7 +118,7 @@ export function IndicateurDialog({
               name="nom"
               required
               defaultValue={indicateur?.nom}
-              placeholder="Taux de satisfaction client"
+              placeholder="Ex. taux de réalisation, délai moyen…"
             />
           </div>
 
@@ -122,7 +129,7 @@ export function IndicateurDialog({
               name="formule"
               rows={2}
               defaultValue={indicateur?.formule_calcul ?? ""}
-              placeholder="(Nombre de clients satisfaits ÷ Nombre total de répondants) × 100"
+              placeholder="Ex. (nombre atteint ÷ nombre total) × 100"
             />
           </div>
 
@@ -165,22 +172,24 @@ export function IndicateurDialog({
                 <option value="annuel">Annuelle</option>
               </select>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="processusId">Processus</Label>
-              <select
-                id="processusId"
-                name="processusId"
-                className={SELECT_CLASS}
-                defaultValue={indicateur?.processus_id ?? presetProcessusId ?? ""}
-              >
-                <option value="">Aucun (global)</option>
-                {processusOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nom}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {afficherProcessus ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="processusId">Processus</Label>
+                <select
+                  id="processusId"
+                  name="processusId"
+                  className={SELECT_CLASS}
+                  defaultValue={indicateur?.processus_id ?? presetProcessusId ?? ""}
+                >
+                  <option value="">Aucun (global)</option>
+                  {processusOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nom}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
             {afficherDomaine ? (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="domaine">Domaine SSE</Label>
@@ -233,7 +242,7 @@ export function IndicateurDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Objectifs qualité mesurés</Label>
+            <Label>{objectifsLabel(normes)} mesurés</Label>
             {objectifOptions.length === 0 ? (
               <p className="rounded-lg border border-dashed px-3 py-2 text-muted-foreground text-xs">
                 Aucun objectif disponible. Créez vos objectifs dans Stratégie → Objectifs.
@@ -277,6 +286,8 @@ export function CreateIndicateurDialog(props: {
   presetProcessusId?: string;
   objectifOptions?: { id: string; intitule: string }[];
   afficherDomaine?: boolean;
+  afficherProcessus?: boolean;
+  normes?: string[];
 }) {
   return <IndicateurDialog {...props} />;
 }

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DOMAINE_SSE_LABELS, DOMAINES_SSE } from "@/lib/domaines-sse";
 import { formatDate } from "@/lib/format";
 import { PERFORMANCE_TABS } from "@/lib/module-tabs";
+import { isModuleVisible } from "@/lib/modules";
 import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -48,6 +49,7 @@ export default async function IndicateursPage() {
   // MASE §1.4 : les indicateurs doivent couvrir Sécurité / Santé / Environnement.
   const normes = await getNormesActives();
   const afficherDomaine = normes.includes("MASE");
+  const afficherProcessus = isModuleVisible("/processus", normes);
 
   const { data: processus } = await supabase
     .from("processus")
@@ -153,13 +155,17 @@ export default async function IndicateursPage() {
           processusOptions={processusOptions}
           objectifOptions={objectifOptions}
           afficherDomaine={afficherDomaine}
+          afficherProcessus={afficherProcessus}
+          normes={normes}
         />
       </PageHeader>
 
       {afficherDomaine ? (
         <Card className="mb-6">
           <CardContent className="flex flex-wrap items-center gap-4 py-4">
-            <span className="font-medium text-sm">Couverture des domaines (MASE §1.4)</span>
+            <span className="font-medium text-sm">
+              Couverture des domaines · au moins un indicateur par domaine (MASE §1.4)
+            </span>
             <div className="flex flex-wrap gap-2">
               {DOMAINES_SSE.map((d) => {
                 const couvert = domainesCouverts.has(d);

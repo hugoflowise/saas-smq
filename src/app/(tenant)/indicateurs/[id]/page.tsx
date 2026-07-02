@@ -17,6 +17,7 @@ import {
 import { deleteIndicateurAction } from "@/lib/actions/indicateurs";
 import { formatDate } from "@/lib/format";
 import { cibleAffichee, FREQUENCE_LABELS } from "@/lib/indicateurs";
+import { isModuleVisible } from "@/lib/modules";
 import { getNormesActives } from "@/lib/normes-actives";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -39,7 +40,9 @@ export default async function IndicateurDetailPage({
 
   const supabase = await createClient();
   const tid = ctx.effectiveTenantId;
-  const afficherDomaine = (await getNormesActives()).includes("MASE");
+  const normes = await getNormesActives();
+  const afficherDomaine = normes.includes("MASE");
+  const afficherProcessus = isModuleVisible("/processus", normes);
 
   const { data: ind } = await supabase
     .from("indicateurs")
@@ -95,6 +98,8 @@ export default async function IndicateurDetailPage({
           objectifOptions={objectifOptions}
           linkedObjectifIds={linkedObjectifIds}
           afficherDomaine={afficherDomaine}
+          afficherProcessus={afficherProcessus}
+          normes={normes}
         />
         <SupprimerButton
           action={deleteIndicateurAction}
