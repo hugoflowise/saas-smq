@@ -11,6 +11,7 @@ import { deleteActionAction } from "@/lib/actions/plan-actions";
 import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import {
+  ACTION_CATEGORIE_LABELS,
   ACTION_ORIGINE_LABELS,
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
@@ -122,6 +123,12 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         <Badge variant="secondary">{ACTION_STATUT_LABELS[action.statut]}</Badge>
         <Badge variant="secondary">{ACTION_PRIORITE_LABELS[action.priorite]}</Badge>
         <Badge variant="secondary">{ACTION_TYPE_LABELS[action.type]}</Badge>
+        {action.categorie ? (
+          <Badge variant="outline">
+            {ACTION_CATEGORIE_LABELS[action.categorie as keyof typeof ACTION_CATEGORIE_LABELS] ??
+              action.categorie}
+          </Badge>
+        ) : null}
         {action.cotation && action.cotation !== "non_evalue" ? (
           <span className={`${BADGE_BASE} ${COTATION_BADGE_CLASS[action.cotation] ?? "bg-muted"}`}>
             {COTATION_LABELS[action.cotation as keyof typeof COTATION_LABELS]}

@@ -266,6 +266,18 @@ const quickUpdateSchema = z.object({
       "non_applicable",
     ])
     .optional(),
+  categorie: z
+    .enum([
+      "nc_mineure",
+      "nc_majeure",
+      "amelioration",
+      "piste_progres",
+      "opportunite",
+      "point_sensible",
+      "observation",
+    ])
+    .optional()
+    .or(z.literal("")),
 });
 
 /** Mise à jour rapide d'un seul champ depuis le tableau (édition inline). */
@@ -286,6 +298,7 @@ export async function quickUpdateActionAction(input: unknown): Promise<ActionRes
   if (d.priorite !== undefined) patch.priorite = d.priorite;
   if (d.datePrevue !== undefined) patch.date_prevue = d.datePrevue || null;
   if (d.cotation !== undefined) patch.cotation = d.cotation;
+  if (d.categorie !== undefined) patch.categorie = d.categorie || null;
 
   const supabase = await createClient();
   const { error } = await supabase
