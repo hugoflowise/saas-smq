@@ -302,10 +302,10 @@ export default async function ObjectifsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Objectif</TableHead>
-                        <TableHead className="w-[44%]">Indicateurs & mesure</TableHead>
-                        <TableHead>Échéance</TableHead>
-                        <TableHead>Statut</TableHead>
+                        <TableHead className="w-[34%]">Objectif</TableHead>
+                        <TableHead className="w-[40%]">Indicateurs & mesure</TableHead>
+                        <TableHead className="w-28">Échéance</TableHead>
+                        <TableHead className="w-32">Statut</TableHead>
                         <TableHead className="w-12" />
                       </TableRow>
                     </TableHeader>
