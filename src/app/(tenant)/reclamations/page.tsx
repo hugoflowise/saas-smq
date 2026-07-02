@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { ShareFormCard } from "@/components/share-form-card";
@@ -171,15 +172,9 @@ export default async function ReclamationsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <ReclamationDialog
-                      reclamation={r}
-                      afficherSse={afficherSse}
-                      trigger={
-                        <button type="button" className={ROW_NAME_BUTTON}>
-                          {r.objet}
-                        </button>
-                      }
-                    />
+                    <Link href={`/reclamations/${r.id}`} className={ROW_NAME_BUTTON}>
+                      {r.objet}
+                    </Link>
                   </TableCell>
                   {afficherSse ? (
                     <TableCell className="text-muted-foreground text-sm">

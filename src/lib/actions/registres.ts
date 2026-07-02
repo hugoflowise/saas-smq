@@ -40,10 +40,9 @@ const recBase = {
   description: z.string().trim().optional(),
   traitement: z.string().trim().optional(),
   statut: z.enum(["recue", "analysee", "traitee", "cloturee"]),
-  // SSE (MASE Axe 4) : domaine concerné + analyse des causes.
+  // SSE (MASE Axe 4) : domaine concerné (l'analyse des causes se fait ensuite,
+  // via la page détail de la remontée : setRemonteeAnalyseAction).
   domaine: z.enum(["securite", "sante", "environnement", "qualite"]).optional(),
-  analyseMethode: z.enum(["5_pourquoi", "arbre_causes", "autre"]).optional(),
-  analyseCauses: z.string().trim().optional(),
   // Accident du travail (MASE) : avec arrêt + jours d'arrêt (base TF/TG).
   avecArret: z.boolean().optional(),
   joursArret: z.coerce.number().int().min(0).optional(),
@@ -78,8 +77,6 @@ function recPayload(d: z.infer<typeof recCreate>) {
     traitement: d.traitement ?? null,
     statut: d.statut,
     domaine: d.domaine ?? null,
-    analyse_methode: d.analyseMethode ?? null,
-    analyse_causes: d.analyseCauses ?? null,
     avec_arret: d.avecArret ?? false,
     jours_arret: d.joursArret ?? null,
   };
@@ -150,6 +147,38 @@ export async function updateReclamationAction(input: unknown): Promise<ActionRes
     .eq("id", parsed.data.id)
     .eq("tenant_id", c.tenantId);
   if (error) return { ok: false, error: error.message };
+  revalidatePath("/reclamations");
+  return { ok: true };
+}
+
+// Analyse des causes guidée (MASE Axe 4) : méthode + détail structuré + synthèse.
+const recAnalyseSchema = z.object({
+  id: z.string().uuid(),
+  analyseMethode: z.enum(["5_pourquoi", "arbre_causes", "autre"]).optional(),
+  analyseDetails: z.record(z.string(), z.string()).optional(),
+  analyseCauses: z.string().trim().optional(),
+});
+
+/** Enregistre l'analyse des causes d'une remontée (étape postérieure à la déclaration). */
+export async function setRemonteeAnalyseAction(input: unknown): Promise<ActionResult> {
+  const c = await tenantWrite();
+  if (!c) return { ok: false, error: "Aucun client actif." };
+  const parsed = recAnalyseSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalide." };
+  const d = parsed.data;
+
+  const { error } = await c.supabase
+    .from("reclamations")
+    .update({
+      analyse_methode: d.analyseMethode ?? null,
+      analyse_details: d.analyseDetails ?? null,
+      analyse_causes: d.analyseCauses ?? null,
+      updated_by: c.userId,
+    })
+    .eq("id", d.id)
+    .eq("tenant_id", c.tenantId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/reclamations/${d.id}`);
   revalidatePath("/reclamations");
   return { ok: true };
 }

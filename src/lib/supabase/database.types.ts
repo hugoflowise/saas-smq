@@ -4012,6 +4012,7 @@ export type Database = {
         Row: {
           action_id: string | null
           analyse_causes: string | null
+          analyse_details: Json | null
           analyse_methode: string | null
           avec_arret: boolean
           canal: Database["public"]["Enums"]["reclamation_canal"]
@@ -4042,6 +4043,7 @@ export type Database = {
         Insert: {
           action_id?: string | null
           analyse_causes?: string | null
+          analyse_details?: Json | null
           analyse_methode?: string | null
           avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
@@ -4072,6 +4074,7 @@ export type Database = {
         Update: {
           action_id?: string | null
           analyse_causes?: string | null
+          analyse_details?: Json | null
           analyse_methode?: string | null
           avec_arret?: boolean
           canal?: Database["public"]["Enums"]["reclamation_canal"]
