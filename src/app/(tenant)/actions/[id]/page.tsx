@@ -8,6 +8,7 @@ import { SupprimerButton } from "@/components/supprimer-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { deleteActionAction } from "@/lib/actions/plan-actions";
+import { resolveActionSources } from "@/lib/actions-source";
 import { BADGE_BASE, COTATION_BADGE_CLASS } from "@/lib/badges";
 import { formatDate } from "@/lib/format";
 import {
@@ -16,7 +17,6 @@ import {
   ACTION_PRIORITE_LABELS,
   ACTION_STATUT_LABELS,
   ACTION_TYPE_LABELS,
-  REMONTEE_TYPE_LABELS,
 } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantContext } from "@/lib/tenant-context";
@@ -43,7 +43,7 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
   const { data: action } = await supabase
     .from("actions")
     .select(
-      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, objectif_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, contexte_item_label",
+      "id, reference, description_courte, description_detail, origine, type, priorite, statut, processus_concerne, responsable_id, objectif_id, revue_id, date_prevue, date_effective, indicateur_efficacite, resultat_efficacite, date_verification_efficacite, resultat_verification, commentaires, constat, cause_fondamentale, recommandation, cotation, categorie, contexte_item_id, contexte_item_label",
     )
     .eq("id", id)
     .eq("tenant_id", tid)
@@ -73,37 +73,9 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
     ? ((processusOptions ?? []).find((p) => p.id === action.processus_concerne)?.nom ?? "-")
     : "-";
 
-  // §6.2.2 : objectif qualité auquel cette action contribue (lien direct).
-  const objectifLie = action.objectif_id
-    ? ((objectifOptions ?? []).find((o) => o.id === action.objectif_id) ?? null)
-    : null;
-
-  // Non-conformité(s) liée(s) via la table pivot nc_actions → on permet de
-  // remonter à la NC d'origine depuis la fiche action.
-  const { data: ncLinks } = await supabase
-    .from("nc_actions")
-    .select("nc_id")
-    .eq("action_id", id)
-    .eq("tenant_id", tid);
-
-  const ncIds = (ncLinks ?? []).map((l) => l.nc_id);
-  const { data: ncLiees } = ncIds.length
-    ? await supabase
-        .from("non_conformites")
-        .select("id, reference, intitule")
-        .in("id", ncIds)
-        .eq("tenant_id", tid)
-        .is("deleted_at", null)
-    : { data: [] };
-
-  // Remontée d'origine (réclamation / événement SSE ayant généré cette action).
-  const { data: remonteeSource } = await supabase
-    .from("reclamations")
-    .select("id, objet, type")
-    .eq("action_id", id)
-    .eq("tenant_id", tid)
-    .is("deleted_at", null)
-    .maybeSingle();
+  // Traçabilité : origine + lien effectif vers la source (NC, remontée, R&O,
+  // audit, réunion, revue, objectif, SWOT/PESTEL), résolution centralisée.
+  const src = (await resolveActionSources(tid, [action])).get(action.id) ?? null;
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -142,39 +114,16 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         ) : null}
       </div>
 
-      {remonteeSource ? (
+      {src?.href ? (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Remontée d'origine</CardTitle>
+            <CardTitle className="text-base">Origine</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Link
-              href={`/reclamations/${remonteeSource.id}`}
-              className="text-sm hover:text-primary hover:underline"
-            >
-              {REMONTEE_TYPE_LABELS[remonteeSource.type] ?? remonteeSource.type} ·{" "}
-              {remonteeSource.objet}
+          <CardContent className="flex flex-col gap-1">
+            <span className="text-muted-foreground text-xs">{src.origineLabel}</span>
+            <Link href={src.href} className="text-primary text-sm hover:underline">
+              {src.sourceLabel}
             </Link>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {(ncLiees ?? []).length > 0 ? (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">Non-conformité liée</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {(ncLiees ?? []).map((nc) => (
-              <Link
-                key={nc.id}
-                href={`/nc/${nc.id}`}
-                className="text-sm hover:text-primary hover:underline"
-              >
-                <span className="font-mono text-muted-foreground text-xs">{nc.reference}</span>{" "}
-                {nc.intitule}
-              </Link>
-            ))}
           </CardContent>
         </Card>
       ) : null}
@@ -185,14 +134,6 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field label="Origine" value={ACTION_ORIGINE_LABELS[action.origine]} />
-          {action.contexte_item_label ? (
-            <div>
-              <p className="text-muted-foreground text-xs">Issu du contexte (SWOT/PESTEL)</p>
-              <Link href="/strategie/contexte" className="text-primary text-sm hover:underline">
-                {action.contexte_item_label}
-              </Link>
-            </div>
-          ) : null}
           <Field label="Responsable" value={responsableNom} />
           <div>
             <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
@@ -203,20 +144,6 @@ export default async function ActionDetailPage({ params }: { params: Promise<{ i
                 id={action.processus_concerne}
                 nom={action.processus_concerne ? processusNom : null}
               />
-            </p>
-          </div>
-          <div>
-            <p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              Objectif lié
-            </p>
-            <p className="mt-1 text-sm">
-              {objectifLie ? (
-                <Link href="/strategie/objectifs" className="text-primary hover:underline">
-                  {objectifLie.intitule}
-                </Link>
-              ) : (
-                "-"
-              )}
             </p>
           </div>
           <Field

@@ -134,15 +134,21 @@ export async function createActionAction(input: unknown): Promise<ActionResult> 
   const supabase = await createClient();
   const reference = await nextActionReference(supabase, ctx.effectiveTenantId);
 
-  // §6.2.2 : si une action est rattachée à un objectif sans origine explicite
-  // (origine laissée sur « manuelle » par défaut), on la classe « objectif ».
-  // De même, si on crée une NC liée sans origine explicite, on classe « nc ».
+  // Traçabilité : si l'origine est laissée par défaut (« manuelle »), on la
+  // déduit de la source à laquelle l'action est rattachée (objectif, NC, point
+  // SWOT/PESTEL, revue de direction) pour qu'elle soit toujours cohérente.
   const origine =
-    d.objectifId && d.origine === "manuelle"
-      ? "objectif"
-      : d.creerNc && d.origine === "manuelle"
-        ? "nc"
-        : d.origine;
+    d.origine !== "manuelle"
+      ? d.origine
+      : d.objectifId
+        ? "objectif"
+        : d.contexteItemId
+          ? "contexte"
+          : d.revueId
+            ? "rdd"
+            : d.creerNc
+              ? "nc"
+              : d.origine;
 
   const { data: act, error } = await supabase
     .from("actions")
@@ -336,8 +342,6 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
   }
   const d = parsed.data;
 
-  const origine = d.objectifId && d.origine === "manuelle" ? "objectif" : d.origine;
-
   const supabase = await createClient();
   // Responsable avant modification : pour ne notifier que sur un vrai changement.
   const { data: avant } = await supabase
@@ -347,17 +351,20 @@ export async function updateActionAction(input: unknown): Promise<ActionResult> 
     .eq("tenant_id", ctx.effectiveTenantId)
     .single();
 
+  // NB : on NE touche PAS à `objectif_id` / `revue_id` / `contexte_item_id` ici.
+  // Le formulaire du plan d'action ne porte pas ces liens ; les écraser romprait
+  // le rattachement (l'action disparaîtrait de sa section source). Le lien à un
+  // objectif se gère uniquement depuis la page Objectifs (lier / délier).
   const { error } = await supabase
     .from("actions")
     .update({
       description_courte: d.descriptionCourte,
       description_detail: d.descriptionDetail ?? null,
-      origine,
+      origine: d.origine,
       type: d.type,
       priorite: d.priorite,
       statut: d.statut,
       processus_concerne: d.processusConcerne ?? null,
-      objectif_id: d.objectifId ?? null,
       responsable_id: d.responsableId || null,
       date_prevue: d.datePrevue || null,
       // Date de fin réalisée : valeur saisie prioritaire, sinon auto au « terminé ».
@@ -473,9 +480,25 @@ export async function lierActionObjectifAction(input: unknown): Promise<ActionRe
   const d = parsed.data;
   const supabase = await createClient();
 
+  // Origine cohérente avec le lien : « Objectif qualité » quand on rattache ;
+  // au déliage, on repasse à « Manuelle » si l'origine était « objectif » (sinon
+  // on préserve une origine plus spécifique, ex. « nc »).
+  const patch: ActionUpdate = { objectif_id: d.objectifId };
+  if (d.objectifId) {
+    patch.origine = "objectif";
+  } else {
+    const { data: cur } = await supabase
+      .from("actions")
+      .select("origine")
+      .eq("id", d.actionId)
+      .eq("tenant_id", ctx.effectiveTenantId)
+      .maybeSingle();
+    if (cur?.origine === "objectif") patch.origine = "manuelle";
+  }
+
   const { data: rows, error } = await supabase
     .from("actions")
-    .update({ objectif_id: d.objectifId })
+    .update(patch)
     .eq("id", d.actionId)
     .eq("tenant_id", ctx.effectiveTenantId)
     .is("deleted_at", null)
