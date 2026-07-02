@@ -42,7 +42,7 @@ export function ObjStatutCell({ id, value }: { id: string; value: string }) {
       value={val}
       onChange={onChange}
       disabled={pending}
-      className={CONTROL}
+      className={`${CONTROL} w-full min-w-0`}
       aria-label="Statut"
     >
       {Object.entries(STATUT_OPTIONS).map(([v, label]) => (
@@ -82,7 +82,7 @@ export function ObjEcheanceCell({ id, value }: { id: string; value: string | nul
       value={val}
       onChange={onChange}
       disabled={pending}
-      className={CONTROL}
+      className={`${CONTROL} w-full min-w-0`}
       aria-label="Échéance"
     />
   );
