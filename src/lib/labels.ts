@@ -14,9 +14,23 @@ export const ACTION_PRIORITE_LABELS = {
   p3: "P3 · Basse",
 } as const;
 
+// « Type d'action » : nature de la réponse apportée.
 export const ACTION_TYPE_LABELS = {
-  preventive: "Préventive",
   corrective: "Corrective",
+  preventive: "Préventive",
+  curative: "Curative",
+  amelioration: "Amélioration",
+} as const;
+
+// « Catégorie » : nature du constat à l'origine de l'action (liste métier).
+export const ACTION_CATEGORIE_LABELS = {
+  nc_mineure: "NC mineure",
+  nc_majeure: "NC majeure",
+  amelioration: "Amélioration",
+  piste_progres: "Piste de progrès",
+  opportunite: "Opportunité",
+  point_sensible: "Point sensible",
+  observation: "Observation",
 } as const;
 
 export const ACTION_ORIGINE_LABELS = {

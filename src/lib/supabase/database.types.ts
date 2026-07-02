@@ -235,6 +235,7 @@ export type Database = {
       }
       actions: {
         Row: {
+          categorie: Database["public"]["Enums"]["action_categorie"] | null
           cause_fondamentale: string | null
           commentaires: string | null
           constat: string | null
@@ -270,6 +271,7 @@ export type Database = {
           valide_le: string | null
         }
         Insert: {
+          categorie?: Database["public"]["Enums"]["action_categorie"] | null
           cause_fondamentale?: string | null
           commentaires?: string | null
           constat?: string | null
@@ -305,6 +307,7 @@ export type Database = {
           valide_le?: string | null
         }
         Update: {
+          categorie?: Database["public"]["Enums"]["action_categorie"] | null
           cause_fondamentale?: string | null
           commentaires?: string | null
           constat?: string | null
@@ -5198,7 +5201,15 @@ export type Database = {
         | "termine"
         | "bloquee"
         | "abandonnee"
-      action_type: "preventive" | "corrective"
+      action_categorie:
+        | "nc_mineure"
+        | "nc_majeure"
+        | "amelioration"
+        | "piste_progres"
+        | "opportunite"
+        | "point_sensible"
+        | "observation"
+      action_type: "preventive" | "corrective" | "curative" | "amelioration"
       audit_statut:
         | "planifie"
         | "en_cours"
@@ -5519,7 +5530,16 @@ export const Constants = {
         "bloquee",
         "abandonnee",
       ],
-      action_type: ["preventive", "corrective"],
+      action_categorie: [
+        "nc_mineure",
+        "nc_majeure",
+        "amelioration",
+        "piste_progres",
+        "opportunite",
+        "point_sensible",
+        "observation",
+      ],
+      action_type: ["preventive", "corrective", "curative", "amelioration"],
       audit_statut: [
         "planifie",
         "en_cours",
