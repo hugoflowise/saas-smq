@@ -117,7 +117,7 @@ export default async function CorbeillePage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-28 whitespace-normal">Référence</TableHead>
-                        <TableHead className="min-w-[200px]">Élément</TableHead>
+                        <TableHead className="whitespace-normal">Élément</TableHead>
                         <TableHead className="w-44">Supprimé le</TableHead>
                         <TableHead className="w-32 text-right">Action</TableHead>
                       </TableRow>
